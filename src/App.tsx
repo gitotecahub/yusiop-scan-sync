@@ -29,14 +29,10 @@ const AppContent = () => {
     initialize();
   }, [initialize]);
 
-  // Temporalmente desactivar autenticación para pruebas
   // Si no hay sesión, mostrar Auth
-  // if (!session) {
-  //   return <Auth />;
-  // }
-
-  // Simular sesión para pruebas
-  const mockSession = !session;
+  if (!session) {
+    return <Auth />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground dark">
