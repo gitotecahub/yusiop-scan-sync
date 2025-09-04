@@ -13,7 +13,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="yusiop-bottom-nav">
+    <div className="flex items-center justify-around p-3 bg-background/95 backdrop-blur-sm border-t border-border/50">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;

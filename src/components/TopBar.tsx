@@ -7,7 +7,7 @@ const TopBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="yusiop-topbar">
+    <div className="flex items-center justify-between p-4 bg-background/95 backdrop-blur-sm border-b border-border/50">
       {/* Logo */}
       <div className="flex items-center">
         <h1 className="text-2xl font-bold yusiop-gradient bg-clip-text text-transparent">
