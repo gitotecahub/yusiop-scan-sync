@@ -34,7 +34,7 @@ const AppContent = () => {
   if (loading) {
     return (
       <PhoneMockup>
-        <div className="min-h-screen flex items-center justify-center bg-background dark">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center">
             <h1 className="text-4xl font-bold yusiop-gradient bg-clip-text text-transparent mb-4">
               YUSIOP
@@ -57,7 +57,7 @@ const AppContent = () => {
 
   return (
     <PhoneMockup>
-      <div className="min-h-screen bg-background text-foreground dark">
+      <div className="min-h-screen bg-background text-foreground">
         <Layout>
           <Routes>
             <Route path="/" element={<Index />} />
