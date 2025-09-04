@@ -23,11 +23,25 @@ import { useAuthStore } from '@/stores/authStore';
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { session, initialize } = useAuthStore();
+  const { session, loading, initialize } = useAuthStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Mostrar loading mientras se inicializa
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background dark">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold yusiop-gradient bg-clip-text text-transparent mb-4">
+            YUSIOP
+          </h1>
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Si no hay sesión, mostrar Auth
   if (!session) {
