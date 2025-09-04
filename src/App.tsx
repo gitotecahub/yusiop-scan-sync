@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 
 // Layout
 import Layout from '@/components/Layout';
+import PhoneMockup from '@/components/PhoneMockup';
 
 // Hooks
 import { useAuthStore } from '@/stores/authStore';
@@ -32,35 +33,43 @@ const AppContent = () => {
   // Mostrar loading mientras se inicializa
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background dark">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold yusiop-gradient bg-clip-text text-transparent mb-4">
-            YUSIOP
-          </h1>
-          <p className="text-muted-foreground">Cargando...</p>
+      <PhoneMockup>
+        <div className="min-h-screen flex items-center justify-center bg-background dark">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold yusiop-gradient bg-clip-text text-transparent mb-4">
+              YUSIOP
+            </h1>
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
         </div>
-      </div>
+      </PhoneMockup>
     );
   }
 
   // Si no hay sesión, mostrar Auth
   if (!session) {
-    return <Auth />;
+    return (
+      <PhoneMockup>
+        <Auth />
+      </PhoneMockup>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground dark">
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/qr" element={<QRScanner />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
-    </div>
+    <PhoneMockup>
+      <div className="min-h-screen bg-background text-foreground dark">
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/qr" element={<QRScanner />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </div>
+    </PhoneMockup>
   );
 };
 
