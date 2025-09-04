@@ -52,16 +52,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
+				// YUSIOP Custom Colors
+				'purple-primary': 'hsl(var(--purple-primary))',
+				'mint-secondary': 'hsl(var(--mint-secondary))',
+				'dark-bg': 'hsl(var(--dark-bg))',
+				'dark-card': 'hsl(var(--dark-card))',
+				'dark-surface': 'hsl(var(--dark-surface))',
+				'text-primary': 'hsl(var(--text-primary))',
+				'text-secondary': 'hsl(var(--text-secondary))',
+				'text-muted': 'hsl(var(--text-muted))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

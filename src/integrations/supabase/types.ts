@@ -14,7 +14,250 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      albums: {
+        Row: {
+          artist_id: string
+          cover_url: string | null
+          created_at: string
+          id: string
+          release_date: string | null
+          title: string
+        }
+        Insert: {
+          artist_id: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          release_date?: string | null
+          title: string
+        }
+        Update: {
+          artist_id?: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          release_date?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "albums_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artists: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          downloads_remaining: number | null
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          downloads_remaining?: number | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          downloads_remaining?: number | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      qr_cards: {
+        Row: {
+          activated_at: string | null
+          activated_by: string | null
+          card_type: Database["public"]["Enums"]["card_type"]
+          code: string
+          created_at: string
+          download_credits: number
+          id: string
+          is_activated: boolean | null
+        }
+        Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
+          card_type?: Database["public"]["Enums"]["card_type"]
+          code: string
+          created_at?: string
+          download_credits?: number
+          id?: string
+          is_activated?: boolean | null
+        }
+        Update: {
+          activated_at?: string | null
+          activated_by?: string | null
+          card_type?: Database["public"]["Enums"]["card_type"]
+          code?: string
+          created_at?: string
+          download_credits?: number
+          id?: string
+          is_activated?: boolean | null
+        }
+        Relationships: []
+      }
+      songs: {
+        Row: {
+          album_id: string | null
+          artist_id: string
+          cover_url: string | null
+          created_at: string
+          duration_seconds: number
+          id: string
+          preview_url: string | null
+          title: string
+          track_url: string | null
+        }
+        Insert: {
+          album_id?: string | null
+          artist_id: string
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          preview_url?: string | null
+          title: string
+          track_url?: string | null
+        }
+        Update: {
+          album_id?: string | null
+          artist_id?: string
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          preview_url?: string | null
+          title?: string
+          track_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "songs_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_downloads: {
+        Row: {
+          downloaded_at: string
+          id: string
+          qr_card_id: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          downloaded_at?: string
+          id?: string
+          qr_card_id: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          downloaded_at?: string
+          id?: string
+          qr_card_id?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_downloads_qr_card_id_fkey"
+            columns: ["qr_card_id"]
+            isOneToOne: false
+            referencedRelation: "qr_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_downloads_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +266,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      card_type: "standard" | "premium"
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +394,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      card_type: ["standard", "premium"],
+      user_role: ["user", "admin"],
+    },
   },
 } as const
