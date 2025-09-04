@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Pause, Download, Heart } from 'lucide-react';
@@ -19,43 +20,41 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
 
-  // Mock data - en producción esto vendrá de Supabase
+  // Cargar canciones reales de Supabase
   useEffect(() => {
-    const mockSongs: Song[] = [
-      {
-        id: '1',
-        title: 'Bohemian Rhapsody',
-        artist: 'Queen',
-        duration_seconds: 355,
-        cover_url: 'https://picsum.photos/300/300?random=1'
-      },
-      {
-        id: '2',
-        title: 'Hotel California',
-        artist: 'Eagles',
-        duration_seconds: 391,
-        cover_url: 'https://picsum.photos/300/300?random=2'
-      },
-      {
-        id: '3',
-        title: 'Imagine',
-        artist: 'John Lennon',
-        duration_seconds: 183,
-        cover_url: 'https://picsum.photos/300/300?random=3'
-      },
-      {
-        id: '4',
-        title: 'Billie Jean',
-        artist: 'Michael Jackson',
-        duration_seconds: 294,
-        cover_url: 'https://picsum.photos/300/300?random=4'
+    const fetchSongs = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('songs')
+          .select(`
+            *,
+            artists!inner(name),
+            albums(title, cover_url)
+          `);
+
+        if (error) {
+          console.error('Error fetching songs:', error);
+          return;
+        }
+
+        const formattedSongs = data.map(song => ({
+          id: song.id,
+          title: song.title,
+          artist: song.artists.name,
+          duration_seconds: song.duration_seconds,
+          cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+          preview_url: song.preview_url
+        }));
+
+        setSongs(formattedSongs);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
       }
-    ];
-    
-    setTimeout(() => {
-      setSongs(mockSongs);
-      setLoading(false);
-    }, 1000);
+    };
+
+    fetchSongs();
   }, []);
 
   const formatDuration = (seconds: number) => {
