@@ -1,11 +1,12 @@
 import { useLocation, Link } from 'react-router-dom';
-import { QrCode, Music, Library, User } from 'lucide-react';
+import { QrCode, Music, Library, User, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNav = () => {
   const location = useLocation();
 
   const navItems = [
+    { path: '/', icon: Home, label: 'Inicio' },
     { path: '/qr', icon: QrCode, label: 'QR' },
     { path: '/catalog', icon: Music, label: 'Catálogo' },
     { path: '/library', icon: Library, label: 'Biblioteca' },
