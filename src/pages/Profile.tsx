@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,16 +13,22 @@ import {
   CreditCard, 
   Wifi, 
   LogOut,
-  Edit
+  Edit,
+  Camera,
+  Upload
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const [editing, setEditing] = useState(false);
   const [wifiOnly, setWifiOnly] = useState(true);
   const [notifications, setNotifications] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Mock data - en producción esto vendrá de Supabase
   const [profile, setProfile] = useState({
@@ -37,6 +43,61 @@ const Profile = () => {
   const handleSaveProfile = () => {
     setEditing(false);
     toast.success('Perfil actualizado correctamente');
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen debe ser menor a 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Crear nombre único para el archivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Subir el archivo a Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { 
+          upsert: true,
+          contentType: file.type
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Obtener la URL pública de la imagen
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrl);
+      toast.success('Foto de perfil actualizada correctamente');
+
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Error al subir la imagen');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -84,12 +145,33 @@ const Profile = () => {
       {/* Profile Info */}
       <Card className="yusiop-card">
         <CardHeader className="text-center">
-          <Avatar className="w-24 h-24 mx-auto mb-4">
-            <AvatarImage src="/placeholder-avatar.png" />
-            <AvatarFallback className="text-lg">
-              {profile.fullName.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative mx-auto mb-4">
+            <Avatar className="w-24 h-24">
+              <AvatarImage src={avatarUrl || "/placeholder-avatar.png"} />
+              <AvatarFallback className="text-lg">
+                {profile.fullName.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <Button
+              size="sm"
+              className="absolute -bottom-1 -right-1 rounded-full w-8 h-8 p-0 bg-primary hover:bg-primary/90"
+              onClick={handleAvatarClick}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4 text-white" />
+              )}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
           <CardTitle className="flex items-center justify-center gap-2">
             {profile.fullName}
             <Button
