@@ -8,7 +8,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="relative h-full flex flex-col bg-background">
       <TopBar />
       <main className="flex-1 overflow-auto px-3 py-1.5 pb-20">
         {children}
