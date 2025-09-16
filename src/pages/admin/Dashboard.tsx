@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Music, Album, QrCode, TrendingUp, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, Music, Album, QrCode, TrendingUp, Download, Plus, UserPlus, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardStats {
@@ -13,6 +15,7 @@ interface DashboardStats {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalSongs: 0,
@@ -168,16 +171,42 @@ const Dashboard = () => {
               Funciones administrativas frecuentes
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <button className="w-full text-left p-2 rounded hover:bg-accent text-sm">
+          <CardContent className="space-y-3">
+            <Button
+              onClick={() => navigate('/admin/qr-cards')}
+              variant="outline"
+              className="w-full justify-start gap-2"
+            >
+              <QrCode className="h-4 w-4" />
               Crear nuevo código QR
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-accent text-sm">
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/admin/songs')}
+              variant="outline"
+              className="w-full justify-start gap-2"
+            >
+              <Plus className="h-4 w-4" />
               Agregar nueva canción
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-accent text-sm">
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/admin/users')}
+              variant="outline"
+              className="w-full justify-start gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
               Gestionar usuarios
-            </button>
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/admin/settings')}
+              variant="outline"
+              className="w-full justify-start gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Configuración
+            </Button>
           </CardContent>
         </Card>
       </div>
