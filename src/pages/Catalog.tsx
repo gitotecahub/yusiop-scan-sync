@@ -36,6 +36,8 @@ const Catalog = () => {
           .eq('user_email', user.email)
           .eq('is_active', true)
           .gt('credits_remaining', 0)
+          .order('scanned_at', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         if (!creditsError && creditsData) {
