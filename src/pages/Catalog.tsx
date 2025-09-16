@@ -220,17 +220,6 @@ const Catalog = () => {
                       alt={`${song.title} cover`}
                       className="w-16 h-16 rounded-lg object-cover"
                     />
-                    <Button
-                      size="sm"
-                      className="absolute inset-0 bg-black/60 hover:bg-black/80 text-white rounded-lg"
-                      onClick={() => handlePlayPreview(song)}
-                    >
-                      {isCurrentlyPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
                   </div>
 
                   {/* Song Info */}
