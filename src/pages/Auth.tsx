@@ -6,22 +6,24 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
+  const navigate = useNavigate();
   const { signIn, signUp, loading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { error } = await signIn(email, password);
-    if (error) {
-      toast.error('Error al iniciar sesión: ' + error.message);
-    } else {
-      toast.success('¡Bienvenido a YUSIOP!');
-    }
-  };
+const handleSignIn = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const { error } = await signIn(email, password);
+  if (error) {
+    toast.error('Error al iniciar sesión: ' + error.message);
+  } else {
+    toast.success('¡Bienvenido a YUSIOP!');
+    navigate('/', { replace: true });
+  }
+};
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
