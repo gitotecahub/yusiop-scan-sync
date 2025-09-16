@@ -6,6 +6,7 @@ interface Song {
   artist: string;
   duration_seconds: number;
   preview_url?: string;
+  track_url?: string;
   cover_url?: string;
 }
 

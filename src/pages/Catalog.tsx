@@ -15,6 +15,7 @@ interface Song {
   duration_seconds: number;
   cover_url?: string;
   preview_url?: string;
+  track_url?: string;
 }
 
 const Catalog = () => {
@@ -93,7 +94,8 @@ const Catalog = () => {
             artist: song.artists.name,
             duration_seconds: song.duration_seconds,
             cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
-            preview_url: song.preview_url
+            preview_url: song.preview_url,
+            track_url: song.track_url
           }));
           setSongs(formattedSongs);
         }

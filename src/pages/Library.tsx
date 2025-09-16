@@ -15,6 +15,8 @@ interface DownloadedSong {
   cover_url?: string;
   downloaded_at: string;
   is_favorite: boolean;
+  track_url?: string;
+  preview_url?: string;
 }
 
 const Library = () => {
@@ -43,6 +45,8 @@ const Library = () => {
               title,
               duration_seconds,
               cover_url,
+              track_url,
+              preview_url,
               artists!inner(name),
               albums(cover_url)
             )
@@ -63,7 +67,9 @@ const Library = () => {
           duration_seconds: download.songs.duration_seconds,
           cover_url: download.songs.cover_url || download.songs.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
           downloaded_at: download.downloaded_at,
-          is_favorite: false // TODO: implementar favoritos
+          is_favorite: false, // TODO: implementar favoritos
+          track_url: download.songs.track_url,
+          preview_url: download.songs.preview_url
         })) || [];
 
         setDownloads(formattedSongs);

@@ -41,7 +41,9 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
 
-    audio.src = currentSong.preview_url || '';
+    // Use preview_url if available, otherwise use track_url for both preview and full playback
+    const audioUrl = currentSong.preview_url || currentSong.track_url || '';
+    audio.src = audioUrl;
     audio.currentTime = 0;
   }, [currentSong]);
 
