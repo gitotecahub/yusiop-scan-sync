@@ -20,11 +20,10 @@ const QRScanner = () => {
   const processingRef = useRef(false);
 
   const activateQRCode = async (code: string) => {
-    if (activating || processingRef.current) return;
+    if (activating) return;
     
     try {
       setActivating(true);
-      processingRef.current = true;
       
       // Obtener el usuario actual y su token de sesión
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
