@@ -22,7 +22,7 @@ const PhoneMockup = ({ children }: PhoneMockupProps) => {
             {/* Screen Content */}
             <div className="w-[390px] h-[844px] bg-background text-foreground overflow-hidden rounded-[3rem] relative pt-5">
               {/* App Content */}
-              <div className="w-full h-full flex flex-col pb-4 rounded-[3rem] overflow-hidden">
+              <div className="w-full h-full flex flex-col rounded-[3rem] overflow-hidden">
                 {children}
               </div>
               
