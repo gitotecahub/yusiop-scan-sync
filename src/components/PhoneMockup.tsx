@@ -6,9 +6,9 @@ interface PhoneMockupProps {
 
 const PhoneMockup = ({ children }: PhoneMockupProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-2 overflow-hidden">
       {/* iPhone 14 Pro Max Frame */}
-      <div className="relative">
+      <div className="relative scale-75 sm:scale-90 lg:scale-100">
         {/* Phone Shadow */}
         <div className="absolute inset-0 bg-black/20 blur-xl translate-y-4 scale-105 rounded-[3rem]"></div>
         
@@ -17,10 +17,10 @@ const PhoneMockup = ({ children }: PhoneMockupProps) => {
           {/* Screen Container */}
           <div className="bg-black rounded-[2.5rem] overflow-hidden relative">
             {/* Dynamic Island */}
-            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-black w-32 h-8 rounded-full"></div>
+            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-black w-24 h-6 rounded-full"></div>
             
             {/* Screen Content */}
-            <div className="w-[430px] h-[932px] bg-background text-foreground overflow-hidden rounded-[2.5rem] relative pt-6">
+            <div className="w-[320px] h-[680px] bg-background text-foreground overflow-hidden rounded-[2.5rem] relative pt-4">
               {/* App Content */}
               <div className="w-full h-full flex flex-col pb-6">
                 {children}
