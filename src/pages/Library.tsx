@@ -6,6 +6,7 @@ import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
+import PlaybackControls from '@/components/PlaybackControls';
 
 interface DownloadedSong {
   id: string;
@@ -243,7 +244,7 @@ const Library = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Mi Biblioteca</h1>
@@ -293,6 +294,9 @@ const Library = () => {
           <SongList songs={favorites} />
         </TabsContent>
       </Tabs>
+
+      {/* Playback Controls */}
+      <PlaybackControls />
     </div>
   );
 };
