@@ -69,6 +69,7 @@ const Catalog = () => {
     } catch (error) {
       console.error('Error loading downloaded songs:', error);
     }
+  };
 
   // Cargar canciones y créditos del usuario
   useEffect(() => {
