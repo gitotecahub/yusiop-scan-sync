@@ -3,8 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search } from 'lucide-react';
+import { Play, Pause, Download, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
@@ -23,8 +22,6 @@ interface Song {
 const Catalog = () => {
   const location = useLocation();
   const [songs, setSongs] = useState<Song[]>([]);
-  const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
@@ -104,7 +101,6 @@ const Catalog = () => {
             track_url: song.track_url
           }));
           setSongs(formattedSongs);
-          setFilteredSongs(formattedSongs);
         }
 
         // Cargar créditos
@@ -153,20 +149,6 @@ const Catalog = () => {
       loadDownloadedSongs();
     }
   }, [userCredits]);
-
-  // Filter songs based on search term
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredSongs(songs);
-    } else {
-      const filtered = songs.filter(song =>
-        song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (song.album && song.album.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      setFilteredSongs(filtered);
-    }
-  }, [searchTerm, songs]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -281,20 +263,15 @@ const Catalog = () => {
         </p>
       </div>
 
-      {/* Search Bar */}
-      <Card className="yusiop-card">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por título, artista o álbum..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Header */}
+      <div className="text-center py-6">
+        <h1 className="text-3xl font-bold mb-2 yusiop-gradient bg-clip-text text-transparent">
+          Catálogo Musical
+        </h1>
+        <p className="text-muted-foreground">
+          Descubre y descarga tu música favorita
+        </p>
+      </div>
 
       {/* Downloads remaining - Only show when user has active credits */}
       {userCredits && userCredits.credits_remaining > 0 && (
@@ -313,16 +290,7 @@ const Catalog = () => {
 
       {/* Songs List */}
       <div className="grid gap-4">
-        {filteredSongs.length === 0 && searchTerm ? (
-          <Card className="yusiop-card">
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">
-                No se encontraron canciones que coincidan con "{searchTerm}"
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredSongs.map((song) => {
+        {songs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
           const isDownloaded = downloadedSongs.has(song.id);
           const isHighlighted = highlightedSongId === song.id;
@@ -395,8 +363,7 @@ const Catalog = () => {
               </CardContent>
             </Card>
           );
-          })
-        )}
+        })}
       </div>
     </div>
   );
