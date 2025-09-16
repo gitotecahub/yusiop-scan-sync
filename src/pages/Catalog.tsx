@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,6 +22,7 @@ interface Song {
 
 const Catalog = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [songs, setSongs] = useState<Song[]>([]);
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,29 +123,42 @@ const Catalog = () => {
     fetchData();
   }, [setUserCredits]);
 
-  // Refresh credits and downloads when user navigates to catalog (e.g., after QR scan)
-  useEffect(() => {
-    loadUserCredits();
-    loadDownloadedSongs();
-    
-    // Check if we need to highlight a specific song
-    if (location.state?.highlightSongId) {
-      setHighlightedSongId(location.state.highlightSongId);
-      
-      // Scroll to the song after a short delay to ensure it's rendered
+// Refresh credits and downloads when user navigates to catalog (e.g., after QR scan)
+useEffect(() => {
+  loadUserCredits();
+  loadDownloadedSongs();
+}, [location.pathname]);
+
+// Scroll first, then highlight when coming from "Música Popular"
+useEffect(() => {
+  const id = location.state?.highlightSongId as string | undefined;
+  if (!id) return;
+
+  let attempts = 0;
+  const maxAttempts = 30;
+  const interval = setInterval(() => {
+    attempts++;
+    const el = document.getElementById(`song-${id}`);
+    if (el) {
+      clearInterval(interval);
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // After scroll starts, add highlight
       setTimeout(() => {
-        const songElement = document.getElementById(`song-${location.state.highlightSongId}`);
-        if (songElement) {
-          songElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 100);
-      
-      // Remove highlight after 3 seconds
-      setTimeout(() => {
-        setHighlightedSongId(null);
-      }, 3000);
+        setHighlightedSongId(id);
+        // Remove highlight after 3 seconds
+        setTimeout(() => setHighlightedSongId(null), 3000);
+      }, 400);
+
+      // Clear navigation state so it doesn't re-trigger
+      navigate('.', { replace: true, state: {} });
+    } else if (attempts >= maxAttempts) {
+      clearInterval(interval);
     }
-  }, [location.pathname, location.state]);
+  }, 100);
+
+  return () => clearInterval(interval);
+}, [location.state, filteredSongs]);
 
   // Also refresh when the component mounts or when credits store changes
   useEffect(() => {
