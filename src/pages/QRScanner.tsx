@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import QrScanner from 'qr-scanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useCreditsStore } from '@/stores/creditsStore';
 
 const QRScanner = () => {
   const [manualCode, setManualCode] = useState('');
@@ -15,6 +16,7 @@ const QRScanner = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
   const navigate = useNavigate();
+  const { setUserCredits } = useCreditsStore();
 
   const activateQRCode = async (code: string) => {
     if (activating) return;
@@ -56,9 +58,19 @@ const QRScanner = () => {
         return;
       }
 
-      // Éxito - mostrar mensaje y redirigir al catálogo
+      // Éxito - mostrar mensaje y actualizar créditos localmente
       toast.success(`¡${data.message}! ${data.credits} créditos disponibles`);
       stopScanning();
+      
+      // Actualizar los créditos en el store local
+      if (data.credits && data.cardType) {
+        setUserCredits({
+          credits_remaining: data.credits,
+          card_type: data.cardType,
+          expires_at: data.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          is_active: true
+        });
+      }
       
       // Redirigir al catálogo después de un breve delay
       setTimeout(() => {
@@ -144,7 +156,9 @@ const QRScanner = () => {
           videoRef.current!,
           (result) => {
             console.log('QR detectado:', result.data);
-            activateQRCode(result.data);
+            if (!activating) {
+              activateQRCode(result.data);
+            }
           },
           {
             returnDetailedScanResult: true,

@@ -90,10 +90,15 @@ const Catalog = () => {
 
   // Refresh credits when user navigates to catalog (e.g., after QR scan)
   useEffect(() => {
-    if (location.pathname === '/catalog') {
+    loadUserCredits();
+  }, [location.pathname, location.state]);
+
+  // Also refresh when the component mounts or when credits store changes
+  useEffect(() => {
+    if (!userCredits) {
       loadUserCredits();
     }
-  }, [location.pathname]);
+  }, [userCredits]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
