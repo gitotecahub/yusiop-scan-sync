@@ -49,24 +49,60 @@ const QRScanner = () => {
         return;
       }
 
+      // Verificar si el dispositivo tiene cámara
+      const hasCamera = await QrScanner.hasCamera();
+      if (!hasCamera) {
+        toast.error('No se detectó ninguna cámara en este dispositivo');
+        setScanning(false);
+        return;
+      }
+
+      // Verificar permisos de cámara
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: true });
+      } catch (permissionError) {
+        console.error('Error de permisos:', permissionError);
+        toast.error('Permisos de cámara denegados. Por favor permite el acceso a la cámara.');
+        setScanning(false);
+        return;
+      }
+
       // Crear instancia del scanner
       qrScannerRef.current = new QrScanner(
         videoRef.current,
         (result) => {
+          console.log('QR Code detectado:', result.data);
           activateQRCode(result.data);
         },
         {
           returnDetailedScanResult: true,
           highlightScanRegion: true,
           highlightCodeOutline: true,
+          preferredCamera: 'environment', // Usar cámara trasera si está disponible
         }
       );
 
       await qrScannerRef.current.start();
       toast.success('Cámara activada. Apunta al código QR');
     } catch (error) {
-      console.error('Error al iniciar el scanner:', error);
-      toast.error('Error al acceder a la cámara. Verifica los permisos.');
+      console.error('Error detallado al iniciar el scanner:', error);
+      let errorMessage = 'Error desconocido al acceder a la cámara';
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = 'Permisos de cámara denegados. Por favor permite el acceso a la cámara en la configuración de tu navegador.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'No se encontró ninguna cámara en este dispositivo.';
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = 'Tu navegador no soporta el acceso a la cámara.';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = 'La cámara está siendo utilizada por otra aplicación.';
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
+      }
+      
+      toast.error(errorMessage);
       setScanning(false);
     }
   };
