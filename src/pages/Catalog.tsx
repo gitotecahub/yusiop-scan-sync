@@ -270,15 +270,14 @@ const Catalog = () => {
                         <Play className="h-4 w-4" />
                       )}
                     </Button>
-                    {userCredits && userCredits.credits_remaining > 0 && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleDownload(song)}
-                        className="yusiop-button-primary"
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => handleDownload(song)}
+                      className="yusiop-button-primary"
+                      disabled={!userCredits || userCredits.credits_remaining <= 0}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
