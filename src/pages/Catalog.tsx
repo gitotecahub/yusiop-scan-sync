@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Play, Pause, Download, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
+import { useCreditsStore } from '@/stores/creditsStore';
 
 interface Song {
   id: string;
@@ -19,12 +20,17 @@ const Catalog = () => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
+  const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
-  // Cargar canciones reales de Supabase
+  // Cargar canciones y créditos del usuario
   useEffect(() => {
-    const fetchSongs = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
+        // Obtener usuario actual
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        // Cargar canciones
+        const { data: songsData, error: songsError } = await supabase
           .from('songs')
           .select(`
             *,
@@ -32,21 +38,36 @@ const Catalog = () => {
             albums(title, cover_url)
           `);
 
-        if (error) {
-          console.error('Error fetching songs:', error);
-          return;
+        if (songsError) {
+          console.error('Error fetching songs:', songsError);
+        } else {
+          const formattedSongs = songsData.map(song => ({
+            id: song.id,
+            title: song.title,
+            artist: song.artists.name,
+            duration_seconds: song.duration_seconds,
+            cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+            preview_url: song.preview_url
+          }));
+          setSongs(formattedSongs);
         }
 
-        const formattedSongs = data.map(song => ({
-          id: song.id,
-          title: song.title,
-          artist: song.artists.name,
-          duration_seconds: song.duration_seconds,
-          cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
-          preview_url: song.preview_url
-        }));
+        // Cargar créditos del usuario (si está autenticado)
+        if (user?.email) {
+          const { data: creditsData, error: creditsError } = await supabase
+            .from('user_credits')
+            .select('*')
+            .eq('user_email', user.email)
+            .eq('is_active', true)
+            .gt('credits_remaining', 0)
+            .single();
 
-        setSongs(formattedSongs);
+          if (!creditsError && creditsData) {
+            setUserCredits(creditsData);
+          } else {
+            setUserCredits(null);
+          }
+        }
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -54,8 +75,8 @@ const Catalog = () => {
       }
     };
 
-    fetchSongs();
-  }, []);
+    fetchData();
+  }, [setUserCredits]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -72,9 +93,62 @@ const Catalog = () => {
     }
   };
 
-  const handleDownload = (song: Song) => {
-    // Verificar si el usuario tiene descargas disponibles
-    toast.success(`"${song.title}" se descargó correctamente`);
+  const handleDownload = async (song: Song) => {
+    if (!userCredits || userCredits.credits_remaining <= 0) {
+      toast.error('No tienes créditos disponibles. Escanea una tarjeta QR para obtener más.');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Debes iniciar sesión para descargar canciones');
+        return;
+      }
+
+      // Registrar la descarga
+      const { error: downloadError } = await supabase
+        .from('user_downloads')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          song_id: song.id,
+          card_type: userCredits.card_type
+        });
+
+      if (downloadError) {
+        toast.error('Error al registrar la descarga');
+        return;
+      }
+
+      // Decrementar créditos en la base de datos
+      const { error: updateError } = await supabase
+        .from('user_credits')
+        .update({ 
+          credits_remaining: userCredits.credits_remaining - 1,
+          is_active: userCredits.credits_remaining - 1 > 0
+        })
+        .eq('user_email', user.email!)
+        .eq('is_active', true);
+
+      if (updateError) {
+        toast.error('Error al actualizar créditos');
+        return;
+      }
+
+      // Actualizar estado local
+      decrementCredits();
+      
+      toast.success(`"${song.title}" se descargó correctamente`);
+      
+      // Si no quedan créditos, actualizar el estado
+      if (userCredits.credits_remaining - 1 <= 0) {
+        setUserCredits(null);
+      }
+    } catch (error) {
+      console.error('Error downloading song:', error);
+      toast.error('Error al descargar la canción');
+    }
   };
 
   const handleFavorite = (song: Song) => {
@@ -121,9 +195,14 @@ const Catalog = () => {
       <Card className="yusiop-card border-primary/20">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground">Te quedan</p>
-          <p className="text-2xl font-bold text-primary">0 descargas</p>
+          <p className="text-2xl font-bold text-primary">
+            {userCredits?.credits_remaining || 0} descargas
+          </p>
           <p className="text-xs text-muted-foreground">
-            Escanea una tarjeta QR para activar más descargas
+            {userCredits ? 
+              `Tarjeta ${userCredits.card_type} activa` : 
+              'Escanea una tarjeta QR para activar más descargas'
+            }
           </p>
         </CardContent>
       </Card>
@@ -180,13 +259,15 @@ const Catalog = () => {
                     >
                       <Heart className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleDownload(song)}
-                      className="yusiop-button-primary"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
+                    {userCredits && userCredits.credits_remaining > 0 && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleDownload(song)}
+                        className="yusiop-button-primary"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

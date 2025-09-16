@@ -5,20 +5,62 @@ import { Input } from '@/components/ui/input';
 import { QrCode, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import QrScanner from 'qr-scanner';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 const QRScanner = () => {
   const [manualCode, setManualCode] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [activating, setActivating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
+  const navigate = useNavigate();
 
   const activateQRCode = async (code: string) => {
+    if (activating) return;
+    
     try {
-      // Aquí llamaremos a la edge function para activar el QR
-      toast.success(`QR activado: ${code}`);
+      setActivating(true);
+      
+      // Obtener el usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) {
+        toast.error('Debes iniciar sesión para activar una tarjeta QR');
+        return;
+      }
+
+      // Llamar a la edge function para activar el QR
+      const { data, error } = await supabase.functions.invoke('activate-qr', {
+        body: { 
+          code: code.trim(),
+          userEmail: user.email
+        }
+      });
+
+      if (error) {
+        toast.error(error.message || 'Error al activar el QR');
+        return;
+      }
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Éxito - mostrar mensaje y redirigir al catálogo
+      toast.success(`¡${data.message}! ${data.credits} créditos disponibles`);
       stopScanning();
-    } catch (error) {
+      
+      // Redirigir al catálogo después de un breve delay
+      setTimeout(() => {
+        navigate('/catalog');
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error('Error activating QR:', error);
       toast.error('Error al activar el QR');
+    } finally {
+      setActivating(false);
     }
   };
 
@@ -222,9 +264,9 @@ const QRScanner = () => {
             <Button
               type="submit"
               className="w-full yusiop-button-secondary"
-              disabled={!manualCode.trim()}
+              disabled={!manualCode.trim() || activating}
             >
-              Activar Tarjeta
+              {activating ? 'Activando...' : 'Activar Tarjeta'}
             </Button>
           </form>
         </CardContent>
