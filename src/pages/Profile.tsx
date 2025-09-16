@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -30,31 +30,88 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Mock data - en producción esto vendrá de Supabase
+  // Perfil del usuario (se carga desde Supabase)
   const [profile, setProfile] = useState({
-    username: 'usuario123',
-    fullName: 'Usuario YUSIOP',
+    username: '',
+    fullName: '',
     email: user?.email || '',
     downloadsRemaining: 0,
-    totalDownloads: 7,
-    activatedCards: 2
+    totalDownloads: 0,
+    activatedCards: 0
   });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username, full_name, avatar_url, downloads_remaining')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setProfile(prev => ({
+            ...prev,
+            username: data.username || '',
+            fullName: data.full_name || '',
+            downloadsRemaining: data.downloads_remaining ?? 0,
+          }));
+          if (data.avatar_url) setAvatarUrl(data.avatar_url);
+        } else {
+          // Si no existe, crear un perfil básico
+          const initial = {
+            user_id: user.id,
+            username: user.email?.split('@')[0] || 'usuario',
+            full_name: (user.user_metadata as any)?.full_name || user.email?.split('@')[0] || 'Usuario',
+            downloads_remaining: 0,
+          };
+          const { error: insertError } = await supabase.from('profiles').insert(initial);
+          if (insertError) throw insertError;
+
+          setProfile(prev => ({
+            ...prev,
+            username: initial.username,
+            fullName: initial.full_name,
+          }));
+        }
+      } catch (err) {
+        console.error('Error loading profile:', err);
+        toast.error('No se pudo cargar el perfil');
+      }
+    };
+
+    loadProfile();
+  }, [user]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
     
     try {
-      // Update profile in Supabase
-      const { error } = await supabase
+      // Verificar si existe el perfil
+      const { data: existing } = await supabase
         .from('profiles')
-        .update({
-          full_name: profile.fullName,
-          username: profile.username
-        })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        throw error;
+      if (existing) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ full_name: profile.fullName, username: profile.username })
+          .eq('user_id', user.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            full_name: profile.fullName,
+            username: profile.username,
+          });
+        if (error) throw error;
       }
 
       setEditing(false);
@@ -110,6 +167,13 @@ const Profile = () => {
         .getPublicUrl(fileName);
 
       setAvatarUrl(publicUrl);
+
+      // Guardar URL en el perfil
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user.id);
+
       toast.success('Foto de perfil actualizada correctamente');
 
     } catch (error: any) {
