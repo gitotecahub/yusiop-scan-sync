@@ -40,9 +40,29 @@ const Profile = () => {
     activatedCards: 2
   });
 
-  const handleSaveProfile = () => {
-    setEditing(false);
-    toast.success('Perfil actualizado correctamente');
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    try {
+      // Update profile in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profile.fullName,
+          username: profile.username
+        })
+        .eq('user_id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setEditing(false);
+      toast.success('Perfil actualizado correctamente');
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast.error('Error al actualizar el perfil');
+    }
   };
 
   const handleAvatarClick = () => {
