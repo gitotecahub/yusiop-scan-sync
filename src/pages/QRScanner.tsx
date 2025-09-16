@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { QrCode, Camera } from 'lucide-react';
+import { QrCode, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
+import QrScanner from 'qr-scanner';
 
 const QRScanner = () => {
   const [manualCode, setManualCode] = useState('');
   const [scanning, setScanning] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const qrScannerRef = useRef<QrScanner | null>(null);
 
   const activateQRCode = async (code: string) => {
     try {
       // Aquí llamaremos a la edge function para activar el QR
       toast.success(`QR activado: ${code}`);
+      stopScanning();
     } catch (error) {
       toast.error('Error al activar el QR');
     }
@@ -26,12 +30,52 @@ const QRScanner = () => {
     }
   };
 
-  const startScanning = () => {
-    setScanning(true);
-    // Aquí implementaremos el scanner de cámara
-    toast.info('Función de cámara próximamente disponible');
-    setTimeout(() => setScanning(false), 2000);
+  const stopScanning = () => {
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop();
+      qrScannerRef.current.destroy();
+      qrScannerRef.current = null;
+    }
+    setScanning(false);
   };
+
+  const startScanning = async () => {
+    try {
+      setScanning(true);
+      
+      if (!videoRef.current) {
+        toast.error('Error al inicializar la cámara');
+        setScanning(false);
+        return;
+      }
+
+      // Crear instancia del scanner
+      qrScannerRef.current = new QrScanner(
+        videoRef.current,
+        (result) => {
+          activateQRCode(result.data);
+        },
+        {
+          returnDetailedScanResult: true,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        }
+      );
+
+      await qrScannerRef.current.start();
+      toast.success('Cámara activada. Apunta al código QR');
+    } catch (error) {
+      console.error('Error al iniciar el scanner:', error);
+      toast.error('Error al acceder a la cámara. Verifica los permisos.');
+      setScanning(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopScanning();
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -57,14 +101,35 @@ const QRScanner = () => {
         <CardContent className="space-y-6">
           {/* Camera Scanner */}
           <div className="space-y-4">
-            <Button
-              onClick={startScanning}
-              disabled={scanning}
-              className="w-full yusiop-button-primary flex items-center gap-2"
-            >
-              <Camera className="h-4 w-4" />
-              {scanning ? 'Escaneando...' : 'Usar Cámara'}
-            </Button>
+            {scanning ? (
+              <div className="space-y-4">
+                <div className="relative">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-64 rounded-lg bg-muted object-cover"
+                    playsInline
+                    muted
+                  />
+                  <div className="absolute inset-0 border-2 border-primary rounded-lg opacity-50 pointer-events-none" />
+                </div>
+                <Button
+                  onClick={stopScanning}
+                  variant="outline"
+                  className="w-full flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Detener Escaneo
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={startScanning}
+                className="w-full yusiop-button-primary flex items-center gap-2"
+              >
+                <Camera className="h-4 w-4" />
+                Usar Cámara
+              </Button>
+            )}
           </div>
 
           {/* Divider */}
