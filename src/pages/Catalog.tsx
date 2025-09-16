@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, Download, Heart } from 'lucide-react';
+import { Play, Pause, Download, Heart, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
@@ -21,6 +21,7 @@ const Catalog = () => {
   const location = useLocation();
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
@@ -51,6 +52,24 @@ const Catalog = () => {
     }
   };
 
+  // Function to load downloaded songs
+  const loadDownloadedSongs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: downloadsData } = await supabase
+          .from('user_downloads')
+          .select('song_id')
+          .eq('user_id', user.id);
+        
+        if (downloadsData) {
+          setDownloadedSongs(new Set(downloadsData.map(d => d.song_id)));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading downloaded songs:', error);
+    }
+
   // Cargar canciones y créditos del usuario
   useEffect(() => {
     const fetchData = async () => {
@@ -80,6 +99,9 @@ const Catalog = () => {
 
         // Cargar créditos
         await loadUserCredits();
+        
+        // Cargar canciones descargadas
+        await loadDownloadedSongs();
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -90,15 +112,17 @@ const Catalog = () => {
     fetchData();
   }, [setUserCredits]);
 
-  // Refresh credits when user navigates to catalog (e.g., after QR scan)
+  // Refresh credits and downloads when user navigates to catalog (e.g., after QR scan)
   useEffect(() => {
     loadUserCredits();
+    loadDownloadedSongs();
   }, [location.pathname, location.state]);
 
   // Also refresh when the component mounts or when credits store changes
   useEffect(() => {
     if (!userCredits) {
       loadUserCredits();
+      loadDownloadedSongs();
     }
   }, [userCredits]);
 
@@ -162,6 +186,9 @@ const Catalog = () => {
 
       // Actualizar estado local
       decrementCredits();
+      
+      // Actualizar lista de canciones descargadas
+      setDownloadedSongs(prev => new Set([...prev, song.id]));
       
       toast.success(`"${song.title}" se descargó correctamente`);
       
@@ -231,6 +258,7 @@ const Catalog = () => {
       <div className="grid gap-4">
         {songs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+          const isDownloaded = downloadedSongs.has(song.id);
           
           return (
             <Card key={song.id} className="yusiop-card hover:bg-card/80 transition-colors">
@@ -276,9 +304,13 @@ const Catalog = () => {
                       size="sm"
                       onClick={() => handleDownload(song)}
                       className="yusiop-button-primary"
-                      disabled={!userCredits || userCredits.credits_remaining <= 0}
+                      disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
                     >
-                      <Download className="h-4 w-4" />
+                      {isDownloaded ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>

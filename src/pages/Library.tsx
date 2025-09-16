@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DownloadedSong {
   id: string;
@@ -22,34 +23,59 @@ const Library = () => {
   const [loading, setLoading] = useState(true);
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
 
-  // Mock data - en producción esto vendrá de Supabase
+  // Cargar canciones descargadas desde Supabase
   useEffect(() => {
-    const mockDownloads: DownloadedSong[] = [
-      {
-        id: '1',
-        title: 'Bohemian Rhapsody',
-        artist: 'Queen',
-        duration_seconds: 355,
-        cover_url: 'https://picsum.photos/300/300?random=1',
-        downloaded_at: '2024-01-15T10:30:00Z',
-        is_favorite: true
-      },
-      {
-        id: '2',
-        title: 'Hotel California',
-        artist: 'Eagles',
-        duration_seconds: 391,
-        cover_url: 'https://picsum.photos/300/300?random=2',
-        downloaded_at: '2024-01-14T15:45:00Z',
-        is_favorite: false
+    const loadDownloadedSongs = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setLoading(false);
+          return;
+        }
+
+        // Obtener las descargas del usuario con información de la canción
+        const { data: downloadsData, error } = await supabase
+          .from('user_downloads')
+          .select(`
+            *,
+            songs!inner(
+              id,
+              title,
+              duration_seconds,
+              cover_url,
+              artists!inner(name),
+              albums(cover_url)
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('downloaded_at', { ascending: false });
+
+        if (error) {
+          console.error('Error loading downloads:', error);
+          setLoading(false);
+          return;
+        }
+
+        const formattedSongs: DownloadedSong[] = downloadsData?.map(download => ({
+          id: download.songs.id,
+          title: download.songs.title,
+          artist: download.songs.artists.name,
+          duration_seconds: download.songs.duration_seconds,
+          cover_url: download.songs.cover_url || download.songs.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+          downloaded_at: download.downloaded_at,
+          is_favorite: false // TODO: implementar favoritos
+        })) || [];
+
+        setDownloads(formattedSongs);
+        setFavorites(formattedSongs.filter(song => song.is_favorite));
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
       }
-    ];
-    
-    setTimeout(() => {
-      setDownloads(mockDownloads);
-      setFavorites(mockDownloads.filter(song => song.is_favorite));
-      setLoading(false);
-    }, 1000);
+    };
+
+    loadDownloadedSongs();
   }, []);
 
   const formatDuration = (seconds: number) => {
