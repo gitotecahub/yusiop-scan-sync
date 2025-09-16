@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import UploadAlbumDialog from '@/components/admin/UploadAlbumDialog';
 
 interface Album {
   id: string;
@@ -17,14 +18,22 @@ interface Album {
   artists?: { name: string };
 }
 
+interface Artist {
+  id: string;
+  name: string;
+}
+
 const Albums = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAlbums();
+    fetchArtists();
   }, []);
 
   const fetchAlbums = async () => {
@@ -52,6 +61,24 @@ const Albums = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArtists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching artists:', error);
+        return;
+      }
+
+      setArtists(data || []);
+    } catch (error) {
+      console.error('Error fetching artists:', error);
     }
   };
 
@@ -118,7 +145,7 @@ const Albums = () => {
             Administra los álbumes de la plataforma
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setUploadDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Álbum
         </Button>
@@ -203,6 +230,17 @@ const Albums = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Upload Album Dialog */}
+      <UploadAlbumDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onAlbumUploaded={() => {
+          fetchAlbums();
+          fetchArtists();
+        }}
+        artists={artists}
+      />
     </div>
   );
 };
