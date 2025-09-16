@@ -3,7 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play, Pause, Download, Heart, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Play, Pause, Download, Heart, Check, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
@@ -12,6 +13,7 @@ interface Song {
   id: string;
   title: string;
   artist: string;
+  album?: string;
   duration_seconds: number;
   cover_url?: string;
   preview_url?: string;
@@ -21,6 +23,8 @@ interface Song {
 const Catalog = () => {
   const location = useLocation();
   const [songs, setSongs] = useState<Song[]>([]);
+  const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
@@ -93,12 +97,14 @@ const Catalog = () => {
             id: song.id,
             title: song.title,
             artist: song.artists.name,
+            album: song.albums?.title,
             duration_seconds: song.duration_seconds,
             cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
             preview_url: song.preview_url,
             track_url: song.track_url
           }));
           setSongs(formattedSongs);
+          setFilteredSongs(formattedSongs);
         }
 
         // Cargar créditos
@@ -147,6 +153,20 @@ const Catalog = () => {
       loadDownloadedSongs();
     }
   }, [userCredits]);
+
+  // Filter songs based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredSongs(songs);
+    } else {
+      const filtered = songs.filter(song =>
+        song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        song.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (song.album && song.album.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredSongs(filtered);
+    }
+  }, [searchTerm, songs]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -261,6 +281,21 @@ const Catalog = () => {
         </p>
       </div>
 
+      {/* Search Bar */}
+      <Card className="yusiop-card">
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por título, artista o álbum..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Downloads remaining - Only show when user has active credits */}
       {userCredits && userCredits.credits_remaining > 0 && (
         <Card className="yusiop-card border-primary/20">
@@ -278,7 +313,16 @@ const Catalog = () => {
 
       {/* Songs List */}
       <div className="grid gap-4">
-        {songs.map((song) => {
+        {filteredSongs.length === 0 && searchTerm ? (
+          <Card className="yusiop-card">
+            <CardContent className="p-8 text-center">
+              <p className="text-muted-foreground">
+                No se encontraron canciones que coincidan con "{searchTerm}"
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredSongs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
           const isDownloaded = downloadedSongs.has(song.id);
           const isHighlighted = highlightedSongId === song.id;
@@ -310,6 +354,11 @@ const Catalog = () => {
                     <p className="text-sm text-muted-foreground truncate">
                       {song.artist}
                     </p>
+                    {song.album && (
+                      <p className="text-xs text-muted-foreground/80 truncate">
+                        {song.album}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {formatDuration(song.duration_seconds)}
                     </p>
@@ -346,7 +395,8 @@ const Catalog = () => {
               </CardContent>
             </Card>
           );
-        })}
+          })
+        )}
       </div>
     </div>
   );
