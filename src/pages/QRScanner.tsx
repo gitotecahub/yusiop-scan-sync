@@ -17,12 +17,14 @@ const QRScanner = () => {
   const qrScannerRef = useRef<QrScanner | null>(null);
   const navigate = useNavigate();
   const { setUserCredits } = useCreditsStore();
+  const processingRef = useRef(false);
 
   const activateQRCode = async (code: string) => {
-    if (activating) return;
+    if (activating || processingRef.current) return;
     
     try {
       setActivating(true);
+      processingRef.current = true;
       
       // Obtener el usuario actual y su token de sesión
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -82,6 +84,7 @@ const QRScanner = () => {
       toast.error('Error al activar el QR');
     } finally {
       setActivating(false);
+      processingRef.current = false;
     }
   };
 
@@ -156,16 +159,16 @@ const QRScanner = () => {
           videoRef.current!,
           (result) => {
             console.log('QR detectado:', result.data);
-            if (!activating) {
-              activateQRCode(result.data);
-            }
+            if (processingRef.current || activating) return;
+            processingRef.current = true;
+            activateQRCode(result.data);
           },
           {
             returnDetailedScanResult: true,
             highlightScanRegion: true,
             highlightCodeOutline: true,
             preferredCamera: 'environment',
-            maxScansPerSecond: 8,
+            maxScansPerSecond: 4,
           }
         );
 
