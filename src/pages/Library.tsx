@@ -152,25 +152,25 @@ const Library = () => {
             <Card key={song.id} className="yusiop-card hover:bg-card/80 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
-                  {/* Cover */}
-                  <div className="relative">
-                    <img
-                      src={song.cover_url}
-                      alt={`${song.title} cover`}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                    <Button
-                      size="sm"
-                      className="absolute inset-0 bg-black/60 hover:bg-black/80 text-white rounded-lg"
-                      onClick={() => handlePlay(song)}
-                    >
-                      {isCurrentlyPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                   {/* Cover */}
+                   <div className="relative">
+                     <img
+                       src={song.cover_url}
+                       alt={`${song.title} cover`}
+                       className="w-16 h-16 rounded-lg object-cover"
+                     />
+                     <Button
+                       size="sm"
+                       className="absolute inset-0 m-auto w-8 h-8 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center"
+                       onClick={() => handlePlay(song)}
+                     >
+                       {isCurrentlyPlaying ? (
+                         <Pause className="h-3 w-3" />
+                       ) : (
+                         <Play className="h-3 w-3" />
+                       )}
+                     </Button>
+                   </div>
 
                   {/* Song Info */}
                   <div className="flex-1 min-w-0">
