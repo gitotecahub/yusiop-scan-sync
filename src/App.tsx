@@ -27,6 +27,7 @@ import Settings from '@/pages/admin/Settings';
 // Layout
 import Layout from '@/components/Layout';
 import PhoneMockup from '@/components/PhoneMockup';
+import AudioPlayer from '@/components/AudioPlayer';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
@@ -84,6 +85,7 @@ const AppContent = () => {
               <Auth />
             ) : (
               <Layout>
+                <AudioPlayer />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/qr" element={<QRScanner />} />
