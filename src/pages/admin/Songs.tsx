@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Play, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import UploadSongDialog from '@/components/admin/UploadSongDialog';
 
 interface Song {
   id: string;
@@ -21,14 +22,29 @@ interface Song {
   albums?: { title: string };
 }
 
+interface Artist {
+  id: string;
+  name: string;
+}
+
+interface Album {
+  id: string;
+  title: string;
+}
+
 const Songs = () => {
   const [songs, setSongs] = useState<Song[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchSongs();
+    fetchArtists();
+    fetchAlbums();
   }, []);
 
   const fetchSongs = async () => {
@@ -57,6 +73,42 @@ const Songs = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArtists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching artists:', error);
+        return;
+      }
+
+      setArtists(data || []);
+    } catch (error) {
+      console.error('Error fetching artists:', error);
+    }
+  };
+
+  const fetchAlbums = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('albums')
+        .select('id, title')
+        .order('title');
+
+      if (error) {
+        console.error('Error fetching albums:', error);
+        return;
+      }
+
+      setAlbums(data || []);
+    } catch (error) {
+      console.error('Error fetching albums:', error);
     }
   };
 
@@ -124,7 +176,7 @@ const Songs = () => {
             Administra el catálogo musical de la plataforma
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setUploadDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nueva Canción
         </Button>
@@ -215,6 +267,15 @@ const Songs = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Upload Dialog */}
+      <UploadSongDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onSongUploaded={fetchSongs}
+        artists={artists}
+        albums={albums}
+      />
     </div>
   );
 };
