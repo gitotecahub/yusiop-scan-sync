@@ -4,8 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, QrCode, Eye, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Search, Plus, QrCode, Eye, Trash2, Download, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import QRCodeLib from 'qrcode';
 
 interface QRCard {
   id: string;
@@ -22,6 +26,12 @@ const QRCards = () => {
   const [qrCards, setQrCards] = useState<QRCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showQRDialog, setShowQRDialog] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<QRCard | null>(null);
+  const [qrImageUrl, setQrImageUrl] = useState('');
+  const [newCardType, setNewCardType] = useState('standard');
+  const [newCardCredits, setNewCardCredits] = useState('5');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -84,12 +94,13 @@ const QRCards = () => {
 
   const generateNewQRCard = async () => {
     try {
+      const uniqueCode = `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const { error } = await supabase
         .from('qr_cards')
         .insert({
-          code: `QR${Date.now()}`,
-          card_type: 'standard',
-          download_credits: 5,
+          code: uniqueCode,
+          card_type: newCardType as 'standard' | 'premium',
+          download_credits: parseInt(newCardCredits),
         });
 
       if (error) throw error;
@@ -99,6 +110,7 @@ const QRCards = () => {
         description: 'Nuevo código QR generado correctamente',
       });
 
+      setShowCreateDialog(false);
       fetchQRCards();
     } catch (error) {
       console.error('Error generating QR card:', error);
@@ -108,6 +120,49 @@ const QRCards = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const generateQRImage = async (code: string) => {
+    try {
+      const qrDataUrl = await QRCodeLib.toDataURL(code, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      return qrDataUrl;
+    } catch (error) {
+      console.error('Error generating QR image:', error);
+      return '';
+    }
+  };
+
+  const handleViewQR = async (card: QRCard) => {
+    setSelectedCard(card);
+    const qrImage = await generateQRImage(card.code);
+    setQrImageUrl(qrImage);
+    setShowQRDialog(true);
+  };
+
+  const handleDownloadQR = () => {
+    if (qrImageUrl && selectedCard) {
+      const link = document.createElement('a');
+      link.download = `QR-${selectedCard.code}.png`;
+      link.href = qrImageUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: 'Copiado',
+      description: 'Código copiado al portapapeles',
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -148,10 +203,56 @@ const QRCards = () => {
             Administra los códigos QR de la plataforma
           </p>
         </div>
-        <Button onClick={generateNewQRCard}>
-          <Plus className="h-4 w-4 mr-2" />
-          Generar QR
-        </Button>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Generar QR
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Crear Nuevo Código QR</DialogTitle>
+              <DialogDescription>
+                Configura los parámetros para el nuevo código QR
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="card-type">Tipo de Tarjeta</Label>
+                <Select value={newCardType} onValueChange={setNewCardType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona el tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="standard">Estándar</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="credits">Créditos de Descarga</Label>
+                <Select value={newCardCredits} onValueChange={setNewCardCredits}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona los créditos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 crédito</SelectItem>
+                    <SelectItem value="5">5 créditos</SelectItem>
+                    <SelectItem value="10">10 créditos</SelectItem>
+                    <SelectItem value="25">25 créditos</SelectItem>
+                    <SelectItem value="50">50 créditos</SelectItem>
+                    <SelectItem value="100">100 créditos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={generateNewQRCard} className="w-full">
+                <QrCode className="h-4 w-4 mr-2" />
+                Generar Código QR
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -205,9 +306,21 @@ const QRCards = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewQR(card)}
+                  >
                     <Eye className="h-4 w-4 mr-1" />
                     Ver QR
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleCopyCode(card.code)}
+                  >
+                    <Copy className="h-4 w-4 mr-1" />
+                    Copiar
                   </Button>
                   <Button
                     variant="destructive"
@@ -231,6 +344,56 @@ const QRCards = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog para mostrar el código QR */}
+      <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Código QR - {selectedCard?.code}</DialogTitle>
+            <DialogDescription>
+              Escanea este código para activar {selectedCard?.download_credits} créditos de descarga
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4">
+            {qrImageUrl && (
+              <div className="bg-white p-4 rounded-lg border">
+                <img 
+                  src={qrImageUrl} 
+                  alt="Código QR" 
+                  className="w-64 h-64"
+                />
+              </div>
+            )}
+            <div className="flex space-x-2 w-full">
+              <Button 
+                variant="outline" 
+                onClick={handleDownloadQR}
+                className="flex-1"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Descargar
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => selectedCard && handleCopyCode(selectedCard.code)}
+                className="flex-1"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copiar Código
+              </Button>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium">{selectedCard?.code}</p>
+              <div className="flex justify-center space-x-2">
+                <Badge variant={selectedCard?.is_activated ? 'default' : 'secondary'}>
+                  {selectedCard?.is_activated ? 'Activado' : 'Pendiente'}
+                </Badge>
+                <Badge variant="outline">{selectedCard?.card_type}</Badge>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
