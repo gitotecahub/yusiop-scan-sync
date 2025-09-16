@@ -129,11 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user && event === 'SIGNED_IN') {
           // Manage session when user signs in
-          try {
-            await manageUserSession(session.user.email!);
-          } catch (error) {
-            console.error('Session management failed:', error);
-          }
+          await manageUserSession(session.user.email!);
           setTimeout(async () => {
             const adminStatus = await checkAdminRole(session.user.id);
             setIsAdmin(adminStatus);
@@ -154,11 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (session?.user) {
         setTimeout(async () => {
-          try {
-            await manageUserSession(session.user.email!);
-          } catch (error) {
-            console.error('Session management failed:', error);
-          }
+          await manageUserSession(session.user.email!);
           const adminStatus = await checkAdminRole(session.user.id);
           setIsAdmin(adminStatus);
         }, 0);
