@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { QrCode, Music, Library, User, Play } from 'lucide-react';
+import { QrCode, Music, Library, User, Play, Settings } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
+  const { isAdmin } = useAuth();
   const navCards = [
     {
       title: 'Escanear QR',
@@ -68,6 +70,27 @@ const Index = () => {
           );
         })}
       </div>
+
+      {/* Admin Panel Access */}
+      {isAdmin && (
+        <div className="mt-6">
+          <Link to="/admin">
+            <Card className="p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-200 hover:shadow-lg transition-all duration-200">
+              <div className="flex items-center space-x-4">
+                <div className="bg-red-500 p-3 rounded-full">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Panel de Administración</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Gestiona usuarios, música y configuraciones
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+        </div>
+      )}
 
       {/* Music Preview Section */}
       <div className="mt-8">

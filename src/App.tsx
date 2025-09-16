@@ -14,12 +14,23 @@ import Profile from '@/pages/Profile';
 import Auth from '@/pages/Auth';
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminLayout from '@/pages/admin/AdminLayout';
+import Dashboard from '@/pages/admin/Dashboard';
+import Users from '@/pages/admin/Users';
+import Songs from '@/pages/admin/Songs';
+import Albums from '@/pages/admin/Albums';
+import QRCards from '@/pages/admin/QRCards';
+import Downloads from '@/pages/admin/Downloads';
+import Settings from '@/pages/admin/Settings';
+
 // Layout
 import Layout from '@/components/Layout';
 import PhoneMockup from '@/components/PhoneMockup';
 
-// Hooks
+// Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 
 const queryClient = new QueryClient();
 
@@ -46,30 +57,47 @@ const AppContent = () => {
     );
   }
 
-  // Si no hay sesión, mostrar Auth
-  if (!session) {
-    return (
-      <PhoneMockup>
-        <Auth />
-      </PhoneMockup>
-    );
-  }
-
   return (
-    <PhoneMockup>
-      <div className="min-h-screen bg-background text-foreground">
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/qr" element={<QRScanner />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </div>
-    </PhoneMockup>
+    <Routes>
+      {/* Admin Routes - Outside PhoneMockup for desktop view */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="users" element={<Users />} />
+        <Route path="songs" element={<Songs />} />
+        <Route path="albums" element={<Albums />} />
+        <Route path="qr-cards" element={<QRCards />} />
+        <Route path="downloads" element={<Downloads />} />
+        <Route path="settings" element={<Settings />} />
+      </Route>
+
+      {/* Mobile App Routes - Inside PhoneMockup */}
+      <Route path="/auth" element={
+        <PhoneMockup>
+          <Auth />
+        </PhoneMockup>
+      } />
+      
+      <Route path="/*" element={
+        <PhoneMockup>
+          <div className="min-h-screen bg-background text-foreground">
+            {!session ? (
+              <Auth />
+            ) : (
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/qr" element={<QRScanner />} />
+                  <Route path="/catalog" element={<Catalog />} />
+                  <Route path="/library" element={<Library />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            )}
+          </div>
+        </PhoneMockup>
+      } />
+    </Routes>
   );
 };
 
@@ -79,7 +107,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppContent />
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

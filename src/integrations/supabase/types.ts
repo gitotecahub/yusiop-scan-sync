@@ -190,27 +190,117 @@ export type Database = {
           },
         ]
       }
-      user_downloads: {
+      user_balance: {
         Row: {
-          downloaded_at: string
+          created_at: string | null
           id: string
           qr_card_id: string
-          song_id: string
+          remaining_downloads: number
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          downloaded_at?: string
+          created_at?: string | null
           id?: string
           qr_card_id: string
-          song_id: string
+          remaining_downloads?: number
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          downloaded_at?: string
+          created_at?: string | null
           id?: string
           qr_card_id?: string
-          song_id?: string
+          remaining_downloads?: number
+          updated_at?: string | null
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_balance_qr_card_id_fkey"
+            columns: ["qr_card_id"]
+            isOneToOne: false
+            referencedRelation: "qr_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_balance_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_credits: {
+        Row: {
+          card_id: string
+          card_type: string
+          credits_remaining: number
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          max_credits: number
+          scanned_at: string | null
+          user_email: string
+        }
+        Insert: {
+          card_id: string
+          card_type: string
+          credits_remaining: number
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+          max_credits: number
+          scanned_at?: string | null
+          user_email: string
+        }
+        Update: {
+          card_id?: string
+          card_type?: string
+          credits_remaining?: number
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_credits?: number
+          scanned_at?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
+      user_downloads: {
+        Row: {
+          card_id_str: string | null
+          card_type: string | null
+          downloaded_at: string
+          id: string
+          local_user_id: string | null
+          qr_card_id: string | null
+          song_id: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          card_id_str?: string | null
+          card_type?: string | null
+          downloaded_at?: string
+          id?: string
+          local_user_id?: string | null
+          qr_card_id?: string | null
+          song_id: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          card_id_str?: string | null
+          card_type?: string | null
+          downloaded_at?: string
+          id?: string
+          local_user_id?: string | null
+          qr_card_id?: string | null
+          song_id?: string
+          user_email?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -258,14 +348,103 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          device_info: Json | null
+          id: string
+          is_active: boolean | null
+          last_active: string | null
+          session_token: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_active?: string | null
+          session_token: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_active?: string | null
+          session_token?: string
+          user_email?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       card_type: "standard" | "premium"
       user_role: "user" | "admin"
     }
@@ -395,6 +574,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       card_type: ["standard", "premium"],
       user_role: ["user", "admin"],
     },
