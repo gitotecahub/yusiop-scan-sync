@@ -39,79 +39,109 @@ const QRScanner = () => {
     setScanning(false);
   };
 
-  const startScanning = async () => {
-    try {
-      setScanning(true);
-      
-      if (!videoRef.current) {
-        toast.error('Error al inicializar la cámara');
-        setScanning(false);
-        return;
-      }
-
-      // Verificar si el dispositivo tiene cámara
-      const hasCamera = await QrScanner.hasCamera();
-      if (!hasCamera) {
-        toast.error('No se detectó ninguna cámara en este dispositivo');
-        setScanning(false);
-        return;
-      }
-
-      // Verificar permisos de cámara
-      try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-      } catch (permissionError) {
-        console.error('Error de permisos:', permissionError);
-        toast.error('Permisos de cámara denegados. Por favor permite el acceso a la cámara.');
-        setScanning(false);
-        return;
-      }
-
-      // Crear instancia del scanner
-      qrScannerRef.current = new QrScanner(
-        videoRef.current,
-        (result) => {
-          console.log('QR Code detectado:', result.data);
-          activateQRCode(result.data);
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-          preferredCamera: 'environment', // Usar cámara trasera si está disponible
-        }
-      );
-
-      await qrScannerRef.current.start();
-      toast.success('Cámara activada. Apunta al código QR');
-    } catch (error) {
-      console.error('Error detallado al iniciar el scanner:', error);
-      let errorMessage = 'Error desconocido al acceder a la cámara';
-      
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          errorMessage = 'Permisos de cámara denegados. Por favor permite el acceso a la cámara en la configuración de tu navegador.';
-        } else if (error.name === 'NotFoundError') {
-          errorMessage = 'No se encontró ninguna cámara en este dispositivo.';
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage = 'Tu navegador no soporta el acceso a la cámara.';
-        } else if (error.name === 'NotReadableError') {
-          errorMessage = 'La cámara está siendo utilizada por otra aplicación.';
-        } else {
-          errorMessage = `Error: ${error.message}`;
-        }
-      }
-      
-      toast.error(errorMessage);
-      setScanning(false);
-    }
+  const startScanning = () => {
+    // Solo activamos el modo "escaneando"; la inicialización real
+    // del scanner se hace en un useEffect después de que el <video>
+    // exista en el DOM (evita referencias nulas en el primer click)
+    setScanning(true);
   };
 
   useEffect(() => {
-    return () => {
-      stopScanning();
+    if (!scanning) return;
+
+    let cancelled = false;
+
+    const init = async () => {
+      try {
+        if (!videoRef.current) return;
+
+        // 1) Verificar cámara disponible
+        const hasCamera = await QrScanner.hasCamera();
+        if (!hasCamera) {
+          toast.error('No se detectó ninguna cámara en este dispositivo');
+          setScanning(false);
+          return;
+        }
+
+        // 2) Pre-solicitar permisos y detectar cámara trasera si existe
+        let preferredDeviceId: string | undefined;
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+          const back = videoInputs.find((d) => /back|rear|environment/i.test(d.label));
+          preferredDeviceId = (back ?? videoInputs[0])?.deviceId;
+
+          const constraints: MediaStreamConstraints = {
+            video: preferredDeviceId
+              ? { deviceId: { exact: preferredDeviceId } }
+              : { facingMode: { ideal: 'environment' } },
+          };
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          // Cerrar stream de preflight
+          stream.getTracks().forEach((t) => t.stop());
+        } catch (permissionError) {
+          console.error('Error de permisos:', permissionError);
+          toast.error('Permisos de cámara denegados. Por favor permite el acceso a la cámara.');
+          setScanning(false);
+          return;
+        }
+
+        if (cancelled) return;
+
+        // 3) Inicializar QrScanner
+        qrScannerRef.current = new QrScanner(
+          videoRef.current!,
+          (result) => {
+            console.log('QR detectado:', result.data);
+            activateQRCode(result.data);
+          },
+          {
+            returnDetailedScanResult: true,
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            preferredCamera: 'environment',
+            maxScansPerSecond: 8,
+          }
+        );
+
+        await qrScannerRef.current.start();
+
+        // Si detectamos deviceId de la cámara trasera, intentamos fijarla
+        if (preferredDeviceId) {
+          try {
+            await qrScannerRef.current.setCamera(preferredDeviceId);
+          } catch (e) {
+            console.warn('No se pudo fijar la cámara preferida, usando por defecto.', e);
+          }
+        }
+
+        toast.success('Cámara activada. Apunta al código QR');
+      } catch (error: any) {
+        console.error('Error al iniciar el scanner:', error);
+        let msg = 'Error desconocido al acceder a la cámara';
+        if (error?.name === 'NotAllowedError') msg = 'Permisos de cámara denegados.';
+        else if (error?.name === 'NotFoundError') msg = 'No se encontró ninguna cámara.';
+        else if (error?.name === 'NotReadableError') msg = 'La cámara está en uso por otra app.';
+        else if (error?.message) msg = `Error: ${error.message}`;
+        toast.error(msg);
+        setScanning(false);
+      }
     };
-  }, []);
+
+    const raf = requestAnimationFrame(() => {
+      void init();
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      if (qrScannerRef.current) {
+        qrScannerRef.current.stop();
+        qrScannerRef.current.destroy();
+        qrScannerRef.current = null;
+      }
+    };
+  }, [scanning]);
 
   return (
     <div className="space-y-6">
@@ -144,6 +174,7 @@ const QRScanner = () => {
                     ref={videoRef}
                     className="w-full h-64 rounded-lg bg-muted object-cover"
                     playsInline
+                    autoPlay
                     muted
                   />
                   <div className="absolute inset-0 border-2 border-primary rounded-lg opacity-50 pointer-events-none" />
