@@ -205,21 +205,20 @@ const Catalog = () => {
         </p>
       </div>
 
-      {/* Downloads remaining */}
-      <Card className="yusiop-card border-primary/20">
-        <CardContent className="p-4 text-center">
-          <p className="text-sm text-muted-foreground">Te quedan</p>
-          <p className="text-2xl font-bold text-primary">
-            {userCredits?.credits_remaining || 0} descargas
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {userCredits ? 
-              `Tarjeta ${userCredits.card_type} activa` : 
-              'Escanea una tarjeta QR para activar más descargas'
-            }
-          </p>
-        </CardContent>
-      </Card>
+      {/* Downloads remaining - Only show when user has active credits */}
+      {userCredits && userCredits.credits_remaining > 0 && (
+        <Card className="yusiop-card border-primary/20">
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-muted-foreground">Te quedan</p>
+            <p className="text-2xl font-bold text-primary">
+              {userCredits.credits_remaining} descargas
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Tarjeta {userCredits.card_type} activa
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Songs List */}
       <div className="grid gap-4">
