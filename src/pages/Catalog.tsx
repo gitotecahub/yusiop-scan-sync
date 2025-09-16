@@ -23,6 +23,7 @@ const Catalog = () => {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
+  const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
@@ -119,6 +120,24 @@ const Catalog = () => {
   useEffect(() => {
     loadUserCredits();
     loadDownloadedSongs();
+    
+    // Check if we need to highlight a specific song
+    if (location.state?.highlightSongId) {
+      setHighlightedSongId(location.state.highlightSongId);
+      
+      // Scroll to the song after a short delay to ensure it's rendered
+      setTimeout(() => {
+        const songElement = document.getElementById(`song-${location.state.highlightSongId}`);
+        if (songElement) {
+          songElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      
+      // Remove highlight after 3 seconds
+      setTimeout(() => {
+        setHighlightedSongId(null);
+      }, 3000);
+    }
   }, [location.pathname, location.state]);
 
   // Also refresh when the component mounts or when credits store changes
@@ -262,9 +281,16 @@ const Catalog = () => {
         {songs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
           const isDownloaded = downloadedSongs.has(song.id);
+          const isHighlighted = highlightedSongId === song.id;
           
           return (
-            <Card key={song.id} className="yusiop-card hover:bg-card/80 transition-colors">
+            <Card 
+              key={song.id} 
+              id={`song-${song.id}`}
+              className={`yusiop-card hover:bg-card/80 transition-all duration-300 ${
+                isHighlighted ? 'ring-2 ring-primary bg-primary/10' : ''
+              }`}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
                   {/* Cover */}
