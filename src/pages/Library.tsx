@@ -99,11 +99,17 @@ const Library = () => {
   };
 
   const handlePlay = (song: DownloadedSong) => {
-    if (currentSong?.id === song.id && isPlaying) {
-      pause();
+    if (currentSong?.id === song.id) {
+      if (isPlaying) {
+        pause();
+      } else {
+        play();
+      }
     } else {
       setCurrentSong(song, false); // false = full track, not preview
-      play();
+      if (!isPlaying) {
+        play();
+      }
     }
   };
 
