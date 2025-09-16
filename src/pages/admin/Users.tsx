@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, UserPlus, Shield, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 
 interface UserProfile {
   id: string;
@@ -22,6 +23,7 @@ const Users = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [createUserOpen, setCreateUserOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -127,7 +129,7 @@ const Users = () => {
             Administra los usuarios de la plataforma
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setCreateUserOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
           Nuevo Usuario
         </Button>
@@ -207,6 +209,12 @@ const Users = () => {
           </CardContent>
         </Card>
       )}
+
+      <CreateUserDialog
+        open={createUserOpen}
+        onOpenChange={setCreateUserOpen}
+        onUserCreated={fetchUsers}
+      />
     </div>
   );
 };
