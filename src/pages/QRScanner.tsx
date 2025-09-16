@@ -22,9 +22,9 @@ const QRScanner = () => {
     try {
       setActivating(true);
       
-      // Obtener el usuario actual
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
+      // Obtener el usuario actual y su token de sesión
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user?.email) {
         toast.error('Debes iniciar sesión para activar una tarjeta QR');
         return;
       }
@@ -33,11 +33,15 @@ const QRScanner = () => {
       const { data, error } = await supabase.functions.invoke('activate-qr', {
         body: { 
           code: code.trim(),
-          userEmail: user.email
+          userEmail: session.user.email
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
       if (error) {
+        console.error('Edge function error:', error);
         toast.error(error.message || 'Error al activar el QR');
         return;
       }
