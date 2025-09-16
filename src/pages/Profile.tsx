@@ -231,7 +231,10 @@ const Profile = () => {
         <CardHeader className="text-center">
           <div className="relative mx-auto mb-4">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={avatarUrl || "/placeholder-avatar.png"} />
+              <AvatarImage 
+                src={avatarUrl || "/placeholder-avatar.png"} 
+                className="object-cover w-full h-full"
+              />
               <AvatarFallback className="text-lg">
                 {profile.fullName.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
