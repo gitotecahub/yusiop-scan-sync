@@ -29,7 +29,7 @@ interface UploadSongDialogProps {
 
 interface SongFormData {
   title: string;
-  artist_id: string;
+  artist_name: string;
   album_id: string;
   duration_seconds: number;
   cover_url: string;
@@ -38,7 +38,7 @@ interface SongFormData {
 const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums }: UploadSongDialogProps) => {
   const [formData, setFormData] = useState<SongFormData>({
     title: '',
-    artist_id: '',
+    artist_name: '',
     album_id: '',
     duration_seconds: 0,
     cover_url: ''
@@ -57,7 +57,7 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
   const resetForm = () => {
     setFormData({
       title: '',
-      artist_id: '',
+      artist_name: '',
       album_id: '',
       duration_seconds: 0,
       cover_url: ''
@@ -73,8 +73,8 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
       toast.error('El título es requerido');
       return false;
     }
-    if (!formData.artist_id) {
-      toast.error('Debes seleccionar un artista');
+    if (!formData.artist_name.trim()) {
+      toast.error('El nombre del artista es requerido');
       return false;
     }
     if (!trackFile) {
@@ -150,12 +150,33 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
         setUploadProgress(80);
       }
 
+      // Buscar o crear artista
+      let artistId = null;
+      const { data: existingArtist } = await supabase
+        .from('artists')
+        .select('id')
+        .eq('name', formData.artist_name.trim())
+        .single();
+
+      if (existingArtist) {
+        artistId = existingArtist.id;
+      } else {
+        const { data: newArtist, error: artistError } = await supabase
+          .from('artists')
+          .insert({ name: formData.artist_name.trim() })
+          .select('id')
+          .single();
+        
+        if (artistError) throw artistError;
+        artistId = newArtist.id;
+      }
+
       // Crear registro en la base de datos
       const { error: dbError } = await supabase
         .from('songs')
         .insert({
           title: formData.title,
-          artist_id: formData.artist_id,
+          artist_id: artistId,
           album_id: formData.album_id || null,
           duration_seconds: duration,
           track_url: trackUrl,
@@ -243,21 +264,12 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
             
             <div>
               <Label htmlFor="artist">Artista *</Label>
-              <Select 
-                value={formData.artist_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, artist_id: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar artista" />
-                </SelectTrigger>
-                <SelectContent>
-                  {artists.map((artist) => (
-                    <SelectItem key={artist.id} value={artist.id}>
-                      {artist.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="artist"
+                value={formData.artist_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, artist_name: e.target.value }))}
+                placeholder="Nombre del artista"
+              />
             </div>
           </div>
 
@@ -388,7 +400,7 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={uploading || !formData.title || !formData.artist_id || !trackFile}
+            disabled={uploading || !formData.title || !formData.artist_name.trim() || !trackFile}
           >
             {uploading ? 'Subiendo...' : 'Subir Canción'}
           </Button>
