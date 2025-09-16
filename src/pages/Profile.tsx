@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -15,14 +16,19 @@ import {
   LogOut,
   Edit,
   Camera,
-  Upload
+  Upload,
+  Moon,
+  Sun,
+  Monitor
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useTheme } from 'next-themes';
 
 const Profile = () => {
   const { user, signOut } = useAuthStore();
+  const { theme, setTheme } = useTheme();
   const [editing, setEditing] = useState(false);
   const [wifiOnly, setWifiOnly] = useState(true);
   const [notifications, setNotifications] = useState(true);
@@ -337,6 +343,51 @@ const Profile = () => {
               checked={wifiOnly}
               onCheckedChange={setWifiOnly}
             />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                {theme === 'dark' ? (
+                  <Moon className="h-4 w-4" />
+                ) : theme === 'light' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Monitor className="h-4 w-4" />
+                )}
+                <Label>Tema de la aplicación</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Cambia entre modo claro, oscuro o automático
+              </p>
+            </div>
+            <Select value={theme} onValueChange={setTheme}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Tema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4" />
+                    Claro
+                  </div>
+                </SelectItem>
+                <SelectItem value="dark">
+                  <div className="flex items-center gap-2">
+                    <Moon className="h-4 w-4" />
+                    Oscuro
+                  </div>
+                </SelectItem>
+                <SelectItem value="system">
+                  <div className="flex items-center gap-2">
+                    <Monitor className="h-4 w-4" />
+                    Sistema
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Separator />

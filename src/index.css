@@ -8,24 +8,24 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* YUSIOP Design System - Light Mode (fallback) */
-    --background: 240 8% 8%;
-    --foreground: 0 0% 95%;
+    /* YUSIOP Design System - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-    --card: 240 8% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
-    --popover: 240 8% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
 
     --primary: 270 91% 65%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 180 100% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 240 6% 20%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
     --accent: 270 91% 65%;
     --accent-foreground: 0 0% 100%;
@@ -33,25 +33,25 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
     --ring: 270 91% 65%;
 
     --radius: 0.75rem;
 
-    /* YUSIOP Custom Colors */
+    /* YUSIOP Custom Colors - Light Mode */
     --purple-primary: 270 91% 65%;
     --mint-secondary: 180 100% 50%;
-    --dark-bg: 240 8% 8%;
-    --dark-card: 240 8% 12%;
-    --dark-surface: 240 6% 16%;
-    --text-primary: 0 0% 95%;
-    --text-secondary: 0 0% 70%;
-    --text-muted: 0 0% 60%;
+    --dark-bg: 0 0% 100%;
+    --dark-card: 0 0% 100%;
+    --dark-surface: 240 4.8% 95.9%;
+    --text-primary: 240 10% 3.9%;
+    --text-secondary: 240 5% 64.9%;
+    --text-muted: 240 3.8% 46.1%;
 
-    /* Gradients */
+    /* Gradients - Light Mode */
     --gradient-primary: linear-gradient(135deg, hsl(270 91% 65%), hsl(180 100% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(240 8% 12%), hsl(240 8% 8%));
+    --gradient-dark: linear-gradient(180deg, hsl(240 4.8% 95.9%), hsl(0 0% 100%));
   }
 
   .dark {
@@ -84,7 +84,7 @@ All colors MUST be HSL.
     --input: 240 6% 20%;
     --ring: 270 91% 65%;
 
-    /* YUSIOP Custom Colors */
+    /* YUSIOP Custom Colors - Dark Mode */
     --purple-primary: 270 91% 65%;
     --mint-secondary: 180 100% 50%;
     --dark-bg: 240 8% 8%;
@@ -94,7 +94,7 @@ All colors MUST be HSL.
     --text-secondary: 0 0% 70%;
     --text-muted: 0 0% 60%;
 
-    /* Gradients */
+    /* Gradients - Dark Mode */
     --gradient-primary: linear-gradient(135deg, hsl(270 91% 65%), hsl(180 100% 50%));
     --gradient-dark: linear-gradient(180deg, hsl(240 8% 12%), hsl(240 8% 8%));
   }
