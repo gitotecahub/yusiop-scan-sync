@@ -17,6 +17,7 @@ interface Artist {
 interface Album {
   id: string;
   title: string;
+  cover_url?: string;
 }
 
 interface UploadSongDialogProps {
@@ -278,7 +279,14 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
               <Label htmlFor="album">Álbum (opcional)</Label>
               <Select 
                 value={formData.album_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, album_id: value }))}
+                onValueChange={(value) => {
+                  const selectedAlbum = albums.find(album => album.id === value);
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    album_id: value,
+                    cover_url: selectedAlbum?.cover_url || prev.cover_url
+                  }));
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar álbum" />

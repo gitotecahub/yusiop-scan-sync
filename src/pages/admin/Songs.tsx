@@ -30,6 +30,7 @@ interface Artist {
 interface Album {
   id: string;
   title: string;
+  cover_url?: string;
 }
 
 const Songs = () => {
@@ -98,7 +99,7 @@ const Songs = () => {
     try {
       const { data, error } = await supabase
         .from('albums')
-        .select('id, title')
+        .select('id, title, cover_url')
         .order('title');
 
       if (error) {
