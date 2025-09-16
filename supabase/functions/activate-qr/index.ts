@@ -87,41 +87,52 @@ serve(async (req) => {
 
     // Verificar si ya está activada
     if (qrCard.is_activated) {
-      console.log('QR card already activated')
-      return new Response(
-        JSON.stringify({ 
-          error: 'Esta tarjeta QR ya ha sido activada y no se puede usar nuevamente' 
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
+      console.log('QR card already activated, checking existing credits')
+      
+      // Check if user already has active credits from this card
+      const { data: existingCredits, error: creditsError } = await supabaseClient
+        .from('user_credits')
+        .select('*')
+        .eq('user_email', user.email!)
+        .eq('card_id', code)
+        .eq('is_active', true)
+        .maybeSingle()
 
+      if (creditsError) {
+        console.error('Error checking existing credits:', creditsError)
+        return new Response(
+          JSON.stringify({ error: 'Error verificando créditos existentes' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
 
-    console.log(`Found QR card: ${qrCard.card_type} with ${qrCard.download_credits} credits`)
-
-    // 2. Verificar si el usuario ya tiene créditos activos
-    const { data: existingCredits } = await supabaseClient
-      .from('user_credits')
-      .select('*')
-      .eq('user_email', user.email)
-      .eq('is_active', true)
-      .gt('credits_remaining', 0)
-      .maybeSingle()
-
-    if (existingCredits) {
-      console.log('User already has active credits')
-      return new Response(
-        JSON.stringify({ 
-          error: 'Ya tienes créditos activos. Úsalos antes de activar una nueva tarjeta.' 
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+      if (existingCredits && existingCredits.credits_remaining > 0) {
+        console.log('User has existing active credits')
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            credits: existingCredits.credits_remaining,
+            cardType: existingCredits.card_type,
+            message: 'Tienes créditos activos de esta tarjeta'
+          }),
+          { 
+            status: 200, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      } else {
+        console.log('QR card already used and no active credits remaining')
+        return new Response(
+          JSON.stringify({ error: 'Esta tarjeta QR ya ha sido utilizada' }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
     }
 
     // 3. Calcular fecha de expiración (30 días desde ahora)

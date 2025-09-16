@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,18 +18,41 @@ interface Song {
 }
 
 const Catalog = () => {
+  const location = useLocation();
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
+  // Function to load credits
+  const loadUserCredits = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user?.email) {
+        const { data: creditsData, error: creditsError } = await supabase
+          .from('user_credits')
+          .select('*')
+          .eq('user_email', user.email)
+          .eq('is_active', true)
+          .gt('credits_remaining', 0)
+          .maybeSingle();
+
+        if (!creditsError && creditsData) {
+          setUserCredits(creditsData);
+        } else {
+          setUserCredits(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading credits:', error);
+    }
+  };
+
   // Cargar canciones y créditos del usuario
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener usuario actual
-        const { data: { user } } = await supabase.auth.getUser();
-        
         // Cargar canciones
         const { data: songsData, error: songsError } = await supabase
           .from('songs')
@@ -52,22 +76,8 @@ const Catalog = () => {
           setSongs(formattedSongs);
         }
 
-        // Cargar créditos del usuario (si está autenticado)
-        if (user?.email) {
-          const { data: creditsData, error: creditsError } = await supabase
-            .from('user_credits')
-            .select('*')
-            .eq('user_email', user.email)
-            .eq('is_active', true)
-            .gt('credits_remaining', 0)
-            .maybeSingle();
-
-          if (!creditsError && creditsData) {
-            setUserCredits(creditsData);
-          } else {
-            setUserCredits(null);
-          }
-        }
+        // Cargar créditos
+        await loadUserCredits();
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -77,6 +87,13 @@ const Catalog = () => {
 
     fetchData();
   }, [setUserCredits]);
+
+  // Refresh credits when user navigates to catalog (e.g., after QR scan)
+  useEffect(() => {
+    if (location.pathname === '/catalog') {
+      loadUserCredits();
+    }
+  }, [location.pathname]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
