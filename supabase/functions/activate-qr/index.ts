@@ -55,15 +55,28 @@ serve(async (req) => {
       .from('qr_cards')
       .select('*')
       .eq('code', code)
-      .eq('is_activated', false)
-      .single()
+      .maybeSingle()
 
-    if (qrError || !qrCard) {
-      console.error('QR card not found:', qrError)
+    // Verificar si la tarjeta existe
+    if (qrError) {
+      console.error('Error searching QR card:', qrError)
       return new Response(
         JSON.stringify({ 
-          error: 'Tarjeta QR no encontrada o ya activada',
-          details: qrError?.message 
+          error: 'Error al buscar la tarjeta QR',
+          details: qrError.message 
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    if (!qrCard) {
+      console.log('QR card not found')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Tarjeta QR no encontrada' 
         }),
         {
           status: 404,
@@ -71,6 +84,21 @@ serve(async (req) => {
         }
       )
     }
+
+    // Verificar si ya está activada
+    if (qrCard.is_activated) {
+      console.log('QR card already activated')
+      return new Response(
+        JSON.stringify({ 
+          error: 'Esta tarjeta QR ya ha sido activada y no se puede usar nuevamente' 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
 
     console.log(`Found QR card: ${qrCard.card_type} with ${qrCard.download_credits} credits`)
 

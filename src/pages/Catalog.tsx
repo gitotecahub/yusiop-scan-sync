@@ -60,7 +60,7 @@ const Catalog = () => {
             .eq('user_email', user.email)
             .eq('is_active', true)
             .gt('credits_remaining', 0)
-            .single();
+            .maybeSingle();
 
           if (!creditsError && creditsData) {
             setUserCredits(creditsData);
@@ -151,9 +151,6 @@ const Catalog = () => {
     }
   };
 
-  const handleFavorite = (song: Song) => {
-    toast.success(`"${song.title}" agregada a favoritos`);
-  };
 
   if (loading) {
     return (
@@ -253,11 +250,15 @@ const Catalog = () => {
                   <div className="flex items-center space-x-2">
                     <Button
                       size="sm"
-                      variant="ghost"
-                      onClick={() => handleFavorite(song)}
-                      className="yusiop-button-ghost"
+                      variant="outline"
+                      onClick={() => handlePlayPreview(song)}
+                      className="yusiop-button-outline"
                     >
-                      <Heart className="h-4 w-4" />
+                      {isCurrentlyPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
                     </Button>
                     {userCredits && userCredits.credits_remaining > 0 && (
                       <Button

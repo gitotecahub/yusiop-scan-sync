@@ -287,9 +287,9 @@ const QRCards = () => {
                   <div>
                     <h3 className="font-semibold text-lg">{card.code}</h3>
                     <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant={card.is_activated ? 'default' : 'secondary'}>
-                        {card.is_activated ? 'Activado' : 'Pendiente'}
-                      </Badge>
+                       <Badge variant={card.is_activated ? 'destructive' : 'default'}>
+                         {card.is_activated ? 'Activada' : 'Disponible'}
+                       </Badge>
                       <Badge variant="outline">{card.card_type}</Badge>
                       <span className="text-sm text-muted-foreground">
                         {card.download_credits} créditos
@@ -298,11 +298,11 @@ const QRCards = () => {
                     <p className="text-xs text-muted-foreground mt-1">
                       Creado: {formatDate(card.created_at)}
                     </p>
-                    {card.activated_at && (
-                      <p className="text-xs text-muted-foreground">
-                        Activado: {formatDate(card.activated_at)}
-                      </p>
-                    )}
+                     {card.activated_at && (
+                       <p className="text-xs text-orange-600">
+                         Activada: {formatDate(card.activated_at)}
+                       </p>
+                     )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">

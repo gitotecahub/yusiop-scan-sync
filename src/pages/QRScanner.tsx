@@ -46,6 +46,11 @@ const QRScanner = () => {
         return;
       }
 
+      if (!data?.success) {
+        toast.error(data?.error || 'Error al activar el QR');
+        return;
+      }
+
       if (data.error) {
         toast.error(data.error);
         return;
