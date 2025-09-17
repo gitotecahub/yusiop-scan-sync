@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { 
   User, 
   Settings, 
@@ -19,12 +20,25 @@ import {
   Upload,
   Moon,
   Sun,
-  Monitor
+  Monitor,
+  Clock,
+  Calendar
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from 'next-themes';
+
+interface ScannedCard {
+  id: string;
+  card_id: string;
+  card_type: string;
+  scanned_at: string;
+  credits_remaining: number;
+  max_credits: number;
+  expires_at: string;
+  is_active: boolean;
+}
 
 const Profile = () => {
   const { user, signOut } = useAuthStore();
@@ -34,6 +48,8 @@ const Profile = () => {
   const [notifications, setNotifications] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [scannedCards, setScannedCards] = useState<ScannedCard[]>([]);
+  const [loadingCards, setLoadingCards] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Perfil del usuario (se carga desde Supabase)
@@ -89,8 +105,81 @@ const Profile = () => {
       }
     };
 
+    const loadScannedCards = async () => {
+      if (!user?.email) return;
+      
+      try {
+        setLoadingCards(true);
+        const { data, error } = await supabase
+          .from('user_credits')
+          .select('*')
+          .eq('user_email', user.email)
+          .order('scanned_at', { ascending: false });
+
+        if (error) throw error;
+
+        setScannedCards(data || []);
+        setProfile(prev => ({
+          ...prev,
+          activatedCards: data?.length || 0
+        }));
+      } catch (err) {
+        console.error('Error loading scanned cards:', err);
+        toast.error('No se pudo cargar el historial de tarjetas');
+      } finally {
+        setLoadingCards(false);
+      }
+    };
+
     loadProfile();
+    loadScannedCards();
   }, [user]);
+
+  // Configurar actualizaciones en tiempo real para tarjetas escaneadas
+  useEffect(() => {
+    if (!user?.email) return;
+
+    const channel = supabase
+      .channel('user-credits-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits',
+          filter: `user_email=eq.${user.email}`
+        },
+        (payload) => {
+          console.log('Real-time update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setScannedCards(prev => [payload.new as ScannedCard, ...prev]);
+            setProfile(prev => ({
+              ...prev,
+              activatedCards: prev.activatedCards + 1
+            }));
+            toast.success('Nueva tarjeta escaneada detectada');
+          } else if (payload.eventType === 'UPDATE') {
+            setScannedCards(prev =>
+              prev.map(card =>
+                card.id === payload.new.id ? payload.new as ScannedCard : card
+              )
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setScannedCards(prev => prev.filter(card => card.id !== payload.old.id));
+            setProfile(prev => ({
+              ...prev,
+              activatedCards: Math.max(0, prev.activatedCards - 1)
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.email]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -195,23 +284,6 @@ const Profile = () => {
     toast.success('Sesión cerrada');
   };
 
-  const activatedCardsHistory = [
-    {
-      id: '1',
-      type: 'Premium',
-      activatedAt: '2024-01-15T10:30:00Z',
-      downloads: 10,
-      used: 10
-    },
-    {
-      id: '2',
-      type: 'Estándar',
-      activatedAt: '2024-01-10T15:45:00Z',
-      downloads: 5,
-      used: 5
-    }
-  ];
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       day: 'numeric',
@@ -220,6 +292,32 @@ const Profile = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Hace un momento';
+    if (diffInMinutes < 60) return `Hace ${diffInMinutes} min`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `Hace ${diffInHours}h`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `Hace ${diffInDays}d`;
+    
+    return formatDate(dateString);
+  };
+
+  const getCardTypeColor = (cardType: string) => {
+    switch (cardType.toLowerCase()) {
+      case 'premium': return 'bg-gradient-to-r from-amber-500 to-orange-500';
+      case 'standard': return 'bg-gradient-to-r from-blue-500 to-cyan-500';
+      case 'basic': return 'bg-gradient-to-r from-gray-500 to-slate-500';
+      default: return 'bg-gradient-to-r from-primary to-primary/80';
+    }
   };
 
   return (
@@ -422,27 +520,68 @@ const Profile = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {activatedCardsHistory.length > 0 ? (
+          {loadingCards ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : scannedCards.length > 0 ? (
             <div className="space-y-4">
-              {activatedCardsHistory.map((card) => (
-                <div key={card.id} className="flex items-center justify-between p-4 rounded-lg border border-border">
-                  <div>
-                    <p className="font-medium">Tarjeta {card.type}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(card.activatedAt)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{card.used}/{card.downloads}</p>
-                    <p className="text-sm text-muted-foreground">descargas</p>
+              {scannedCards.map((card) => (
+                <div key={card.id} className="relative overflow-hidden rounded-lg border border-border hover:shadow-md transition-shadow">
+                  <div className={`absolute top-0 left-0 w-1 h-full ${getCardTypeColor(card.card_type)}`} />
+                  <div className="p-4 pl-6">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">Tarjeta {card.card_type}</h4>
+                          <Badge 
+                            variant={card.is_active ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {card.is_active ? "Activa" : "Expirada"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          ID: {card.card_id}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatTimeAgo(card.scanned_at)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Expira: {formatDate(card.expires_at)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <p className="font-medium text-lg">
+                          {card.credits_remaining}/{card.max_credits}
+                        </p>
+                        <p className="text-xs text-muted-foreground">créditos</p>
+                        <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full ${getCardTypeColor(card.card_type)} transition-all`}
+                            style={{ 
+                              width: `${(card.credits_remaining / card.max_credits) * 100}%` 
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8">
-              No has activado ninguna tarjeta aún
-            </p>
+            <div className="text-center py-12">
+              <CreditCard className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground mb-2">No has escaneado ninguna tarjeta aún</p>
+              <p className="text-sm text-muted-foreground">
+                Usa el escáner QR para activar tus primeras tarjetas
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
