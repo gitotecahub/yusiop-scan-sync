@@ -176,12 +176,12 @@ const Index = () => {
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Música Popular</h2>
         {loading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="aspect-square animate-pulse">
-                <div className="p-3 h-full flex flex-col">
-                  <div className="flex-1 bg-muted rounded-lg mb-2" />
-                  <div className="space-y-1">
+                <div className="p-4 h-full flex flex-col">
+                  <div className="flex-1 bg-muted rounded-lg mb-3" />
+                  <div className="space-y-2">
                     <div className="h-3 bg-muted rounded w-full" />
                     <div className="h-2 bg-muted rounded w-2/3" />
                   </div>
@@ -190,15 +190,15 @@ const Index = () => {
             ))}
           </div>
         ) : popularSongs.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-6">
             {popularSongs.map((song) => (
               <Card 
                 key={song.id} 
                 className="aspect-square cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
                 onClick={() => handleSongClick(song.id)}
               >
-                <div className="p-3 h-full flex flex-col">
-                  <div className="flex-1 relative mb-2">
+                <div className="p-4 h-full flex flex-col">
+                  <div className="flex-1 relative mb-3">
                     <img
                       src={song.cover_url}
                       alt={`${song.title} cover`}
@@ -208,7 +208,7 @@ const Index = () => {
                       <Play className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <h3 className="font-medium text-sm line-clamp-1">{song.title}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-1">{song.artist}</p>
                   </div>
