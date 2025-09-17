@@ -41,11 +41,18 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
 
-    // Use preview_url if available, otherwise use track_url for both preview and full playback
+    // Usar preview_url si existe, si no usar track_url
     const audioUrl = currentSong.preview_url || currentSong.track_url || '';
-    audio.src = audioUrl;
+    if (audio.src !== audioUrl) {
+      audio.src = audioUrl;
+    }
     audio.currentTime = 0;
-  }, [currentSong]);
+
+    // Si ya está en estado de reproducción, iniciar inmediatamente la nueva pista
+    if (isPlaying) {
+      audio.play().catch(console.error);
+    }
+  }, [currentSong, isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
