@@ -15,7 +15,8 @@ const PlaybackControls = () => {
     setPosition 
   } = usePlayerStore();
 
-  if (!currentSong) return null;
+  // Solo mostrar si hay una canción actual Y está reproduciéndose
+  if (!currentSong || !isPlaying) return null;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
