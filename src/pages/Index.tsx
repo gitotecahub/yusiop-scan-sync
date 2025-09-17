@@ -198,17 +198,17 @@ const Index = () => {
                 onClick={() => handleSongClick(song.id)}
               >
                 <div className="p-4 h-full flex flex-col">
-                  <div className="flex-1 relative mb-3">
+                  <div className="flex-1 relative mb-3 overflow-hidden rounded-lg">
                     <img
                       src={song.cover_url}
                       alt={`${song.title} cover`}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded-lg flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
                       <Play className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 text-center">
                     <h3 className="font-medium text-sm line-clamp-1">{song.title}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-1">{song.artist}</p>
                   </div>
