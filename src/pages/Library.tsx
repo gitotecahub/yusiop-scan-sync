@@ -108,9 +108,7 @@ const Library = () => {
       }
     } else {
       setCurrentSong(song, false); // false = full track, not preview
-      if (!isPlaying) {
-        play();
-      }
+      play(); // Siempre reproducir la nueva canción
     }
   };
 
