@@ -442,6 +442,15 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      validate_qr_card: {
+        Args: { card_code: string }
+        Returns: {
+          card_type: Database["public"]["Enums"]["card_type"]
+          download_credits: number
+          id: string
+          is_activated: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
