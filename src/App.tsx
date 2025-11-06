@@ -29,6 +29,7 @@ import Settings from '@/pages/admin/Settings';
 import Layout from '@/components/Layout';
 import PhoneMockup from '@/components/PhoneMockup';
 import AudioPlayer from '@/components/AudioPlayer';
+import SplashScreen from '@/components/SplashScreen';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
@@ -47,14 +48,7 @@ const AppContent = () => {
   if (loading) {
     return (
       <PhoneMockup>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold yusiop-gradient bg-clip-text text-transparent mb-4">
-              YUSIOP
-            </h1>
-            <p className="text-muted-foreground">Cargando...</p>
-          </div>
-        </div>
+        <SplashScreen />
       </PhoneMockup>
     );
   }
