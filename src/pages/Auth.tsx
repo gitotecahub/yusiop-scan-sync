@@ -14,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 const handleSignIn = async (e: React.FormEvent) => {
   e.preventDefault();
   const { error } = await signIn(email, password);
@@ -27,6 +28,12 @@ const handleSignIn = async (e: React.FormEvent) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    
     const { error } = await signUp(email, password, username);
     if (error) {
       toast.error('Error al registrarse: ' + error.message);
@@ -123,6 +130,18 @@ const handleSignIn = async (e: React.FormEvent) => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="yusiop-input"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Repetir Contraseña</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     className="yusiop-input"
                   />
