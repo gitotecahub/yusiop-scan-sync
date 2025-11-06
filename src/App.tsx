@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Pages
 import Index from "./pages/Index";
@@ -39,13 +39,23 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { session, loading, initialize } = useAuthStore();
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  // Mostrar loading mientras se inicializa
-  if (loading) {
+  useEffect(() => {
+    // Garantizar que el splash se muestre por al menos 2.5 segundos
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Mostrar splash mientras carga o durante el tiempo mínimo
+  if (loading || showSplash) {
     return (
       <PhoneMockup>
         <SplashScreen />
