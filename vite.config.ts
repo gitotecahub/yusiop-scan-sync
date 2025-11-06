@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
         name: 'Yusiop Scan & Sync',
         short_name: 'Yusiop',
         description: 'Escanea códigos QR y sincroniza música',
-        theme_color: '#000000',
-        background_color: '#000000',
+        theme_color: '#9D5DFF',
+        background_color: '#9D5DFF',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
