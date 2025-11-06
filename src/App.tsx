@@ -12,6 +12,7 @@ import Catalog from '@/pages/Catalog';
 import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Auth from '@/pages/Auth';
+import Install from './pages/Install';
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -77,6 +78,8 @@ const AppContent = () => {
           <Auth />
         </PhoneMockup>
       } />
+      
+      <Route path="/install" element={<Install />} />
       
       <Route path="/*" element={
         <PhoneMockup>
