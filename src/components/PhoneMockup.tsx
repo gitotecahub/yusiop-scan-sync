@@ -1,10 +1,29 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 interface PhoneMockupProps {
   children: ReactNode;
 }
 
 const PhoneMockup = ({ children }: PhoneMockupProps) => {
+  const [isRealMobile, setIsRealMobile] = useState(false);
+
+  useEffect(() => {
+    // Detectar si es un dispositivo móvil real (táctil y viewport pequeño)
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const isSmallScreen = window.innerWidth <= 768;
+    setIsRealMobile(isTouchDevice && isSmallScreen);
+  }, []);
+
+  // Si es un dispositivo móvil real, renderizar solo el contenido sin el mockup
+  if (isRealMobile) {
+    return (
+      <div className="min-h-screen w-full bg-background text-foreground">
+        {children}
+      </div>
+    );
+  }
+
+  // Si es desktop, mostrar el mockup del teléfono
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 overflow-hidden">
       {/* iPhone 14 Pro Max Frame */}
