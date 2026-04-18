@@ -26,16 +26,16 @@ const PlaybackControls = () => {
   const togglePlayPause = () => { isPlaying ? pause() : play(); };
 
   return (
-    <div className="fixed bottom-[72px] left-0 right-0 z-40 px-3">
-      <div className="bg-card border border-border max-w-md mx-auto p-3">
+    <div className="fixed bottom-[88px] left-3 right-3 z-40">
+      <div className="glass-strong shadow-vapor max-w-md mx-auto p-3">
         <div className="flex items-center gap-3">
           <img
             src={currentSong.cover_url}
             alt={`${currentSong.title} cover`}
-            className="w-12 h-12 object-cover"
+            className="w-12 h-12 object-cover rounded-2xl shadow-glow"
           />
           <div className="flex-1 min-w-0">
-            <p className="eyebrow mb-0.5">Now playing</p>
+            <p className="eyebrow mb-0.5 vapor-text">Now playing</p>
             <h4 className="font-display font-bold text-foreground truncate text-sm leading-tight">
               {currentSong.title}
             </h4>
@@ -46,9 +46,9 @@ const PlaybackControls = () => {
           <Button
             size="sm"
             onClick={togglePlayPause}
-            className="h-11 w-11 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 border-0"
+            className="h-11 w-11 rounded-full vapor-bg text-primary-foreground hover:opacity-90 border-0 shadow-glow"
           >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
           </Button>
         </div>
 

@@ -19,17 +19,20 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Manrope', 'system-ui', 'sans-serif'],
-				display: ['Sora', 'system-ui', 'sans-serif'],
+				sans: ['DM Sans', 'system-ui', 'sans-serif'],
+				display: ['Space Grotesk', 'system-ui', 'sans-serif'],
 			},
 			backgroundImage: {
-				'gold': 'var(--gradient-gold)',
-				'vapor': 'var(--gradient-gold)',
+				'vapor': 'var(--gradient-vapor)',
+				'sunset': 'var(--gradient-sunset)',
+				'aurora': 'var(--gradient-aurora)',
+				'gold': 'var(--gradient-vapor)',
 			},
 			boxShadow: {
-				'gold': 'var(--shadow-gold)',
-				'glow': 'var(--shadow-gold)',
-				'glass': '0 1px 0 hsl(var(--border))',
+				'vapor': 'var(--shadow-vapor)',
+				'glow': 'var(--shadow-glow)',
+				'gold': 'var(--shadow-vapor)',
+				'glass': '0 8px 32px -8px hsl(250 95% 70% / 0.2)',
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -65,11 +68,19 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// YUSIOP Editorial Noir & Gold
+				// YUSIOP Vapor Chrome
+				vapor: {
+					violet: 'hsl(var(--vapor-violet))',
+					indigo: 'hsl(var(--vapor-indigo))',
+					cyan: 'hsl(var(--vapor-cyan))',
+					aqua: 'hsl(var(--vapor-aqua))',
+					pink: 'hsl(var(--vapor-pink))',
+					mint: 'hsl(var(--vapor-mint))'
+				},
 				gold: {
-					DEFAULT: 'hsl(var(--gold))',
-					light: 'hsl(var(--gold-light))',
-					deep: 'hsl(var(--gold-deep))'
+					DEFAULT: 'hsl(var(--primary))',
+					light: 'hsl(var(--vapor-aqua))',
+					deep: 'hsl(var(--vapor-indigo))'
 				}
 			},
 			borderRadius: {
