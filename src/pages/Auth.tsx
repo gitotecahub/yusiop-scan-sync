@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { signInSchema, signUpSchema } from '@/lib/validation';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -17,7 +18,12 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
 const handleSignIn = async (e: React.FormEvent) => {
   e.preventDefault();
-  const { error } = await signIn(email, password);
+  const parsed = signInSchema.safeParse({ email, password });
+  if (!parsed.success) {
+    toast.error(parsed.error.errors[0].message);
+    return;
+  }
+  const { error } = await signIn(parsed.data.email, parsed.data.password);
   if (error) {
     toast.error('Error al iniciar sesión: ' + error.message);
   } else {
@@ -28,13 +34,19 @@ const handleSignIn = async (e: React.FormEvent) => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       toast.error('Las contraseñas no coinciden');
       return;
     }
-    
-    const { error } = await signUp(email, password, username);
+
+    const parsed = signUpSchema.safeParse({ email, password, username });
+    if (!parsed.success) {
+      toast.error(parsed.error.errors[0].message);
+      return;
+    }
+
+    const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
     if (error) {
       toast.error('Error al registrarse: ' + error.message);
     } else {

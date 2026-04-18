@@ -47,10 +47,10 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Activating QR for user: ${user.email} (${user.id})`)
+    console.log(`Activating QR for user id: ${user.id}`)
 
     // 1. Buscar la tarjeta QR por código
-    console.log(`Looking for QR card with code: ${code}`)
+    console.log('Looking up QR card')
     const { data: qrCard, error: qrError } = await supabaseClient
       .from('qr_cards')
       .select('*')
@@ -140,7 +140,7 @@ serve(async (req) => {
     expiresAt.setDate(expiresAt.getDate() + 30)
 
     // 4. Crear registro de créditos para el usuario
-    console.log(`Creating credits for user: ${user.email}`)
+    console.log('Creating credits row')
     const { error: creditsError } = await supabaseClient
       .from('user_credits')
       .insert({
@@ -168,13 +168,13 @@ serve(async (req) => {
     }
 
     // 5. Marcar la tarjeta QR como activada
-    console.log(`Marking QR card as activated`)
+    console.log('Marking QR card as activated')
     const { error: updateError } = await supabaseClient
       .from('qr_cards')
       .update({
         is_activated: true,
         activated_at: new Date().toISOString(),
-        activated_by: user.id // Usar UUID del usuario, no email
+        activated_by: user.id
       })
       .eq('id', qrCard.id)
 
@@ -183,7 +183,7 @@ serve(async (req) => {
       // No devolver error aquí porque los créditos ya se crearon exitosamente
     }
 
-    console.log(`QR activation successful for ${user.email}`)
+    console.log('QR activation successful')
     return new Response(
       JSON.stringify({
         success: true,

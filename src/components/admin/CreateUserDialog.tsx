@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { createUserSchema } from '@/lib/validation';
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -27,6 +28,25 @@ export function CreateUserDialog({ open, onOpenChange, onUserCreated }: CreateUs
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsed = createUserSchema.safeParse({
+      email: formData.email,
+      password: formData.password,
+      username: formData.username,
+      fullName: formData.fullName,
+      role: formData.role,
+      downloads: parseInt(formData.downloads, 10),
+    });
+
+    if (!parsed.success) {
+      toast({
+        title: 'Datos inválidos',
+        description: parsed.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
