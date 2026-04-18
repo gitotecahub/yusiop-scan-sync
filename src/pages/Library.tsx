@@ -194,87 +194,65 @@ const Library = () => {
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
     if (songs.length === 0) {
       return (
-        <Card className="yusiop-card">
-          <CardContent className="p-8 text-center">
-            <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">
-              No hay canciones en esta sección
-            </p>
-          </CardContent>
-        </Card>
+        <div className="glass rounded-3xl p-8 text-center">
+          <Music className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">No hay canciones en esta sección</p>
+        </div>
       );
     }
 
     return (
-      <div className="grid gap-4">
+      <div className="space-y-3">
         {songs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
-          
+
           return (
-            <Card key={song.id} className="yusiop-card hover:bg-card/80 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-4">
-                   {/* Cover */}
-                   <div className="relative">
-                     <img
-                       src={song.cover_url}
-                       alt={`${song.title} cover`}
-                       className="w-16 h-16 rounded-lg object-cover"
-                     />
-                     <Button
-                       size="sm"
-                       className="absolute inset-0 m-auto w-8 h-8 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center"
-                       onClick={() => handlePlay(song)}
-                     >
-                       {isCurrentlyPlaying ? (
-                         <Pause className="h-3 w-3" />
-                       ) : (
-                         <Play className="h-3 w-3" />
-                       )}
-                     </Button>
-                   </div>
+            <div key={song.id} className="glass rounded-3xl p-3 hover:bg-white/5 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <img
+                    src={song.cover_url}
+                    alt={`${song.title} cover`}
+                    className="w-14 h-14 rounded-2xl object-cover"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => handlePlay(song)}
+                    className="absolute inset-0 m-auto w-9 h-9 rounded-full vapor-gradient text-primary-foreground border-0 shadow-glow opacity-90"
+                  >
+                    {isCurrentlyPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
+                  </Button>
+                </div>
 
-                  {/* Song Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {song.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {song.artist}
-                    </p>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <span>{formatDuration(song.duration_seconds)}</span>
-                      {showDate && (
-                        <>
-                          <span>•</span>
-                          <span>{formatDate(song.downloaded_at)}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleToggleFavorite(song)}
-                      className={`yusiop-button-ghost ${song.is_favorite ? 'text-primary' : ''}`}
-                    >
-                      <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteRequest(song)}
-                      className="yusiop-button-ghost text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm text-foreground truncate">{song.title}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 tabular-nums">
+                    <span>{formatDuration(song.duration_seconds)}</span>
+                    {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleToggleFavorite(song)}
+                    className={`h-9 w-9 rounded-full hover:bg-white/10 ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
+                  >
+                    <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handleDeleteRequest(song)}
+                    className="h-9 w-9 rounded-full hover:bg-destructive/20 text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
