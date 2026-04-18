@@ -257,10 +257,7 @@ useEffect(() => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <span className="chip chip-vapor mb-3">
-          <Music className="h-3 w-3" /> Sección 02
-        </span>
-        <h1 className="display-xl text-4xl mt-2">
+        <h1 className="display-xl text-4xl">
           Catálogo<span className="vapor-text">.</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
