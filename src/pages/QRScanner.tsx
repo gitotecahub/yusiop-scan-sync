@@ -217,35 +217,36 @@ const QRScanner = () => {
   }, [scanning]);
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="editorial-rule" />
-          <p className="eyebrow">Sección 01 · Activa</p>
-        </div>
-        <h1 className="display-xl text-5xl">Escanear<br /><span className="gold-text">QR.</span></h1>
-        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+        <span className="chip chip-vapor mb-3">
+          <QrCode className="h-3 w-3" /> Sección 01
+        </span>
+        <h1 className="display-xl text-4xl mt-2">
+          Escanea<br /><span className="vapor-text">tu QR.</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           Apunta a una tarjeta o introduce el código manualmente.
         </p>
       </div>
 
       {/* Scanner */}
-      <div className="border border-border p-6">
-        <div className="flex items-start justify-between mb-6">
+      <div className="blob-card p-6">
+        <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="eyebrow mb-2">Método 01</p>
-            <h2 className="font-display text-xl font-bold leading-tight">Activar Tarjeta</h2>
+            <p className="eyebrow mb-1.5">Activar Tarjeta</p>
+            <h2 className="font-display text-xl font-bold leading-tight">Método rápido</h2>
           </div>
-          <div className="w-10 h-10 border border-primary/40 flex items-center justify-center">
-            <QrCode className="h-5 w-5 text-primary" strokeWidth={1.5} />
+          <div className="w-11 h-11 rounded-2xl vapor-bg flex items-center justify-center shadow-glow">
+            <QrCode className="h-5 w-5 text-primary-foreground" strokeWidth={1.8} />
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {scanning ? (
             <div className="space-y-3">
-              <div className="relative overflow-hidden">
+              <div className="relative overflow-hidden rounded-2xl">
                 <video
                   ref={videoRef}
                   className="w-full h-64 bg-black object-cover"
@@ -253,20 +254,20 @@ const QRScanner = () => {
                   autoPlay
                   muted
                 />
-                <div className="absolute inset-6 border border-primary pointer-events-none">
-                  <span className="absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 border-primary" />
-                  <span className="absolute -top-px -right-px w-3 h-3 border-t-2 border-r-2 border-primary" />
-                  <span className="absolute -bottom-px -left-px w-3 h-3 border-b-2 border-l-2 border-primary" />
-                  <span className="absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 border-primary" />
+                <div className="absolute inset-6 border-2 border-primary rounded-xl pointer-events-none shadow-glow">
+                  <span className="absolute -top-1 -left-1 w-4 h-4 border-t-[3px] border-l-[3px] border-primary rounded-tl-lg" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 border-t-[3px] border-r-[3px] border-primary rounded-tr-lg" />
+                  <span className="absolute -bottom-1 -left-1 w-4 h-4 border-b-[3px] border-l-[3px] border-primary rounded-bl-lg" />
+                  <span className="absolute -bottom-1 -right-1 w-4 h-4 border-b-[3px] border-r-[3px] border-primary rounded-br-lg" />
                 </div>
               </div>
-              <Button onClick={stopScanning} variant="outline" className="w-full rounded-none border-border hover:bg-muted gap-2 h-11">
+              <Button onClick={stopScanning} variant="outline" className="w-full rounded-full border-border hover:bg-muted gap-2 h-11">
                 <X className="h-4 w-4" />
-                Detener Escaneo
+                Detener
               </Button>
             </div>
           ) : (
-            <Button onClick={startScanning} className="w-full h-12 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 gap-2 font-medium tracking-wide">
+            <Button onClick={startScanning} className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 gap-2 font-bold shadow-glow">
               <Camera className="h-4 w-4" />
               Usar Cámara
             </Button>
@@ -280,18 +281,18 @@ const QRScanner = () => {
 
           <form onSubmit={handleManualSubmit} className="space-y-3">
             <div>
-              <p className="eyebrow mb-2">Método 02 · Manual</p>
+              <p className="eyebrow mb-2">Código manual</p>
               <Input
-                placeholder="CÓDIGO DE LA TARJETA"
+                placeholder="CÓDIGO DE TARJETA"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                className="rounded-none border-border bg-input text-center tracking-[0.3em] uppercase font-mono h-12"
+                className="rounded-2xl border-border bg-input text-center tracking-[0.3em] uppercase font-mono h-12"
               />
             </div>
             <Button
               type="submit"
               variant="outline"
-              className="w-full h-11 rounded-none border-primary/40 bg-transparent text-foreground hover:bg-primary/10 font-medium tracking-wide"
+              className="w-full h-11 rounded-full border-primary/40 bg-transparent text-foreground hover:bg-primary/10 font-semibold"
               disabled={!manualCode.trim() || activating}
             >
               {activating ? 'Activando…' : 'Activar Tarjeta'}
@@ -300,29 +301,21 @@ const QRScanner = () => {
         </div>
       </div>
 
-      {/* Card types — editorial table */}
+      {/* Card types — gradient cards */}
       <div>
         <p className="eyebrow mb-3">Tipos de tarjeta</p>
-        <div className="border-t border-border">
-          <div className="flex items-baseline justify-between py-5 border-b border-border">
-            <div>
-              <p className="font-display text-lg font-bold">Estándar</p>
-              <p className="text-xs text-muted-foreground mt-1">Para descubrir nueva música</p>
-            </div>
-            <div className="text-right">
-              <p className="display-xl text-3xl">04</p>
-              <p className="eyebrow mt-1">descargas</p>
-            </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="blob-card blob-card-aurora p-5">
+            <p className="font-display text-lg font-bold">Estándar</p>
+            <p className="text-[11px] text-foreground/70 mt-1 mb-4">Para descubrir</p>
+            <p className="display-xl text-4xl">04</p>
+            <p className="eyebrow mt-1">descargas</p>
           </div>
-          <div className="flex items-baseline justify-between py-5 border-b border-border">
-            <div>
-              <p className="font-display text-lg font-bold gold-text">Premium</p>
-              <p className="text-xs text-muted-foreground mt-1">Para los más fanáticos</p>
-            </div>
-            <div className="text-right">
-              <p className="display-xl text-3xl gold-text">10</p>
-              <p className="eyebrow mt-1">descargas</p>
-            </div>
+          <div className="blob-card blob-card-sunset p-5">
+            <p className="font-display text-lg font-bold vapor-text">Premium</p>
+            <p className="text-[11px] text-foreground/70 mt-1 mb-4">Para fanáticos</p>
+            <p className="display-xl text-4xl vapor-text">10</p>
+            <p className="eyebrow mt-1">descargas</p>
           </div>
         </div>
       </div>
