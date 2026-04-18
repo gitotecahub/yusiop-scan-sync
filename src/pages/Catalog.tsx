@@ -8,6 +8,7 @@ import { Play, Pause, Download, Heart, Check, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
+import { logger } from '@/lib/logger';
 
 interface Song {
   id: string;
@@ -204,56 +205,32 @@ useEffect(() => {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         toast.error('Debes iniciar sesión para descargar canciones');
         return;
       }
 
-      // Registrar la descarga
-      const { error: downloadError } = await supabase
-        .from('user_downloads')
-        .insert({
-          user_id: user.id,
-          user_email: user.email,
-          song_id: song.id,
-          card_type: userCredits.card_type
-        });
+      // Server-side credit decrement & download registration (prevents client tampering)
+      const { data, error } = await supabase.functions.invoke('decrement-credits', {
+        body: { songId: song.id },
+      });
 
-      if (downloadError) {
-        toast.error('Error al registrar la descarga');
+      if (error || !data?.success) {
+        toast.error(data?.error || 'Error al descargar la canción');
         return;
       }
 
-      // Decrementar créditos en la base de datos
-      const { error: updateError } = await supabase
-        .from('user_credits')
-        .update({ 
-          credits_remaining: userCredits.credits_remaining - 1,
-          is_active: userCredits.credits_remaining - 1 > 0
-        })
-        .eq('user_email', user.email!)
-        .eq('is_active', true);
-
-      if (updateError) {
-        toast.error('Error al actualizar créditos');
-        return;
-      }
-
-      // Actualizar estado local
+      // Update local state from authoritative server response
       decrementCredits();
-      
-      // Actualizar lista de canciones descargadas
       setDownloadedSongs(prev => new Set([...prev, song.id]));
-      
       toast.success(`"${song.title}" se descargó correctamente`);
-      
-      // Si no quedan créditos, actualizar el estado
-      if (userCredits.credits_remaining - 1 <= 0) {
+
+      if (data.credits_remaining <= 0) {
         setUserCredits(null);
       }
     } catch (error) {
-      console.error('Error downloading song:', error);
+      logger.error('Error downloading song');
       toast.error('Error al descargar la canción');
     }
   };
