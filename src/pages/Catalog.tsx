@@ -45,6 +45,7 @@ const Catalog = () => {
           .eq('user_email', user.email)
           .eq('is_active', true)
           .gt('credits_remaining', 0)
+          .gt('expires_at', new Date().toISOString())
           .order('scanned_at', { ascending: false })
           .limit(1)
           .maybeSingle();
