@@ -35,7 +35,10 @@ const Library = () => {
   const [downloads, setDownloads] = useState<DownloadedSong[]>([]);
   const [favorites, setFavorites] = useState<DownloadedSong[]>([]);
   const [loading, setLoading] = useState(true);
-  const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
+  const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
+  const { incrementCredits } = useCreditsStore();
 
   // Cargar canciones descargadas desde Supabase
   useEffect(() => {
