@@ -293,7 +293,7 @@ const Library = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(song)}
+                      onClick={() => handleDeleteRequest(song)}
                       className="yusiop-button-ghost text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
