@@ -194,63 +194,64 @@ const Library = () => {
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
     if (songs.length === 0) {
       return (
-        <div className="glass rounded-3xl p-8 text-center">
-          <Music className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+        <div className="border border-border p-10 text-center">
+          <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.2} />
           <p className="text-muted-foreground text-sm">No hay canciones en esta sección</p>
         </div>
       );
     }
 
     return (
-      <div className="space-y-3">
-        {songs.map((song) => {
+      <div className="border-t border-border">
+        {songs.map((song, idx) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
 
           return (
-            <div key={song.id} className="glass rounded-3xl p-3 hover:bg-white/5 transition-all">
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  <img
-                    src={song.cover_url}
-                    alt={`${song.title} cover`}
-                    className="w-14 h-14 rounded-2xl object-cover"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={() => handlePlay(song)}
-                    className="absolute inset-0 m-auto w-9 h-9 rounded-full vapor-gradient text-primary-foreground border-0 shadow-glow opacity-90"
-                  >
-                    {isCurrentlyPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
-                  </Button>
-                </div>
+            <div key={song.id} className="flex items-center gap-3 py-3 border-b border-border hover:bg-muted/30 transition-colors">
+              <span className="font-display text-[10px] font-medium text-muted-foreground tabular-nums w-6 shrink-0">
+                {String(idx + 1).padStart(2, '0')}
+              </span>
+              <div className="relative shrink-0 group">
+                <img
+                  src={song.cover_url}
+                  alt={`${song.title} cover`}
+                  className="w-12 h-12 object-cover"
+                />
+                <Button
+                  size="sm"
+                  onClick={() => handlePlay(song)}
+                  className="absolute inset-0 w-full h-full bg-black/60 text-primary border-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-none p-0"
+                >
+                  {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+              </div>
 
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-foreground truncate">{song.title}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 tabular-nums">
-                    <span>{formatDuration(song.duration_seconds)}</span>
-                    {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
-                  </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-1 tabular-nums tracking-wider">
+                  <span>{formatDuration(song.duration_seconds)}</span>
+                  {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
                 </div>
+              </div>
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleToggleFavorite(song)}
-                    className={`h-9 w-9 rounded-full hover:bg-white/10 ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
-                  >
-                    <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handleDeleteRequest(song)}
-                    className="h-9 w-9 rounded-full hover:bg-destructive/20 text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="flex items-center shrink-0">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleToggleFavorite(song)}
+                  className={`h-9 w-9 rounded-none hover:bg-muted ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
+                >
+                  <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDeleteRequest(song)}
+                  className="h-9 w-9 rounded-none hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           );
@@ -262,68 +263,86 @@ const Library = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu música</p>
-          <h1 className="font-display text-3xl font-bold">Biblioteca</h1>
+        <div>
+          <p className="eyebrow mb-2">Sección 03</p>
+          <h1 className="display-xl text-5xl">Biblioteca</h1>
         </div>
-        <div className="space-y-3">
-          {[1,2,3].map(i => <div key={i} className="glass rounded-3xl h-20 animate-pulse" />)}
+        <div className="space-y-2">
+          {[1,2,3].map(i => <div key={i} className="bg-muted h-20 animate-pulse" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 pb-32">
+    <div className="space-y-7 pb-32">
       {/* Header */}
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu música</p>
-        <h1 className="font-display text-3xl font-bold">Biblioteca</h1>
-        <p className="text-sm text-muted-foreground">Todas tus descargas, listas para sonar</p>
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="editorial-rule" />
+          <p className="eyebrow">Sección 03 · Tu música</p>
+        </div>
+        <h1 className="display-xl text-5xl">Biblioteca</h1>
+        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+          Tu colección personal. Descargada y lista para sonar.
+        </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="glass rounded-3xl p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Descargas</p>
-          <p className="font-display text-3xl font-bold mt-1">{downloads.length}</p>
+      <div className="grid grid-cols-2 border-y border-border divide-x divide-border">
+        <div className="py-5 pr-4">
+          <p className="eyebrow mb-2">Descargas</p>
+          <p className="display-xl text-4xl">{String(downloads.length).padStart(2, '0')}</p>
         </div>
-        <div className="glass rounded-3xl p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Favoritos</p>
-          <p className="font-display text-3xl font-bold vapor-text mt-1">{favorites.length}</p>
+        <div className="py-5 pl-4">
+          <p className="eyebrow mb-2">Favoritos</p>
+          <p className="display-xl text-4xl gold-text">{String(favorites.length).padStart(2, '0')}</p>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 glass rounded-2xl p-1 h-auto">
-          <TabsTrigger value="all" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Todo</TabsTrigger>
-          <TabsTrigger value="recent" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Recientes</TabsTrigger>
-          <TabsTrigger value="favorites" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Favoritos</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-border rounded-none p-0 h-auto gap-0">
+          <TabsTrigger
+            value="all"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+          >
+            Todo
+          </TabsTrigger>
+          <TabsTrigger
+            value="recent"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+          >
+            Recientes
+          </TabsTrigger>
+          <TabsTrigger
+            value="favorites"
+            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+          >
+            Favoritos
+          </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="all" className="mt-6">
+
+        <TabsContent value="all" className="mt-5">
           <SongList songs={downloads} showDate={true} />
         </TabsContent>
-        
-        <TabsContent value="recent" className="mt-6">
-          <SongList 
-            songs={[...downloads].sort((a, b) => 
+
+        <TabsContent value="recent" className="mt-5">
+          <SongList
+            songs={[...downloads].sort((a, b) =>
               new Date(b.downloaded_at).getTime() - new Date(a.downloaded_at).getTime()
-            )} 
-            showDate={true} 
+            )}
+            showDate={true}
           />
         </TabsContent>
-        
-        <TabsContent value="favorites" className="mt-6">
+
+        <TabsContent value="favorites" className="mt-5">
           <SongList songs={favorites} />
         </TabsContent>
       </Tabs>
 
-      {/* Playback Controls */}
       <PlaybackControls />
 
-      {/* Confirmación de eliminación */}
       <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -336,10 +355,7 @@ const Library = () => {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                confirmDelete();
-              }}
+              onClick={(e) => { e.preventDefault(); confirmDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

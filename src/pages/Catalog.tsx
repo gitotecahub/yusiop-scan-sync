@@ -240,13 +240,13 @@ useEffect(() => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Explora</p>
-          <h1 className="font-display text-3xl font-bold">Catálogo</h1>
+        <div>
+          <p className="eyebrow mb-2">Sección 02</p>
+          <h1 className="display-xl text-5xl">Catálogo</h1>
         </div>
-        <div className="grid gap-3">
+        <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass rounded-3xl p-4 animate-pulse h-20" />
+            <div key={i} className="bg-muted h-20 animate-pulse" />
           ))}
         </div>
       </div>
@@ -254,106 +254,115 @@ useEffect(() => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7">
       {/* Header */}
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Explora</p>
-        <h1 className="font-display text-3xl font-bold">Catálogo</h1>
-        <p className="text-sm text-muted-foreground">Descubre y descarga tu música favorita</p>
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="editorial-rule" />
+          <p className="eyebrow">Sección 02 · Explora</p>
+        </div>
+        <h1 className="display-xl text-5xl">Catálogo</h1>
+        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+          Una colección curada. Descubre y descarga tu música favorita.
+        </p>
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+      <div className="relative border-b border-border pb-3">
+        <Search className="absolute left-0 top-2 h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
         <Input
           placeholder="Buscar por título, artista o álbum…"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="yusiop-input pl-11"
+          className="border-0 bg-transparent rounded-none pl-7 h-9 text-sm focus-visible:ring-0 focus-visible:border-0 placeholder:text-muted-foreground/60"
         />
       </div>
 
       {/* Downloads remaining */}
       {userCredits && userCredits.credits_remaining > 0 && (
-        <div className="relative overflow-hidden glass rounded-3xl p-4">
-          <div className="absolute -top-12 -right-10 w-40 h-40 vapor-gradient rounded-full blur-3xl opacity-40" />
-          <div className="relative flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Te quedan</p>
-              <p className="font-display text-3xl font-bold vapor-text leading-none mt-1">
-                {userCredits.credits_remaining}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">descargas · tarjeta {userCredits.card_type}</p>
-            </div>
-            <div className="w-14 h-14 rounded-2xl glass flex items-center justify-center">
-              <Download className="h-6 w-6 text-primary" />
-            </div>
+        <div className="border border-primary/30 bg-primary/[0.04] p-5 flex items-end justify-between">
+          <div>
+            <p className="eyebrow text-primary mb-2">Tu balance</p>
+            <p className="display-xl text-5xl gold-text leading-none">
+              {String(userCredits.credits_remaining).padStart(2, '0')}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              descargas restantes · tarjeta {userCredits.card_type}
+            </p>
           </div>
+          <Download className="h-7 w-7 text-primary" strokeWidth={1.4} />
         </div>
       )}
 
       {/* Songs List */}
-      <div className="space-y-3">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="eyebrow">Pistas</p>
+          <p className="eyebrow tabular-nums">{String(filteredSongs.length).padStart(3, '0')}</p>
+        </div>
+
         {filteredSongs.length === 0 && searchTerm ? (
-          <div className="glass rounded-3xl p-8 text-center">
+          <div className="border border-border p-10 text-center">
             <p className="text-muted-foreground text-sm">
-              No se encontraron canciones que coincidan con "{searchTerm}"
+              Sin resultados para "{searchTerm}"
             </p>
           </div>
         ) : (
-          filteredSongs.map((song) => {
-          const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
-          const isDownloaded = downloadedSongs.has(song.id);
-          const isHighlighted = highlightedSongId === song.id;
+          <div className="border-t border-border">
+            {filteredSongs.map((song, idx) => {
+              const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+              const isDownloaded = downloadedSongs.has(song.id);
+              const isHighlighted = highlightedSongId === song.id;
 
-          return (
-            <div
-              key={song.id}
-              id={`song-${song.id}`}
-              className={`glass rounded-3xl p-3 transition-all duration-300 ${
-                isHighlighted ? 'ring-2 ring-primary shadow-glow scale-[1.01]' : 'hover:bg-white/5'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
+              return (
+                <div
+                  key={song.id}
+                  id={`song-${song.id}`}
+                  className={`flex items-center gap-3 py-3 border-b border-border transition-colors ${
+                    isHighlighted ? 'bg-primary/10 border-primary/40' : 'hover:bg-muted/30'
+                  }`}
+                >
+                  <span className="font-display text-[10px] font-medium text-muted-foreground tabular-nums w-6 shrink-0">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
                   <img
                     src={song.cover_url}
                     alt={`${song.title} cover`}
-                    className="w-14 h-14 rounded-2xl object-cover"
+                    className="w-12 h-12 object-cover shrink-0"
                   />
-                  <div className="absolute inset-0 rounded-2xl ring-1 ring-white/20" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-1 tabular-nums tracking-wider">
+                      {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handlePlayPreview(song)}
+                      className="h-9 w-9 rounded-none hover:bg-muted"
+                    >
+                      {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      onClick={() => handleDownload(song)}
+                      disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
+                      className={`h-9 w-9 rounded-none border-0 ${
+                        isDownloaded
+                          ? 'bg-muted text-primary'
+                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      }`}
+                    >
+                      {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm text-foreground truncate">{song.title}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
-                  <p className="text-[10px] text-muted-foreground/80 mt-0.5 tabular-nums">
-                    {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => handlePlayPreview(song)}
-                    className="h-10 w-10 rounded-full glass border border-white/10 hover:bg-white/10"
-                  >
-                    {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => handleDownload(song)}
-                    disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
-                    className={`h-10 w-10 rounded-full border-0 ${isDownloaded ? 'bg-emerald-500/20 text-emerald-300' : 'vapor-gradient text-primary-foreground shadow-glow'}`}
-                  >
-                    {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
