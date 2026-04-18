@@ -148,10 +148,74 @@ const Library = () => {
     }
   };
 
-  const handleDelete = (song: DownloadedSong) => {
-    setDownloads(prev => prev.filter(s => s.id !== song.id));
-    setFavorites(prev => prev.filter(s => s.id !== song.id));
-    toast.success(`"${song.title}" eliminada de tu biblioteca`);
+  const handleDeleteRequest = (song: DownloadedSong) => {
+    setSongToDelete(song);
+  };
+
+  const confirmDelete = async () => {
+    if (!songToDelete) return;
+    setDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Debes iniciar sesión');
+        return;
+      }
+
+      // 1. Eliminar registro de descarga
+      const { error: deleteError } = await supabase
+        .from('user_downloads')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('song_id', songToDelete.id);
+
+      if (deleteError) {
+        console.error('Error deleting download:', deleteError);
+        toast.error('No se pudo eliminar la canción');
+        return;
+      }
+
+      // 2. Devolver crédito al usuario (user_credits por email)
+      const userEmail = user.email;
+      if (userEmail) {
+        const { data: creditRow } = await supabase
+          .from('user_credits')
+          .select('id, credits_remaining, max_credits')
+          .eq('user_email', userEmail)
+          .eq('is_active', true)
+          .order('scanned_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (creditRow) {
+          const newRemaining = Math.min(
+            creditRow.credits_remaining + 1,
+            creditRow.max_credits
+          );
+          await supabase
+            .from('user_credits')
+            .update({ credits_remaining: newRemaining })
+            .eq('id', creditRow.id);
+          incrementCredits();
+        }
+      }
+
+      // 3. Si está sonando, detener
+      if (currentSong?.id === songToDelete.id) {
+        stop();
+      }
+
+      // 4. Actualizar UI local
+      setDownloads(prev => prev.filter(s => s.id !== songToDelete.id));
+      setFavorites(prev => prev.filter(s => s.id !== songToDelete.id));
+      toast.success(`"${songToDelete.title}" eliminada. Descarga disponible de nuevo.`);
+    } catch (err) {
+      console.error('Error in confirmDelete:', err);
+      toast.error('Ocurrió un error al eliminar');
+    } finally {
+      setDeleting(false);
+      setSongToDelete(null);
+    }
   };
 
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
