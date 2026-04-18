@@ -15,7 +15,6 @@ import {
 import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
-import { useCreditsStore } from '@/stores/creditsStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
 
@@ -38,7 +37,6 @@ const Library = () => {
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
   const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
-  const { incrementCredits } = useCreditsStore();
 
   // Cargar canciones descargadas desde Supabase
   useEffect(() => {
@@ -175,40 +173,15 @@ const Library = () => {
         return;
       }
 
-      // 2. Devolver crédito al usuario (user_credits por email)
-      const userEmail = user.email;
-      if (userEmail) {
-        const { data: creditRow } = await supabase
-          .from('user_credits')
-          .select('id, credits_remaining, max_credits')
-          .eq('user_email', userEmail)
-          .eq('is_active', true)
-          .order('scanned_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (creditRow) {
-          const newRemaining = Math.min(
-            creditRow.credits_remaining + 1,
-            creditRow.max_credits
-          );
-          await supabase
-            .from('user_credits')
-            .update({ credits_remaining: newRemaining })
-            .eq('id', creditRow.id);
-          incrementCredits();
-        }
-      }
-
-      // 3. Si está sonando, detener
+      // 2. Si está sonando, detener
       if (currentSong?.id === songToDelete.id) {
         stop();
       }
 
-      // 4. Actualizar UI local
+      // 3. Actualizar UI local
       setDownloads(prev => prev.filter(s => s.id !== songToDelete.id));
       setFavorites(prev => prev.filter(s => s.id !== songToDelete.id));
-      toast.success(`"${songToDelete.title}" eliminada. Descarga disponible de nuevo.`);
+      toast.success(`"${songToDelete.title}" eliminada de tu biblioteca`);
     } catch (err) {
       console.error('Error in confirmDelete:', err);
       toast.error('Ocurrió un error al eliminar');
@@ -380,8 +353,8 @@ const Library = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar de tu biblioteca?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre.
-              Tu descarga volverá a estar disponible en el catálogo.
+              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre
+              y perderás el crédito de descarga utilizado. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
