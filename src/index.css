@@ -1,102 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* YUSIOP – Vapor Chrome + Glassmorphism design system.
+   Iridescent pastels, frosted glass, soft glow. All colors HSL. */
 
 @layer base {
   :root {
-    /* YUSIOP Design System - Light Mode */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Light mode (kept usable, but app prefers dark) */
+    --background: 250 100% 99%;
+    --foreground: 240 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 30% 12%;
 
-    --primary: 270 91% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 250 95% 76%;        /* lavender 818cf8-ish */
+    --primary-foreground: 240 30% 10%;
 
-    --secondary: 180 100% 50%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 187 92% 69%;       /* cyan 67e8f9 */
+    --secondary-foreground: 240 30% 10%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 240 30% 95%;
+    --muted-foreground: 240 10% 45%;
 
-    --accent: 270 91% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 252 100% 85%;         /* pastel violet c4b5fd */
+    --accent-foreground: 240 30% 10%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 270 91% 65%;
+    --border: 240 30% 90%;
+    --input: 240 30% 92%;
+    --ring: 250 95% 76%;
 
-    --radius: 0.75rem;
+    --radius: 1.25rem;
 
-    /* YUSIOP Custom Colors - Light Mode */
-    --purple-primary: 270 91% 65%;
-    --mint-secondary: 180 100% 50%;
-    --dark-bg: 0 0% 100%;
-    --dark-card: 0 0% 100%;
-    --dark-surface: 240 4.8% 95.9%;
-    --text-primary: 240 10% 3.9%;
-    --text-secondary: 240 5% 64.9%;
-    --text-muted: 240 3.8% 46.1%;
+    /* Vapor Chrome accents */
+    --vapor-violet: 252 100% 85%;
+    --vapor-indigo: 234 89% 74%;
+    --vapor-cyan:   187 92% 69%;
+    --vapor-aqua:   187 100% 84%;
 
-    /* Gradients - Light Mode */
-    --gradient-primary: linear-gradient(135deg, hsl(270 91% 65%), hsl(180 100% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(240 4.8% 95.9%), hsl(0 0% 100%));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--vapor-violet)) 0%, hsl(var(--vapor-indigo)) 35%, hsl(var(--vapor-cyan)) 70%, hsl(var(--vapor-aqua)) 100%);
+    --gradient-mesh: radial-gradient(at 20% 10%, hsl(var(--vapor-violet) / 0.55) 0px, transparent 55%),
+                     radial-gradient(at 85% 15%, hsl(var(--vapor-cyan) / 0.45) 0px, transparent 55%),
+                     radial-gradient(at 60% 90%, hsl(var(--vapor-indigo) / 0.45) 0px, transparent 60%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.65), hsl(0 0% 100% / 0.35));
+
+    --glass-bg: hsl(0 0% 100% / 0.55);
+    --glass-border: hsl(0 0% 100% / 0.6);
+    --glass-shadow: 0 8px 32px hsl(234 89% 50% / 0.12);
+    --glow-primary: 0 0 40px hsl(var(--vapor-indigo) / 0.45);
   }
 
   .dark {
-    /* YUSIOP Design System - Dark Mode (primary) */
-    --background: 240 8% 8%;
-    --foreground: 0 0% 95%;
+    /* Dark vapor mode (primary experience) */
+    --background: 240 35% 6%;
+    --foreground: 240 20% 96%;
 
-    --card: 240 8% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 240 30% 10%;
+    --card-foreground: 240 20% 96%;
 
-    --popover: 240 8% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 240 30% 10%;
+    --popover-foreground: 240 20% 96%;
 
-    --primary: 270 91% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 234 89% 74%;
+    --primary-foreground: 240 35% 8%;
 
-    --secondary: 180 100% 50%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 187 92% 69%;
+    --secondary-foreground: 240 35% 8%;
 
-    --muted: 240 6% 20%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 240 25% 16%;
+    --muted-foreground: 240 15% 70%;
 
-    --accent: 270 91% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 252 100% 85%;
+    --accent-foreground: 240 35% 8%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 270 91% 65%;
+    --border: 240 30% 22%;
+    --input: 240 30% 18%;
+    --ring: 234 89% 74%;
 
-    /* YUSIOP Custom Colors - Dark Mode */
-    --purple-primary: 270 91% 65%;
-    --mint-secondary: 180 100% 50%;
-    --dark-bg: 240 8% 8%;
-    --dark-card: 240 8% 12%;
-    --dark-surface: 240 6% 16%;
-    --text-primary: 0 0% 95%;
-    --text-secondary: 0 0% 70%;
-    --text-muted: 0 0% 60%;
+    --vapor-violet: 252 100% 85%;
+    --vapor-indigo: 234 89% 74%;
+    --vapor-cyan:   187 92% 69%;
+    --vapor-aqua:   187 100% 84%;
 
-    /* Gradients - Dark Mode */
-    --gradient-primary: linear-gradient(135deg, hsl(270 91% 65%), hsl(180 100% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(240 8% 12%), hsl(240 8% 8%));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--vapor-violet)) 0%, hsl(var(--vapor-indigo)) 35%, hsl(var(--vapor-cyan)) 70%, hsl(var(--vapor-aqua)) 100%);
+    --gradient-mesh: radial-gradient(at 20% 10%, hsl(var(--vapor-violet) / 0.28) 0px, transparent 55%),
+                     radial-gradient(at 85% 15%, hsl(var(--vapor-cyan) / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 60% 90%, hsl(var(--vapor-indigo) / 0.30) 0px, transparent 60%);
+    --gradient-card: linear-gradient(135deg, hsl(240 30% 14% / 0.7), hsl(240 30% 10% / 0.5));
+
+    --glass-bg: hsl(240 30% 12% / 0.55);
+    --glass-border: hsl(240 30% 60% / 0.18);
+    --glass-shadow: 0 8px 32px hsl(234 89% 30% / 0.35);
+    --glow-primary: 0 0 60px hsl(var(--vapor-indigo) / 0.5);
   }
 }
 
@@ -105,55 +111,102 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    overflow-x: hidden;
-  }
-
   html {
     scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    overflow-x: hidden;
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* YUSIOP Components */
-  .yusiop-topbar {
-    @apply h-16 px-4 flex items-center justify-between bg-card border-b border-border sticky top-0 z-50 backdrop-blur-sm;
+  /* === Vapor / Glass primitives === */
+  .vapor-gradient {
+    background: var(--gradient-primary);
   }
 
-  .yusiop-bottom-nav {
-    @apply h-20 bg-card border-t border-border flex items-center justify-around fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm;
+  .vapor-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
-  .yusiop-container {
-    @apply px-4 pt-16 pb-20 min-h-screen;
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-strong {
+    background: var(--gradient-card);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  /* === Legacy yusiop classes (mapped to glass so old markup keeps working) === */
+  .yusiop-card {
+    @apply glass rounded-2xl p-4;
   }
 
   .yusiop-gradient {
     background: var(--gradient-primary);
   }
 
-  .yusiop-card {
-    @apply bg-card rounded-xl border border-border p-4 shadow-sm;
-  }
-
   .yusiop-button {
-    @apply inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-2xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .yusiop-button-primary {
-    @apply yusiop-button bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6;
+    @apply yusiop-button vapor-gradient text-primary-foreground hover:opacity-90 hover:scale-[1.02] h-10 px-6 shadow-lg;
   }
 
   .yusiop-button-secondary {
-    @apply yusiop-button bg-secondary text-secondary-foreground hover:bg-secondary/90 h-10 px-6;
+    @apply yusiop-button glass text-foreground hover:bg-white/10 h-10 px-6;
   }
 
   .yusiop-button-ghost {
-    @apply yusiop-button hover:bg-accent hover:text-accent-foreground h-10 px-4;
+    @apply yusiop-button hover:bg-white/5 hover:text-foreground h-10 px-4;
+  }
+
+  .yusiop-button-outline {
+    @apply yusiop-button border border-white/20 bg-white/5 hover:bg-white/10 h-10 px-4;
   }
 
   .yusiop-input {
-    @apply flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent transition-all disabled:cursor-not-allowed disabled:opacity-50;
   }
+
+  /* Animated gradient blob backgrounds */
+  .vapor-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(60px);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }

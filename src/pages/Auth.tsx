@@ -55,121 +55,67 @@ const handleSignIn = async (e: React.FormEvent) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 dark">
-      <Card className="w-full max-w-md yusiop-card">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold yusiop-gradient bg-clip-text text-transparent">
-            YUSIOP
-          </CardTitle>
-          <CardDescription>
-            Descubre, previsualiza y descarga música con QR
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
-              <TabsTrigger value="signup">Registrarse</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="tu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full yusiop-button-primary"
-                  disabled={loading}
-                >
-                  {loading ? 'Iniciando...' : 'Iniciar Sesión'}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Nombre de usuario</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder="usuario123"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="tu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Contraseña</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Repetir Contraseña</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="yusiop-input"
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full yusiop-button-primary"
-                  disabled={loading}
-                >
-                  {loading ? 'Registrando...' : 'Crear Cuenta'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+    <div className="dark relative min-h-screen bg-background flex items-center justify-center p-4 overflow-hidden">
+      {/* Vapor orbs */}
+      <div className="vapor-orb w-96 h-96 bg-vapor top-[-100px] left-[-100px] animate-float-slow" />
+      <div className="vapor-orb w-[28rem] h-[28rem] bg-vapor bottom-[-150px] right-[-150px] animate-float-slower opacity-50" />
+
+      <div className="relative z-10 w-full max-w-md glass-strong rounded-3xl p-7 animate-fade-in">
+        <div className="text-center mb-6">
+          <div className="mx-auto w-16 h-16 rounded-2xl vapor-gradient flex items-center justify-center mb-4 shadow-glow">
+            <span className="font-display text-3xl font-bold text-primary-foreground">Y</span>
+          </div>
+          <h1 className="font-display text-3xl font-bold vapor-text">YUSIOP</h1>
+          <p className="text-sm text-muted-foreground mt-2">Descubre, previsualiza y descarga música con QR</p>
+        </div>
+
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 glass rounded-2xl p-1 h-auto mb-5">
+            <TabsTrigger value="signin" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Iniciar Sesión</TabsTrigger>
+            <TabsTrigger value="signup" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Registrarse</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="signin" className="space-y-4">
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
+                <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="yusiop-input" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Contraseña</Label>
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="yusiop-input" />
+              </div>
+              <Button type="submit" className="w-full h-11 rounded-2xl vapor-gradient text-primary-foreground border-0 shadow-glow font-semibold hover:opacity-90" disabled={loading}>
+                {loading ? 'Iniciando…' : 'Iniciar Sesión'}
+              </Button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="signup" className="space-y-4">
+            <form onSubmit={handleSignUp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-xs uppercase tracking-wider text-muted-foreground">Nombre de usuario</Label>
+                <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="yusiop-input" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
+                <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="yusiop-input" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-muted-foreground">Contraseña</Label>
+                <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="yusiop-input" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password" className="text-xs uppercase tracking-wider text-muted-foreground">Repetir Contraseña</Label>
+                <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="yusiop-input" />
+              </div>
+              <Button type="submit" className="w-full h-11 rounded-2xl vapor-gradient text-primary-foreground border-0 shadow-glow font-semibold hover:opacity-90" disabled={loading}>
+                {loading ? 'Registrando…' : 'Crear Cuenta'}
+              </Button>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

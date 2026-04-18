@@ -321,13 +321,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Perfil</h1>
-        <p className="text-muted-foreground">
-          Gestiona tu cuenta y configuración
-        </p>
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu cuenta</p>
+        <h1 className="font-display text-3xl font-bold">Perfil</h1>
+        <p className="text-sm text-muted-foreground">Gestiona tu cuenta y configuración</p>
       </div>
 
       {/* Profile Info */}
