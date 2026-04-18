@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
@@ -194,42 +194,42 @@ const Library = () => {
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
     if (songs.length === 0) {
       return (
-        <div className="border border-border p-10 text-center">
-          <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.2} />
-          <p className="text-muted-foreground text-sm">No hay canciones en esta sección</p>
+        <div className="vapor-card p-10 text-center">
+          <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.4} />
+          <p className="text-muted-foreground text-sm">No hay canciones aquí todavía</p>
         </div>
       );
     }
 
     return (
-      <div className="border-t border-border">
+      <div className="space-y-2">
         {songs.map((song, idx) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
 
           return (
-            <div key={song.id} className="flex items-center gap-3 py-3 border-b border-border hover:bg-muted/30 transition-colors">
-              <span className="font-display text-[10px] font-medium text-muted-foreground tabular-nums w-6 shrink-0">
+            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border hover:border-primary/30 hover:bg-card transition-all">
+              <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
                 {String(idx + 1).padStart(2, '0')}
               </span>
               <div className="relative shrink-0 group">
                 <img
                   src={song.cover_url}
                   alt={`${song.title} cover`}
-                  className="w-12 h-12 object-cover"
+                  className="w-12 h-12 object-cover rounded-xl"
                 />
                 <Button
                   size="sm"
                   onClick={() => handlePlay(song)}
-                  className="absolute inset-0 w-full h-full bg-black/60 text-primary border-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-none p-0"
+                  className="absolute inset-0 w-full h-full bg-background/70 backdrop-blur-sm text-primary border-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl p-0"
                 >
-                  {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
                 </Button>
               </div>
 
               <div className="flex-1 min-w-0">
                 <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-1 tabular-nums tracking-wider">
+                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
                   <span>{formatDuration(song.duration_seconds)}</span>
                   {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
                 </div>
@@ -240,7 +240,7 @@ const Library = () => {
                   size="icon"
                   variant="ghost"
                   onClick={() => handleToggleFavorite(song)}
-                  className={`h-9 w-9 rounded-none hover:bg-muted ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
+                  className={`h-9 w-9 rounded-full hover:bg-muted ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
                 >
                   <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
                 </Button>
@@ -248,7 +248,7 @@ const Library = () => {
                   size="icon"
                   variant="ghost"
                   onClick={() => handleDeleteRequest(song)}
-                  className="h-9 w-9 rounded-none hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                  className="h-9 w-9 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -265,61 +265,62 @@ const Library = () => {
       <div className="space-y-6">
         <div>
           <p className="eyebrow mb-2">Sección 03</p>
-          <h1 className="display-xl text-5xl">Biblioteca</h1>
+          <h1 className="display-xl text-4xl">Biblioteca</h1>
         </div>
         <div className="space-y-2">
-          {[1,2,3].map(i => <div key={i} className="bg-muted h-20 animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="bg-muted h-20 rounded-2xl animate-pulse" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-7 pb-32">
+    <div className="space-y-6 pb-32">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="editorial-rule" />
-          <p className="eyebrow">Sección 03 · Tu música</p>
-        </div>
-        <h1 className="display-xl text-5xl">Biblioteca</h1>
-        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
-          Tu colección personal. Descargada y lista para sonar.
+        <span className="chip chip-vapor mb-3">
+          <LibraryIcon className="h-3 w-3" /> Sección 03
+        </span>
+        <h1 className="display-xl text-4xl mt-2">
+          Biblioteca<span className="vapor-text">.</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+          Tu colección personal, lista para sonar.
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 border-y border-border divide-x divide-border">
-        <div className="py-5 pr-4">
-          <p className="eyebrow mb-2">Descargas</p>
+      {/* Stats — blob cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="blob-card blob-card-aurora p-5">
+          <p className="eyebrow mb-1.5">Descargas</p>
           <p className="display-xl text-4xl">{String(downloads.length).padStart(2, '0')}</p>
         </div>
-        <div className="py-5 pl-4">
-          <p className="eyebrow mb-2">Favoritos</p>
-          <p className="display-xl text-4xl gold-text">{String(favorites.length).padStart(2, '0')}</p>
+        <div className="blob-card blob-card-sunset p-5">
+          <p className="eyebrow mb-1.5">Favoritos</p>
+          <p className="display-xl text-4xl vapor-text">{String(favorites.length).padStart(2, '0')}</p>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-border rounded-none p-0 h-auto gap-0">
+        <TabsList className="grid w-full grid-cols-3 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
             value="all"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
             Todo
           </TabsTrigger>
           <TabsTrigger
             value="recent"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
             Recientes
           </TabsTrigger>
           <TabsTrigger
             value="favorites"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-2.5 text-xs uppercase tracking-[0.18em] font-medium"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
-            Favoritos
+            Favs
           </TabsTrigger>
         </TabsList>
 

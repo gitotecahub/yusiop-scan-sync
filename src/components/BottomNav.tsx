@@ -14,8 +14,8 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border">
-      <div className="max-w-md mx-auto px-2 py-2 flex items-center justify-around">
+    <div className="fixed bottom-3 left-3 right-3 z-40">
+      <div className="max-w-md mx-auto glass-strong shadow-vapor px-2 py-2 flex items-center justify-around">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -25,20 +25,22 @@ const BottomNav = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 px-3 py-2 transition-colors duration-200",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300",
+                isActive
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.2 : 1.6} />
+              {isActive && (
+                <span className="absolute inset-0 rounded-2xl vapor-bg shadow-glow" />
+              )}
+              <Icon className={cn("relative h-[18px] w-[18px]", isActive && "drop-shadow-sm")} strokeWidth={isActive ? 2.4 : 1.7} />
               <span className={cn(
-                "text-[9px] uppercase tracking-[0.18em]",
-                isActive ? "font-semibold" : "font-medium"
+                "relative text-[9px] uppercase tracking-[0.16em]",
+                isActive ? "font-bold" : "font-medium"
               )}>
                 {item.label}
               </span>
-              {isActive && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-primary" />
-              )}
             </Link>
           );
         })}

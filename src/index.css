@@ -2,217 +2,256 @@
 @tailwind components;
 @tailwind utilities;
 
-/* YUSIOP – Editorial Dark · Noir & Gold.
-   Typographic-first, generous negative space, subtle gold accents.
+/* YUSIOP – Vapor Chrome · Gradient Blobs.
+   Juvenil, profesional, oscuro. Iridiscencia + tarjetas con blobs vivos.
    All colors HSL. */
 
 @layer base {
   :root {
-    /* Light fallback (dark is the primary experience) */
-    --background: 40 25% 96%;
-    --foreground: 0 0% 5%;
+    /* Light fallback */
+    --background: 240 20% 98%;
+    --foreground: 240 30% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
+    --card-foreground: 240 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 240 30% 10%;
 
-    --primary: 42 55% 54%;          /* gold #c9a84c */
-    --primary-foreground: 0 0% 5%;
+    --primary: 250 95% 70%;
+    --primary-foreground: 240 40% 8%;
 
-    --secondary: 42 75% 75%;         /* light gold #f0d78c */
-    --secondary-foreground: 0 0% 5%;
+    --secondary: 188 90% 70%;
+    --secondary-foreground: 240 40% 8%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 240 10% 92%;
+    --muted-foreground: 240 10% 40%;
 
-    --accent: 42 55% 54%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 280 85% 75%;
+    --accent-foreground: 240 40% 8%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 92%;
-    --ring: 42 55% 54%;
+    --border: 240 15% 88%;
+    --input: 240 15% 94%;
+    --ring: 250 95% 70%;
 
-    --radius: 0.5rem;
+    --radius: 1.25rem;
 
-    --gold: 42 55% 54%;
-    --gold-light: 42 75% 75%;
-    --gold-deep: 38 60% 40%;
+    /* Vapor Chrome palette */
+    --vapor-violet: 250 95% 75%;       /* #c4b5fd */
+    --vapor-indigo: 232 90% 75%;       /* #818cf8 */
+    --vapor-cyan: 188 85% 67%;         /* #67e8f9 */
+    --vapor-aqua: 188 95% 82%;         /* #a5f3fc */
+    --vapor-pink: 320 85% 78%;
+    --vapor-mint: 160 80% 70%;
 
-    --gradient-gold: linear-gradient(135deg, hsl(var(--gold-deep)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-light)) 100%);
-    --shadow-gold: 0 0 40px hsl(var(--gold) / 0.25);
+    --gradient-vapor: linear-gradient(135deg, hsl(250 95% 75%) 0%, hsl(232 90% 75%) 35%, hsl(188 85% 67%) 70%, hsl(188 95% 82%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(320 85% 78%) 0%, hsl(280 85% 75%) 50%, hsl(250 95% 75%) 100%);
+    --gradient-aurora: linear-gradient(135deg, hsl(160 80% 70%) 0%, hsl(188 85% 67%) 50%, hsl(232 90% 75%) 100%);
+
+    --shadow-vapor: 0 20px 60px -20px hsl(250 95% 70% / 0.4);
+    --shadow-glow: 0 0 40px hsl(250 95% 70% / 0.3);
   }
 
   .dark {
-    /* Editorial dark: deep noir with gold accents */
-    --background: 0 0% 5%;          /* #0d0d0d */
-    --foreground: 40 15% 95%;
+    /* Dark vapor — deep ink with iridescent accents */
+    --background: 240 25% 6%;
+    --foreground: 240 15% 96%;
 
-    --card: 0 0% 8%;                 /* #141414 */
-    --card-foreground: 40 15% 95%;
+    --card: 240 25% 9%;
+    --card-foreground: 240 15% 96%;
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 40 15% 95%;
+    --popover: 240 25% 7%;
+    --popover-foreground: 240 15% 96%;
 
-    --primary: 42 55% 54%;           /* gold */
-    --primary-foreground: 0 0% 5%;
+    --primary: 250 95% 75%;
+    --primary-foreground: 240 40% 8%;
 
-    --secondary: 42 75% 75%;
-    --secondary-foreground: 0 0% 5%;
+    --secondary: 188 85% 67%;
+    --secondary-foreground: 240 40% 8%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 40 8% 60%;
+    --muted: 240 20% 14%;
+    --muted-foreground: 240 10% 65%;
 
-    --accent: 42 55% 54%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 280 85% 75%;
+    --accent-foreground: 240 40% 8%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 10%;
-    --ring: 42 55% 54%;
+    --border: 240 20% 18%;
+    --input: 240 20% 12%;
+    --ring: 250 95% 75%;
 
-    --gold: 42 55% 54%;
-    --gold-light: 42 75% 75%;
-    --gold-deep: 38 60% 40%;
+    --gradient-vapor: linear-gradient(135deg, hsl(250 95% 75%) 0%, hsl(232 90% 75%) 35%, hsl(188 85% 67%) 70%, hsl(188 95% 82%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(320 85% 78%) 0%, hsl(280 85% 75%) 50%, hsl(250 95% 75%) 100%);
+    --gradient-aurora: linear-gradient(135deg, hsl(160 80% 70%) 0%, hsl(188 85% 67%) 50%, hsl(232 90% 75%) 100%);
 
-    --gradient-gold: linear-gradient(135deg, hsl(var(--gold-deep)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-light)) 100%);
-    --shadow-gold: 0 0 60px hsl(var(--gold) / 0.18);
+    --shadow-vapor: 0 20px 60px -20px hsl(250 95% 75% / 0.5);
+    --shadow-glow: 0 0 50px hsl(250 95% 75% / 0.35);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
-  html {
-    scroll-behavior: smooth;
-  }
+  html { scroll-behavior: smooth; }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Manrope', system-ui, sans-serif;
-    font-feature-settings: "ss01", "cv11";
+    font-family: 'DM Sans', system-ui, sans-serif;
     overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 0%, hsl(250 95% 35% / 0.18), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, hsl(188 85% 35% / 0.15), transparent 60%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', system-ui, sans-serif;
-    letter-spacing: -0.04em;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.03em;
     font-weight: 700;
   }
 }
 
 @layer components {
-  /* === Editorial primitives === */
-  .gold-text {
-    background: var(--gradient-gold);
+  /* === Vapor primitives === */
+  .vapor-text {
+    background: var(--gradient-vapor);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  .gold-bg {
-    background: var(--gradient-gold);
+  .vapor-bg { background: var(--gradient-vapor); }
+  .sunset-bg { background: var(--gradient-sunset); }
+  .aurora-bg { background: var(--gradient-aurora); }
+
+  .gold-text { /* legacy alias */
+    background: var(--gradient-vapor);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gold-bg { background: var(--gradient-vapor); }
+
+  /* Cards */
+  .vapor-card {
+    @apply relative overflow-hidden bg-card border border-border rounded-3xl;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .vapor-card:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-vapor);
   }
 
-  .editorial-card {
-    @apply bg-card border border-border rounded-lg;
+  /* Blob card — gradient blob background tarjetas juveniles */
+  .blob-card {
+    @apply relative overflow-hidden rounded-3xl border border-border bg-card;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
-  .editorial-card-hover {
-    @apply editorial-card transition-all duration-300 hover:border-primary/40;
+  .blob-card::before {
+    content: '';
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--gradient-vapor);
+    filter: blur(40px);
+    opacity: 0.55;
+    top: -40px;
+    right: -40px;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s;
+    z-index: 0;
   }
-
-  .gold-border {
-    border-color: hsl(var(--gold) / 0.4);
+  .blob-card::after {
+    content: '';
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--gradient-sunset);
+    filter: blur(50px);
+    opacity: 0.35;
+    bottom: -50px;
+    left: -30px;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 0;
   }
+  .blob-card:hover::before { transform: scale(1.3) translate(-10px, 10px); opacity: 0.7; }
+  .blob-card:hover::after { transform: scale(1.25) translate(15px, -10px); }
+  .blob-card > * { position: relative; z-index: 1; }
 
-  .gold-glow {
-    box-shadow: var(--shadow-gold);
-  }
+  /* Variants */
+  .blob-card-aurora::before { background: var(--gradient-aurora); }
+  .blob-card-sunset::before { background: var(--gradient-sunset); }
 
-  .editorial-divider {
-    @apply h-px bg-border;
-  }
+  .editorial-card { @apply vapor-card; }
+  .editorial-card-hover { @apply vapor-card; }
+  .editorial-divider { @apply h-px bg-border; }
+  .editorial-rule { @apply h-0.5 w-10 rounded-full vapor-bg; }
 
-  .editorial-rule {
-    @apply h-px w-12 bg-primary;
-  }
-
-  /* Display heading: huge, tight, magazine-style */
   .display-xl {
-    font-family: 'Sora', system-ui, sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.055em;
-    line-height: 0.92;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
   }
 
   .eyebrow {
-    @apply text-[10px] uppercase tracking-[0.32em] text-muted-foreground font-medium;
-    font-family: 'Manrope', system-ui, sans-serif;
+    @apply text-[10px] uppercase tracking-[0.22em] text-muted-foreground font-semibold;
+    font-family: 'DM Sans', system-ui, sans-serif;
   }
 
-  /* === Legacy yusiop classes (kept for backwards compatibility) === */
-  .yusiop-card {
-    @apply editorial-card p-4;
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border border-border bg-card/60 backdrop-blur-sm;
+  }
+  .chip-vapor {
+    background: var(--gradient-vapor);
+    border-color: transparent;
+    @apply text-primary-foreground;
   }
 
-  .yusiop-button {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
-  }
-
-  .yusiop-button-primary {
-    @apply yusiop-button bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6;
-  }
-
-  .yusiop-button-secondary {
-    @apply yusiop-button border border-border bg-card text-foreground hover:bg-muted h-10 px-6;
-  }
-
-  .yusiop-button-ghost {
-    @apply yusiop-button hover:bg-muted hover:text-foreground h-10 px-4;
-  }
-
-  .yusiop-button-outline {
-    @apply yusiop-button border border-border bg-transparent hover:bg-muted h-10 px-4;
-  }
-
-  .yusiop-input {
-    @apply flex h-11 w-full rounded-md border border-border bg-input px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-primary/50 transition-all disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  /* keep glass classes mapped to editorial card so old markup still renders */
+  /* Glass surface */
   .glass {
-    @apply editorial-card;
+    @apply bg-card/60 border border-border rounded-3xl backdrop-blur-xl;
   }
-
   .glass-strong {
-    @apply editorial-card;
-    background: hsl(var(--card));
-  }
-
-  .vapor-text {
-    @apply gold-text;
-  }
-
-  .vapor-gradient {
-    background: var(--gradient-gold);
-  }
-
-  .shadow-glow {
-    box-shadow: var(--shadow-gold);
+    @apply bg-card/85 border border-border rounded-3xl backdrop-blur-2xl;
   }
 
   .vapor-orb {
-    display: none; /* editorial style: no orbs */
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.4;
+    pointer-events: none;
   }
+
+  /* Legacy yusiop classes mapped to vapor */
+  .yusiop-card { @apply vapor-card p-4; }
+  .yusiop-button {
+    @apply inline-flex items-center justify-center rounded-full text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .yusiop-button-primary {
+    @apply yusiop-button text-primary-foreground h-11 px-6;
+    background: var(--gradient-vapor);
+  }
+  .yusiop-button-secondary {
+    @apply yusiop-button border border-border bg-card text-foreground hover:bg-muted h-11 px-6;
+  }
+  .yusiop-button-ghost { @apply yusiop-button hover:bg-muted hover:text-foreground h-10 px-4; }
+  .yusiop-button-outline { @apply yusiop-button border border-border bg-transparent hover:bg-muted h-10 px-4; }
+  .yusiop-input {
+    @apply flex h-11 w-full rounded-2xl border border-border bg-input px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary/50 transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .vapor-gradient { background: var(--gradient-vapor); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-vapor { box-shadow: var(--shadow-vapor); }
 }
 
 @layer utilities {
@@ -224,8 +263,18 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.04;
+    opacity: 0.025;
     z-index: 1;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+
+  .animate-blob-float {
+    animation: blob-float 14s ease-in-out infinite;
+  }
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
 }

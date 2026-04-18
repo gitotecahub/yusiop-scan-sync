@@ -313,43 +313,44 @@ const Profile = () => {
 
   const getCardTypeColor = (cardType: string) => {
     switch (cardType.toLowerCase()) {
-      case 'premium': return 'bg-gradient-to-r from-amber-500 to-orange-500';
-      case 'standard': return 'bg-gradient-to-r from-blue-500 to-cyan-500';
-      case 'basic': return 'bg-gradient-to-r from-gray-500 to-slate-500';
-      default: return 'bg-gradient-to-r from-primary to-primary/80';
+      case 'premium': return 'sunset-bg';
+      case 'standard': return 'aurora-bg';
+      case 'basic': return 'bg-muted';
+      default: return 'vapor-bg';
     }
   };
 
   return (
-    <div className="space-y-7 pb-8">
+    <div className="space-y-6 pb-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="editorial-rule" />
-          <p className="eyebrow">Sección 04 · Tu cuenta</p>
-        </div>
-        <h1 className="display-xl text-5xl">Perfil</h1>
-        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
-          Gestiona tu identidad, balance y preferencias.
+        <span className="chip chip-vapor mb-3">
+          <User className="h-3 w-3" /> Sección 04
+        </span>
+        <h1 className="display-xl text-4xl mt-2">
+          Perfil<span className="vapor-text">.</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+          Gestiona tu identidad y preferencias.
         </p>
       </div>
 
-      {/* Profile masthead */}
-      <div className="border border-border p-6">
+      {/* Profile masthead — blob card */}
+      <div className="blob-card p-6">
         <div className="flex items-start gap-5">
           <div className="relative shrink-0">
-            <Avatar className="w-20 h-20 rounded-none">
+            <Avatar className="w-20 h-20 rounded-3xl">
               <AvatarImage
                 src={avatarUrl || "/placeholder-avatar.png"}
                 className="object-cover w-full h-full"
               />
-              <AvatarFallback className="text-base rounded-none bg-muted font-display font-bold">
+              <AvatarFallback className="text-base rounded-3xl bg-muted font-display font-bold">
                 {profile.fullName.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             <Button
               size="sm"
-              className="absolute -bottom-2 -right-2 rounded-none w-7 h-7 p-0 bg-primary hover:bg-primary/90"
+              className="absolute -bottom-1 -right-1 rounded-full w-8 h-8 p-0 vapor-bg hover:opacity-90 shadow-glow"
               onClick={handleAvatarClick}
               disabled={uploading}
             >
@@ -376,7 +377,7 @@ const Profile = () => {
               size="sm"
               variant="ghost"
               onClick={() => setEditing(!editing)}
-              className="rounded-none h-8 px-2 mt-2 -ml-2 text-xs hover:bg-muted text-primary"
+              className="rounded-full h-8 px-3 mt-2 -ml-3 text-xs hover:bg-muted text-primary"
             >
               <Edit className="h-3 w-3 mr-1.5" />
               Editar
@@ -391,7 +392,7 @@ const Profile = () => {
               <Input
                 value={profile.fullName}
                 onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
-                className="rounded-none border-border bg-input h-11"
+                className="rounded-2xl border-border bg-input h-11"
               />
             </div>
             <div className="space-y-2">
@@ -399,22 +400,22 @@ const Profile = () => {
               <Input
                 value={profile.username}
                 onChange={(e) => setProfile(prev => ({ ...prev, username: e.target.value }))}
-                className="rounded-none border-border bg-input h-11"
+                className="rounded-2xl border-border bg-input h-11"
               />
             </div>
-            <Button onClick={handleSaveProfile} className="w-full rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-11">
+            <Button onClick={handleSaveProfile} className="w-full rounded-full vapor-bg text-primary-foreground hover:opacity-90 h-11 font-bold shadow-glow">
               Guardar Cambios
             </Button>
           </div>
         )}
 
         {!editing && (
-          <div className="grid grid-cols-3 mt-6 pt-6 border-t border-border divide-x divide-border">
+          <div className="grid grid-cols-3 mt-6 pt-6 border-t border-border">
             <div className="text-center">
-              <p className="display-xl text-2xl gold-text">{String(profile.downloadsRemaining).padStart(2, '0')}</p>
+              <p className="display-xl text-2xl vapor-text">{String(profile.downloadsRemaining).padStart(2, '0')}</p>
               <p className="eyebrow mt-1.5">Disponibles</p>
             </div>
-            <div className="text-center">
+            <div className="text-center border-x border-border">
               <p className="display-xl text-2xl">{String(profile.totalDownloads).padStart(2, '0')}</p>
               <p className="eyebrow mt-1.5">Descargadas</p>
             </div>
