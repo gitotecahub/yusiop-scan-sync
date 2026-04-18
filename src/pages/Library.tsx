@@ -355,8 +355,8 @@ const Library = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar de tu biblioteca?</AlertDialogTitle>
             <AlertDialogDescription>
-              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre.
-              Tu descarga volverá a estar disponible en el catálogo.
+              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre
+              y perderás el crédito de descarga utilizado. Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
