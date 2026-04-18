@@ -87,11 +87,6 @@ const Index = () => {
     <div className="space-y-8">
       {/* Hero */}
       <section className="pt-4 pb-2">
-        <div className="flex items-center gap-2 mb-5">
-          <span className="chip chip-vapor">
-            <Sparkles className="h-3 w-3" /> Nuevo · ed.01
-          </span>
-        </div>
         <h1 className="display-xl text-5xl">
           Tu música,<br />
           <span className="vapor-text">en alta fidelidad.</span>
