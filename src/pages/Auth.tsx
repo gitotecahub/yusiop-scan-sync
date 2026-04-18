@@ -55,66 +55,81 @@ const handleSignIn = async (e: React.FormEvent) => {
   };
 
   return (
-    <div className="dark relative min-h-screen bg-background flex items-center justify-center p-4 overflow-hidden">
-      {/* Vapor orbs */}
-      <div className="vapor-orb w-96 h-96 bg-vapor top-[-100px] left-[-100px] animate-float-slow" />
-      <div className="vapor-orb w-[28rem] h-[28rem] bg-vapor bottom-[-150px] right-[-150px] animate-float-slower opacity-50" />
-
-      <div className="relative z-10 w-full max-w-md glass-strong rounded-3xl p-7 animate-fade-in">
-        <div className="text-center mb-6">
-          <div className="mx-auto w-16 h-16 rounded-2xl vapor-gradient flex items-center justify-center mb-4 shadow-glow">
-            <span className="font-display text-3xl font-bold text-primary-foreground">Y</span>
+    <div className="dark relative min-h-screen bg-background flex items-center justify-center p-5 overflow-hidden grain">
+      <div className="relative z-10 w-full max-w-md">
+        {/* Editorial header */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <span className="h-px w-8 bg-border" />
+            <p className="eyebrow">Edición digital</p>
+            <span className="h-px w-8 bg-border" />
           </div>
-          <h1 className="font-display text-3xl font-bold vapor-text">YUSIOP</h1>
-          <p className="text-sm text-muted-foreground mt-2">Descubre, previsualiza y descarga música con QR</p>
+          <h1 className="display-xl text-7xl mb-2">
+            <span className="gold-text">Y</span>USIOP
+          </h1>
+          <p className="eyebrow mt-4">Scan · Sync · Play</p>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass rounded-2xl p-1 h-auto mb-5">
-            <TabsTrigger value="signin" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Iniciar Sesión</TabsTrigger>
-            <TabsTrigger value="signup" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Registrarse</TabsTrigger>
-          </TabsList>
+        <div className="border border-border p-7 bg-card">
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-border rounded-none p-0 h-auto gap-0 mb-6">
+              <TabsTrigger
+                value="signin"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-3 text-xs uppercase tracking-[0.18em] font-medium"
+              >
+                Iniciar Sesión
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-3 text-xs uppercase tracking-[0.18em] font-medium"
+              >
+                Registrarse
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="signin" className="space-y-4">
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
-                <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="yusiop-input" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Contraseña</Label>
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="yusiop-input" />
-              </div>
-              <Button type="submit" className="w-full h-11 rounded-2xl vapor-gradient text-primary-foreground border-0 shadow-glow font-semibold hover:opacity-90" disabled={loading}>
-                {loading ? 'Iniciando…' : 'Iniciar Sesión'}
-              </Button>
-            </form>
-          </TabsContent>
+            <TabsContent value="signin" className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="eyebrow">Email</Label>
+                  <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="eyebrow">Contraseña</Label>
+                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <Button type="submit" className="w-full h-11 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 font-medium tracking-wide" disabled={loading}>
+                  {loading ? 'Iniciando…' : 'Iniciar Sesión'}
+                </Button>
+              </form>
+            </TabsContent>
 
-          <TabsContent value="signup" className="space-y-4">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-xs uppercase tracking-wider text-muted-foreground">Nombre de usuario</Label>
-                <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="yusiop-input" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
-                <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="yusiop-input" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-muted-foreground">Contraseña</Label>
-                <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="yusiop-input" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-xs uppercase tracking-wider text-muted-foreground">Repetir Contraseña</Label>
-                <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="yusiop-input" />
-              </div>
-              <Button type="submit" className="w-full h-11 rounded-2xl vapor-gradient text-primary-foreground border-0 shadow-glow font-semibold hover:opacity-90" disabled={loading}>
-                {loading ? 'Registrando…' : 'Crear Cuenta'}
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="signup" className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="eyebrow">Nombre de usuario</Label>
+                  <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="eyebrow">Email</Label>
+                  <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password" className="eyebrow">Contraseña</Label>
+                  <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="eyebrow">Repetir Contraseña</Label>
+                  <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                </div>
+                <Button type="submit" className="w-full h-11 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 font-medium tracking-wide" disabled={loading}>
+                  {loading ? 'Registrando…' : 'Crear Cuenta'}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <p className="eyebrow text-center mt-6">© Yusiop · MMXXVI</p>
       </div>
     </div>
   );
