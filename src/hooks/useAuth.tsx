@@ -30,8 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
       
       return !error && data?.role === 'admin';
-    } catch (error) {
-      console.error('Error checking admin role:', error);
+    } catch {
       return false;
     }
   };

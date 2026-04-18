@@ -8,6 +8,7 @@ import QrScanner from 'qr-scanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useCreditsStore } from '@/stores/creditsStore';
+import { qrCodeSchema } from '@/lib/validation';
 
 const QRScanner = () => {
   const [manualCode, setManualCode] = useState('');
@@ -89,10 +90,13 @@ const QRScanner = () => {
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (manualCode.trim()) {
-      activateQRCode(manualCode.trim());
-      setManualCode('');
+    const parsed = qrCodeSchema.safeParse(manualCode);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
     }
+    activateQRCode(parsed.data);
+    setManualCode('');
   };
 
   const stopScanning = () => {
@@ -157,10 +161,12 @@ const QRScanner = () => {
         qrScannerRef.current = new QrScanner(
           videoRef.current!,
           (result) => {
-            console.log('QR detectado:', result.data);
             if (processingRef.current || activating) return;
+            const code = (result.data ?? '').trim();
+            const parsed = qrCodeSchema.safeParse(code);
+            if (!parsed.success) return;
             processingRef.current = true;
-            activateQRCode(result.data);
+            activateQRCode(parsed.data);
           },
           {
             returnDetailedScanResult: true,

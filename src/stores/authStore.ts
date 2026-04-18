@@ -18,10 +18,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: true,
 
   initialize: () => {
-    // Configurar listener de cambios de auth
+    // Configurar listener de cambios de auth (no logueamos sesiones para evitar leaks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session);
+      (_event, session) => {
         set({
           session,
           user: session?.user ?? null,
@@ -32,7 +31,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Obtener sesión actual
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Current session:', session);
       set({
         session,
         user: session?.user ?? null,
@@ -72,18 +70,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    console.log('Signing out...');
     set({ loading: true });
-    
+
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('SignOut error:', error);
-      } else {
-        console.log('SignOut successful');
-      }
-    } catch (error) {
-      console.error('SignOut exception:', error);
+      await supabase.auth.signOut();
+    } catch {
+      // Silenciar; siempre limpiamos el estado local debajo
     }
     
     // Forzar limpieza del estado
