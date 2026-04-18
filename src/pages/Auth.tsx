@@ -55,10 +55,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="dark relative min-h-screen bg-background flex items-center justify-center p-5 overflow-hidden grain">
-      {/* Ambient blobs */}
-      <div className="vapor-orb animate-blob-float" style={{ width: 400, height: 400, top: '-15%', left: '-15%', background: 'var(--gradient-vapor)', opacity: 0.5 }} />
-      <div className="vapor-orb animate-blob-float" style={{ width: 320, height: 320, bottom: '-15%', right: '-15%', background: 'var(--gradient-sunset)', animationDelay: '4s', opacity: 0.45 }} />
+    <div
+      className="dark relative min-h-screen flex items-center justify-center p-5 overflow-hidden grain"
+      style={{ background: 'var(--gradient-vapor)' }}
+    >
+      {/* Ambient blobs over full gradient */}
+      <div className="vapor-orb animate-blob-float" style={{ width: 500, height: 500, top: '-20%', left: '-20%', background: 'var(--gradient-sunset)', opacity: 0.55 }} />
+      <div className="vapor-orb animate-blob-float" style={{ width: 420, height: 420, bottom: '-20%', right: '-20%', background: 'var(--gradient-aurora)', animationDelay: '4s', opacity: 0.5 }} />
+      <div className="vapor-orb animate-blob-float" style={{ width: 360, height: 360, top: '40%', left: '60%', background: 'var(--gradient-vapor)', animationDelay: '7s', opacity: 0.4 }} />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-background/40 backdrop-blur-2xl" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
