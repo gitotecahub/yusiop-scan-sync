@@ -321,37 +321,42 @@ const Profile = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-7 pb-8">
       {/* Header */}
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu cuenta</p>
-        <h1 className="font-display text-3xl font-bold">Perfil</h1>
-        <p className="text-sm text-muted-foreground">Gestiona tu cuenta y configuración</p>
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="editorial-rule" />
+          <p className="eyebrow">Sección 04 · Tu cuenta</p>
+        </div>
+        <h1 className="display-xl text-5xl">Perfil</h1>
+        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+          Gestiona tu identidad, balance y preferencias.
+        </p>
       </div>
 
-      {/* Profile Info */}
-      <Card className="yusiop-card">
-        <CardHeader className="text-center">
-          <div className="relative mx-auto mb-4">
-            <Avatar className="w-24 h-24">
-              <AvatarImage 
-                src={avatarUrl || "/placeholder-avatar.png"} 
+      {/* Profile masthead */}
+      <div className="border border-border p-6">
+        <div className="flex items-start gap-5">
+          <div className="relative shrink-0">
+            <Avatar className="w-20 h-20 rounded-none">
+              <AvatarImage
+                src={avatarUrl || "/placeholder-avatar.png"}
                 className="object-cover w-full h-full"
               />
-              <AvatarFallback className="text-lg">
+              <AvatarFallback className="text-base rounded-none bg-muted font-display font-bold">
                 {profile.fullName.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             <Button
               size="sm"
-              className="absolute -bottom-1 -right-1 rounded-full w-8 h-8 p-0 bg-primary hover:bg-primary/90"
+              className="absolute -bottom-2 -right-2 rounded-none w-7 h-7 p-0 bg-primary hover:bg-primary/90"
               onClick={handleAvatarClick}
               disabled={uploading}
             >
               {uploading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-3 h-3 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Camera className="h-4 w-4 text-white" />
+                <Camera className="h-3.5 w-3.5 text-primary-foreground" />
               )}
             </Button>
             <input
@@ -362,242 +367,184 @@ const Profile = () => {
               className="hidden"
             />
           </div>
-          <CardTitle className="flex items-center justify-center gap-2">
-            {profile.fullName}
+
+          <div className="flex-1 min-w-0">
+            <p className="eyebrow mb-1">Usuario</p>
+            <h2 className="font-display text-2xl font-bold leading-tight truncate">{profile.fullName}</h2>
+            <p className="text-xs text-muted-foreground mt-1">@{profile.username}</p>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => setEditing(!editing)}
-              className="yusiop-button-ghost"
+              className="rounded-none h-8 px-2 mt-2 -ml-2 text-xs hover:bg-muted text-primary"
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3 w-3 mr-1.5" />
+              Editar
             </Button>
-          </CardTitle>
-          <CardDescription>@{profile.username}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {editing ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Nombre completo</Label>
-                <Input
-                  value={profile.fullName}
-                  onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="yusiop-input"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Nombre de usuario</Label>
-                <Input
-                  value={profile.username}
-                  onChange={(e) => setProfile(prev => ({ ...prev, username: e.target.value }))}
-                  className="yusiop-input"
-                />
-              </div>
-              <Button onClick={handleSaveProfile} className="w-full yusiop-button-primary">
-                Guardar Cambios
-              </Button>
+          </div>
+        </div>
+
+        {editing && (
+          <div className="space-y-4 mt-6 pt-6 border-t border-border">
+            <div className="space-y-2">
+              <Label className="eyebrow">Nombre completo</Label>
+              <Input
+                value={profile.fullName}
+                onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
+                className="rounded-none border-border bg-input h-11"
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-primary">{profile.downloadsRemaining}</p>
-                <p className="text-xs text-muted-foreground">Disponibles</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{profile.totalDownloads}</p>
-                <p className="text-xs text-muted-foreground">Descargadas</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-secondary">{profile.activatedCards}</p>
-                <p className="text-xs text-muted-foreground">Tarjetas</p>
-              </div>
+            <div className="space-y-2">
+              <Label className="eyebrow">Nombre de usuario</Label>
+              <Input
+                value={profile.username}
+                onChange={(e) => setProfile(prev => ({ ...prev, username: e.target.value }))}
+                className="rounded-none border-border bg-input h-11"
+              />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <Button onClick={handleSaveProfile} className="w-full rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-11">
+              Guardar Cambios
+            </Button>
+          </div>
+        )}
+
+        {!editing && (
+          <div className="grid grid-cols-3 mt-6 pt-6 border-t border-border divide-x divide-border">
+            <div className="text-center">
+              <p className="display-xl text-2xl gold-text">{String(profile.downloadsRemaining).padStart(2, '0')}</p>
+              <p className="eyebrow mt-1.5">Disponibles</p>
+            </div>
+            <div className="text-center">
+              <p className="display-xl text-2xl">{String(profile.totalDownloads).padStart(2, '0')}</p>
+              <p className="eyebrow mt-1.5">Descargadas</p>
+            </div>
+            <div className="text-center">
+              <p className="display-xl text-2xl">{String(profile.activatedCards).padStart(2, '0')}</p>
+              <p className="eyebrow mt-1.5">Tarjetas</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Settings */}
-      <Card className="yusiop-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Configuración
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <Wifi className="h-4 w-4" />
-                <Label>Descargas solo con Wi-Fi</Label>
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Settings className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          <p className="eyebrow">Configuración</p>
+        </div>
+        <div className="border-t border-border">
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Wifi className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">Solo Wi-Fi</p>
+                <p className="text-xs text-muted-foreground">Evita usar datos móviles</p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Evita usar datos móviles
-              </p>
             </div>
-            <Switch
-              checked={wifiOnly}
-              onCheckedChange={setWifiOnly}
-            />
+            <Switch checked={wifiOnly} onCheckedChange={setWifiOnly} />
           </div>
 
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                {theme === 'dark' ? (
-                  <Moon className="h-4 w-4" />
-                ) : theme === 'light' ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Monitor className="h-4 w-4" />
-                )}
-                <Label>Tema de la aplicación</Label>
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? <Moon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> :
+               theme === 'light' ? <Sun className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> :
+               <Monitor className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />}
+              <div>
+                <p className="font-display font-semibold text-sm">Tema</p>
+                <p className="text-xs text-muted-foreground">Claro, oscuro o sistema</p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Cambia entre modo claro, oscuro o automático
-              </p>
             </div>
             <Select value={theme} onValueChange={setTheme}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Tema" />
+              <SelectTrigger className="w-28 rounded-none border-border bg-transparent h-9">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">
-                  <div className="flex items-center gap-2">
-                    <Sun className="h-4 w-4" />
-                    Claro
-                  </div>
-                </SelectItem>
-                <SelectItem value="dark">
-                  <div className="flex items-center gap-2">
-                    <Moon className="h-4 w-4" />
-                    Oscuro
-                  </div>
-                </SelectItem>
-                <SelectItem value="system">
-                  <div className="flex items-center gap-2">
-                    <Monitor className="h-4 w-4" />
-                    Sistema
-                  </div>
-                </SelectItem>
+                <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-3.5 w-3.5" /> Claro</div></SelectItem>
+                <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-3.5 w-3.5" /> Oscuro</div></SelectItem>
+                <SelectItem value="system"><div className="flex items-center gap-2"><Monitor className="h-3.5 w-3.5" /> Sistema</div></SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                <Label>Notificaciones de descarga</Label>
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Download className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">Notificaciones</p>
+                <p className="text-xs text-muted-foreground">Avisos de descargas</p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Recibir notificaciones al completar descargas
-              </p>
             </div>
-            <Switch
-              checked={notifications}
-              onCheckedChange={setNotifications}
-            />
+            <Switch checked={notifications} onCheckedChange={setNotifications} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Activated Cards History */}
-      <Card className="yusiop-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Historial de Tarjetas
-          </CardTitle>
-          <CardDescription>
-            Tarjetas QR que has activado
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loadingCards ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : scannedCards.length > 0 ? (
-            <div className="space-y-4">
-              {scannedCards.map((card) => (
-                <div key={card.id} className="relative overflow-hidden rounded-lg border border-border hover:shadow-md transition-shadow">
-                  <div className={`absolute top-0 left-0 w-1 h-full ${getCardTypeColor(card.card_type)}`} />
-                  <div className="p-4 pl-6">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium">Tarjeta {card.card_type}</h4>
-                          <Badge 
-                            variant={card.is_active ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {card.is_active ? "Activa" : "Expirada"}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          ID: {card.card_id}
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {formatTimeAgo(card.scanned_at)}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Expira: {formatDate(card.expires_at)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <p className="font-medium text-lg">
-                          {card.credits_remaining}/{card.max_credits}
-                        </p>
-                        <p className="text-xs text-muted-foreground">créditos</p>
-                        <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${getCardTypeColor(card.card_type)} transition-all`}
-                            style={{ 
-                              width: `${(card.credits_remaining / card.max_credits) * 100}%` 
-                            }}
-                          />
-                        </div>
-                      </div>
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <CreditCard className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          <p className="eyebrow">Historial de Tarjetas</p>
+        </div>
+
+        {loadingCards ? (
+          <div className="flex items-center justify-center py-10 border border-border">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : scannedCards.length > 0 ? (
+          <div className="border-t border-border">
+            {scannedCards.map((card) => (
+              <div key={card.id} className="py-4 border-b border-border">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`w-1.5 h-1.5 ${card.is_active ? 'bg-primary' : 'bg-muted-foreground'}`} />
+                      <p className="font-display font-bold text-sm capitalize">{card.card_type}</p>
+                      <Badge variant={card.is_active ? "default" : "secondary"} className="text-[9px] uppercase tracking-wider rounded-none px-1.5 py-0 h-4">
+                        {card.is_active ? "Activa" : "Expirada"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground font-mono truncate">{card.card_id}</p>
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/80 mt-2 tracking-wider">
+                      <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{formatTimeAgo(card.scanned_at)}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" />{formatDate(card.expires_at)}</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-xl font-bold tabular-nums">
+                      {card.credits_remaining}<span className="text-muted-foreground text-xs">/{card.max_credits}</span>
+                    </p>
+                    <p className="eyebrow mt-0.5">créditos</p>
+                    <div className="w-16 h-0.5 bg-muted mt-2 ml-auto overflow-hidden">
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{ width: `${(card.credits_remaining / card.max_credits) * 100}%` }}
+                      />
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <CreditCard className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground mb-2">No has escaneado ninguna tarjeta aún</p>
-              <p className="text-sm text-muted-foreground">
-                Usa el escáner QR para activar tus primeras tarjetas
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 border border-border">
+            <CreditCard className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" strokeWidth={1.2} />
+            <p className="text-sm text-muted-foreground">No has escaneado ninguna tarjeta aún</p>
+          </div>
+        )}
+      </div>
 
       {/* Sign Out */}
-      <Card className="yusiop-card border-destructive/20">
-        <CardContent className="p-6">
-          <Button
-            onClick={handleSignOut}
-            variant="destructive"
-            className="w-full flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Cerrar Sesión
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="pt-4 border-t border-border">
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          className="w-full rounded-none h-11 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center gap-2 border border-destructive/30"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar Sesión
+        </Button>
+        <p className="eyebrow text-center mt-6">© Yusiop · MMXXVI</p>
+      </div>
     </div>
   );
 };
