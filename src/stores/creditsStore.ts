@@ -12,6 +12,7 @@ interface CreditsState {
   loading: boolean;
   setUserCredits: (credits: UserCredits | null) => void;
   decrementCredits: () => void;
+  incrementCredits: () => void;
   setLoading: (loading: boolean) => void;
 }
 
