@@ -4,35 +4,27 @@ const SplashScreen = () => {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, 2000);
-
+    const exitTimer = setTimeout(() => setIsExiting(true), 2000);
     return () => clearTimeout(exitTimer);
   }, []);
 
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-background overflow-hidden transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
-      {/* Vapor orbs */}
-      <div className="vapor-orb w-80 h-80 bg-vapor top-1/4 left-1/4 animate-float-slow" />
-      <div className="vapor-orb w-96 h-96 bg-vapor bottom-1/4 right-1/4 animate-float-slower" />
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 eyebrow">Yusiop · ed.01</div>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 eyebrow text-muted-foreground">scan · sync · play</div>
 
-      <div className="relative z-10 text-center">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-40 h-40 rounded-full vapor-gradient opacity-30 blur-2xl animate-pulse" />
-        </div>
+      <div className="relative text-center">
+        <div className="editorial-rule mx-auto mb-8 opacity-0 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }} />
 
-        <div className="relative animate-scale-in">
-          <h1 className="font-display text-9xl font-bold vapor-text drop-shadow-2xl">
-            Y
+        <div className="animate-scale-in">
+          <h1 className="display-xl text-[14rem] leading-none">
+            <span className="gold-text">Y</span>
           </h1>
         </div>
 
-        <div className="mt-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
-          <h2 className="font-display text-2xl font-semibold tracking-wide vapor-text">
-            Yusiop
-          </h2>
-          <p className="text-xs text-muted-foreground mt-2 tracking-[0.3em] uppercase">scan · sync · play</p>
+        <div className="mt-2 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+          <h2 className="font-display text-2xl font-bold tracking-tight">YUSIOP</h2>
+          <p className="eyebrow mt-3">An editorial sound experience</p>
         </div>
       </div>
     </div>
