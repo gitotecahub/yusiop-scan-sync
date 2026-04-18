@@ -12,6 +12,7 @@ interface CreditsState {
   loading: boolean;
   setUserCredits: (credits: UserCredits | null) => void;
   decrementCredits: () => void;
+  incrementCredits: () => void;
   setLoading: (loading: boolean) => void;
 }
 
@@ -28,6 +29,18 @@ export const useCreditsStore = create<CreditsState>((set, get) => ({
         userCredits: {
           ...userCredits,
           credits_remaining: userCredits.credits_remaining - 1
+        }
+      });
+    }
+  },
+
+  incrementCredits: () => {
+    const { userCredits } = get();
+    if (userCredits) {
+      set({
+        userCredits: {
+          ...userCredits,
+          credits_remaining: userCredits.credits_remaining + 1
         }
       });
     }

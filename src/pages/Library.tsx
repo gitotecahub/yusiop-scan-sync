@@ -2,9 +2,20 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
+import { useCreditsStore } from '@/stores/creditsStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
 
@@ -24,7 +35,10 @@ const Library = () => {
   const [downloads, setDownloads] = useState<DownloadedSong[]>([]);
   const [favorites, setFavorites] = useState<DownloadedSong[]>([]);
   const [loading, setLoading] = useState(true);
-  const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
+  const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
+  const { incrementCredits } = useCreditsStore();
 
   // Cargar canciones descargadas desde Supabase
   useEffect(() => {
@@ -134,10 +148,74 @@ const Library = () => {
     }
   };
 
-  const handleDelete = (song: DownloadedSong) => {
-    setDownloads(prev => prev.filter(s => s.id !== song.id));
-    setFavorites(prev => prev.filter(s => s.id !== song.id));
-    toast.success(`"${song.title}" eliminada de tu biblioteca`);
+  const handleDeleteRequest = (song: DownloadedSong) => {
+    setSongToDelete(song);
+  };
+
+  const confirmDelete = async () => {
+    if (!songToDelete) return;
+    setDeleting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Debes iniciar sesión');
+        return;
+      }
+
+      // 1. Eliminar registro de descarga
+      const { error: deleteError } = await supabase
+        .from('user_downloads')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('song_id', songToDelete.id);
+
+      if (deleteError) {
+        console.error('Error deleting download:', deleteError);
+        toast.error('No se pudo eliminar la canción');
+        return;
+      }
+
+      // 2. Devolver crédito al usuario (user_credits por email)
+      const userEmail = user.email;
+      if (userEmail) {
+        const { data: creditRow } = await supabase
+          .from('user_credits')
+          .select('id, credits_remaining, max_credits')
+          .eq('user_email', userEmail)
+          .eq('is_active', true)
+          .order('scanned_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (creditRow) {
+          const newRemaining = Math.min(
+            creditRow.credits_remaining + 1,
+            creditRow.max_credits
+          );
+          await supabase
+            .from('user_credits')
+            .update({ credits_remaining: newRemaining })
+            .eq('id', creditRow.id);
+          incrementCredits();
+        }
+      }
+
+      // 3. Si está sonando, detener
+      if (currentSong?.id === songToDelete.id) {
+        stop();
+      }
+
+      // 4. Actualizar UI local
+      setDownloads(prev => prev.filter(s => s.id !== songToDelete.id));
+      setFavorites(prev => prev.filter(s => s.id !== songToDelete.id));
+      toast.success(`"${songToDelete.title}" eliminada. Descarga disponible de nuevo.`);
+    } catch (err) {
+      console.error('Error in confirmDelete:', err);
+      toast.error('Ocurrió un error al eliminar');
+    } finally {
+      setDeleting(false);
+      setSongToDelete(null);
+    }
   };
 
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
@@ -215,7 +293,7 @@ const Library = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(song)}
+                      onClick={() => handleDeleteRequest(song)}
                       className="yusiop-button-ghost text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -295,6 +373,32 @@ const Library = () => {
 
       {/* Playback Controls */}
       <PlaybackControls />
+
+      {/* Confirmación de eliminación */}
+      <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar de tu biblioteca?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre.
+              Tu descarga volverá a estar disponible en el catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
