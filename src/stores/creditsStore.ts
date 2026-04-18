@@ -34,5 +34,17 @@ export const useCreditsStore = create<CreditsState>((set, get) => ({
     }
   },
 
+  incrementCredits: () => {
+    const { userCredits } = get();
+    if (userCredits) {
+      set({
+        userCredits: {
+          ...userCredits,
+          credits_remaining: userCredits.credits_remaining + 1
+        }
+      });
+    }
+  },
+
   setLoading: (loading) => set({ loading })
 }));
