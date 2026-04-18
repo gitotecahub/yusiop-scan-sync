@@ -25,28 +25,28 @@ const Index = () => {
       description: 'Activa tu tarjeta',
       icon: QrCode,
       link: '/qr',
-      color: 'bg-primary'
+      gradient: 'from-violet-400/30 to-indigo-400/30'
     },
     {
       title: 'Catálogo',
       description: 'Explora música',
       icon: Music,
       link: '/catalog',
-      color: 'bg-secondary'
+      gradient: 'from-cyan-300/30 to-sky-400/30'
     },
     {
       title: 'Mi Biblioteca',
       description: 'Tus descargas',
       icon: Library,
       link: '/library',
-      color: 'bg-accent'
+      gradient: 'from-fuchsia-300/30 to-violet-400/30'
     },
     {
       title: 'Perfil',
       description: 'Tu cuenta',
       icon: User,
       link: '/profile',
-      color: 'bg-muted'
+      gradient: 'from-cyan-200/30 to-emerald-300/30'
     }
   ];
 
@@ -118,34 +118,35 @@ const Index = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="text-center py-6">
-        <h1 className="text-3xl font-bold mb-2 yusiop-gradient bg-clip-text text-transparent">
-          Bienvenido a YUSIOP
+    <div className="space-y-7">
+      {/* Hero */}
+      <section className="relative pt-2 pb-4">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">Bienvenido</p>
+        <h1 className="font-display text-4xl font-bold leading-tight">
+          <span className="vapor-text">Sintoniza</span><br />
+          <span className="text-foreground">tu mundo</span>
         </h1>
-        <p className="text-muted-foreground">
-          Tu plataforma de música favorita
+        <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+          Escanea, descubre y descarga tu música favorita en una experiencia limpia y rápida.
         </p>
-      </div>
+      </section>
 
       {/* Navigation Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {navCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.link} to={card.link}>
-              <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className={`${card.color} p-3 rounded-full`}>
-                    <Icon className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{card.title}</h3>
-                    <p className="text-sm text-muted-foreground">{card.description}</p>
-                  </div>
+            <Link key={card.link} to={card.link} className="group">
+              <div className={`relative overflow-hidden glass rounded-3xl p-4 h-32 flex flex-col justify-between transition-all duration-300 hover:scale-[1.03] hover:shadow-glow`}>
+                <div className={`absolute -top-8 -right-8 w-28 h-28 rounded-full bg-gradient-to-br ${card.gradient} blur-2xl opacity-80`} />
+                <div className="relative w-10 h-10 rounded-2xl glass flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-foreground" />
                 </div>
-              </Card>
+                <div className="relative">
+                  <h3 className="font-display font-semibold text-sm">{card.title}</h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{card.description}</p>
+                </div>
+              </div>
             </Link>
           );
         })}
@@ -153,74 +154,61 @@ const Index = () => {
 
       {/* Admin Panel Access */}
       {isAdmin && (
-        <div className="mt-6">
-          <Link to="/admin">
-            <Card className="p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-200 hover:shadow-lg transition-all duration-200">
-              <div className="flex items-center space-x-4">
-                <div className="bg-red-500 p-3 rounded-full">
-                  <Settings className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Panel de Administración</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Gestiona usuarios, música y configuraciones
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </Link>
-        </div>
+        <Link to="/admin">
+          <div className="relative overflow-hidden glass rounded-3xl p-4 flex items-center gap-4 hover:scale-[1.01] transition-all">
+            <div className="absolute inset-0 bg-gradient-to-r from-rose-400/15 to-orange-400/15" />
+            <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center shadow-lg">
+              <Settings className="h-6 w-6 text-white" />
+            </div>
+            <div className="relative">
+              <h3 className="font-display font-semibold">Panel de Administración</h3>
+              <p className="text-xs text-muted-foreground">Gestiona usuarios, música y configuraciones</p>
+            </div>
+          </div>
+        </Link>
       )}
 
       {/* Music Preview Section */}
-      <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Música Popular</h2>
+      <div>
+        <div className="flex items-end justify-between mb-3">
+          <h2 className="font-display text-xl font-bold">Música Popular</h2>
+          <Link to="/catalog" className="text-xs text-primary hover:underline">Ver todo →</Link>
+        </div>
         {loading ? (
-          <div className="grid grid-cols-2 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="aspect-square animate-pulse">
-                <div className="p-4 h-full flex flex-col">
-                  <div className="flex-1 bg-muted rounded-lg mb-3" />
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded w-full" />
-                    <div className="h-2 bg-muted rounded w-2/3" />
-                  </div>
-                </div>
-              </Card>
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="glass rounded-3xl aspect-square animate-pulse" />
             ))}
           </div>
         ) : popularSongs.length > 0 ? (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-3">
             {popularSongs.map((song) => (
-              <Card 
-                key={song.id} 
-                className="aspect-square cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
+              <button
+                key={song.id}
                 onClick={() => handleSongClick(song.id)}
+                className="group relative overflow-hidden rounded-3xl aspect-square text-left transition-all duration-300 hover:scale-[1.03] hover:shadow-glow"
               >
-                <div className="p-4 h-full flex flex-col">
-                  <div className="flex-1 relative mb-3 overflow-hidden rounded-lg">
-                    <img
-                      src={song.cover_url}
-                      alt={`${song.title} cover`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
-                      <Play className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 text-center">
-                    <h3 className="font-medium text-sm line-clamp-1">{song.title}</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{song.artist}</p>
-                  </div>
+                <img
+                  src={song.cover_url}
+                  alt={`${song.title} cover`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute top-2 right-2 w-9 h-9 rounded-full vapor-gradient flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
+                  <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
                 </div>
-              </Card>
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <h3 className="font-semibold text-sm text-white line-clamp-1">{song.title}</h3>
+                  <p className="text-xs text-white/70 line-clamp-1">{song.artist}</p>
+                </div>
+              </button>
             ))}
           </div>
         ) : (
-          <Card className="p-6 text-center">
+          <div className="glass rounded-3xl p-8 text-center">
             <Music className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">No hay canciones populares disponibles</p>
-          </Card>
+            <p className="text-muted-foreground text-sm">No hay canciones populares disponibles</p>
+          </div>
         )}
       </div>
     </div>

@@ -240,23 +240,13 @@ useEffect(() => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Catálogo</h1>
-          <p className="text-muted-foreground">Cargando música...</p>
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Explora</p>
+          <h1 className="font-display text-3xl font-bold">Catálogo</h1>
         </div>
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="yusiop-card animate-pulse">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-muted rounded-lg" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-3/4" />
-                    <div className="h-3 bg-muted rounded w-1/2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={i} className="glass rounded-3xl p-4 animate-pulse h-20" />
           ))}
         </div>
       </div>
@@ -264,128 +254,104 @@ useEffect(() => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Catálogo</h1>
-        <p className="text-muted-foreground">
-          Descubre y descarga tu música favorita
-        </p>
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Explora</p>
+        <h1 className="font-display text-3xl font-bold">Catálogo</h1>
+        <p className="text-sm text-muted-foreground">Descubre y descarga tu música favorita</p>
       </div>
 
       {/* Search Bar */}
-      <Card className="yusiop-card">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por título, artista o álbum..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+        <Input
+          placeholder="Buscar por título, artista o álbum…"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="yusiop-input pl-11"
+        />
+      </div>
 
-      {/* Downloads remaining - Only show when user has active credits */}
+      {/* Downloads remaining */}
       {userCredits && userCredits.credits_remaining > 0 && (
-        <Card className="yusiop-card border-primary/20">
-          <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">Te quedan</p>
-            <p className="text-2xl font-bold text-primary">
-              {userCredits.credits_remaining} descargas
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Tarjeta {userCredits.card_type} activa
-            </p>
-          </CardContent>
-        </Card>
+        <div className="relative overflow-hidden glass rounded-3xl p-4">
+          <div className="absolute -top-12 -right-10 w-40 h-40 vapor-gradient rounded-full blur-3xl opacity-40" />
+          <div className="relative flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Te quedan</p>
+              <p className="font-display text-3xl font-bold vapor-text leading-none mt-1">
+                {userCredits.credits_remaining}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">descargas · tarjeta {userCredits.card_type}</p>
+            </div>
+            <div className="w-14 h-14 rounded-2xl glass flex items-center justify-center">
+              <Download className="h-6 w-6 text-primary" />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Songs List */}
-      <div className="grid gap-4">
+      <div className="space-y-3">
         {filteredSongs.length === 0 && searchTerm ? (
-          <Card className="yusiop-card">
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">
-                No se encontraron canciones que coincidan con "{searchTerm}"
-              </p>
-            </CardContent>
-          </Card>
+          <div className="glass rounded-3xl p-8 text-center">
+            <p className="text-muted-foreground text-sm">
+              No se encontraron canciones que coincidan con "{searchTerm}"
+            </p>
+          </div>
         ) : (
           filteredSongs.map((song) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
           const isDownloaded = downloadedSongs.has(song.id);
           const isHighlighted = highlightedSongId === song.id;
-          
+
           return (
-            <Card 
-              key={song.id} 
+            <div
+              key={song.id}
               id={`song-${song.id}`}
-              className={`yusiop-card hover:bg-card/80 transition-all duration-300 ${
-                isHighlighted ? 'ring-2 ring-primary bg-primary/10' : ''
+              className={`glass rounded-3xl p-3 transition-all duration-300 ${
+                isHighlighted ? 'ring-2 ring-primary shadow-glow scale-[1.01]' : 'hover:bg-white/5'
               }`}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-4">
-                  {/* Cover */}
-                  <div className="relative">
-                    <img
-                      src={song.cover_url}
-                      alt={`${song.title} cover`}
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                  </div>
-
-                  {/* Song Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {song.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {song.artist}
-                    </p>
-                    {song.album && (
-                      <p className="text-xs text-muted-foreground/80 truncate">
-                        {song.album}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {formatDuration(song.duration_seconds)}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePlayPreview(song)}
-                      className="yusiop-button-outline"
-                    >
-                      {isCurrentlyPlaying ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleDownload(song)}
-                      className="yusiop-button-primary"
-                      disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
-                    >
-                      {isDownloaded ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Download className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <img
+                    src={song.cover_url}
+                    alt={`${song.title} cover`}
+                    className="w-14 h-14 rounded-2xl object-cover"
+                  />
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-white/20" />
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm text-foreground truncate">{song.title}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{song.artist}</p>
+                  <p className="text-[10px] text-muted-foreground/80 mt-0.5 tabular-nums">
+                    {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => handlePlayPreview(song)}
+                    className="h-10 w-10 rounded-full glass border border-white/10 hover:bg-white/10"
+                  >
+                    {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    size="icon"
+                    onClick={() => handleDownload(song)}
+                    disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
+                    className={`h-10 w-10 rounded-full border-0 ${isDownloaded ? 'bg-emerald-500/20 text-emerald-300' : 'vapor-gradient text-primary-foreground shadow-glow'}`}
+                  >
+                    {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
           );
           })
         )}
