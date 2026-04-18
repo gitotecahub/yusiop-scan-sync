@@ -217,117 +217,102 @@ const QRScanner = () => {
   }, [scanning]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Escanear QR</h1>
-        <p className="text-muted-foreground">
-          Escanea una tarjeta QR para activar tus descargas
-        </p>
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Activa</p>
+        <h1 className="font-display text-3xl font-bold">Escanear QR</h1>
+        <p className="text-sm text-muted-foreground">Apunta a una tarjeta o escribe el código</p>
       </div>
 
       {/* Scanner Card */}
-      <Card className="yusiop-card">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <QrCode className="h-10 w-10 text-primary" />
+      <div className="relative overflow-hidden glass rounded-3xl p-5">
+        <div className="absolute -top-16 -left-16 w-48 h-48 vapor-gradient rounded-full blur-3xl opacity-30" />
+
+        <div className="relative text-center mb-5">
+          <div className="mx-auto w-16 h-16 rounded-2xl glass flex items-center justify-center mb-3 shadow-glow">
+            <QrCode className="h-8 w-8 vapor-text" />
           </div>
-          <CardTitle>Activar Tarjeta</CardTitle>
-          <CardDescription>
-            Usa la cámara o ingresa el código manualmente
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Camera Scanner */}
-          <div className="space-y-4">
-            {scanning ? (
-              <div className="space-y-4">
-                <div className="relative">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-64 rounded-lg bg-muted object-cover"
-                    playsInline
-                    autoPlay
-                    muted
-                  />
-                  <div className="absolute inset-0 border-2 border-primary rounded-lg opacity-50 pointer-events-none" />
-                </div>
-                <Button
-                  onClick={stopScanning}
-                  variant="outline"
-                  className="w-full flex items-center gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  Detener Escaneo
-                </Button>
+          <h2 className="font-display text-lg font-bold">Activar Tarjeta</h2>
+          <p className="text-xs text-muted-foreground">Usa la cámara o ingresa el código manualmente</p>
+        </div>
+
+        <div className="relative space-y-5">
+          {/* Camera */}
+          {scanning ? (
+            <div className="space-y-3">
+              <div className="relative rounded-2xl overflow-hidden">
+                <video
+                  ref={videoRef}
+                  className="w-full h-64 bg-black object-cover"
+                  playsInline
+                  autoPlay
+                  muted
+                />
+                <div className="absolute inset-4 border-2 border-white/60 rounded-2xl pointer-events-none" />
+                <div className="absolute inset-0 ring-1 ring-white/10 rounded-2xl pointer-events-none" />
               </div>
-            ) : (
-              <Button
-                onClick={startScanning}
-                className="w-full yusiop-button-primary flex items-center gap-2"
-              >
-                <Camera className="h-4 w-4" />
-                Usar Cámara
+              <Button onClick={stopScanning} variant="outline" className="w-full rounded-2xl border-white/20 bg-white/5 hover:bg-white/10 gap-2">
+                <X className="h-4 w-4" />
+                Detener Escaneo
               </Button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <Button onClick={startScanning} className="w-full h-12 rounded-2xl vapor-gradient text-primary-foreground border-0 shadow-glow gap-2 hover:opacity-90">
+              <Camera className="h-4 w-4" />
+              Usar Cámara
+            </Button>
+          )}
 
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
+              <span className="w-full border-t border-white/10" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                O ingresa manualmente
-              </span>
+            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.25em]">
+              <span className="bg-background/80 backdrop-blur px-3 text-muted-foreground">o ingresa manualmente</span>
             </div>
           </div>
 
           {/* Manual Input */}
-          <form onSubmit={handleManualSubmit} className="space-y-4">
+          <form onSubmit={handleManualSubmit} className="space-y-3">
             <Input
               placeholder="Código de la tarjeta QR"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              className="yusiop-input"
+              className="yusiop-input text-center tracking-widest uppercase"
             />
             <Button
               type="submit"
-              className="w-full yusiop-button-secondary"
+              className="w-full h-11 rounded-2xl glass border border-white/20 hover:bg-white/10 font-semibold"
               disabled={!manualCode.trim() || activating}
             >
-              {activating ? 'Activando...' : 'Activar Tarjeta'}
+              {activating ? 'Activando…' : 'Activar Tarjeta'}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="yusiop-card border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-lg text-primary">Tarjeta Estándar</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground">4 Descargas</p>
-            <p className="text-sm text-muted-foreground">
-              Perfecto para descubrir nueva música
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="yusiop-card border-secondary/20">
-          <CardHeader>
-            <CardTitle className="text-lg text-secondary">Tarjeta Premium</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-foreground">10 Descargas</p>
-            <p className="text-sm text-muted-foreground">
-              Para los verdaderos amantes de la música
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="relative overflow-hidden glass rounded-3xl p-4">
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br from-violet-400/40 to-indigo-400/40 blur-2xl" />
+          <div className="relative">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Estándar</p>
+            <p className="font-display text-3xl font-bold mt-1">4</p>
+            <p className="text-xs text-muted-foreground -mt-1">descargas</p>
+            <p className="text-[11px] text-muted-foreground/80 mt-2">Para descubrir nueva música</p>
+          </div>
+        </div>
+        <div className="relative overflow-hidden glass rounded-3xl p-4">
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br from-cyan-300/40 to-emerald-300/40 blur-2xl" />
+          <div className="relative">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Premium</p>
+            <p className="font-display text-3xl font-bold vapor-text mt-1">10</p>
+            <p className="text-xs text-muted-foreground -mt-1">descargas</p>
+            <p className="text-[11px] text-muted-foreground/80 mt-2">Para los más fanáticos</p>
+          </div>
+        </div>
       </div>
     </div>
   );

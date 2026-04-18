@@ -262,46 +262,44 @@ const Library = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Mi Biblioteca</h1>
-          <p className="text-muted-foreground">Cargando tu música...</p>
+        <div className="space-y-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu música</p>
+          <h1 className="font-display text-3xl font-bold">Biblioteca</h1>
+        </div>
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="glass rounded-3xl h-20 animate-pulse" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-32">
+    <div className="space-y-5 pb-32">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Mi Biblioteca</h1>
-        <p className="text-muted-foreground">
-          Tu música descargada disponible offline
-        </p>
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Tu música</p>
+        <h1 className="font-display text-3xl font-bold">Biblioteca</h1>
+        <p className="text-sm text-muted-foreground">Todas tus descargas, listas para sonar</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="yusiop-card">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">{downloads.length}</p>
-            <p className="text-sm text-muted-foreground">Descargas</p>
-          </CardContent>
-        </Card>
-        <Card className="yusiop-card">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{favorites.length}</p>
-            <p className="text-sm text-muted-foreground">Favoritos</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="glass rounded-3xl p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Descargas</p>
+          <p className="font-display text-3xl font-bold mt-1">{downloads.length}</p>
+        </div>
+        <div className="glass rounded-3xl p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Favoritos</p>
+          <p className="font-display text-3xl font-bold vapor-text mt-1">{favorites.length}</p>
+        </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">Todo</TabsTrigger>
-          <TabsTrigger value="recent">Recientes</TabsTrigger>
-          <TabsTrigger value="favorites">Favoritos</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 glass rounded-2xl p-1 h-auto">
+          <TabsTrigger value="all" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Todo</TabsTrigger>
+          <TabsTrigger value="recent" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Recientes</TabsTrigger>
+          <TabsTrigger value="favorites" className="rounded-xl data-[state=active]:vapor-gradient data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow">Favoritos</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all" className="mt-6">
