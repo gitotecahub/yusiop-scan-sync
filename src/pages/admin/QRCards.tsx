@@ -31,7 +31,7 @@ const QRCards = () => {
   const [selectedCard, setSelectedCard] = useState<QRCard | null>(null);
   const [qrImageUrl, setQrImageUrl] = useState('');
   const [newCardType, setNewCardType] = useState('standard');
-  const [newCardCredits, setNewCardCredits] = useState('5');
+  const newCardCredits = newCardType === 'premium' ? '10' : '4';
   const { toast } = useToast();
 
   useEffect(() => {
@@ -225,26 +225,13 @@ const QRCards = () => {
                     <SelectValue placeholder="Selecciona el tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="standard">Estándar</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="standard">Estándar (4 créditos)</SelectItem>
+                    <SelectItem value="premium">Premium (10 créditos)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="credits">Créditos de Descarga</Label>
-                <Select value={newCardCredits} onValueChange={setNewCardCredits}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona los créditos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 crédito</SelectItem>
-                    <SelectItem value="5">5 créditos</SelectItem>
-                    <SelectItem value="10">10 créditos</SelectItem>
-                    <SelectItem value="25">25 créditos</SelectItem>
-                    <SelectItem value="50">50 créditos</SelectItem>
-                    <SelectItem value="100">100 créditos</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="text-sm text-muted-foreground">
+                Créditos asignados automáticamente: <span className="font-semibold text-foreground">{newCardCredits}</span>
               </div>
               <Button onClick={generateNewQRCard} className="w-full">
                 <QrCode className="h-4 w-4 mr-2" />
