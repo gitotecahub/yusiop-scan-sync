@@ -1,108 +1,88 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* YUSIOP – Vapor Chrome + Glassmorphism design system.
-   Iridescent pastels, frosted glass, soft glow. All colors HSL. */
+/* YUSIOP – Editorial Dark · Noir & Gold.
+   Typographic-first, generous negative space, subtle gold accents.
+   All colors HSL. */
 
 @layer base {
   :root {
-    /* Light mode (kept usable, but app prefers dark) */
-    --background: 250 100% 99%;
-    --foreground: 240 30% 12%;
+    /* Light fallback (dark is the primary experience) */
+    --background: 40 25% 96%;
+    --foreground: 0 0% 5%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 30% 12%;
+    --card-foreground: 0 0% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 30% 12%;
+    --popover-foreground: 0 0% 5%;
 
-    --primary: 250 95% 76%;        /* lavender 818cf8-ish */
-    --primary-foreground: 240 30% 10%;
+    --primary: 42 55% 54%;          /* gold #c9a84c */
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 187 92% 69%;       /* cyan 67e8f9 */
-    --secondary-foreground: 240 30% 10%;
+    --secondary: 42 75% 75%;         /* light gold #f0d78c */
+    --secondary-foreground: 0 0% 5%;
 
-    --muted: 240 30% 95%;
-    --muted-foreground: 240 10% 45%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 35%;
 
-    --accent: 252 100% 85%;         /* pastel violet c4b5fd */
-    --accent-foreground: 240 30% 10%;
+    --accent: 42 55% 54%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 84% 65%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 30% 90%;
-    --input: 240 30% 92%;
-    --ring: 250 95% 76%;
+    --border: 0 0% 88%;
+    --input: 0 0% 92%;
+    --ring: 42 55% 54%;
 
-    --radius: 1.25rem;
+    --radius: 0.5rem;
 
-    /* Vapor Chrome accents */
-    --vapor-violet: 252 100% 85%;
-    --vapor-indigo: 234 89% 74%;
-    --vapor-cyan:   187 92% 69%;
-    --vapor-aqua:   187 100% 84%;
+    --gold: 42 55% 54%;
+    --gold-light: 42 75% 75%;
+    --gold-deep: 38 60% 40%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(var(--vapor-violet)) 0%, hsl(var(--vapor-indigo)) 35%, hsl(var(--vapor-cyan)) 70%, hsl(var(--vapor-aqua)) 100%);
-    --gradient-mesh: radial-gradient(at 20% 10%, hsl(var(--vapor-violet) / 0.55) 0px, transparent 55%),
-                     radial-gradient(at 85% 15%, hsl(var(--vapor-cyan) / 0.45) 0px, transparent 55%),
-                     radial-gradient(at 60% 90%, hsl(var(--vapor-indigo) / 0.45) 0px, transparent 60%);
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.65), hsl(0 0% 100% / 0.35));
-
-    --glass-bg: hsl(0 0% 100% / 0.55);
-    --glass-border: hsl(0 0% 100% / 0.6);
-    --glass-shadow: 0 8px 32px hsl(234 89% 50% / 0.12);
-    --glow-primary: 0 0 40px hsl(var(--vapor-indigo) / 0.45);
+    --gradient-gold: linear-gradient(135deg, hsl(var(--gold-deep)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-light)) 100%);
+    --shadow-gold: 0 0 40px hsl(var(--gold) / 0.25);
   }
 
   .dark {
-    /* Dark vapor mode (primary experience) */
-    --background: 240 35% 6%;
-    --foreground: 240 20% 96%;
+    /* Editorial dark: deep noir with gold accents */
+    --background: 0 0% 5%;          /* #0d0d0d */
+    --foreground: 40 15% 95%;
 
-    --card: 240 30% 10%;
-    --card-foreground: 240 20% 96%;
+    --card: 0 0% 8%;                 /* #141414 */
+    --card-foreground: 40 15% 95%;
 
-    --popover: 240 30% 10%;
-    --popover-foreground: 240 20% 96%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 40 15% 95%;
 
-    --primary: 234 89% 74%;
-    --primary-foreground: 240 35% 8%;
+    --primary: 42 55% 54%;           /* gold */
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 187 92% 69%;
-    --secondary-foreground: 240 35% 8%;
+    --secondary: 42 75% 75%;
+    --secondary-foreground: 0 0% 5%;
 
-    --muted: 240 25% 16%;
-    --muted-foreground: 240 15% 70%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 40 8% 60%;
 
-    --accent: 252 100% 85%;
-    --accent-foreground: 240 35% 8%;
+    --accent: 42 55% 54%;
+    --accent-foreground: 0 0% 5%;
 
-    --destructive: 0 84% 65%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 30% 22%;
-    --input: 240 30% 18%;
-    --ring: 234 89% 74%;
+    --border: 0 0% 14%;
+    --input: 0 0% 10%;
+    --ring: 42 55% 54%;
 
-    --vapor-violet: 252 100% 85%;
-    --vapor-indigo: 234 89% 74%;
-    --vapor-cyan:   187 92% 69%;
-    --vapor-aqua:   187 100% 84%;
+    --gold: 42 55% 54%;
+    --gold-light: 42 75% 75%;
+    --gold-deep: 38 60% 40%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(var(--vapor-violet)) 0%, hsl(var(--vapor-indigo)) 35%, hsl(var(--vapor-cyan)) 70%, hsl(var(--vapor-aqua)) 100%);
-    --gradient-mesh: radial-gradient(at 20% 10%, hsl(var(--vapor-violet) / 0.28) 0px, transparent 55%),
-                     radial-gradient(at 85% 15%, hsl(var(--vapor-cyan) / 0.22) 0px, transparent 55%),
-                     radial-gradient(at 60% 90%, hsl(var(--vapor-indigo) / 0.30) 0px, transparent 60%);
-    --gradient-card: linear-gradient(135deg, hsl(240 30% 14% / 0.7), hsl(240 30% 10% / 0.5));
-
-    --glass-bg: hsl(240 30% 12% / 0.55);
-    --glass-border: hsl(240 30% 60% / 0.18);
-    --glass-shadow: 0 8px 32px hsl(234 89% 30% / 0.35);
-    --glow-primary: 0 0 60px hsl(var(--vapor-indigo) / 0.5);
+    --gradient-gold: linear-gradient(135deg, hsl(var(--gold-deep)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-light)) 100%);
+    --shadow-gold: 0 0 60px hsl(var(--gold) / 0.18);
   }
 }
 
@@ -117,96 +97,135 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
     overflow-x: hidden;
-    background-image: var(--gradient-mesh);
-    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.04em;
+    font-weight: 700;
   }
 }
 
 @layer components {
-  /* === Vapor / Glass primitives === */
-  .vapor-gradient {
-    background: var(--gradient-primary);
-  }
-
-  .vapor-text {
-    background: var(--gradient-primary);
+  /* === Editorial primitives === */
+  .gold-text {
+    background: var(--gradient-gold);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+  .gold-bg {
+    background: var(--gradient-gold);
   }
 
-  .glass-strong {
-    background: var(--gradient-card);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
+  .editorial-card {
+    @apply bg-card border border-border rounded-lg;
   }
 
-  .glow-primary {
-    box-shadow: var(--glow-primary);
+  .editorial-card-hover {
+    @apply editorial-card transition-all duration-300 hover:border-primary/40;
   }
 
-  /* === Legacy yusiop classes (mapped to glass so old markup keeps working) === */
+  .gold-border {
+    border-color: hsl(var(--gold) / 0.4);
+  }
+
+  .gold-glow {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .editorial-divider {
+    @apply h-px bg-border;
+  }
+
+  .editorial-rule {
+    @apply h-px w-12 bg-primary;
+  }
+
+  /* Display heading: huge, tight, magazine-style */
+  .display-xl {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+    line-height: 0.92;
+  }
+
+  .eyebrow {
+    @apply text-[10px] uppercase tracking-[0.32em] text-muted-foreground font-medium;
+    font-family: 'Manrope', system-ui, sans-serif;
+  }
+
+  /* === Legacy yusiop classes (kept for backwards compatibility) === */
   .yusiop-card {
-    @apply glass rounded-2xl p-4;
-  }
-
-  .yusiop-gradient {
-    background: var(--gradient-primary);
+    @apply editorial-card p-4;
   }
 
   .yusiop-button {
-    @apply inline-flex items-center justify-center rounded-2xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .yusiop-button-primary {
-    @apply yusiop-button vapor-gradient text-primary-foreground hover:opacity-90 hover:scale-[1.02] h-10 px-6 shadow-lg;
+    @apply yusiop-button bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6;
   }
 
   .yusiop-button-secondary {
-    @apply yusiop-button glass text-foreground hover:bg-white/10 h-10 px-6;
+    @apply yusiop-button border border-border bg-card text-foreground hover:bg-muted h-10 px-6;
   }
 
   .yusiop-button-ghost {
-    @apply yusiop-button hover:bg-white/5 hover:text-foreground h-10 px-4;
+    @apply yusiop-button hover:bg-muted hover:text-foreground h-10 px-4;
   }
 
   .yusiop-button-outline {
-    @apply yusiop-button border border-white/20 bg-white/5 hover:bg-white/10 h-10 px-4;
+    @apply yusiop-button border border-border bg-transparent hover:bg-muted h-10 px-4;
   }
 
   .yusiop-input {
-    @apply flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent transition-all disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-11 w-full rounded-md border border-border bg-input px-4 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-primary/50 transition-all disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Animated gradient blob backgrounds */
+  /* keep glass classes mapped to editorial card so old markup still renders */
+  .glass {
+    @apply editorial-card;
+  }
+
+  .glass-strong {
+    @apply editorial-card;
+    background: hsl(var(--card));
+  }
+
+  .vapor-text {
+    @apply gold-text;
+  }
+
+  .vapor-gradient {
+    background: var(--gradient-gold);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-gold);
+  }
+
   .vapor-orb {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(60px);
-    opacity: 0.55;
-    pointer-events: none;
-    z-index: 0;
+    display: none; /* editorial style: no orbs */
   }
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .grain::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 }
