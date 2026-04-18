@@ -20,7 +20,7 @@ const handleSignIn = async (e: React.FormEvent) => {
   e.preventDefault();
   const parsed = signInSchema.safeParse({ email, password });
   if (!parsed.success) {
-    toast.error(parsed.error.errors[0].message);
+    toast.error(parsed.error.issues[0].message);
     return;
   }
   const { error } = await signIn(parsed.data.email, parsed.data.password);
@@ -42,7 +42,7 @@ const handleSignIn = async (e: React.FormEvent) => {
 
     const parsed = signUpSchema.safeParse({ email, password, username });
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+      toast.error(parsed.error.issues[0].message);
       return;
     }
 

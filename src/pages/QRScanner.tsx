@@ -92,7 +92,7 @@ const QRScanner = () => {
     e.preventDefault();
     const parsed = qrCodeSchema.safeParse(manualCode);
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+      toast.error(parsed.error.issues[0].message);
       return;
     }
     activateQRCode(parsed.data);
