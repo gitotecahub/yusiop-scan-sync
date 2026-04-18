@@ -310,7 +310,7 @@ const QRScanner = () => {
             <CardTitle className="text-lg text-primary">Tarjeta Estándar</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-foreground">5 Descargas</p>
+            <p className="text-2xl font-bold text-foreground">4 Descargas</p>
             <p className="text-sm text-muted-foreground">
               Perfecto para descubrir nueva música
             </p>
