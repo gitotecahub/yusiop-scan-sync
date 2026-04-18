@@ -14,29 +14,34 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around p-2 bg-background/95 backdrop-blur-sm border-t border-border/50 safe-area-inset-bottom">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
-        const Icon = item.icon;
-        
-        return (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={cn(
-              "flex flex-col items-center justify-center space-y-0.5 px-2 py-1.5 rounded-lg transition-colors",
-              isActive 
-                ? "text-primary" 
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Icon className={cn("h-5 w-5", isActive && "text-primary")} />
-            <span className={cn("text-xs font-medium", isActive && "text-primary")}>
-              {item.label}
-            </span>
-          </Link>
-        );
-      })}
+    <div className="fixed bottom-3 left-3 right-3 z-40 safe-area-inset-bottom">
+      <div className="glass-strong rounded-3xl px-2 py-2 flex items-center justify-around">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "relative flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all duration-300",
+                isActive
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {isActive && (
+                <span className="absolute inset-0 vapor-gradient rounded-2xl shadow-glow" aria-hidden />
+              )}
+              <Icon className={cn("h-5 w-5 relative z-10", isActive && "drop-shadow")} />
+              <span className={cn("text-[10px] font-medium relative z-10", isActive && "font-semibold")}>
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 };

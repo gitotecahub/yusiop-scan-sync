@@ -12,25 +12,27 @@ const SplashScreen = () => {
   }, []);
 
   return (
-    <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-background transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="relative">
-        {/* Círculo de fondo con pulso */}
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-background overflow-hidden transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Vapor orbs */}
+      <div className="vapor-orb w-80 h-80 bg-vapor top-1/4 left-1/4 animate-float-slow" />
+      <div className="vapor-orb w-96 h-96 bg-vapor bottom-1/4 right-1/4 animate-float-slower" />
+
+      <div className="relative z-10 text-center">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full bg-primary/20 animate-ping" />
+          <div className="w-40 h-40 rounded-full vapor-gradient opacity-30 blur-2xl animate-pulse" />
         </div>
-        
-        {/* Logo Y con animación */}
-        <div className="relative z-10 animate-scale-in">
-          <h1 className="text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-pulse">
+
+        <div className="relative animate-scale-in">
+          <h1 className="font-display text-9xl font-bold vapor-text drop-shadow-2xl">
             Y
           </h1>
         </div>
 
-        {/* Nombre completo con fade in retrasado */}
-        <div className="mt-6 text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <div className="mt-4 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+          <h2 className="font-display text-2xl font-semibold tracking-wide vapor-text">
             Yusiop
           </h2>
+          <p className="text-xs text-muted-foreground mt-2 tracking-[0.3em] uppercase">scan · sync · play</p>
         </div>
       </div>
     </div>
