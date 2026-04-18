@@ -373,6 +373,32 @@ const Library = () => {
 
       {/* Playback Controls */}
       <PlaybackControls />
+
+      {/* Confirmación de eliminación */}
+      <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar de tu biblioteca?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre.
+              Tu descarga volverá a estar disponible en el catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmDelete();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
