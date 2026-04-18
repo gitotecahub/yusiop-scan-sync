@@ -15,7 +15,6 @@ import {
 import { Play, Pause, Trash2, Heart, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
-import { useCreditsStore } from '@/stores/creditsStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
 
