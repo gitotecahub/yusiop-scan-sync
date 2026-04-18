@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
@@ -16,21 +15,22 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-const handleSignIn = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const parsed = signInSchema.safeParse({ email, password });
-  if (!parsed.success) {
-    toast.error(parsed.error.issues[0].message);
-    return;
-  }
-  const { error } = await signIn(parsed.data.email, parsed.data.password);
-  if (error) {
-    toast.error('Error al iniciar sesión: ' + error.message);
-  } else {
-    toast.success('¡Bienvenido a YUSIOP!');
-    navigate('/', { replace: true });
-  }
-};
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = signInSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    const { error } = await signIn(parsed.data.email, parsed.data.password);
+    if (error) {
+      toast.error('Error al iniciar sesión: ' + error.message);
+    } else {
+      toast.success('¡Bienvenido a YUSIOP!');
+      navigate('/', { replace: true });
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,80 +56,78 @@ const handleSignIn = async (e: React.FormEvent) => {
 
   return (
     <div className="dark relative min-h-screen bg-background flex items-center justify-center p-5 overflow-hidden grain">
+      {/* Ambient blobs */}
+      <div className="vapor-orb animate-blob-float" style={{ width: 400, height: 400, top: '-15%', left: '-15%', background: 'var(--gradient-vapor)', opacity: 0.5 }} />
+      <div className="vapor-orb animate-blob-float" style={{ width: 320, height: 320, bottom: '-15%', right: '-15%', background: 'var(--gradient-sunset)', animationDelay: '4s', opacity: 0.45 }} />
+
       <div className="relative z-10 w-full max-w-md">
-        {/* Editorial header */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <span className="h-px w-8 bg-border" />
-            <p className="eyebrow">Edición digital</p>
-            <span className="h-px w-8 bg-border" />
-          </div>
+        <div className="text-center mb-8">
           <h1 className="display-xl text-7xl mb-2">
-            <span className="gold-text">Y</span>USIOP
+            <span className="vapor-text">Y</span>USIOP
           </h1>
-          <p className="eyebrow mt-4">Scan · Sync · Play</p>
+          <p className="eyebrow mt-3">Scan · Sync · Play</p>
         </div>
 
-        <div className="border border-border p-7 bg-card">
+        <div className="glass-strong shadow-vapor p-7">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-border rounded-none p-0 h-auto gap-0 mb-6">
+            <TabsList className="grid w-full grid-cols-2 bg-card/40 border border-border rounded-full p-1 h-auto gap-1 mb-6">
               <TabsTrigger
                 value="signin"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-3 text-xs uppercase tracking-[0.18em] font-medium"
+                className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
               >
-                Iniciar Sesión
+                Iniciar
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none py-3 text-xs uppercase tracking-[0.18em] font-medium"
+                className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
               >
-                Registrarse
+                Crear cuenta
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={handleSignIn} className="space-y-5">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="eyebrow">Email</Label>
-                  <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="eyebrow">Contraseña</Label>
-                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
-                <Button type="submit" className="w-full h-11 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 font-medium tracking-wide" disabled={loading}>
-                  {loading ? 'Iniciando…' : 'Iniciar Sesión'}
+                <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
+                  {loading ? 'Iniciando…' : 'Entrar'}
                 </Button>
               </form>
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSignUp} className="space-y-5">
+              <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="eyebrow">Nombre de usuario</Label>
-                  <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Label htmlFor="username" className="eyebrow">Usuario</Label>
+                  <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email" className="eyebrow">Email</Label>
-                  <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="eyebrow">Contraseña</Label>
-                  <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password" className="eyebrow">Repetir Contraseña</Label>
-                  <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-none border-border bg-input h-11" />
+                  <Label htmlFor="confirm-password" className="eyebrow">Repetir</Label>
+                  <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
-                <Button type="submit" className="w-full h-11 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 font-medium tracking-wide" disabled={loading}>
-                  {loading ? 'Registrando…' : 'Crear Cuenta'}
+                <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
+                  {loading ? 'Creando…' : 'Crear cuenta'}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
         </div>
 
-        <p className="eyebrow text-center mt-6">© Yusiop · MMXXVI</p>
+        <p className="eyebrow text-center mt-6">© Yusiop · 2026</p>
       </div>
     </div>
   );

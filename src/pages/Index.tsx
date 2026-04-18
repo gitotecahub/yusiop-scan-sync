@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { QrCode, Music, Library, User, Play, Settings } from 'lucide-react';
+import { QrCode, Music, Library, User, Play, Settings, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,10 +19,10 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
 
   const navCards = [
-    { title: 'Escanear QR', description: 'Activa tu tarjeta', icon: QrCode, link: '/qr', number: '01' },
-    { title: 'Catálogo', description: 'Explora música', icon: Music, link: '/catalog', number: '02' },
-    { title: 'Mi Biblioteca', description: 'Tus descargas', icon: Library, link: '/library', number: '03' },
-    { title: 'Perfil', description: 'Tu cuenta', icon: User, link: '/profile', number: '04' }
+    { title: 'Escanear QR', description: 'Activa tu tarjeta', icon: QrCode, link: '/qr', variant: '' },
+    { title: 'Catálogo', description: 'Explora música', icon: Music, link: '/catalog', variant: 'blob-card-aurora' },
+    { title: 'Mi Biblioteca', description: 'Tus descargas', icon: Library, link: '/library', variant: 'blob-card-sunset' },
+    { title: 'Perfil', description: 'Tu cuenta', icon: User, link: '/profile', variant: '' }
   ];
 
   useEffect(() => {
@@ -84,44 +84,45 @@ const Index = () => {
   };
 
   return (
-    <div className="space-y-10">
-      {/* Hero — editorial cover */}
+    <div className="space-y-8">
+      {/* Hero */}
       <section className="pt-4 pb-2">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="editorial-rule" />
-          <p className="eyebrow">Issue 01 · Sound</p>
+        <div className="flex items-center gap-2 mb-5">
+          <span className="chip chip-vapor">
+            <Sparkles className="h-3 w-3" /> Nuevo · ed.01
+          </span>
         </div>
-        <h1 className="display-xl text-6xl">
-          Sintoniza<br />
-          <span className="gold-text">tu mundo.</span>
+        <h1 className="display-xl text-5xl">
+          Tu música,<br />
+          <span className="vapor-text">en alta fidelidad.</span>
         </h1>
-        <p className="text-sm text-muted-foreground mt-5 max-w-xs leading-relaxed">
-          Una experiencia editorial para escanear, descubrir y coleccionar música. Limpia. Pausada. Tuya.
+        <p className="text-sm text-muted-foreground mt-4 max-w-xs leading-relaxed">
+          Escanea, descubre y colecciona. Una experiencia sonora pensada para tu generación.
         </p>
       </section>
 
-      {/* Navigation index — magazine TOC */}
+      {/* Quick nav — blob cards */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <p className="eyebrow">Índice</p>
-          <p className="eyebrow">04 secciones</p>
+          <p className="eyebrow">Atajos</p>
+          <p className="eyebrow text-primary">04</p>
         </div>
-        <div className="border-t border-border">
+        <div className="grid grid-cols-2 gap-3">
           {navCards.map((card) => {
             const Icon = card.icon;
             return (
               <Link
                 key={card.link}
                 to={card.link}
-                className="group flex items-center gap-4 py-5 border-b border-border transition-colors hover:bg-muted/30"
+                className={`blob-card ${card.variant} group p-5 aspect-[1/1.05] flex flex-col justify-between`}
               >
-                <span className="font-display text-xs font-medium text-muted-foreground tabular-nums w-6">{card.number}</span>
-                <Icon className="h-4 w-4 text-primary shrink-0" strokeWidth={1.6} />
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-base leading-tight">{card.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{card.description}</p>
+                <div className="w-11 h-11 rounded-2xl bg-background/40 backdrop-blur-md border border-border/60 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Icon className="h-5 w-5 text-foreground" strokeWidth={1.8} />
                 </div>
-                <span className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all">→</span>
+                <div>
+                  <h3 className="font-display font-bold text-base leading-tight text-foreground">{card.title}</h3>
+                  <p className="text-[11px] text-foreground/70 mt-1">{card.description}</p>
+                </div>
               </Link>
             );
           })}
@@ -131,27 +132,27 @@ const Index = () => {
       {/* Admin Panel Access */}
       {isAdmin && (
         <Link to="/admin" className="block">
-          <div className="flex items-center gap-4 p-5 border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors">
-            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+          <div className="vapor-card p-5 flex items-center gap-4 hover:shadow-vapor">
+            <div className="w-11 h-11 rounded-2xl vapor-bg flex items-center justify-center shadow-glow">
               <Settings className="h-5 w-5 text-primary-foreground" />
             </div>
             <div className="flex-1">
-              <p className="eyebrow text-primary mb-1">Restringido</p>
+              <p className="eyebrow vapor-text mb-1">Restringido</p>
               <h3 className="font-display font-bold text-sm">Panel de Administración</h3>
             </div>
-            <span className="text-primary">→</span>
+            <span className="text-primary text-lg">→</span>
           </div>
         </Link>
       )}
 
-      {/* Featured — music popular */}
+      {/* Featured */}
       <section>
-        <div className="flex items-end justify-between mb-5">
+        <div className="flex items-end justify-between mb-4">
           <div>
-            <p className="eyebrow mb-2">Destacado</p>
-            <h2 className="font-display text-3xl font-bold tracking-tight">Música Popular</h2>
+            <p className="eyebrow mb-1.5">Trending</p>
+            <h2 className="font-display text-2xl font-bold tracking-tight">Música popular</h2>
           </div>
-          <Link to="/catalog" className="text-xs text-primary hover:underline underline-offset-4">
+          <Link to="/catalog" className="text-xs text-primary hover:underline underline-offset-4 font-semibold">
             Ver todo →
           </Link>
         </div>
@@ -159,7 +160,7 @@ const Index = () => {
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-muted aspect-square animate-pulse" />
+              <div key={i} className="bg-muted aspect-square rounded-3xl animate-pulse" />
             ))}
           </div>
         ) : popularSongs.length > 0 ? (
@@ -168,38 +169,40 @@ const Index = () => {
               <button
                 key={song.id}
                 onClick={() => handleSongClick(song.id)}
-                className="group relative overflow-hidden aspect-square text-left"
+                className="group relative overflow-hidden aspect-square text-left rounded-3xl border border-border hover:shadow-vapor hover:-translate-y-1 transition-all duration-500"
               >
                 <img
                   src={song.cover_url}
                   alt={`${song.title} cover`}
-                  className="absolute inset-0 w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                <div className="absolute top-2 left-2 font-display text-[10px] font-bold text-primary tabular-nums tracking-widest">
-                  N°{String(idx + 1).padStart(2, '0')}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                <div className="absolute top-3 left-3">
+                  <span className="chip text-[10px] bg-background/70 backdrop-blur-md">
+                    #{String(idx + 1).padStart(2, '0')}
+                  </span>
                 </div>
-                <div className="absolute top-2 right-2 w-9 h-9 bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 w-9 h-9 rounded-full vapor-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
                   <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h3 className="font-display font-bold text-sm text-white line-clamp-1 leading-tight">{song.title}</h3>
-                  <p className="text-[11px] text-white/70 line-clamp-1 mt-0.5">{song.artist}</p>
+                  <h3 className="font-display font-bold text-sm text-foreground line-clamp-1 leading-tight">{song.title}</h3>
+                  <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{song.artist}</p>
                 </div>
               </button>
             ))}
           </div>
         ) : (
-          <div className="border border-border p-10 text-center">
-            <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.2} />
-            <p className="text-muted-foreground text-sm">No hay canciones populares disponibles</p>
+          <div className="vapor-card p-10 text-center">
+            <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.4} />
+            <p className="text-muted-foreground text-sm">No hay canciones populares aún</p>
           </div>
         )}
       </section>
 
-      <div className="pt-4 pb-2 border-t border-border flex justify-between items-center">
-        <span className="eyebrow">© Yusiop MMXXVI</span>
-        <span className="eyebrow">Edición digital</span>
+      <div className="pt-4 pb-2 flex justify-between items-center">
+        <span className="eyebrow">© Yusiop 2026</span>
+        <span className="eyebrow vapor-text">Made for sound</span>
       </div>
     </div>
   );
