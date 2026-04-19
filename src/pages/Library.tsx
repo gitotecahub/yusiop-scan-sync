@@ -207,7 +207,7 @@ const Library = () => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
 
           return (
-            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border hover:border-primary/30 hover:bg-card transition-all">
+            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border transition-colors">
               <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
                 {String(idx + 1).padStart(2, '0')}
               </span>
