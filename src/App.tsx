@@ -27,13 +27,12 @@ import Settings from '@/pages/admin/Settings';
 
 // Layout
 import Layout from '@/components/Layout';
-import PhoneMockup from '@/components/PhoneMockup';
 import AudioPlayer from '@/components/AudioPlayer';
 import SplashScreen from '@/components/SplashScreen';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
-import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { AuthProvider } from '@/hooks/useAuth';
 
 const queryClient = new QueryClient();
 
@@ -46,7 +45,6 @@ const AppContent = () => {
   }, [initialize]);
 
   useEffect(() => {
-    // Garantizar que el splash se muestre por al menos 2.5 segundos
     const timer = setTimeout(() => {
       setShowSplash(false);
     }, 2500);
@@ -54,18 +52,13 @@ const AppContent = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Mostrar splash mientras carga o durante el tiempo mínimo
   if (loading || showSplash) {
-    return (
-      <PhoneMockup>
-        <SplashScreen />
-      </PhoneMockup>
-    );
+    return <SplashScreen />;
   }
 
   return (
     <Routes>
-      {/* Admin Routes - Outside PhoneMockup for desktop view */}
+      {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
@@ -76,35 +69,25 @@ const AppContent = () => {
         <Route path="settings" element={<Settings />} />
       </Route>
 
-      {/* Mobile App Routes - Inside PhoneMockup */}
-      <Route path="/auth" element={
-        <PhoneMockup>
-          <Auth />
-        </PhoneMockup>
-      } />
-      
+      <Route path="/auth" element={<Auth />} />
       <Route path="/install" element={<Install />} />
-      
+
       <Route path="/*" element={
-        <PhoneMockup>
-          <div className="min-h-screen bg-background text-foreground">
-            {!session ? (
-              <Auth />
-            ) : (
-              <Layout>
-                <AudioPlayer />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/qr" element={<QRScanner />} />
-                  <Route path="/catalog" element={<Catalog />} />
-                  <Route path="/library" element={<Library />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Layout>
-            )}
-          </div>
-        </PhoneMockup>
+        !session ? (
+          <Auth />
+        ) : (
+          <Layout>
+            <AudioPlayer />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/qr" element={<QRScanner />} />
+              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        )
       } />
     </Routes>
   );
