@@ -236,12 +236,27 @@ const QRCards = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="text-sm text-muted-foreground">
-                Créditos asignados automáticamente: <span className="font-semibold text-foreground">{newCardCredits}</span>
+              <div>
+                <Label htmlFor="card-quantity">Cantidad</Label>
+                <Input
+                  id="card-quantity"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={newCardQuantity}
+                  onChange={(e) => setNewCardQuantity(e.target.value)}
+                  placeholder="Número de códigos a generar"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Máximo 100 códigos por lote
+                </p>
               </div>
-              <Button onClick={generateNewQRCard} className="w-full">
+              <div className="text-sm text-muted-foreground">
+                Créditos por tarjeta: <span className="font-semibold text-foreground">{newCardCredits}</span>
+              </div>
+              <Button onClick={generateNewQRCard} disabled={isGenerating} className="w-full">
                 <QrCode className="h-4 w-4 mr-2" />
-                Generar Código QR
+                {isGenerating ? 'Generando...' : (parseInt(newCardQuantity) > 1 ? `Generar ${newCardQuantity} Códigos QR` : 'Generar Código QR')}
               </Button>
             </div>
           </DialogContent>
