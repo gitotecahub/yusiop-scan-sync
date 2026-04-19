@@ -168,11 +168,6 @@ const Index = () => {
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                <div className="absolute top-3 left-3">
-                  <span className="chip text-[10px] bg-background/70 backdrop-blur-md">
-                    #{String(idx + 1).padStart(2, '0')}
-                  </span>
-                </div>
                 <div className="absolute top-3 right-3 w-9 h-9 rounded-full vapor-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
                   <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
                 </div>
