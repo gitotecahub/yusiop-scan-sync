@@ -1,0 +1,1 @@
+UPDATE public.user_credits SET max_credits = 4 WHERE card_type = 'standard' AND max_credits = 5;
