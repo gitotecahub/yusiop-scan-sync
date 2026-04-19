@@ -37,7 +37,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { session, loading, initialize } = useAuthStore();
+  const { session, initialize } = useAuthStore();
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const AppContent = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading || showSplash) {
+  if (showSplash) {
     return <SplashScreen />;
   }
 
