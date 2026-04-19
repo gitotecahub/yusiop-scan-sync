@@ -64,13 +64,6 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    const { error } = await signInWithGoogle();
-    if (error) {
-      toast.error('Error con Google: ' + error.message);
-    }
-  };
-
   return (
     <div className="dark relative min-h-screen w-full flex items-center justify-center p-5 overflow-hidden grain">
       {/* Full-screen fixed gradient background */}
