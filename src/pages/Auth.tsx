@@ -10,7 +10,7 @@ import { signInSchema, signUpSchema } from '@/lib/validation';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, signInWithGoogle, loading } = useAuthStore();
+  const { signIn, signUp, loading } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
