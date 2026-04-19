@@ -221,7 +221,7 @@ const QRScanner = () => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Escanea<br /><span className="vapor-text">tu QR.</span>
+          Escanea<br /><span className="vapor-text">tu QR</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           Apunta a una tarjeta o introduce el código manualmente.
