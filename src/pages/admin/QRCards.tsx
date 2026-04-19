@@ -31,6 +31,8 @@ const QRCards = () => {
   const [selectedCard, setSelectedCard] = useState<QRCard | null>(null);
   const [qrImageUrl, setQrImageUrl] = useState('');
   const [newCardType, setNewCardType] = useState('standard');
+  const [newCardQuantity, setNewCardQuantity] = useState('1');
+  const [isGenerating, setIsGenerating] = useState(false);
   const newCardCredits = newCardType === 'premium' ? '10' : '4';
   const { toast } = useToast();
 
