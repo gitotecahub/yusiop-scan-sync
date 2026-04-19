@@ -98,10 +98,6 @@ const Index = () => {
 
       {/* Quick nav — blob cards */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <p className="eyebrow">Atajos</p>
-          <p className="eyebrow text-primary">04</p>
-        </div>
         <div className="grid grid-cols-2 gap-3">
           {navCards.map((card) => {
             const Icon = card.icon;
