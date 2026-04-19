@@ -289,9 +289,6 @@ useEffect(() => {
                 descargas · tarjeta {userCredits.card_type}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-2xl vapor-bg flex items-center justify-center shadow-glow">
-              <Download className="h-5 w-5 text-primary-foreground" strokeWidth={2} />
-            </div>
           </div>
         </div>
       )}
