@@ -279,7 +279,7 @@ const Library = () => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Biblioteca<span className="vapor-text">.</span>
+          Biblioteca
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           Tu colección personal, lista para sonar.
