@@ -220,9 +220,9 @@ const Library = () => {
                 <Button
                   size="sm"
                   onClick={() => handlePlay(song)}
-                  className="absolute inset-0 w-full h-full bg-background/70 backdrop-blur-sm text-primary border-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl p-0"
+                  className="absolute inset-0 w-full h-full bg-transparent hover:bg-background/30 text-white border-0 rounded-xl p-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                 >
-                  {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+                  {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
                 </Button>
               </div>
 
