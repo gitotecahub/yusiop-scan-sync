@@ -207,7 +207,7 @@ const Library = () => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
 
           return (
-            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border hover:border-primary/30 hover:bg-card transition-all">
+            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border transition-colors">
               <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
                 {String(idx + 1).padStart(2, '0')}
               </span>
@@ -220,7 +220,7 @@ const Library = () => {
                 <Button
                   size="sm"
                   onClick={() => handlePlay(song)}
-                  className="absolute inset-0 w-full h-full bg-transparent hover:bg-background/30 text-white border-0 rounded-xl p-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+                  className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
                 >
                   {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
                 </Button>
