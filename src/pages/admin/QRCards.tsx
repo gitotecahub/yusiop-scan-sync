@@ -98,8 +98,18 @@ const QRCards = () => {
     const quantity = Math.max(1, Math.min(100, parseInt(newCardQuantity) || 1));
     setIsGenerating(true);
     try {
-      const rows = Array.from({ length: quantity }, () => ({
-        code: `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const generateCode = () => {
+        let code = '';
+        const arr = new Uint32Array(6);
+        crypto.getRandomValues(arr);
+        for (let i = 0; i < 6; i++) code += chars[arr[i] % chars.length];
+        return code;
+      };
+      const codes = new Set<string>();
+      while (codes.size < quantity) codes.add(generateCode());
+      const rows = Array.from(codes).map((code) => ({
+        code,
         card_type: newCardType as 'standard' | 'premium',
         download_credits: parseInt(newCardCredits),
       }));
