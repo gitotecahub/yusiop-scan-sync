@@ -258,7 +258,7 @@ useEffect(() => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Catálogo<span className="vapor-text">.</span>
+          Catálogo<span className="vapor-text"></span>
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           Descubre y descarga tu música favorita.
