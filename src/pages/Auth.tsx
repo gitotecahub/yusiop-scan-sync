@@ -49,9 +49,18 @@ const Auth = () => {
 
     const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
     if (error) {
-      toast.error('Error al registrarse: ' + error.message);
+      if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
+        toast.error('Este email ya está registrado. Inicia sesión.');
+        setActiveTab('signin');
+      } else {
+        toast.error('Error al registrarse: ' + error.message);
+      }
     } else {
-      toast.success('¡Cuenta creada! Revisa tu email para confirmar.');
+      toast.success('¡Cuenta creada! Te enviamos un email para confirmar tu cuenta.');
+      setPassword('');
+      setConfirmPassword('');
+      setUsername('');
+      setActiveTab('signin');
     }
   };
 
