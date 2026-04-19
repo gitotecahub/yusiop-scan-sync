@@ -95,32 +95,36 @@ const QRCards = () => {
   };
 
   const generateNewQRCard = async () => {
+    const quantity = Math.max(1, Math.min(100, parseInt(newCardQuantity) || 1));
+    setIsGenerating(true);
     try {
-      const uniqueCode = `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const { error } = await supabase
-        .from('qr_cards')
-        .insert({
-          code: uniqueCode,
-          card_type: newCardType as 'standard' | 'premium',
-          download_credits: parseInt(newCardCredits),
-        });
+      const rows = Array.from({ length: quantity }, () => ({
+        code: `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        card_type: newCardType as 'standard' | 'premium',
+        download_credits: parseInt(newCardCredits),
+      }));
+
+      const { error } = await supabase.from('qr_cards').insert(rows);
 
       if (error) throw error;
 
       toast({
         title: 'Éxito',
-        description: 'Nuevo código QR generado correctamente',
+        description: `${quantity} código${quantity > 1 ? 's' : ''} QR generado${quantity > 1 ? 's' : ''} correctamente`,
       });
 
       setShowCreateDialog(false);
+      setNewCardQuantity('1');
       fetchQRCards();
     } catch (error) {
       console.error('Error generating QR card:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo generar el código QR',
+        description: 'No se pudieron generar los códigos QR',
         variant: 'destructive',
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
