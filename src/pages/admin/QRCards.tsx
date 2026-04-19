@@ -31,6 +31,8 @@ const QRCards = () => {
   const [selectedCard, setSelectedCard] = useState<QRCard | null>(null);
   const [qrImageUrl, setQrImageUrl] = useState('');
   const [newCardType, setNewCardType] = useState('standard');
+  const [newCardQuantity, setNewCardQuantity] = useState('1');
+  const [isGenerating, setIsGenerating] = useState(false);
   const newCardCredits = newCardType === 'premium' ? '10' : '4';
   const { toast } = useToast();
 
@@ -93,32 +95,36 @@ const QRCards = () => {
   };
 
   const generateNewQRCard = async () => {
+    const quantity = Math.max(1, Math.min(100, parseInt(newCardQuantity) || 1));
+    setIsGenerating(true);
     try {
-      const uniqueCode = `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const { error } = await supabase
-        .from('qr_cards')
-        .insert({
-          code: uniqueCode,
-          card_type: newCardType as 'standard' | 'premium',
-          download_credits: parseInt(newCardCredits),
-        });
+      const rows = Array.from({ length: quantity }, () => ({
+        code: `QR${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        card_type: newCardType as 'standard' | 'premium',
+        download_credits: parseInt(newCardCredits),
+      }));
+
+      const { error } = await supabase.from('qr_cards').insert(rows);
 
       if (error) throw error;
 
       toast({
         title: 'Éxito',
-        description: 'Nuevo código QR generado correctamente',
+        description: `${quantity} código${quantity > 1 ? 's' : ''} QR generado${quantity > 1 ? 's' : ''} correctamente`,
       });
 
       setShowCreateDialog(false);
+      setNewCardQuantity('1');
       fetchQRCards();
     } catch (error) {
       console.error('Error generating QR card:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo generar el código QR',
+        description: 'No se pudieron generar los códigos QR',
         variant: 'destructive',
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -230,12 +236,27 @@ const QRCards = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="text-sm text-muted-foreground">
-                Créditos asignados automáticamente: <span className="font-semibold text-foreground">{newCardCredits}</span>
+              <div>
+                <Label htmlFor="card-quantity">Cantidad</Label>
+                <Input
+                  id="card-quantity"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={newCardQuantity}
+                  onChange={(e) => setNewCardQuantity(e.target.value)}
+                  placeholder="Número de códigos a generar"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Máximo 100 códigos por lote
+                </p>
               </div>
-              <Button onClick={generateNewQRCard} className="w-full">
+              <div className="text-sm text-muted-foreground">
+                Créditos por tarjeta: <span className="font-semibold text-foreground">{newCardCredits}</span>
+              </div>
+              <Button onClick={generateNewQRCard} disabled={isGenerating} className="w-full">
                 <QrCode className="h-4 w-4 mr-2" />
-                Generar Código QR
+                {isGenerating ? 'Generando...' : (parseInt(newCardQuantity) > 1 ? `Generar ${newCardQuantity} Códigos QR` : 'Generar Código QR')}
               </Button>
             </div>
           </DialogContent>
