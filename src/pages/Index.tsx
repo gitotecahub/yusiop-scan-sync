@@ -89,7 +89,7 @@ const Index = () => {
       <section className="pt-4 pb-2">
         <h1 className="display-xl text-5xl">
           Tu música,<br />
-          <span className="vapor-text">en alta fidelidad.</span>
+          <span className="vapor-text">en alta fidelidad</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-4 max-w-xs leading-relaxed">
           Escanea, descubre y colecciona. Una experiencia sonora pensada para tu generación.
