@@ -295,10 +295,6 @@ useEffect(() => {
 
       {/* Songs List */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="eyebrow">Pistas</p>
-          <p className="eyebrow text-primary tabular-nums">{String(filteredSongs.length).padStart(3, '0')}</p>
-        </div>
 
         {filteredSongs.length === 0 && searchTerm ? (
           <div className="vapor-card p-10 text-center">
