@@ -11,6 +11,7 @@ import { signInSchema, signUpSchema } from '@/lib/validation';
 const Auth = () => {
   const navigate = useNavigate();
   const { signIn, signUp, loading } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -48,9 +49,18 @@ const Auth = () => {
 
     const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
     if (error) {
-      toast.error('Error al registrarse: ' + error.message);
+      if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
+        toast.error('Este email ya está registrado. Inicia sesión.');
+        setActiveTab('signin');
+      } else {
+        toast.error('Error al registrarse: ' + error.message);
+      }
     } else {
-      toast.success('¡Cuenta creada! Revisa tu email para confirmar.');
+      toast.success('¡Cuenta creada! Te enviamos un email para confirmar tu cuenta.');
+      setPassword('');
+      setConfirmPassword('');
+      setUsername('');
+      setActiveTab('signin');
     }
   };
 
@@ -74,7 +84,7 @@ const Auth = () => {
         </div>
 
         <div className="glass-strong shadow-vapor p-7">
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'signin' | 'signup')} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-card/40 border border-border rounded-full p-1 h-auto gap-1 mb-6">
               <TabsTrigger
                 value="signin"
