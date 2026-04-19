@@ -325,7 +325,7 @@ const Profile = () => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Perfil<span className="vapor-text">.</span>
+          Perfil
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           Gestiona tu identidad y preferencias.
