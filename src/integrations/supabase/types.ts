@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_user_notes: {
+        Row: {
+          author_user_id: string
+          created_at: string
+          id: string
+          note: string
+          pinned: boolean
+          target_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id: string
+          created_at?: string
+          id?: string
+          note: string
+          pinned?: boolean
+          target_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          pinned?: boolean
+          target_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       albums: {
         Row: {
           artist_id: string
