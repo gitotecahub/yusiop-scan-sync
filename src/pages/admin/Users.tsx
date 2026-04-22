@@ -318,7 +318,7 @@ const Users = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard title="Total" value={stats.total} icon={UsersIcon} />
         <StatCard title="Clientes" value={stats.customers} icon={ShoppingBag} hint="Con ≥1 compra" />
-        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥3 compras" accent />
+        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥50 descargas" accent />
         <StatCard title="Admins" value={stats.admins} icon={ShieldCheck} />
       </div>
 
@@ -344,7 +344,7 @@ const Users = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los usuarios</SelectItem>
-                <SelectItem value="vip">⭐ VIP (≥3 compras)</SelectItem>
+                <SelectItem value="vip">⭐ VIP (≥50 descargas)</SelectItem>
                 <SelectItem value="customers">Clientes (≥1 compra)</SelectItem>
                 <SelectItem value="gift_redeemers">🎁 Canjearon regalo</SelectItem>
                 <SelectItem value="no_purchases">Sin compras</SelectItem>
@@ -383,12 +383,12 @@ const Users = () => {
                           <ShieldCheck className="h-3 w-3" /> Admin
                         </Badge>
                       )}
-                      {user.purchaseCount >= 3 && (
+                      {user.downloadCount >= 50 && (
                         <Badge variant="default" className="text-xs gap-1 bg-primary/80">
                           <Crown className="h-3 w-3" /> VIP
                         </Badge>
                       )}
-                      {user.purchaseCount > 0 && user.purchaseCount < 3 && (
+                      {user.purchaseCount > 0 && (
                         <Badge variant="secondary" className="text-xs">
                           {user.purchaseCount} compra{user.purchaseCount > 1 ? 's' : ''}
                         </Badge>
