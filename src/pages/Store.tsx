@@ -66,7 +66,14 @@ const Store = () => {
       });
       if (error) throw error;
       if (data?.url) {
-        window.location.href = data.url;
+        // Abrir en pestaña nueva para evitar bloqueo de Stripe en iframes (preview de Lovable)
+        const opened = window.open(data.url, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+          // Fallback si el navegador bloquea popups
+          window.location.href = data.url;
+        } else {
+          toast.success('Abriendo Stripe Checkout en una nueva pestaña…');
+        }
       } else {
         throw new Error('No se recibió URL de pago');
       }
