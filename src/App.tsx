@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from '@/pages/admin/AdminLayout';
 import Dashboard from '@/pages/admin/Dashboard';
 import Users from '@/pages/admin/Users';
+import UserDetail from '@/pages/admin/UserDetail';
 import Songs from '@/pages/admin/Songs';
 import Albums from '@/pages/admin/Albums';
 import QRCards from '@/pages/admin/QRCards';
@@ -64,6 +65,7 @@ const AppContent = () => {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
+        <Route path="users/:userId" element={<UserDetail />} />
         <Route path="songs" element={<Songs />} />
         <Route path="albums" element={<Albums />} />
         <Route path="qr-cards" element={<QRCards />} />
