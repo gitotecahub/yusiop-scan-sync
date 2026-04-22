@@ -266,7 +266,7 @@ const Users = () => {
 
       const matchesSegment =
         segment === 'all' ||
-        (segment === 'vip' && u.purchaseCount >= 3) ||
+        (segment === 'vip' && u.downloadCount >= 50) ||
         (segment === 'customers' && u.purchaseCount >= 1) ||
         (segment === 'gift_redeemers' && u.hasGiftRedeemed) ||
         (segment === 'no_purchases' && u.purchaseCount === 0) ||
@@ -279,7 +279,7 @@ const Users = () => {
   const stats = useMemo(() => ({
     total: users.length,
     admins: users.filter((u) => u.role === 'admin').length,
-    vip: users.filter((u) => u.purchaseCount >= 3).length,
+    vip: users.filter((u) => u.downloadCount >= 50).length,
     customers: users.filter((u) => u.purchaseCount >= 1).length,
   }), [users]);
 
