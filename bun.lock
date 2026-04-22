@@ -1598,7 +1598,7 @@
 
     "workbox-cacheable-response": ["workbox-cacheable-response@7.3.0", "", { "dependencies": { "workbox-core": "7.3.0" } }, "sha512-eAFERIg6J2LuyELhLlmeRcJFa5e16Mj8kL2yCDbhWE+HUun9skRQrGIFVUagqWj4DMaaPSMWfAolM7XZZxNmxA=="],
 
-    "workbox-core": ["workbox-core@7.4.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/workbox-core/-/workbox-core-7.4.0.tgz", {}, "sha512-6BMfd8tYEnN4baG4emG9U0hdXM4gGuDU3ectXuVHnj71vwxTFI7WOpQJC4siTOlVtGqCUtj0ZQNsrvi6kZZTAQ=="],
+    "workbox-core": ["workbox-core@7.4.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/workbox-core/-/workbox-core-7.4.0.tgz", {}, "sha512-6BMfd8tYEnN4baG4emG9U0hdXM4gGuDU3ectXuVHnj71vwxTFI7WOpQJC4siTOlVtGqCUtj0ZQNsrvi6kZZTAQ=="],
 
     "workbox-expiration": ["workbox-expiration@7.3.0", "", { "dependencies": { "idb": "^7.0.1", "workbox-core": "7.3.0" } }, "sha512-lpnSSLp2BM+K6bgFCWc5bS1LR5pAwDWbcKt1iL87/eTSJRdLdAwGQznZE+1czLgn/X05YChsrEegTNxjM067vQ=="],
 
@@ -1620,7 +1620,7 @@
 
     "workbox-sw": ["workbox-sw@7.3.0", "", {}, "sha512-aCUyoAZU9IZtH05mn0ACUpyHzPs0lMeJimAYkQkBsOWiqaJLgusfDCR+yllkPkFRxWpZKF8vSvgHYeG7LwhlmA=="],
 
-    "workbox-window": ["workbox-window@7.4.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/workbox-window/-/workbox-window-7.4.0.tgz", { "dependencies": { "@types/trusted-types": "^2.0.2", "workbox-core": "7.4.0" } }, "sha512-/bIYdBLAVsNR3v7gYGaV4pQW3M3kEPx5E8vDxGvxo6khTrGtSSCS7QiFKv9ogzBgZiy0OXLP9zO28U/1nF1mfw=="],
+    "workbox-window": ["workbox-window@7.4.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/workbox-window/-/workbox-window-7.4.0.tgz", { "dependencies": { "@types/trusted-types": "^2.0.2", "workbox-core": "7.4.0" } }, "sha512-/bIYdBLAVsNR3v7gYGaV4pQW3M3kEPx5E8vDxGvxo6khTrGtSSCS7QiFKv9ogzBgZiy0OXLP9zO28U/1nF1mfw=="],
 
     "wrap-ansi": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
 
