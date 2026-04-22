@@ -27,7 +27,6 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const songId = typeof body?.songId === "string" ? body.songId.trim() : "";
 
-    // Basic input validation
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!songId || !uuidRegex.test(songId)) {
@@ -37,13 +36,11 @@ serve(async (req) => {
       });
     }
 
-    // Service-role client to bypass RLS for atomic credit operations
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Authenticate caller
     const { data: { user }, error: userError } = await supabase.auth.getUser(
       authHeader.replace("Bearer ", ""),
     );
@@ -57,7 +54,6 @@ serve(async (req) => {
       );
     }
 
-    // Verify the song exists
     const { data: song, error: songError } = await supabase
       .from("songs")
       .select("id, title")
@@ -71,7 +67,65 @@ serve(async (req) => {
       });
     }
 
-    // Get the most recent active credit row for this user with credits remaining
+    // 1) Tarjetas digitales/owned (qr_cards) primero
+    const { data: ownedCard, error: ownedErr } = await supabase
+      .from("qr_cards")
+      .select("*")
+      .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+      .gt("download_credits", 0)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (ownedErr) console.error("Error fetching owned cards:", ownedErr);
+
+    if (ownedCard) {
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        "consume_card_credit",
+        {
+          p_card_id: ownedCard.id,
+          p_user_id: user.id,
+          p_song_id: song.id,
+        },
+      );
+
+      if (rpcError) {
+        console.error("consume_card_credit error:", rpcError);
+        return new Response(
+          JSON.stringify({ error: "Error al consumir crédito" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      const result = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+      if (!result?.success) {
+        return new Response(
+          JSON.stringify({ error: result?.message || "No se pudo descargar" }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          credits_remaining: result.credits_left,
+          card_type: ownedCard.card_type,
+          source: "qr_card",
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // 2) Fallback: créditos legacy en user_credits
     const { data: credits, error: creditsError } = await supabase
       .from("user_credits")
       .select("*")
@@ -102,7 +156,6 @@ serve(async (req) => {
       );
     }
 
-    // Check expiration
     if (
       credits.expires_at && new Date(credits.expires_at).getTime() < Date.now()
     ) {
@@ -117,7 +170,6 @@ serve(async (req) => {
 
     const newRemaining = credits.credits_remaining - 1;
 
-    // Record the download
     const { error: downloadError } = await supabase
       .from("user_downloads")
       .insert({
@@ -137,7 +189,6 @@ serve(async (req) => {
       );
     }
 
-    // Decrement credits server-side
     const { error: updateError } = await supabase
       .from("user_credits")
       .update({
@@ -161,6 +212,7 @@ serve(async (req) => {
         success: true,
         credits_remaining: newRemaining,
         card_type: credits.card_type,
+        source: "user_credits",
       }),
       {
         status: 200,
