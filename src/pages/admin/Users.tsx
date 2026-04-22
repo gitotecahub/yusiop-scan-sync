@@ -85,13 +85,14 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const [profilesRes, rolesRes, purchasesRes, cardsRes] = await Promise.all([
+      const [profilesRes, rolesRes, purchasesRes, cardsRes, downloadsRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('user_roles').select('user_id, role'),
         supabase
           .from('card_purchases')
           .select('buyer_user_id, amount_cents, status'),
         supabase.from('qr_cards').select('owner_user_id, activated_by, is_gift, gift_redeemed'),
+        supabase.from('user_downloads').select('user_id'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
