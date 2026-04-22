@@ -116,22 +116,57 @@ const MyCards = () => {
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
-        {cards.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelected(c)}
-            className="text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/60 rounded-2xl"
-            aria-label={`Ver detalles de tarjeta ${c.card_type}`}
-          >
-            <DigitalCard
-              code={c.code}
-              cardType={c.card_type}
-              downloadCredits={c.download_credits}
-              isGift={c.is_gift}
-              compact
-            />
-          </button>
-        ))}
+        {cards.map((c) => {
+          const depleted = c.download_credits <= 0;
+          return (
+            <div key={c.id} className="relative group">
+              <button
+                onClick={() => setSelected(c)}
+                className="w-full text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/60 rounded-2xl"
+                aria-label={`Ver detalles de tarjeta ${c.card_type}`}
+              >
+                <DigitalCard
+                  code={c.code}
+                  cardType={c.card_type}
+                  downloadCredits={c.download_credits}
+                  isGift={c.is_gift}
+                  compact
+                />
+              </button>
+
+              {depleted && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-destructive/90 hover:bg-destructive text-destructive-foreground flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20 transition-transform hover:scale-110"
+                      aria-label="Eliminar tarjeta agotada"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(c.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
