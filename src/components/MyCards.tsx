@@ -1,12 +1,38 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
+
+const HIDDEN_KEY = 'yusiop_hidden_cards';
+const getHiddenIds = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(HIDDEN_KEY) ?? '[]');
+  } catch {
+    return [];
+  }
+};
+const addHiddenId = (id: string) => {
+  const ids = getHiddenIds();
+  if (!ids.includes(id)) {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...ids, id]));
+  }
+};
 
 interface MyCard {
   id: string;
