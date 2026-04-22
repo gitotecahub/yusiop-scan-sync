@@ -123,6 +123,13 @@ const Users = () => {
         });
       });
 
+      // Aggregate downloads per user
+      const downloadStats = new Map<string, number>();
+      (downloadsRes.data ?? []).forEach((d) => {
+        if (!d.user_id) return;
+        downloadStats.set(d.user_id, (downloadStats.get(d.user_id) ?? 0) + 1);
+      });
+
       const merged: UserProfile[] = (profilesRes.data ?? []).map((p) => {
         const purch = purchaseStats.get(p.user_id);
         const card = cardStats.get(p.user_id);
@@ -139,6 +146,7 @@ const Users = () => {
           totalSpentCents: purch?.total ?? 0,
           cardCount: card?.count ?? 0,
           hasGiftRedeemed: card?.giftRedeemed ?? false,
+          downloadCount: downloadStats.get(p.user_id) ?? 0,
         };
       });
 
