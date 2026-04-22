@@ -43,7 +43,7 @@ const Store = () => {
     const status = params.get('status');
     if (status === 'success') {
       toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta ya está disponible.', {
-        duration: 6000,
+        duration: 2500,
       });
       navigate('/library', { replace: true });
     } else if (status === 'cancelled') {
