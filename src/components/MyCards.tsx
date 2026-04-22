@@ -214,19 +214,13 @@ const MyCards = () => {
               </p>
 
               <div className="space-y-3 pt-2">
-                <button
-                  onClick={() => handleCopy(selected.code)}
-                  className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40 hover:bg-muted transition-colors group"
-                >
+                <div className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
                     <span>Código</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold">{selected.code}</span>
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
-                  </div>
-                </button>
+                  <span className="font-mono font-bold">{selected.code}</span>
+                </div>
 
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
