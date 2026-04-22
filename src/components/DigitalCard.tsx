@@ -51,13 +51,19 @@ const DigitalCard = ({
   const manualCode = code.split('-').pop()?.slice(0, 6).toUpperCase() ?? code.slice(0, 6).toUpperCase();
   const qr = qrValue ?? code;
 
+  const isDepleted = downloadCredits <= 0;
+
   return (
     <div
-      className="relative w-full aspect-[1.586/1] rounded-3xl overflow-hidden border shadow-2xl"
+      className="relative w-full aspect-[1.586/1] rounded-3xl overflow-hidden border shadow-2xl transition-all"
       style={{
         background: p.bg,
         borderColor: p.border,
-        boxShadow: `0 20px 60px -20px ${p.glow}, 0 0 0 1px ${p.border} inset`,
+        boxShadow: isDepleted
+          ? `0 8px 24px -12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset`
+          : `0 20px 60px -20px ${p.glow}, 0 0 0 1px ${p.border} inset`,
+        filter: isDepleted ? 'grayscale(0.85) brightness(0.55) contrast(0.95)' : undefined,
+        opacity: isDepleted ? 0.75 : 1,
       }}
     >
       {/* Patrón de ondas decorativas */}
