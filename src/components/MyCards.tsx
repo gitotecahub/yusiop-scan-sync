@@ -22,6 +22,18 @@ const MyCards = () => {
   const [cards, setCards] = useState<MyCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success('Código copiado al portapapeles');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('No se pudo copiar el código');
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
