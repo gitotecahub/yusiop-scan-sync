@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Gift, Check, Loader2 } from 'lucide-react';
+import { Sparkles, Gift, Check, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -76,6 +76,41 @@ const Store = () => {
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message ?? 'Error iniciando el pago');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSimulate = async () => {
+    if (isGift && !recipient.includes('@')) {
+      toast.error('Introduce un email válido para el destinatario.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('simulate-card-purchase', {
+        body: {
+          card_type: selected,
+          is_gift: isGift,
+          gift_recipient_email: isGift ? recipient.trim() : undefined,
+          gift_message: isGift ? message.trim() : undefined,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error('No se pudo simular la compra');
+
+      if (isGift && data.redemption_token) {
+        const link = `${window.location.origin}/redeem/${data.redemption_token}`;
+        await navigator.clipboard.writeText(link).catch(() => {});
+        toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 6000 });
+        navigate('/', { replace: true });
+      } else {
+        toast.success('🎉 ¡Felicidades! Compra simulada con éxito. Tu tarjeta ya está activa.', { duration: 6000 });
+        navigate('/', { replace: true });
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? 'Error simulando la compra');
     } finally {
       setLoading(false);
     }
@@ -171,8 +206,24 @@ const Store = () => {
         )}
       </Button>
 
+      <Button
+        variant="outline"
+        className="w-full h-12 text-base font-semibold mt-3 border-dashed border-primary/40 text-primary hover:bg-primary/10"
+        onClick={handleSimulate}
+        disabled={loading}
+      >
+        {loading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <>
+            <Zap className="h-4 w-4 mr-2" />
+            Simular compra (sin pago)
+          </>
+        )}
+      </Button>
+
       <p className="text-xs text-muted-foreground text-center mt-3">
-        Pago seguro con Stripe · Modo prueba activo
+        Pago seguro con Stripe · La simulación crea la tarjeta al instante
       </p>
     </div>
   );
