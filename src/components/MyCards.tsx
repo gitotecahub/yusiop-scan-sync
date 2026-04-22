@@ -1,12 +1,38 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
+
+const HIDDEN_KEY = 'yusiop_hidden_cards';
+const getHiddenIds = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(HIDDEN_KEY) ?? '[]');
+  } catch {
+    return [];
+  }
+};
+const addHiddenId = (id: string) => {
+  const ids = getHiddenIds();
+  if (!ids.includes(id)) {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...ids, id]));
+  }
+};
 
 interface MyCard {
   id: string;
@@ -35,6 +61,13 @@ const MyCards = () => {
     }
   };
 
+  const handleDelete = (id: string) => {
+    addHiddenId(id);
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    setSelected(null);
+    toast.success('Tarjeta eliminada de tu biblioteca');
+  };
+
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -48,7 +81,10 @@ const MyCards = () => {
         .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (!error && data) setCards(data as MyCard[]);
+      if (!error && data) {
+        const hidden = new Set(getHiddenIds());
+        setCards((data as MyCard[]).filter((c) => !hidden.has(c.id)));
+      }
       setLoading(false);
     };
     load();
@@ -80,22 +116,57 @@ const MyCards = () => {
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
-        {cards.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelected(c)}
-            className="text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/60 rounded-2xl"
-            aria-label={`Ver detalles de tarjeta ${c.card_type}`}
-          >
-            <DigitalCard
-              code={c.code}
-              cardType={c.card_type}
-              downloadCredits={c.download_credits}
-              isGift={c.is_gift}
-              compact
-            />
-          </button>
-        ))}
+        {cards.map((c) => {
+          const depleted = c.download_credits <= 0;
+          return (
+            <div key={c.id} className="relative group">
+              <button
+                onClick={() => setSelected(c)}
+                className="w-full text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/60 rounded-2xl"
+                aria-label={`Ver detalles de tarjeta ${c.card_type}`}
+              >
+                <DigitalCard
+                  code={c.code}
+                  cardType={c.card_type}
+                  downloadCredits={c.download_credits}
+                  isGift={c.is_gift}
+                  compact
+                />
+              </button>
+
+              {depleted && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-destructive/90 hover:bg-destructive text-destructive-foreground flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20 transition-transform hover:scale-110"
+                      aria-label="Eliminar tarjeta agotada"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(c.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
@@ -185,6 +256,34 @@ const MyCards = () => {
                     </Badge>
                   )}
                 </div>
+
+                {selected.download_credits <= 0 && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full h-11 gap-2 mt-2">
+                        <Trash2 className="h-4 w-4" />
+                        Eliminar tarjeta agotada
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(selected.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
           )}
