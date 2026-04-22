@@ -45,6 +45,9 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
           {
@@ -54,7 +57,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'supabase-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 semana
+                maxAgeSeconds: 60 * 60 * 24 * 7
               }
             }
           }
