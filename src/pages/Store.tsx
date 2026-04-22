@@ -41,8 +41,10 @@ const Store = () => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
     if (status === 'success') {
-      toast.success('¡Pago completado! Tu tarjeta estará disponible en unos segundos.');
-      navigate('/library', { replace: true });
+      toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta estará disponible en unos segundos.', {
+        duration: 6000,
+      });
+      navigate('/', { replace: true });
     } else if (status === 'cancelled') {
       toast.info('Compra cancelada.');
       navigate('/store', { replace: true });
@@ -66,14 +68,8 @@ const Store = () => {
       });
       if (error) throw error;
       if (data?.url) {
-        // Abrir en pestaña nueva para evitar bloqueo de Stripe en iframes (preview de Lovable)
-        const opened = window.open(data.url, '_blank', 'noopener,noreferrer');
-        if (!opened) {
-          // Fallback si el navegador bloquea popups
-          window.location.href = data.url;
-        } else {
-          toast.success('Abriendo Stripe Checkout en una nueva pestaña…');
-        }
+        // Redirigir en la misma pestaña para que el usuario vuelva a la app tras pagar
+        window.location.href = data.url;
       } else {
         throw new Error('No se recibió URL de pago');
       }

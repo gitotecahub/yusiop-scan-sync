@@ -1,8 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QrCode, Music, Library, User, Play, Settings, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PopularSong {
   id: string;
@@ -15,8 +16,20 @@ interface PopularSong {
 const Index = () => {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [popularSongs, setPopularSongs] = useState<PopularSong[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mensaje de felicitación tras volver de Stripe Checkout
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('status') === 'success') {
+      toast.success('🎉 ¡Felicidades por tu compra! Tu tarjeta estará disponible en unos segundos.', {
+        duration: 6000,
+      });
+      navigate('/', { replace: true });
+    }
+  }, [location.search, navigate]);
 
   const navCards = [
     { title: 'Escanear QR', description: 'Activa tu tarjeta', icon: QrCode, link: '/qr', variant: '' },
