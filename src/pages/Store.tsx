@@ -162,6 +162,15 @@ const Store = () => {
 
   return (
     <div className="min-h-screen pb-32 px-4 pt-6 max-w-md mx-auto">
+      {confirming && (
+        <div className="fixed inset-0 z-50 bg-background/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <h2 className="text-lg font-semibold">Confirmando tu compra…</h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Estamos activando tu tarjeta. Esto puede tardar unos segundos.
+          </p>
+        </div>
+      )}
       <header className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Tienda</h1>
         <p className="text-sm text-muted-foreground mt-1">
