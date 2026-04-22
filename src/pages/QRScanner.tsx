@@ -60,25 +60,52 @@ const QRScanner = () => {
         return;
       }
 
-      // Éxito - mostrar mensaje y actualizar créditos localmente
+      // Éxito - mostrar mensaje
       toast.success(`¡${data.message}! ${data.credits} créditos disponibles`);
       stopScanning();
-      
-      // Actualizar los créditos en el store local
-      if (data.credits && data.cardType) {
-        setUserCredits({
-          credits_remaining: data.credits,
-          card_type: data.cardType,
-          expires_at: data.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          is_active: true
-        });
+
+      // Recargar créditos REALES desde la base de datos (suma user_credits + qr_cards)
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          const [{ data: creditsRows }, { data: ownedCards }] = await Promise.all([
+            supabase
+              .from('user_credits')
+              .select('*')
+              .eq('user_email', user.email)
+              .eq('is_active', true)
+              .gt('credits_remaining', 0)
+              .gt('expires_at', new Date().toISOString())
+              .order('scanned_at', { ascending: false }),
+            supabase
+              .from('qr_cards')
+              .select('card_type, download_credits')
+              .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+              .gt('download_credits', 0),
+          ]);
+
+          const totalLegacy = (creditsRows ?? []).reduce((s, r: any) => s + (r.credits_remaining ?? 0), 0);
+          const totalOwned = (ownedCards ?? []).reduce((s, c: any) => s + (c.download_credits ?? 0), 0);
+          const total = totalLegacy + totalOwned;
+
+          if (total > 0) {
+            setUserCredits({
+              credits_remaining: total,
+              card_type: (creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? data.cardType ?? 'standard') as string,
+              expires_at: creditsRows?.[0]?.expires_at ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+              is_active: true,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('No se pudo refrescar el balance', e);
       }
-      
+
       // Redirigir al catálogo después de un breve delay
       setTimeout(() => {
         navigate('/catalog');
       }, 1500);
-      
+
     } catch (error: any) {
       console.error('Error activating QR:', error);
       toast.error('Error al activar el QR');
