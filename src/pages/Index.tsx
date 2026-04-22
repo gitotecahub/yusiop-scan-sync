@@ -16,8 +16,20 @@ interface PopularSong {
 const Index = () => {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [popularSongs, setPopularSongs] = useState<PopularSong[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Mensaje de felicitación tras volver de Stripe Checkout
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('status') === 'success') {
+      toast.success('🎉 ¡Felicidades por tu compra! Tu tarjeta estará disponible en unos segundos.', {
+        duration: 6000,
+      });
+      navigate('/', { replace: true });
+    }
+  }, [location.search, navigate]);
 
   const navCards = [
     { title: 'Escanear QR', description: 'Activa tu tarjeta', icon: QrCode, link: '/qr', variant: '' },
