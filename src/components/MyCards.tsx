@@ -120,14 +120,42 @@ const MyCards = () => {
                 isGift={selected.is_gift}
               />
 
+              {/* Botón principal de copia rápida */}
+              <Button
+                onClick={() => handleCopy(selected.code)}
+                className="w-full h-12 gap-2 font-semibold"
+                variant={copied ? 'secondary' : 'default'}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    ¡Código copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copiar código manual
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center -mt-1">
+                Pégalo en el escáner → "Introducir código manual"
+              </p>
+
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-sm">
+                <button
+                  onClick={() => handleCopy(selected.code)}
+                  className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40 hover:bg-muted transition-colors group"
+                >
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
                     <span>Código</span>
                   </div>
-                  <span className="font-mono font-bold">{selected.code}</span>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold">{selected.code}</span>
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
+                  </div>
+                </button>
 
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
