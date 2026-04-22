@@ -256,6 +256,34 @@ const MyCards = () => {
                     </Badge>
                   )}
                 </div>
+
+                {selected.download_credits <= 0 && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full h-11 gap-2 mt-2">
+                        <Trash2 className="h-4 w-4" />
+                        Eliminar tarjeta agotada
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(selected.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
           )}
