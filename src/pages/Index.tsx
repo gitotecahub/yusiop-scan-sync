@@ -1,8 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QrCode, Music, Library, User, Play, Settings, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PopularSong {
   id: string;
