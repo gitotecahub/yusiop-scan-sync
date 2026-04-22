@@ -37,15 +37,58 @@ const Store = () => {
   const [recipient, setRecipient] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
     if (status === 'success') {
-      toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta ya está disponible.', {
-        duration: 2500,
-      });
-      navigate('/library', { replace: true });
+      let cancelled = false;
+      setConfirming(true);
+
+      const waitForCard = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error('Sesión no encontrada. Inicia sesión para ver tu tarjeta.');
+          setConfirming(false);
+          navigate('/auth', { replace: true });
+          return;
+        }
+
+        const startedAt = Date.now();
+        const maxMs = 25_000;
+        let found = false;
+
+        while (!cancelled && Date.now() - startedAt < maxMs) {
+          const { data } = await supabase
+            .from('qr_cards')
+            .select('id, created_at')
+            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (data) {
+            found = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+
+        if (cancelled) return;
+        setConfirming(false);
+
+        if (found) {
+          toast.success('🎉 ¡Compra completada! Tu tarjeta ya está disponible.', { duration: 2500 });
+          navigate('/library', { replace: true });
+        } else {
+          toast.info('El pago se está procesando. Tu tarjeta aparecerá en unos instantes.', { duration: 4000 });
+          navigate('/library', { replace: true });
+        }
+      };
+
+      waitForCard();
+      return () => { cancelled = true; };
     } else if (status === 'cancelled') {
       toast.info('Compra cancelada.');
       navigate('/store', { replace: true });
