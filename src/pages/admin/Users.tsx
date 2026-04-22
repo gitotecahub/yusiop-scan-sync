@@ -60,6 +60,7 @@ interface UserProfile {
   totalSpentCents: number;
   cardCount: number;
   hasGiftRedeemed: boolean;
+  downloadCount: number;
 }
 
 type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purchases' | 'admins';
