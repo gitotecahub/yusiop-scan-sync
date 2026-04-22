@@ -73,6 +73,90 @@ export type Database = {
         }
         Relationships: []
       }
+      card_purchases: {
+        Row: {
+          amount_cents: number
+          buyer_email: string
+          buyer_user_id: string
+          card_type: Database["public"]["Enums"]["card_type"]
+          created_at: string
+          currency: string
+          download_credits: number
+          gift_message: string | null
+          gift_recipient_email: string | null
+          id: string
+          is_gift: boolean
+          qr_card_id: string | null
+          status: Database["public"]["Enums"]["purchase_status"]
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          buyer_email: string
+          buyer_user_id: string
+          card_type: Database["public"]["Enums"]["card_type"]
+          created_at?: string
+          currency?: string
+          download_credits: number
+          gift_message?: string | null
+          gift_recipient_email?: string | null
+          id?: string
+          is_gift?: boolean
+          qr_card_id?: string | null
+          status?: Database["public"]["Enums"]["purchase_status"]
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          buyer_email?: string
+          buyer_user_id?: string
+          card_type?: Database["public"]["Enums"]["card_type"]
+          created_at?: string
+          currency?: string
+          download_credits?: number
+          gift_message?: string | null
+          gift_recipient_email?: string | null
+          id?: string
+          is_gift?: boolean
+          qr_card_id?: string | null
+          status?: Database["public"]["Enums"]["purchase_status"]
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gift_redemptions: {
+        Row: {
+          id: string
+          ip_address: string | null
+          qr_card_id: string
+          redeemed_at: string
+          redeemed_by_email: string
+          redeemed_by_user_id: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          qr_card_id: string
+          redeemed_at?: string
+          redeemed_by_email: string
+          redeemed_by_user_id: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          qr_card_id?: string
+          redeemed_at?: string
+          redeemed_by_email?: string
+          redeemed_by_user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -113,9 +197,20 @@ export type Database = {
           card_type: Database["public"]["Enums"]["card_type"]
           code: string
           created_at: string
+          currency: string | null
           download_credits: number
+          gift_message: string | null
+          gift_recipient_email: string | null
+          gift_redeemed: boolean
+          gift_redeemed_at: string | null
           id: string
           is_activated: boolean | null
+          is_gift: boolean
+          origin: Database["public"]["Enums"]["card_origin"]
+          owner_user_id: string | null
+          price_cents: number | null
+          purchase_id: string | null
+          redemption_token: string | null
         }
         Insert: {
           activated_at?: string | null
@@ -123,9 +218,20 @@ export type Database = {
           card_type?: Database["public"]["Enums"]["card_type"]
           code: string
           created_at?: string
+          currency?: string | null
           download_credits?: number
+          gift_message?: string | null
+          gift_recipient_email?: string | null
+          gift_redeemed?: boolean
+          gift_redeemed_at?: string | null
           id?: string
           is_activated?: boolean | null
+          is_gift?: boolean
+          origin?: Database["public"]["Enums"]["card_origin"]
+          owner_user_id?: string | null
+          price_cents?: number | null
+          purchase_id?: string | null
+          redemption_token?: string | null
         }
         Update: {
           activated_at?: string | null
@@ -133,9 +239,20 @@ export type Database = {
           card_type?: Database["public"]["Enums"]["card_type"]
           code?: string
           created_at?: string
+          currency?: string | null
           download_credits?: number
+          gift_message?: string | null
+          gift_recipient_email?: string | null
+          gift_redeemed?: boolean
+          gift_redeemed_at?: string | null
           id?: string
           is_activated?: boolean | null
+          is_gift?: boolean
+          origin?: Database["public"]["Enums"]["card_origin"]
+          owner_user_id?: string | null
+          price_cents?: number | null
+          purchase_id?: string | null
+          redemption_token?: string | null
         }
         Relationships: []
       }
@@ -431,6 +548,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_card_credit: {
+        Args: { p_card_id: string; p_song_id: string; p_user_id: string }
+        Returns: {
+          credits_left: number
+          message: string
+          success: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -439,6 +564,16 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      redeem_gift_card: {
+        Args: { p_token: string; p_user_email: string; p_user_id: string }
+        Returns: {
+          card_id: string
+          card_type: Database["public"]["Enums"]["card_type"]
+          download_credits: number
+          message: string
+          success: boolean
+        }[]
+      }
       validate_qr_card: {
         Args: { card_code: string }
         Returns: {
@@ -451,7 +586,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
+      purchase_status: "pending" | "paid" | "failed" | "refunded"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -581,7 +718,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
+      purchase_status: ["pending", "paid", "failed", "refunded"],
       user_role: ["user", "admin"],
     },
   },
