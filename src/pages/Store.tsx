@@ -42,10 +42,10 @@ const Store = () => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
     if (status === 'success') {
-      toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta estará disponible en unos segundos.', {
+      toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta ya está disponible.', {
         duration: 6000,
       });
-      navigate('/', { replace: true });
+      navigate('/library', { replace: true });
     } else if (status === 'cancelled') {
       toast.info('Compra cancelada.');
       navigate('/store', { replace: true });
@@ -104,10 +104,10 @@ const Store = () => {
         const link = `${window.location.origin}/redeem/${data.redemption_token}`;
         await navigator.clipboard.writeText(link).catch(() => {});
         toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 6000 });
-        navigate('/', { replace: true });
+        navigate('/library', { replace: true });
       } else {
         toast.success('🎉 ¡Felicidades! Compra simulada con éxito. Tu tarjeta ya está activa.', { duration: 6000 });
-        navigate('/', { replace: true });
+        navigate('/library', { replace: true });
       }
     } catch (e: any) {
       console.error(e);
