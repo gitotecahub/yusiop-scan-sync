@@ -252,6 +252,36 @@
   .vapor-gradient { background: var(--gradient-vapor); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-vapor { box-shadow: var(--shadow-vapor); }
+
+  /* === Yusiop Slider — vapor track + glow thumb === */
+  .yusiop-slider [data-orientation="horizontal"] {
+    height: 6px;
+  }
+  .yusiop-slider [role="slider"] {
+    @apply h-3.5 w-3.5 border-0 bg-background;
+    box-shadow:
+      0 0 0 2px hsl(var(--primary)),
+      0 0 14px hsl(var(--primary) / 0.55),
+      0 4px 12px hsl(var(--primary) / 0.35);
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s;
+  }
+  .yusiop-slider [role="slider"]:hover,
+  .yusiop-slider [role="slider"]:focus-visible {
+    transform: scale(1.25);
+    box-shadow:
+      0 0 0 2px hsl(var(--primary)),
+      0 0 22px hsl(var(--primary) / 0.75),
+      0 4px 18px hsl(var(--primary) / 0.5);
+  }
+  .yusiop-slider .bg-secondary {
+    background: hsl(var(--muted) / 0.6);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .yusiop-slider .bg-primary {
+    background: var(--gradient-vapor);
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.5);
+  }
 }
 
 @layer utilities {
