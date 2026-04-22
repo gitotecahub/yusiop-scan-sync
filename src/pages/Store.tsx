@@ -42,52 +42,52 @@ const Store = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
+    const sessionId = params.get('session_id');
+
     if (status === 'success') {
       let cancelled = false;
       setConfirming(true);
 
-      const waitForCard = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          toast.error('Sesión no encontrada. Inicia sesión para ver tu tarjeta.');
-          setConfirming(false);
-          navigate('/auth', { replace: true });
-          return;
-        }
-
-        const startedAt = Date.now();
-        const maxMs = 25_000;
-        let found = false;
-
-        while (!cancelled && Date.now() - startedAt < maxMs) {
-          const { data } = await supabase
-            .from('qr_cards')
-            .select('id, created_at')
-            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (data) {
-            found = true;
-            break;
+      const confirm = async () => {
+        try {
+          if (!sessionId) {
+            toast.success('🎉 Compra completada. Tu tarjeta ya está disponible.', { duration: 2500 });
+            navigate('/library', { replace: true });
+            return;
           }
-          await new Promise((r) => setTimeout(r, 1500));
-        }
 
-        if (cancelled) return;
-        setConfirming(false);
+          // Reintentos: Stripe a veces tarda en marcar payment_status=paid
+          let lastError: string | null = null;
+          for (let attempt = 0; attempt < 8 && !cancelled; attempt++) {
+            const { data, error } = await supabase.functions.invoke('confirm-card-purchase', {
+              body: { session_id: sessionId },
+            });
+            if (cancelled) return;
 
-        if (found) {
-          toast.success('🎉 ¡Compra completada! Tu tarjeta ya está disponible.', { duration: 2500 });
-          navigate('/library', { replace: true });
-        } else {
-          toast.info('El pago se está procesando. Tu tarjeta aparecerá en unos instantes.', { duration: 4000 });
-          navigate('/library', { replace: true });
+            if (error) {
+              lastError = error.message;
+            } else if (data?.success) {
+              toast.success('🎉 ¡Compra completada! Tu tarjeta ya está disponible.', { duration: 2500 });
+              navigate('/library', { replace: true });
+              return;
+            } else if (data?.payment_status && data.payment_status !== 'paid') {
+              lastError = `Estado de pago: ${data.payment_status}`;
+            }
+
+            await new Promise((r) => setTimeout(r, 2000));
+          }
+
+          if (!cancelled) {
+            console.error('confirm-card-purchase falló', lastError);
+            toast.error('No pudimos confirmar el pago. Si se cobró, contacta soporte.');
+            navigate('/store', { replace: true });
+          }
+        } finally {
+          if (!cancelled) setConfirming(false);
         }
       };
 
-      waitForCard();
+      confirm();
       return () => { cancelled = true; };
     } else if (status === 'cancelled') {
       toast.info('Compra cancelada.');
