@@ -206,8 +206,24 @@ const Store = () => {
         )}
       </Button>
 
+      <Button
+        variant="outline"
+        className="w-full h-12 text-base font-semibold mt-3 border-dashed border-primary/40 text-primary hover:bg-primary/10"
+        onClick={handleSimulate}
+        disabled={loading}
+      >
+        {loading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <>
+            <Zap className="h-4 w-4 mr-2" />
+            Simular compra (sin pago)
+          </>
+        )}
+      </Button>
+
       <p className="text-xs text-muted-foreground text-center mt-3">
-        Pago seguro con Stripe · Modo prueba activo
+        Pago seguro con Stripe · La simulación crea la tarjeta al instante
       </p>
     </div>
   );
