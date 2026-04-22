@@ -1,1 +1,10 @@
 project_id = "wbzwdihdayasmikmqvgp"
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-card-checkout]
+verify_jwt = true
+
+[functions.redeem-gift]
+verify_jwt = true
