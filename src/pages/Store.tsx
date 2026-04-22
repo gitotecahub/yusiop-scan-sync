@@ -81,6 +81,41 @@ const Store = () => {
     }
   };
 
+  const handleSimulate = async () => {
+    if (isGift && !recipient.includes('@')) {
+      toast.error('Introduce un email válido para el destinatario.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('simulate-card-purchase', {
+        body: {
+          card_type: selected,
+          is_gift: isGift,
+          gift_recipient_email: isGift ? recipient.trim() : undefined,
+          gift_message: isGift ? message.trim() : undefined,
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error('No se pudo simular la compra');
+
+      if (isGift && data.redemption_token) {
+        const link = `${window.location.origin}/redeem/${data.redemption_token}`;
+        await navigator.clipboard.writeText(link).catch(() => {});
+        toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 6000 });
+        navigate('/', { replace: true });
+      } else {
+        toast.success('🎉 ¡Felicidades! Compra simulada con éxito. Tu tarjeta ya está activa.', { duration: 6000 });
+        navigate('/', { replace: true });
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? 'Error simulando la compra');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen pb-32 px-4 pt-6 max-w-md mx-auto">
       <header className="mb-6">
