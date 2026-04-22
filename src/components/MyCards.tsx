@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
 
 interface MyCard {
