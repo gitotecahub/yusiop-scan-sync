@@ -60,6 +60,7 @@ interface UserProfile {
   totalSpentCents: number;
   cardCount: number;
   hasGiftRedeemed: boolean;
+  downloadCount: number;
 }
 
 type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purchases' | 'admins';
@@ -84,13 +85,14 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const [profilesRes, rolesRes, purchasesRes, cardsRes] = await Promise.all([
+      const [profilesRes, rolesRes, purchasesRes, cardsRes, downloadsRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('user_roles').select('user_id, role'),
         supabase
           .from('card_purchases')
           .select('buyer_user_id, amount_cents, status'),
         supabase.from('qr_cards').select('owner_user_id, activated_by, is_gift, gift_redeemed'),
+        supabase.from('user_downloads').select('user_id'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -121,6 +123,13 @@ const Users = () => {
         });
       });
 
+      // Aggregate downloads per user
+      const downloadStats = new Map<string, number>();
+      (downloadsRes.data ?? []).forEach((d) => {
+        if (!d.user_id) return;
+        downloadStats.set(d.user_id, (downloadStats.get(d.user_id) ?? 0) + 1);
+      });
+
       const merged: UserProfile[] = (profilesRes.data ?? []).map((p) => {
         const purch = purchaseStats.get(p.user_id);
         const card = cardStats.get(p.user_id);
@@ -137,6 +146,7 @@ const Users = () => {
           totalSpentCents: purch?.total ?? 0,
           cardCount: card?.count ?? 0,
           hasGiftRedeemed: card?.giftRedeemed ?? false,
+          downloadCount: downloadStats.get(p.user_id) ?? 0,
         };
       });
 
@@ -256,7 +266,7 @@ const Users = () => {
 
       const matchesSegment =
         segment === 'all' ||
-        (segment === 'vip' && u.purchaseCount >= 3) ||
+        (segment === 'vip' && u.downloadCount >= 50) ||
         (segment === 'customers' && u.purchaseCount >= 1) ||
         (segment === 'gift_redeemers' && u.hasGiftRedeemed) ||
         (segment === 'no_purchases' && u.purchaseCount === 0) ||
@@ -269,7 +279,7 @@ const Users = () => {
   const stats = useMemo(() => ({
     total: users.length,
     admins: users.filter((u) => u.role === 'admin').length,
-    vip: users.filter((u) => u.purchaseCount >= 3).length,
+    vip: users.filter((u) => u.downloadCount >= 50).length,
     customers: users.filter((u) => u.purchaseCount >= 1).length,
   }), [users]);
 
@@ -308,7 +318,7 @@ const Users = () => {
       <div className="grid gap-4 md:grid-cols-4">
         <StatCard title="Total" value={stats.total} icon={UsersIcon} />
         <StatCard title="Clientes" value={stats.customers} icon={ShoppingBag} hint="Con ≥1 compra" />
-        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥3 compras" accent />
+        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥50 descargas" accent />
         <StatCard title="Admins" value={stats.admins} icon={ShieldCheck} />
       </div>
 
@@ -334,7 +344,7 @@ const Users = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los usuarios</SelectItem>
-                <SelectItem value="vip">⭐ VIP (≥3 compras)</SelectItem>
+                <SelectItem value="vip">⭐ VIP (≥50 descargas)</SelectItem>
                 <SelectItem value="customers">Clientes (≥1 compra)</SelectItem>
                 <SelectItem value="gift_redeemers">🎁 Canjearon regalo</SelectItem>
                 <SelectItem value="no_purchases">Sin compras</SelectItem>
@@ -373,12 +383,12 @@ const Users = () => {
                           <ShieldCheck className="h-3 w-3" /> Admin
                         </Badge>
                       )}
-                      {user.purchaseCount >= 3 && (
+                      {user.downloadCount >= 50 && (
                         <Badge variant="default" className="text-xs gap-1 bg-primary/80">
                           <Crown className="h-3 w-3" /> VIP
                         </Badge>
                       )}
-                      {user.purchaseCount > 0 && user.purchaseCount < 3 && (
+                      {user.purchaseCount > 0 && (
                         <Badge variant="secondary" className="text-xs">
                           {user.purchaseCount} compra{user.purchaseCount > 1 ? 's' : ''}
                         </Badge>
