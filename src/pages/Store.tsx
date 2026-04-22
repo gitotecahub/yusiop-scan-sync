@@ -18,7 +18,7 @@ const TIERS: Record<Tier, { label: string; price: string; credits: number; perks
     label: 'YUSIOP Estándar',
     price: '4,99€',
     credits: 4,
-    perks: ['4 descargas', 'Calidad alta', 'Sin caducidad'],
+    perks: ['4 descargas', 'Calidad máxima', 'Sin caducidad'],
   },
   premium: {
     label: 'YUSIOP Premium',
