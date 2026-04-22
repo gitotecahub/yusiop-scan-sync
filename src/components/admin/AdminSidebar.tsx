@@ -9,6 +9,7 @@ import {
   Download,
   Settings,
   LogOut,
+  Home,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -83,7 +84,13 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="mt-auto p-4">
+        <div className="mt-auto p-4 space-y-1">
+          <SidebarMenuButton asChild className="w-full justify-start">
+            <NavLink to="/" className="hover:bg-accent hover:text-accent-foreground">
+              <Home className="mr-2 h-4 w-4" />
+              {!collapsed && <span>Volver a la app</span>}
+            </NavLink>
+          </SidebarMenuButton>
           <SidebarMenuButton 
             onClick={handleSignOut}
             className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
