@@ -12,11 +12,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
+import MyCards from '@/components/MyCards';
 
 interface DownloadedSong {
   id: string;
@@ -300,7 +302,7 @@ const Library = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
+        <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
             value="all"
             className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
@@ -319,6 +321,12 @@ const Library = () => {
           >
             Favs
           </TabsTrigger>
+          <TabsTrigger
+            value="cards"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+          >
+            Tarjetas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-5">
@@ -336,6 +344,23 @@ const Library = () => {
 
         <TabsContent value="favorites" className="mt-5">
           <SongList songs={favorites} />
+        </TabsContent>
+
+        <TabsContent value="cards" className="mt-5 space-y-4">
+          <Link
+            to="/store"
+            className="flex items-center justify-between p-4 rounded-2xl vapor-bg text-primary-foreground shadow-glow"
+          >
+            <div className="flex items-center gap-3">
+              <ShoppingBag className="h-5 w-5" />
+              <div>
+                <p className="font-bold text-sm">Comprar tarjeta</p>
+                <p className="text-xs opacity-80">Estándar o Premium · Regalo disponible</p>
+              </div>
+            </div>
+            <span className="text-xs font-bold">→</span>
+          </Link>
+          <MyCards />
         </TabsContent>
       </Tabs>
 
