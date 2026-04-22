@@ -136,14 +136,6 @@ const Store = () => {
 
         {(Object.keys(TIERS) as Tier[]).map((t) => (
           <TabsContent key={t} value={t} className="mt-4 space-y-4">
-            {/* Vista previa de la tarjeta digital con su diseño real */}
-            <DigitalCard
-              code={`${t === 'premium' ? 'PREM' : 'STD'}-PREVIEW`}
-              cardType={t}
-              downloadCredits={TIERS[t].credits}
-              isGift={isGift}
-              qrValue="https://yusiop.app"
-            />
 
             <Card className="overflow-hidden border-primary/20">
               <CardHeader className="bg-gradient-to-br from-primary/10 to-transparent">
