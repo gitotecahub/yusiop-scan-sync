@@ -37,15 +37,58 @@ const Store = () => {
   const [recipient, setRecipient] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
     if (status === 'success') {
-      toast.success('🎉 ¡Felicidades! Tu compra se ha completado. Tu tarjeta ya está disponible.', {
-        duration: 2500,
-      });
-      navigate('/library', { replace: true });
+      let cancelled = false;
+      setConfirming(true);
+
+      const waitForCard = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error('Sesión no encontrada. Inicia sesión para ver tu tarjeta.');
+          setConfirming(false);
+          navigate('/auth', { replace: true });
+          return;
+        }
+
+        const startedAt = Date.now();
+        const maxMs = 25_000;
+        let found = false;
+
+        while (!cancelled && Date.now() - startedAt < maxMs) {
+          const { data } = await supabase
+            .from('qr_cards')
+            .select('id, created_at')
+            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (data) {
+            found = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+
+        if (cancelled) return;
+        setConfirming(false);
+
+        if (found) {
+          toast.success('🎉 ¡Compra completada! Tu tarjeta ya está disponible.', { duration: 2500 });
+          navigate('/library', { replace: true });
+        } else {
+          toast.info('El pago se está procesando. Tu tarjeta aparecerá en unos instantes.', { duration: 4000 });
+          navigate('/library', { replace: true });
+        }
+      };
+
+      waitForCard();
+      return () => { cancelled = true; };
     } else if (status === 'cancelled') {
       toast.info('Compra cancelada.');
       navigate('/store', { replace: true });
@@ -119,6 +162,15 @@ const Store = () => {
 
   return (
     <div className="min-h-screen pb-32 px-4 pt-6 max-w-md mx-auto">
+      {confirming && (
+        <div className="fixed inset-0 z-50 bg-background/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <h2 className="text-lg font-semibold">Confirmando tu compra…</h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Estamos activando tu tarjeta. Esto puede tardar unos segundos.
+          </p>
+        </div>
+      )}
       <header className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Tienda</h1>
         <p className="text-sm text-muted-foreground mt-1">
