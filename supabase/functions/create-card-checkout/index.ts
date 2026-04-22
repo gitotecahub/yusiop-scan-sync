@@ -128,6 +128,12 @@ Deno.serve(async (req) => {
       cancel_url: body.cancel_url ?? `${origin}/store?status=cancelled`,
     });
 
+    console.log("Checkout session created:", {
+      id: session.id,
+      url: session.url,
+      key_prefix: stripeKey.slice(0, 8),
+    });
+
     return new Response(
       JSON.stringify({ url: session.url, session_id: session.id }),
       {
