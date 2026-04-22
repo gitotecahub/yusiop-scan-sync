@@ -3,7 +3,7 @@
 // Si es regalo: crea una qr_card con redemption_token y la asocia al destinatario por email.
 // Si es compra normal: crea la qr_card asignada al comprador y la marca como activada.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import Stripe from "https://esm.sh/stripe@18.5.0?target=denonext";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
