@@ -33,28 +33,47 @@ const Catalog = () => {
   const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
-  // Function to load credits
+  // Function to load credits (from both user_credits and qr_cards owned by user)
   const loadUserCredits = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user?.email) {
-        const { data: creditsData, error: creditsError } = await supabase
-          .from('user_credits')
-          .select('*')
-          .eq('user_email', user.email)
-          .eq('is_active', true)
-          .gt('credits_remaining', 0)
-          .gt('expires_at', new Date().toISOString())
-          .order('scanned_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      if (!user?.email) return;
 
-        if (!creditsError && creditsData) {
-          setUserCredits(creditsData);
-        } else {
-          setUserCredits(null);
-        }
+      // 1) Legacy/physical: user_credits rows
+      const { data: creditsRows } = await supabase
+        .from('user_credits')
+        .select('*')
+        .eq('user_email', user.email)
+        .eq('is_active', true)
+        .gt('credits_remaining', 0)
+        .gt('expires_at', new Date().toISOString())
+        .order('scanned_at', { ascending: false });
+
+      // 2) Digital/owned QR cards with remaining credits
+      const { data: ownedCards } = await supabase
+        .from('qr_cards')
+        .select('card_type, download_credits')
+        .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+        .gt('download_credits', 0);
+
+      const totalLegacy = (creditsRows ?? []).reduce((s, r: any) => s + (r.credits_remaining ?? 0), 0);
+      const totalOwned = (ownedCards ?? []).reduce((s, c: any) => s + (c.download_credits ?? 0), 0);
+      const total = totalLegacy + totalOwned;
+
+      if (total > 0) {
+        const cardType =
+          creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? 'standard';
+        const expires =
+          creditsRows?.[0]?.expires_at ??
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+        setUserCredits({
+          credits_remaining: total,
+          card_type: cardType,
+          expires_at: expires,
+          is_active: true,
+        });
+      } else {
+        setUserCredits(null);
       }
     } catch (error) {
       console.error('Error loading credits:', error);
