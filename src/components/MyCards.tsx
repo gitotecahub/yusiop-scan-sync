@@ -61,6 +61,13 @@ const MyCards = () => {
     }
   };
 
+  const handleDelete = (id: string) => {
+    addHiddenId(id);
+    setCards((prev) => prev.filter((c) => c.id !== id));
+    setSelected(null);
+    toast.success('Tarjeta eliminada de tu biblioteca');
+  };
+
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -74,7 +81,10 @@ const MyCards = () => {
         .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (!error && data) setCards(data as MyCard[]);
+      if (!error && data) {
+        const hidden = new Set(getHiddenIds());
+        setCards((data as MyCard[]).filter((c) => !hidden.has(c.id)));
+      }
       setLoading(false);
     };
     load();
