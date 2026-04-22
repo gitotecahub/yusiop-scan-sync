@@ -12,7 +12,7 @@ const PlaybackControls = () => {
   } = usePlayerStore();
   const [open, setOpen] = useState(false);
 
-  if (!currentSong || !isPlaying) return null;
+  if (!currentSong) return null;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
