@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
 
 interface MyCard {
@@ -20,6 +22,18 @@ const MyCards = () => {
   const [cards, setCards] = useState<MyCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success('Código copiado al portapapeles');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('No se pudo copiar el código');
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -106,14 +120,42 @@ const MyCards = () => {
                 isGift={selected.is_gift}
               />
 
+              {/* Botón principal de copia rápida */}
+              <Button
+                onClick={() => handleCopy(selected.code)}
+                className="w-full h-12 gap-2 font-semibold"
+                variant={copied ? 'secondary' : 'default'}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    ¡Código copiado!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copiar código manual
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center -mt-1">
+                Pégalo en el escáner → "Introducir código manual"
+              </p>
+
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between text-sm">
+                <button
+                  onClick={() => handleCopy(selected.code)}
+                  className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40 hover:bg-muted transition-colors group"
+                >
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
                     <span>Código</span>
                   </div>
-                  <span className="font-mono font-bold">{selected.code}</span>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold">{selected.code}</span>
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground" />
+                  </div>
+                </button>
 
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
