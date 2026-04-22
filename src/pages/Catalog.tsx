@@ -277,21 +277,27 @@ useEffect(() => {
       </div>
 
       {/* Downloads remaining — blob card */}
-      {userCredits && userCredits.credits_remaining > 0 && (
-        <div className="blob-card p-5">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="eyebrow mb-1.5">Tu balance</p>
-              <p className="display-xl text-5xl vapor-text leading-none">
-                {String(userCredits.credits_remaining).padStart(2, '0')}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                descargas · tarjeta {userCredits.card_type}
-              </p>
-            </div>
+      <div className="blob-card p-5">
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0">
+            <p className="eyebrow mb-1.5">Tu balance</p>
+            <p className="display-xl text-5xl vapor-text leading-none">
+              {String(userCredits?.credits_remaining ?? 0).padStart(2, '0')}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {userCredits && userCredits.credits_remaining > 0
+                ? `descargas · tarjeta ${userCredits.card_type}`
+                : 'Sin créditos disponibles'}
+            </p>
           </div>
+          <Button
+            onClick={() => navigate('/store')}
+            className="rounded-full vapor-bg text-primary-foreground hover:opacity-90 shadow-glow shrink-0"
+          >
+            Comprar tarjeta
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Songs List */}
       <div>
