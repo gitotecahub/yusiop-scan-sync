@@ -13,6 +13,8 @@ import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Auth from '@/pages/Auth';
 import Install from './pages/Install';
+import Store from '@/pages/Store';
+import Redeem from '@/pages/Redeem';
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -71,6 +73,7 @@ const AppContent = () => {
 
       <Route path="/auth" element={<Auth />} />
       <Route path="/install" element={<Install />} />
+      <Route path="/redeem/:token" element={<Redeem />} />
 
       <Route path="/*" element={
         !session ? (
@@ -83,6 +86,7 @@ const AppContent = () => {
               <Route path="/qr" element={<QRScanner />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/library" element={<Library />} />
+              <Route path="/store" element={<Store />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
