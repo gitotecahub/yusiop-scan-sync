@@ -139,7 +139,7 @@ const MyCards = () => {
                   <AlertDialogTrigger asChild>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground flex items-center justify-center shadow-glow backdrop-blur-sm border border-primary/40 transition-transform hover:scale-110"
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-primary/20 hover:bg-primary/35 text-primary-foreground flex items-center justify-center backdrop-blur-md border border-primary/30 shadow-sm ring-1 ring-white/10 transition-all hover:scale-110"
                       aria-label="Eliminar tarjeta agotada"
                     >
                       <Trash2 className="h-3 w-3" strokeWidth={2.2} />
