@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +31,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Search, UserPlus, Shield, ShieldCheck, Pencil, Trash2, Users as UsersIcon } from 'lucide-react';
+import {
+  Search,
+  UserPlus,
+  Shield,
+  ShieldCheck,
+  Pencil,
+  Trash2,
+  Users as UsersIcon,
+  Eye,
+  Crown,
+  Gift,
+  ShoppingBag,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 
@@ -36,12 +56,20 @@ interface UserProfile {
   downloads_remaining: number | null;
   created_at: string;
   role: 'admin' | 'user';
+  purchaseCount: number;
+  totalSpentCents: number;
+  cardCount: number;
+  hasGiftRedeemed: boolean;
 }
 
+type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purchases' | 'admins';
+
 const Users = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [segment, setSegment] = useState<SegmentFilter>('all');
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserProfile | null>(null);
@@ -56,35 +84,61 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // Fetch all profiles (admins can read all via RLS)
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [profilesRes, rolesRes, purchasesRes, cardsRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('user_roles').select('user_id, role'),
+        supabase
+          .from('card_purchases')
+          .select('buyer_user_id, amount_cents, status'),
+        supabase.from('qr_cards').select('owner_user_id, activated_by, is_gift, gift_redeemed'),
+      ]);
 
-      if (profilesError) throw profilesError;
-
-      // Fetch all admin roles separately so users without a role row still appear
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) throw rolesError;
+      if (profilesRes.error) throw profilesRes.error;
 
       const adminIds = new Set(
-        (roles ?? []).filter((r) => r.role === 'admin').map((r) => r.user_id),
+        (rolesRes.data ?? []).filter((r) => r.role === 'admin').map((r) => r.user_id),
       );
 
-      const merged: UserProfile[] = (profiles ?? []).map((p) => ({
-        id: p.id,
-        user_id: p.user_id,
-        username: p.username,
-        full_name: p.full_name,
-        avatar_url: p.avatar_url,
-        downloads_remaining: p.downloads_remaining,
-        created_at: p.created_at,
-        role: adminIds.has(p.user_id) ? 'admin' : 'user',
-      }));
+      // Aggregate purchases
+      const purchaseStats = new Map<string, { count: number; total: number }>();
+      (purchasesRes.data ?? []).forEach((p) => {
+        if (p.status !== 'paid' || !p.buyer_user_id) return;
+        const cur = purchaseStats.get(p.buyer_user_id) ?? { count: 0, total: 0 };
+        cur.count += 1;
+        cur.total += p.amount_cents ?? 0;
+        purchaseStats.set(p.buyer_user_id, cur);
+      });
+
+      // Aggregate cards
+      const cardStats = new Map<string, { count: number; giftRedeemed: boolean }>();
+      (cardsRes.data ?? []).forEach((c) => {
+        const owners = [c.owner_user_id, c.activated_by].filter(Boolean) as string[];
+        owners.forEach((uid) => {
+          const cur = cardStats.get(uid) ?? { count: 0, giftRedeemed: false };
+          cur.count += 1;
+          if (c.is_gift && c.gift_redeemed) cur.giftRedeemed = true;
+          cardStats.set(uid, cur);
+        });
+      });
+
+      const merged: UserProfile[] = (profilesRes.data ?? []).map((p) => {
+        const purch = purchaseStats.get(p.user_id);
+        const card = cardStats.get(p.user_id);
+        return {
+          id: p.id,
+          user_id: p.user_id,
+          username: p.username,
+          full_name: p.full_name,
+          avatar_url: p.avatar_url,
+          downloads_remaining: p.downloads_remaining,
+          created_at: p.created_at,
+          role: adminIds.has(p.user_id) ? 'admin' : 'user',
+          purchaseCount: purch?.count ?? 0,
+          totalSpentCents: purch?.total ?? 0,
+          cardCount: card?.count ?? 0,
+          hasGiftRedeemed: card?.giftRedeemed ?? false,
+        };
+      });
 
       setUsers(merged);
     } catch (error) {
@@ -141,7 +195,6 @@ const Users = () => {
 
   const saveEdit = async () => {
     if (!editingUser) return;
-
     if (editForm.username.trim().length < 3) {
       toast({ title: 'Datos inválidos', description: 'El usuario debe tener al menos 3 caracteres', variant: 'destructive' });
       return;
@@ -150,7 +203,6 @@ const Users = () => {
       toast({ title: 'Datos inválidos', description: 'Las descargas no pueden ser negativas', variant: 'destructive' });
       return;
     }
-
     try {
       setSavingEdit(true);
       const { error } = await supabase
@@ -161,9 +213,7 @@ const Users = () => {
           downloads_remaining: editForm.downloads_remaining,
         })
         .eq('id', editingUser.id);
-
       if (error) throw error;
-
       toast({ title: 'Éxito', description: 'Usuario actualizado' });
       setEditingUser(null);
       fetchUsers();
@@ -181,16 +231,9 @@ const Users = () => {
   const confirmDelete = async () => {
     if (!deletingUser) return;
     try {
-      // Remove role rows first (RLS allows admins via "Admins can manage all roles")
       await supabase.from('user_roles').delete().eq('user_id', deletingUser.user_id);
-
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', deletingUser.id);
-
+      const { error } = await supabase.from('profiles').delete().eq('id', deletingUser.id);
       if (error) throw error;
-
       toast({ title: 'Usuario eliminado', description: 'El perfil se eliminó correctamente' });
       setDeletingUser(null);
       fetchUsers();
@@ -203,13 +246,35 @@ const Users = () => {
     }
   };
 
-  const filteredUsers = users.filter((user) =>
-    (user.username ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.full_name ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return users.filter((u) => {
+      const matchesSearch =
+        !term ||
+        (u.username ?? '').toLowerCase().includes(term) ||
+        (u.full_name ?? '').toLowerCase().includes(term);
 
-  const totalUsers = users.length;
-  const totalAdmins = users.filter((u) => u.role === 'admin').length;
+      const matchesSegment =
+        segment === 'all' ||
+        (segment === 'vip' && u.purchaseCount >= 3) ||
+        (segment === 'customers' && u.purchaseCount >= 1) ||
+        (segment === 'gift_redeemers' && u.hasGiftRedeemed) ||
+        (segment === 'no_purchases' && u.purchaseCount === 0) ||
+        (segment === 'admins' && u.role === 'admin');
+
+      return matchesSearch && matchesSegment;
+    });
+  }, [users, searchTerm, segment]);
+
+  const stats = useMemo(() => ({
+    total: users.length,
+    admins: users.filter((u) => u.role === 'admin').length,
+    vip: users.filter((u) => u.purchaseCount >= 3).length,
+    customers: users.filter((u) => u.purchaseCount >= 1).length,
+  }), [users]);
+
+  const formatEur = (cents: number) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 
   if (loading) {
     return (
@@ -228,10 +293,10 @@ const Users = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
-          <p className="text-muted-foreground">Administra los usuarios de la plataforma</p>
+          <h1 className="text-3xl font-bold">CRM de Usuarios</h1>
+          <p className="text-muted-foreground">Gestiona y segmenta a tus clientes</p>
         </div>
         <Button onClick={() => setCreateUserOpen(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
@@ -240,83 +305,107 @@ const Users = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Usuarios totales</CardTitle>
-            <UsersIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Registrados en la base de datos</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Administradores</CardTitle>
-            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totalAdmins}</div>
-            <p className="text-xs text-muted-foreground">Con permisos de admin</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Resultados</CardTitle>
-            <Search className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{filteredUsers.length}</div>
-            <p className="text-xs text-muted-foreground">Coinciden con la búsqueda</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard title="Total" value={stats.total} icon={UsersIcon} />
+        <StatCard title="Clientes" value={stats.customers} icon={ShoppingBag} hint="Con ≥1 compra" />
+        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥3 compras" accent />
+        <StatCard title="Admins" value={stats.admins} icon={ShieldCheck} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Buscar Usuarios</CardTitle>
-          <CardDescription>Encuentra usuarios por nombre o username</CardDescription>
+          <CardTitle>Buscar y filtrar</CardTitle>
+          <CardDescription>Encuentra usuarios por nombre o segmento</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar usuarios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        <CardContent className="space-y-3">
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Nombre o username..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={segment} onValueChange={(v: SegmentFilter) => setSegment(v)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Segmento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los usuarios</SelectItem>
+                <SelectItem value="vip">⭐ VIP (≥3 compras)</SelectItem>
+                <SelectItem value="customers">Clientes (≥1 compra)</SelectItem>
+                <SelectItem value="gift_redeemers">🎁 Canjearon regalo</SelectItem>
+                <SelectItem value="no_purchases">Sin compras</SelectItem>
+                <SelectItem value="admins">Administradores</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Mostrando {filteredUsers.length} de {users.length} usuarios
+          </p>
         </CardContent>
       </Card>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredUsers.map((user) => (
-          <Card key={user.id}>
-            <CardContent className="p-6">
+          <Card key={user.id} className="hover:border-primary/40 transition-colors">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center text-primary-foreground font-bold">
+                <button
+                  onClick={() => navigate(`/admin/users/${user.user_id}`)}
+                  className="flex items-center space-x-4 text-left flex-1 min-w-0"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center text-primary-foreground font-bold shrink-0">
                     {(user.username ?? user.full_name ?? 'U').charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{user.full_name || user.username || 'Sin nombre'}</h3>
-                    <p className="text-sm text-muted-foreground">@{user.username || 'sin-usuario'}</p>
-                    <div className="flex items-center space-x-2 mt-1 flex-wrap">
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role === 'admin' ? 'Administrador' : 'Usuario'}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {user.downloads_remaining ?? 0} descargas restantes
-                      </span>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold truncate">
+                      {user.full_name || user.username || 'Sin nombre'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground truncate">
+                      @{user.username || 'sin-usuario'}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      {user.role === 'admin' && (
+                        <Badge variant="default" className="text-xs gap-1">
+                          <ShieldCheck className="h-3 w-3" /> Admin
+                        </Badge>
+                      )}
+                      {user.purchaseCount >= 3 && (
+                        <Badge variant="default" className="text-xs gap-1 bg-primary/80">
+                          <Crown className="h-3 w-3" /> VIP
+                        </Badge>
+                      )}
+                      {user.purchaseCount > 0 && user.purchaseCount < 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {user.purchaseCount} compra{user.purchaseCount > 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                      {user.hasGiftRedeemed && (
+                        <Badge variant="secondary" className="text-xs gap-1">
+                          <Gift className="h-3 w-3" /> Regalo
+                        </Badge>
+                      )}
+                      {user.totalSpentCents > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          {formatEur(user.totalSpentCents)}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2 flex-wrap">
+                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/admin/users/${user.user_id}`)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" /> Ver
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => openEdit(user)}>
-                    <Pencil className="h-4 w-4 mr-1" />
-                    Editar
+                    <Pencil className="h-4 w-4 mr-1" /> Editar
                   </Button>
                   <Button
                     variant={user.role === 'admin' ? 'destructive' : 'outline'}
@@ -324,20 +413,13 @@ const Users = () => {
                     onClick={() => toggleAdminRole(user.user_id, user.role)}
                   >
                     {user.role === 'admin' ? (
-                      <>
-                        <ShieldCheck className="h-4 w-4 mr-1" />
-                        Quitar Admin
-                      </>
+                      <><ShieldCheck className="h-4 w-4 mr-1" /> Quitar</>
                     ) : (
-                      <>
-                        <Shield className="h-4 w-4 mr-1" />
-                        Hacer Admin
-                      </>
+                      <><Shield className="h-4 w-4 mr-1" /> Admin</>
                     )}
                   </Button>
                   <Button variant="destructive" size="sm" onClick={() => setDeletingUser(user)}>
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -360,14 +442,11 @@ const Users = () => {
         onUserCreated={fetchUsers}
       />
 
-      {/* Edit user dialog */}
       <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Editar Usuario</DialogTitle>
-            <DialogDescription>
-              Actualiza la información del perfil
-            </DialogDescription>
+            <DialogDescription>Actualiza la información del perfil</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -400,9 +479,7 @@ const Users = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingUser(null)}>
-              Cancelar
-            </Button>
+            <Button variant="outline" onClick={() => setEditingUser(null)}>Cancelar</Button>
             <Button onClick={saveEdit} disabled={savingEdit}>
               {savingEdit ? 'Guardando...' : 'Guardar'}
             </Button>
@@ -410,7 +487,6 @@ const Users = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
       <AlertDialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -429,5 +505,30 @@ const Users = () => {
     </div>
   );
 };
+
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  hint,
+  accent,
+}: {
+  title: string;
+  value: number;
+  icon: any;
+  hint?: string;
+  accent?: boolean;
+}) => (
+  <Card className={accent ? 'border-primary/30 bg-primary/5' : ''}>
+    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <Icon className={`h-4 w-4 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
+    </CardHeader>
+    <CardContent>
+      <div className="text-3xl font-bold">{value}</div>
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </CardContent>
+  </Card>
+);
 
 export default Users;
