@@ -25,7 +25,7 @@ const Index = () => {
     const params = new URLSearchParams(location.search);
     if (params.get('status') === 'success') {
       toast.success('🎉 ¡Felicidades por tu compra! Tu tarjeta estará disponible en unos segundos.', {
-        duration: 6000,
+        duration: 2500,
       });
       navigate('/', { replace: true });
     }
