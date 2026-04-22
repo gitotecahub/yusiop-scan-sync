@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
         gift_message: body.gift_message?.slice(0, 280) ?? "",
       },
       success_url: body.success_url ??
-        `${origin}/store?status=success&session_id={CHECKOUT_SESSION_ID}`,
+        `${origin}/?status=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: body.cancel_url ?? `${origin}/store?status=cancelled`,
     });
 
