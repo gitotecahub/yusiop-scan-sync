@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Search, Plus, QrCode, Eye, Trash2, Download, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import QRCodeLib from 'qrcode';
 
 interface QRCard {
