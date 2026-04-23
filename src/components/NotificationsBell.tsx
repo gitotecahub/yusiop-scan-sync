@@ -3,6 +3,7 @@ import { Bell, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { useModeStore } from '@/stores/modeStore';
 import {
   Popover,
   PopoverContent,
