@@ -312,6 +312,15 @@ const Library = () => {
                 <Button
                   size="icon"
                   variant="ghost"
+                  onClick={() => handleShareRequest(song)}
+                  className="h-9 w-9 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                  aria-label="Compartir canción"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
                   onClick={() => handleDeleteRequest(song)}
                   className="h-9 w-9 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                 >
