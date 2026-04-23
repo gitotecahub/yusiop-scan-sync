@@ -351,13 +351,14 @@ const SongSubmissions = () => {
             <DialogTitle>Rechazar envío</DialogTitle>
             <DialogDescription>
               Explica al artista por qué su canción no ha sido aprobada. Recibirá una notificación.
+              Escribe <strong>un motivo por línea</strong> para que se muestre como lista.
             </DialogDescription>
           </DialogHeader>
           <Textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Motivo del rechazo (obligatorio)"
-            rows={4}
+            placeholder={'Motivos del rechazo (uno por línea)\n\nEj.:\n- La calidad del audio es baja\n- La portada no cumple las dimensiones mínimas\n- El título contiene errores'}
+            rows={6}
             maxLength={500}
           />
           <DialogFooter>
