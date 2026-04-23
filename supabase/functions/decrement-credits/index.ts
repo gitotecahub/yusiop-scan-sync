@@ -147,14 +147,18 @@ serve(async (req) => {
 
       // Enriquecer la última descarga con datos geo (consume_card_credit la insertó sin geo)
       try {
-        await supabase
+        const { data: lastDl } = await supabase
           .from("user_downloads")
-          .update(geo)
+          .select("id")
           .eq("user_id", user.id)
           .eq("song_id", song.id)
           .eq("qr_card_id", ownedCard.id)
           .order("downloaded_at", { ascending: false })
-          .limit(1);
+          .limit(1)
+          .maybeSingle();
+        if (lastDl?.id) {
+          await supabase.from("user_downloads").update(geo).eq("id", lastDl.id);
+        }
       } catch (_e) { /* no bloquear */ }
 
       return new Response(
