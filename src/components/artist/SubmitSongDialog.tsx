@@ -511,7 +511,75 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
           </div>
 
-          {/* Selector de fragmento de preview */}
+          {/* Colaboraciones y splits */}
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <Users className="h-4 w-4" /> ¿Es una colaboración?
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Define los splits de monetización entre los artistas. Si un colaborador no
+                  está aún en Yusiop, su parte se reservará en el pozo común hasta que se registre.
+                </p>
+              </div>
+              {!hasCollabs ? (
+                <Button type="button" size="sm" variant="outline" onClick={enableCollabs}>
+                  <Plus className="h-4 w-4 mr-1" /> Añadir colaboración
+                </Button>
+              ) : (
+                <Button type="button" size="sm" variant="ghost" onClick={disableCollabs}>
+                  Quitar
+                </Button>
+              )}
+            </div>
+
+            {hasCollabs && (
+              <div className="space-y-2">
+                {collaborators.map((c, i) => (
+                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                    <Input
+                      className="col-span-7"
+                      placeholder="Nombre artístico"
+                      value={c.artist_name}
+                      onChange={(e) => updateCollab(i, { artist_name: e.target.value })}
+                      maxLength={80}
+                    />
+                    <div className="col-span-3 flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={c.share_percent}
+                        onChange={(e) => updateCollab(i, { share_percent: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                    </div>
+                    <div className="col-span-2 flex justify-end items-center gap-1">
+                      {c.is_primary ? (
+                        <span className="text-[10px] uppercase tracking-wider text-primary font-semibold">Principal</span>
+                      ) : (
+                        <Button type="button" size="icon" variant="ghost" onClick={() => removeCollaborator(i)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between pt-2">
+                  <Button type="button" size="sm" variant="outline" onClick={addCollaborator}>
+                    <Plus className="h-4 w-4 mr-1" /> Añadir artista
+                  </Button>
+                  <span className={`text-sm font-semibold ${Math.abs(collabSum - 100) < 0.01 ? 'text-primary' : 'text-destructive'}`}>
+                    Total: {collabSum}% {Math.abs(collabSum - 100) < 0.01 ? '✓' : '(debe ser 100%)'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {audioUrl && audioDuration > 0 && (
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
               <div className="flex items-start justify-between gap-4">
