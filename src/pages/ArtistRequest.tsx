@@ -237,7 +237,7 @@ const ArtistRequest = () => {
         <div>
           <Label className="eyebrow">Documentos de verificación *</Label>
           <p className="text-xs text-muted-foreground mt-1 mb-2">
-            PDF o imágenes. Máximo 5 archivos, 10 MB cada uno.
+            Sube tu DNI, NIE o pasaporte (foto o PDF). Máximo 5 archivos, 10 MB cada uno.
           </p>
 
           <input
