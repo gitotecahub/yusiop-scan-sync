@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -22,6 +22,8 @@ const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
 const DEFAULT_PREM_CREDITS = 100;
 const DEFAULT_ARTIST_SHARE = 40; // %
+const DEFAULT_INVESTOR_SHARE = 10; // %
+const DEFAULT_PLATFORM_SHARE = 50; // %
 
 const SalesSimulator = () => {
   // Pricing inputs
@@ -30,6 +32,8 @@ const SalesSimulator = () => {
   const [stdCredits, setStdCredits] = useState(DEFAULT_STD_CREDITS);
   const [premCredits, setPremCredits] = useState(DEFAULT_PREM_CREDITS);
   const [artistShare, setArtistShare] = useState(DEFAULT_ARTIST_SHARE);
+  const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
+  const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
   // Volume inputs (annual)
   const [stdYearly, setStdYearly] = useState(1000);
@@ -44,11 +48,16 @@ const SalesSimulator = () => {
     const premGross = premPrice * premYearly;
     const totalGross = stdGross + premGross;
 
-    const sharePct = artistShare / 100;
-    const stdArtist = stdGross * sharePct;
-    const premArtist = premGross * sharePct;
+    const artistPct = artistShare / 100;
+    const investorPct = investorShare / 100;
+    const platformPct = platformShare / 100;
+
+    const stdArtist = stdGross * artistPct;
+    const premArtist = premGross * artistPct;
     const totalArtist = stdArtist + premArtist;
-    const totalPlatform = totalGross - totalArtist;
+
+    const totalInvestor = totalGross * investorPct;
+    const totalPlatform = totalGross * platformPct;
 
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
@@ -56,6 +65,8 @@ const SalesSimulator = () => {
     const totalUnits = stdYearly + premYearly;
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
+    const monthlyInvestor = totalInvestor / 12;
+    const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
     // Credits / downloads enabled
@@ -70,12 +81,15 @@ const SalesSimulator = () => {
       stdArtist,
       premArtist,
       totalArtist,
+      totalInvestor,
       totalPlatform,
       totalCosts,
       platformNet,
       totalUnits,
       monthlyGross,
       monthlyPlatform,
+      monthlyInvestor,
+      monthlyArtist,
       monthlyNet,
       totalDownloads,
       valuePerDlStd,
@@ -87,6 +101,8 @@ const SalesSimulator = () => {
     stdCredits,
     premCredits,
     artistShare,
+    investorShare,
+    platformShare,
     stdYearly,
     premYearly,
     stdCostXAF,
@@ -99,6 +115,8 @@ const SalesSimulator = () => {
     setStdCredits(DEFAULT_STD_CREDITS);
     setPremCredits(DEFAULT_PREM_CREDITS);
     setArtistShare(DEFAULT_ARTIST_SHARE);
+    setInvestorShare(DEFAULT_INVESTOR_SHARE);
+    setPlatformShare(DEFAULT_PLATFORM_SHARE);
   };
 
   return (
@@ -221,21 +239,73 @@ const SalesSimulator = () => {
 
           <Separator />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Reparto del artista (%)</Label>
-              <span className="text-sm font-semibold">{artistShare}%</span>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-1">Reparto de ingresos brutos</h4>
+              <p className="text-xs text-muted-foreground">
+                Ajusta los porcentajes entre artistas, inversor y plataforma. Por defecto:
+                40% artistas, 10% inversor, 50% plataforma.
+              </p>
             </div>
-            <Slider
-              value={[artistShare]}
-              onValueChange={(v) => setArtistShare(v[0])}
-              min={0}
-              max={100}
-              step={1}
-            />
-            <p className="text-xs text-muted-foreground">
-              Plataforma se queda con el {100 - artistShare}% de los ingresos brutos.
-            </p>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Bolsa artistas (%)</Label>
+                <span className="text-sm font-semibold">{artistShare}%</span>
+              </div>
+              <Slider
+                value={[artistShare]}
+                onValueChange={(v) => setArtistShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Inversor (%)</Label>
+                <span className="text-sm font-semibold">{investorShare}%</span>
+              </div>
+              <Slider
+                value={[investorShare]}
+                onValueChange={(v) => setInvestorShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Plataforma (%)</Label>
+                <span className="text-sm font-semibold">{platformShare}%</span>
+              </div>
+              <Slider
+                value={[platformShare]}
+                onValueChange={(v) => setPlatformShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            {(() => {
+              const sum = artistShare + investorShare + platformShare;
+              const ok = sum === 100;
+              return (
+                <div
+                  className={`text-xs px-3 py-2 rounded-md border ${
+                    ok
+                      ? 'bg-muted/40 text-muted-foreground'
+                      : 'bg-destructive/10 text-destructive border-destructive/30'
+                  }`}
+                >
+                  Suma actual: <span className="font-semibold">{sum}%</span>{' '}
+                  {ok ? '✓ correcto' : '— debe sumar 100% para un reparto coherente'}
+                </div>
+              );
+            })()}
           </div>
         </CardContent>
       </Card>
@@ -300,7 +370,7 @@ const SalesSimulator = () => {
       </Card>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Tarjetas vendidas / año</CardDescription>
@@ -330,7 +400,16 @@ const SalesSimulator = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Plataforma ({100 - artistShare}%)</CardDescription>
+            <CardDescription>Inversor ({investorShare}%)</CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-yusiop-primary" />
+              {formatEUR(totals.totalInvestor)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Plataforma ({platformShare}%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalPlatform)}
@@ -359,7 +438,13 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Plataforma bruto (${100 - artistShare}%)`}
+              label={`Inversor (${investorShare}%)`}
+              value={formatEUR(totals.totalInvestor)}
+              bold
+            />
+            <Separator />
+            <Row
+              label={`Plataforma bruto (${platformShare}%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
             />
@@ -382,6 +467,8 @@ const SalesSimulator = () => {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <Row label="Ingresos brutos / mes" value={formatEUR(totals.monthlyGross)} />
+            <Row label="Bolsa artistas / mes" value={formatEUR(totals.monthlyArtist)} />
+            <Row label="Inversor / mes" value={formatEUR(totals.monthlyInvestor)} />
             <Row
               label="Plataforma bruto / mes"
               value={formatEUR(totals.monthlyPlatform)}
