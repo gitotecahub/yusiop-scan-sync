@@ -566,6 +566,18 @@ const Profile = () => {
         </div>
       </div>
 
+      {/* Sign Out */}
+      <div className="pt-4 border-t border-border">
+        <Button
+          onClick={handleSignOut}
+          variant="ghost"
+          className="w-full rounded-none h-11 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center gap-2 border border-destructive/30"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar Sesión
+        </Button>
+      </div>
+
       {/* Activated Cards History */}
       <div>
         <div className="flex items-center gap-2 mb-4">
@@ -618,19 +630,8 @@ const Profile = () => {
             <p className="text-sm text-muted-foreground">No has escaneado ninguna tarjeta aún</p>
           </div>
         )}
-      </div>
 
-      {/* Sign Out */}
-      <div className="pt-4 border-t border-border">
-        <Button
-          onClick={handleSignOut}
-          variant="ghost"
-          className="w-full rounded-none h-11 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center gap-2 border border-destructive/30"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar Sesión
-        </Button>
-        <p className="eyebrow text-center mt-6">© Yusiop · MMXXVI</p>
+        <p className="eyebrow text-center mt-8">© Yusiop · MMXXVI</p>
       </div>
     </div>
   );
