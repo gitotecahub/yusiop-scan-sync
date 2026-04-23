@@ -400,29 +400,65 @@ const Library = () => {
       );
     }
 
+    const visibleIds = songs.map((s) => s.id);
+    const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
     return (
       <div className="space-y-2">
+        {selectionMode && (
+          <button
+            type="button"
+            onClick={() => selectAllVisible(visibleIds)}
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors px-1 py-1"
+          >
+            {allVisibleSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+            {allVisibleSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
+          </button>
+        )}
         {songs.map((song, idx) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+          const isSelected = selectedIds.has(song.id);
 
           return (
-            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border transition-colors">
-              <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
-                {String(idx + 1).padStart(2, '0')}
-              </span>
+            <div
+              key={song.id}
+              onClick={selectionMode ? () => toggleSelected(song.id) : undefined}
+              className={cn(
+                'flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-colors',
+                selectionMode && 'cursor-pointer',
+                isSelected
+                  ? 'bg-primary/10 border-primary/50 shadow-glow'
+                  : 'bg-card/40 border-border'
+              )}
+            >
+              {selectionMode ? (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={() => toggleSelected(song.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="shrink-0"
+                  aria-label={isSelected ? 'Deseleccionar' : 'Seleccionar'}
+                />
+              ) : (
+                <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+              )}
               <div className="relative shrink-0 group">
                 <img
                   src={song.cover_url}
                   alt={`${song.title} cover`}
                   className="w-12 h-12 object-cover rounded-xl"
                 />
-                <Button
-                  size="sm"
-                  onClick={() => handlePlay(song)}
-                  className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
-                >
-                  {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
-                </Button>
+                {!selectionMode && (
+                  <Button
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handlePlay(song); }}
+                    className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+                  >
+                    {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
+                  </Button>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -434,6 +470,7 @@ const Library = () => {
                 </div>
               </div>
 
+              {!selectionMode && (
               <div className="flex items-center shrink-0">
                 <Button
                   size="icon"
@@ -461,6 +498,7 @@ const Library = () => {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+              )}
             </div>
           );
         })}
