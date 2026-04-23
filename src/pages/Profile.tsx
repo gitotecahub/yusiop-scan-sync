@@ -106,22 +106,48 @@ const Profile = () => {
     };
 
     const loadScannedCards = async () => {
-      if (!user?.email) return;
-      
+      if (!user?.email || !user?.id) return;
+
       try {
         setLoadingCards(true);
-        const { data, error } = await supabase
-          .from('user_credits')
-          .select('*')
-          .eq('user_email', user.email)
-          .order('scanned_at', { ascending: false });
 
-        if (error) throw error;
+        const [creditsRes, qrCardsRes, downloadsRes] = await Promise.all([
+          supabase
+            .from('user_credits')
+            .select('*')
+            .eq('user_email', user.email)
+            .order('scanned_at', { ascending: false }),
+          supabase
+            .from('qr_cards')
+            .select('id, download_credits')
+            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`),
+          supabase
+            .from('user_downloads')
+            .select('id', { count: 'exact', head: true })
+            .or(`user_id.eq.${user.id},user_email.eq.${user.email}`),
+        ]);
 
-        setScannedCards(data || []);
+        if (creditsRes.error) throw creditsRes.error;
+        if (qrCardsRes.error) throw qrCardsRes.error;
+        if (downloadsRes.error) throw downloadsRes.error;
+
+        const credits = creditsRes.data ?? [];
+        const qrCards = qrCardsRes.data ?? [];
+
+        const legacyAvailable = credits
+          .filter((c: any) => c.is_active && c.credits_remaining > 0)
+          .reduce((sum: number, c: any) => sum + (c.credits_remaining ?? 0), 0);
+        const ownedAvailable = qrCards.reduce(
+          (sum: number, c: any) => sum + (c.download_credits ?? 0),
+          0,
+        );
+
+        setScannedCards(credits);
         setProfile(prev => ({
           ...prev,
-          activatedCards: data?.length || 0
+          downloadsRemaining: legacyAvailable + ownedAvailable,
+          totalDownloads: downloadsRes.count ?? 0,
+          activatedCards: credits.length + qrCards.length,
         }));
       } catch (err) {
         console.error('Error loading scanned cards:', err);
