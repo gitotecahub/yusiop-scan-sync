@@ -260,14 +260,21 @@ const SongSubmissions = () => {
                     </p>
                   </div>
                 </div>
-                {row.status === 'pending' && (
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Button size="sm" onClick={() => approve(row)}>
-                      <Check className="h-4 w-4 mr-1" /> Aprobar
+                {(
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+                    <Button size="sm" variant="outline" onClick={() => openDetails(row)}>
+                      <Info className="h-4 w-4 mr-1" /> Detalles
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => openReject(row)}>
-                      <X className="h-4 w-4 mr-1" /> Rechazar
-                    </Button>
+                    {row.status === 'pending' && (
+                      <>
+                        <Button size="sm" onClick={() => approve(row)}>
+                          <Check className="h-4 w-4 mr-1" /> Aprobar
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => openReject(row)}>
+                          <X className="h-4 w-4 mr-1" /> Rechazar
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </CardHeader>
