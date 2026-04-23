@@ -150,7 +150,7 @@ export function AdminSidebar() {
           <SidebarGroupLabel>Gestión</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
+              {visibleItems.map((item) => {
                 const isArtistRequests = item.url === '/admin/artist-requests';
                 const isSongSubmissions = item.url === '/admin/song-submissions';
                 const badgeCount = isArtistRequests
