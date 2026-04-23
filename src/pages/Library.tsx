@@ -258,7 +258,7 @@ const Library = () => {
       const ids = Array.from(selectedIds);
       const { error } = await supabase
         .from('user_downloads')
-        .delete()
+        .update({ hidden_from_library: true })
         .eq('user_id', user.id)
         .in('song_id', ids);
 
