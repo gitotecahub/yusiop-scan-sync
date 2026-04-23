@@ -868,7 +868,7 @@ export type Database = {
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
-      song_submission_status: "pending" | "approved" | "rejected"
+      song_submission_status: "pending" | "approved" | "rejected" | "removed"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -1002,7 +1002,7 @@ export const Constants = {
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
-      song_submission_status: ["pending", "approved", "rejected"],
+      song_submission_status: ["pending", "approved", "rejected", "removed"],
       user_role: ["user", "admin"],
     },
   },
