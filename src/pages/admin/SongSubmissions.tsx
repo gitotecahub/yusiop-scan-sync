@@ -238,17 +238,64 @@ const SongSubmissions = () => {
                   </div>
                 )}
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={() => playTrack(row.track_path, row.track_url)}>
-                    <Play className="h-3 w-3 mr-1" /> Audio completo
-                  </Button>
-                  {row.preview_url && (
-                    <Button size="sm" variant="outline" onClick={() => playTrack(row.preview_path, row.preview_url!)}>
-                      <Play className="h-3 w-3 mr-1" /> Preview
-                    </Button>
+              <CardContent className="space-y-4 text-sm">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Audio completo
+                    </span>
+                    {!signedUrls[row.id]?.track && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={loadingAudio[row.id] === 'track'}
+                        onClick={() => loadAndPlay(row.id, 'track', row.track_path, row.track_url)}
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        {loadingAudio[row.id] === 'track' ? 'Cargando…' : 'Cargar y reproducir'}
+                      </Button>
+                    )}
+                  </div>
+                  {signedUrls[row.id]?.track && (
+                    <audio
+                      ref={(el) => { audioRefs.current[`${row.id}:track`] = el; }}
+                      src={signedUrls[row.id]!.track}
+                      controls
+                      preload="metadata"
+                      className="w-full"
+                    />
                   )}
                 </div>
+
+                {(row.preview_url || row.preview_path) && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        Preview (20s)
+                      </span>
+                      {!signedUrls[row.id]?.preview && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={loadingAudio[row.id] === 'preview'}
+                          onClick={() => loadAndPlay(row.id, 'preview', row.preview_path, row.preview_url)}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          {loadingAudio[row.id] === 'preview' ? 'Cargando…' : 'Cargar y reproducir'}
+                        </Button>
+                      )}
+                    </div>
+                    {signedUrls[row.id]?.preview && (
+                      <audio
+                        ref={(el) => { audioRefs.current[`${row.id}:preview`] = el; }}
+                        src={signedUrls[row.id]!.preview}
+                        controls
+                        preload="metadata"
+                        className="w-full"
+                      />
+                    )}
+                  </div>
+                )}
 
                 {row.status === 'rejected' && row.rejection_reason && (
                   <div className="text-xs text-destructive">
