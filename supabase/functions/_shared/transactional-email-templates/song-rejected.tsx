@@ -114,7 +114,7 @@ export const template = {
   previewData: {
     songTitle: 'Mi nueva canción',
     artistName: 'Artista',
-    reason: 'La calidad del audio es baja, sube un archivo a 320 kbps.',
+    reason: 'La calidad del audio es baja, sube un archivo a 320 kbps.\nLa portada no cumple las dimensiones mínimas (mínimo 1000x1000).\nEl título contiene errores tipográficos.',
     appUrl: 'https://yusiop.com',
   },
 } satisfies TemplateEntry
