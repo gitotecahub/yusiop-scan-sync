@@ -46,6 +46,9 @@ const SongSubmissions = () => {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<SubmissionRow | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
+  const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
+  const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
   const load = async () => {
     setLoading(true);
