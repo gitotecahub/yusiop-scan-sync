@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import SubmitSongDialog, { type EditingSubmission } from '@/components/artist/SubmitSongDialog';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
+import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
 interface SubmissionRow {
   id: string;
@@ -25,6 +26,7 @@ interface SubmissionRow {
   track_url: string;
   track_path: string | null;
   duration_seconds: number;
+  scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
 }
@@ -44,7 +46,7 @@ const MySubmissions = () => {
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,created_at,reviewed_at')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setRows((data ?? []) as SubmissionRow[]);
@@ -156,7 +158,13 @@ const MySubmissions = () => {
                         <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
                       )}
                       {r.status === 'approved' && (
-                        <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                        r.scheduled_release_at ? (
+                          <Badge variant="secondary" className="border border-primary/30">
+                            <CalendarClock className="h-3 w-3 mr-1" />Programada
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                        )
                       )}
                       {r.status === 'rejected' && (
                         <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
