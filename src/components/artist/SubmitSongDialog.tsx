@@ -529,7 +529,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               <input
                 ref={trackInputRef}
                 type="file"
-                accept=".mp3,.m4a,.wav,.aac,.ogg,.flac,.opus,.weba,.webm,audio/*"
+                accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav"
                 className="hidden"
                 onChange={(e) => handleFileSelect('track', e.target.files?.[0] || null)}
               />
