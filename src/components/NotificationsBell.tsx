@@ -30,6 +30,7 @@ const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const userId = session?.user?.id;
+  const isFirstLoad = useRef(true);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -43,7 +44,9 @@ const NotificationsBell = () => {
   }, [userId]);
 
   useEffect(() => {
-    load();
+    load().then(() => {
+      isFirstLoad.current = false;
+    });
   }, [load]);
 
   // Realtime subscription
@@ -54,7 +57,20 @@ const NotificationsBell = () => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          if (!isFirstLoad.current) playNotificationSound();
+          load();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
           schema: 'public',
           table: 'notifications',
           filter: `user_id=eq.${userId}`,
