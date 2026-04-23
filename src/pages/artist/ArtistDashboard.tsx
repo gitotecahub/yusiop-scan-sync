@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Disc3, BarChart3, ArrowLeft, Upload } from 'lucide-react';
+import { Music, Disc3, BarChart3, ArrowLeft, Upload, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/authStore';
@@ -111,6 +111,15 @@ const ArtistDashboard = () => {
             <h3 className="font-display font-bold text-lg">Estadísticas</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Descargas, ingresos, países y demografía de tu audiencia.
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/collaborations')}>
+          <CardContent className="p-6">
+            <Users className="h-8 w-8 text-primary mb-3" />
+            <h3 className="font-display font-bold text-lg">Colaboraciones</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Reclama tu parte de monetización en canciones donde apareces como colaborador.
             </p>
           </CardContent>
         </Card>

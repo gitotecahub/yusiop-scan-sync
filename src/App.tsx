@@ -22,7 +22,9 @@ import ArtistRequest from '@/pages/ArtistRequest';
 import ArtistDashboard from '@/pages/artist/ArtistDashboard';
 import MySubmissions from '@/pages/artist/MySubmissions';
 import ArtistStats from '@/pages/artist/ArtistStats';
+import Collaborations from '@/pages/artist/Collaborations';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
+import CollaborationClaims from '@/pages/admin/CollaborationClaims';
 
 // Admin Pages
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -91,6 +93,7 @@ const AppContent = () => {
         <Route path="settings" element={<Settings />} />
         <Route path="artist-requests" element={<ArtistRequests />} />
         <Route path="song-submissions" element={<SongSubmissions />} />
+        <Route path="collab-claims" element={<CollaborationClaims />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -115,6 +118,7 @@ const AppContent = () => {
             <Route path="/artist" element={<ArtistDashboard />} />
             <Route path="/artist/submissions" element={<MySubmissions />} />
             <Route path="/artist/stats" element={<ArtistStats />} />
+            <Route path="/artist/collaborations" element={<Collaborations />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
             <Route path="/profile" element={
               <Layout>

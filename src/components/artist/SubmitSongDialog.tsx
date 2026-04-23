@@ -5,10 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+
+interface CollaboratorRow {
+  id?: string; // existing DB id when editing
+  artist_name: string;
+  share_percent: number;
+  is_primary: boolean;
+}
 
 export interface EditingSubmission {
   id: string;
@@ -79,6 +86,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const trackInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
+  // Colaboraciones
+  const [hasCollabs, setHasCollabs] = useState(false);
+  const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
+
+  const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
+  const collabValid = !hasCollabs || (collaborators.length >= 2 && Math.abs(collabSum - 100) < 0.01 && collaborators.every(c => c.artist_name.trim().length > 0));
+
   // Inicializar/precargar campos al abrir
   useEffect(() => {
     if (!open) return;
@@ -93,6 +107,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      // Cargar colaboradores existentes del envío
+      (async () => {
+        const { data } = await supabase
+          .from('song_collaborators')
+          .select('id,artist_name,share_percent,is_primary')
+          .eq('submission_id', editing.id)
+          .order('is_primary', { ascending: false });
+        if (data && data.length > 0) {
+          setHasCollabs(true);
+          setCollaborators(data.map(d => ({
+            id: d.id,
+            artist_name: d.artist_name,
+            share_percent: Number(d.share_percent),
+            is_primary: !!d.is_primary,
+          })));
+        } else {
+          setHasCollabs(false);
+          setCollaborators([]);
+        }
+      })();
     } else {
       setFormData({
         title: '',
@@ -104,12 +138,41 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(0);
       setPreviewStart(0);
       setAudioUrl(null);
+      setHasCollabs(false);
+      setCollaborators([]);
     }
     setTrackFile(null);
     setCoverFile(null);
     setProgress(0);
     stopPreview();
   }, [open, editing, defaultArtistName]);
+
+  const enableCollabs = () => {
+    setHasCollabs(true);
+    if (collaborators.length === 0) {
+      setCollaborators([
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true },
+        { artist_name: '', share_percent: 50, is_primary: false },
+      ]);
+    }
+  };
+
+  const disableCollabs = () => {
+    setHasCollabs(false);
+    setCollaborators([]);
+  };
+
+  const addCollaborator = () => {
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false }]);
+  };
+
+  const removeCollaborator = (idx: number) => {
+    setCollaborators(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateCollab = (idx: number, patch: Partial<CollaboratorRow>) => {
+    setCollaborators(prev => prev.map((c, i) => i === idx ? { ...c, ...patch } : c));
+  };
 
   // Cleanup audio al cerrar
   useEffect(() => {
@@ -207,7 +270,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (!formData.title.trim()) return toast.error('El título es requerido'), false;
     if (!formData.artist_name.trim()) return toast.error('El nombre del artista es requerido'), false;
     if (!isEdit && !trackFile) return toast.error('Debes subir el archivo de audio completo'), false;
+    if (hasCollabs) {
+      if (collaborators.length < 2) return toast.error('Una colaboración requiere al menos 2 artistas'), false;
+      if (collaborators.some(c => !c.artist_name.trim())) return toast.error('Todos los colaboradores deben tener nombre artístico'), false;
+      if (Math.abs(collabSum - 100) > 0.01) return toast.error(`La suma de splits debe ser 100% (actual: ${collabSum}%)`), false;
+    }
     return true;
+  };
+
+  const persistCollaborators = async (submissionId: string) => {
+    // Borrar todos y reinsertar (más simple y consistente)
+    await supabase.from('song_collaborators').delete().eq('submission_id', submissionId);
+    if (!hasCollabs || collaborators.length === 0) return;
+    const rows = collaborators.map(c => ({
+      submission_id: submissionId,
+      artist_name: c.artist_name.trim(),
+      share_percent: c.share_percent,
+      is_primary: c.is_primary,
+    }));
+    const { error } = await supabase.from('song_collaborators').insert(rows);
+    if (error) throw error;
   };
 
   const handleSubmit = async () => {
@@ -266,11 +348,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           .update(update)
           .eq('id', editing.id);
         if (dbError) throw dbError;
+        await persistCollaborators(editing.id);
         setProgress(100);
         toast.success('Envío actualizado y reenviado a revisión');
       } else {
         if (!trackUp) throw new Error('Falta archivo de audio');
-        const { error: dbError } = await supabase.from('song_submissions').insert({
+        const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
           user_id: user.id,
           title: formData.title.trim(),
           artist_name: formData.artist_name.trim(),
@@ -283,8 +366,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
-        });
+        }).select('id').single();
         if (dbError) throw dbError;
+        if (inserted?.id) await persistCollaborators(inserted.id);
         setProgress(100);
         toast.success('Canción enviada a revisión');
       }
@@ -427,7 +511,75 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
           </div>
 
-          {/* Selector de fragmento de preview */}
+          {/* Colaboraciones y splits */}
+          <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <Users className="h-4 w-4" /> ¿Es una colaboración?
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Define los splits de monetización entre los artistas. Si un colaborador no
+                  está aún en Yusiop, su parte se reservará en el pozo común hasta que se registre.
+                </p>
+              </div>
+              {!hasCollabs ? (
+                <Button type="button" size="sm" variant="outline" onClick={enableCollabs}>
+                  <Plus className="h-4 w-4 mr-1" /> Añadir colaboración
+                </Button>
+              ) : (
+                <Button type="button" size="sm" variant="ghost" onClick={disableCollabs}>
+                  Quitar
+                </Button>
+              )}
+            </div>
+
+            {hasCollabs && (
+              <div className="space-y-2">
+                {collaborators.map((c, i) => (
+                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                    <Input
+                      className="col-span-7"
+                      placeholder="Nombre artístico"
+                      value={c.artist_name}
+                      onChange={(e) => updateCollab(i, { artist_name: e.target.value })}
+                      maxLength={80}
+                    />
+                    <div className="col-span-3 flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={c.share_percent}
+                        onChange={(e) => updateCollab(i, { share_percent: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                    </div>
+                    <div className="col-span-2 flex justify-end items-center gap-1">
+                      {c.is_primary ? (
+                        <span className="text-[10px] uppercase tracking-wider text-primary font-semibold">Principal</span>
+                      ) : (
+                        <Button type="button" size="icon" variant="ghost" onClick={() => removeCollaborator(i)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between pt-2">
+                  <Button type="button" size="sm" variant="outline" onClick={addCollaborator}>
+                    <Plus className="h-4 w-4 mr-1" /> Añadir artista
+                  </Button>
+                  <span className={`text-sm font-semibold ${Math.abs(collabSum - 100) < 0.01 ? 'text-primary' : 'text-destructive'}`}>
+                    Total: {collabSum}% {Math.abs(collabSum - 100) < 0.01 ? '✓' : '(debe ser 100%)'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {audioUrl && audioDuration > 0 && (
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
               <div className="flex items-start justify-between gap-4">
@@ -503,7 +655,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile)}
+            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile) || !collabValid}
           >
             {uploading ? 'Guardando…' : isEdit ? 'Guardar y reenviar' : 'Enviar a revisión'}
           </Button>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,7 @@ type Stats = {
   by_age: { bucket: string; downloads: number }[];
   by_gender: { gender: string; downloads: number }[];
   by_day: { day: string; downloads: number; revenue_cents: number }[];
+  pool_pending?: { pending_revenue_cents: number; pending_downloads: number } | null;
 };
 
 const GENDER_LABEL: Record<string, string> = {
@@ -96,6 +97,7 @@ const ArtistStats = () => {
           setStats({
             totals: { total_downloads: 0, unique_listeners: 0, total_revenue_cents: 0 },
             by_song: [], by_country: [], by_age: [], by_gender: [], by_day: [],
+            pool_pending: null,
           });
           setLoading(false);
           return;
@@ -189,13 +191,32 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Ingresos estimados</p>
+                    <p className="text-xs text-muted-foreground">Ingresos estimados (tu parte)</p>
                     <p className="text-2xl font-bold">{formatEuros(stats.totals.total_revenue_cents)}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Pool pendiente de colaboraciones */}
+          {stats.pool_pending && stats.pool_pending.pending_revenue_cents > 0 && (
+            <Card className="mb-6 border-primary/40 bg-primary/5">
+              <CardContent className="p-5 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pendiente en pozo común (sin reclamar)</p>
+                    <p className="text-xl font-bold">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} descargas afectadas</p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => navigate('/artist/collaborations')}>
+                  Ir a reclamar
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Evolución 30 días */}
           <Card className="mb-6">
