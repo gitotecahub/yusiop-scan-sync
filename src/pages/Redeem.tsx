@@ -152,7 +152,7 @@ const Redeem = () => {
             <Button variant="outline" onClick={() => navigate('/profile')}>
               Ver mis tarjetas
             </Button>
-            <Button onClick={() => navigate('/library')}>Ir a biblioteca</Button>
+            <Button onClick={() => navigate('/catalog')}>Ir al catálogo</Button>
           </div>
         ) : (
           <Button
