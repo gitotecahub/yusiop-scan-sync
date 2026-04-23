@@ -70,6 +70,7 @@ type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purcha
 
 const Users = () => {
   const navigate = useNavigate();
+  const { isAdmin: currentUserIsSuperAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,6 +78,7 @@ const Users = () => {
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserProfile | null>(null);
+  const [permissionsUser, setPermissionsUser] = useState<UserProfile | null>(null);
   const [editForm, setEditForm] = useState({ full_name: '', username: '', downloads_remaining: 0 });
   const [savingEdit, setSavingEdit] = useState(false);
   const { toast } = useToast();
