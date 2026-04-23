@@ -95,8 +95,6 @@ const ArtistRequest = () => {
     if (!user) return;
     const parsed = schema.safeParse({
       artist_name: artistName,
-      bio,
-      genre,
       contact_email: contactEmail,
       links,
     });
@@ -120,8 +118,8 @@ const ArtistRequest = () => {
       const { error } = await supabase.from('artist_requests').insert([{
         user_id: user.id,
         artist_name: parsed.data.artist_name,
-        bio: parsed.data.bio || null,
-        genre: parsed.data.genre || null,
+        bio: null,
+        genre: null,
         contact_email: parsed.data.contact_email,
         links: linkArray as any,
         document_urls: docs as any,
