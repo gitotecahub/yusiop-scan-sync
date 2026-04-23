@@ -459,6 +459,55 @@ const Library = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog
+        open={!!songToShare}
+        onOpenChange={(open) => !open && !sharing && setSongToShare(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Compartir canción</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Quieres compartir <span className="font-semibold text-foreground">"{songToShare?.title}"</span>{' '}
+              de <span className="font-semibold text-foreground">{songToShare?.artist}</span>?
+              <br />
+              <br />
+              La canción <span className="font-semibold text-foreground">cambiará de biblioteca</span>: dejará la tuya y entrará directamente en la del destinatario. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="recipient-username">Username del destinatario</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
+              <Input
+                id="recipient-username"
+                value={recipientUsername}
+                onChange={(e) => setRecipientUsername(e.target.value.replace(/^@/, ''))}
+                placeholder="usuario"
+                className="pl-7"
+                maxLength={50}
+                autoFocus
+                disabled={sharing}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !sharing) {
+                    e.preventDefault();
+                    confirmShare();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sharing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmShare(); }}
+              disabled={sharing || !recipientUsername.trim()}
+            >
+              {sharing ? 'Compartiendo...' : 'Compartir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
