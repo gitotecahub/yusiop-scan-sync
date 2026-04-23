@@ -35,6 +35,8 @@ const QRCards = () => {
   const [newCardQuantity, setNewCardQuantity] = useState('1');
   const [isGenerating, setIsGenerating] = useState(false);
   const newCardCredits = newCardType === 'premium' ? '10' : '4';
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
