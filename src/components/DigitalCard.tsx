@@ -244,7 +244,7 @@ const DigitalCard = ({
       />
 
       {/* Contenido */}
-      <div className={`relative h-full flex flex-col ${compact ? 'p-3' : 'p-4 sm:p-5'}`}>
+      <div className={`relative h-full flex flex-col ${compact ? 'p-2.5' : 'p-4 sm:p-5'}`}>
         {/* Top: marca + badge tipo */}
         <div className="flex items-start justify-between">
           <div>
