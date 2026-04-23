@@ -71,6 +71,28 @@ const MySubmissions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Realtime: refrescar la lista cuando cambien mis envíos (aprobaciones/rechazos)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`my-submissions-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'song_submissions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => load(),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   // Deep link: si llega ?edit=<submission_id> abrir el editor cuando carguen las filas
   useEffect(() => {
     const editId = searchParams.get('edit');
