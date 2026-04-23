@@ -289,7 +289,7 @@ const Users = () => {
   }), [users]);
 
   const formatEur = (cents: number) =>
-    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+    `${(cents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € · ${Math.round((cents / 100) * 655.957).toLocaleString('es-ES')} XAF`;
 
   if (loading) {
     return (
