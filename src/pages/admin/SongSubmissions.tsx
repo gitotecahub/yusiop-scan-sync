@@ -90,7 +90,7 @@ const SongSubmissions = () => {
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
-      sendEmailNotification('song-approved', row);
+      sendEmailNotification('approved', row);
       load();
     } else {
       toast.error(result?.message ?? 'Error');
@@ -118,7 +118,7 @@ const SongSubmissions = () => {
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
-      sendEmailNotification('song-rejected', rejectTarget, { reason });
+      sendEmailNotification('rejected', rejectTarget, reason);
       setRejectOpen(false);
       load();
     } else {
