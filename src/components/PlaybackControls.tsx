@@ -191,10 +191,16 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted/40 text-primary shrink-0"
-              aria-label="Favorito"
+              onClick={toggleFavorite}
+              disabled={favoriteLoading}
+              className={cn(
+                "h-9 w-9 rounded-full hover:bg-muted/40 shrink-0 transition-colors",
+                isFavorite ? "text-destructive" : "text-primary"
+              )}
+              aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+              aria-pressed={isFavorite}
             >
-              <Heart className="h-5 w-5" />
+              <Heart className={cn("h-5 w-5 transition-all", isFavorite && "fill-current")} />
             </Button>
           </div>
 
