@@ -594,26 +594,6 @@ const Monetization = () => {
             </div>
           </div>
         </CardContent>
-      </Card>
-                <p className="text-sm text-muted-foreground tabular-nums">
-                  ≈ {formatEURNumber(byOrigin.physical.salesEur + byOrigin.digital.salesEur)}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-right">
-                <div>
-                  <p className="text-xs text-muted-foreground">Físicas</p>
-                  <p className="font-semibold tabular-nums">{formatXAFFixed(byOrigin.physical.salesXaf)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Virtuales</p>
-                  <p className="font-semibold tabular-nums">{formatXAFFixed(byOrigin.digital.salesXaf)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Songs revenue */}
       <Card>
         <CardHeader>
