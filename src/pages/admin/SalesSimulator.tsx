@@ -66,18 +66,37 @@ const SalesSimulator = () => {
   const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
   const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
-  // Volume inputs (annual)
+  // Volume inputs físicas (annual)
   const [stdYearly, setStdYearly] = useState(1000);
   const [premYearly, setPremYearly] = useState(200);
 
-  // Optional cost inputs (XAF per unit) — opcional, para neto
+  // Optional cost inputs físicas (XAF per unit) — opcional, para neto
   const [stdCostXAF, setStdCostXAF] = useState(0);
   const [premCostXAF, setPremCostXAF] = useState(0);
 
+  // ----- Virtuales (EUR) -----
+  const [vStdPriceEUR, setVStdPriceEUR] = useState(DEFAULT_VSTD_PRICE_EUR);
+  const [vPremPriceEUR, setVPremPriceEUR] = useState(DEFAULT_VPREM_PRICE_EUR);
+  const [vStdCredits, setVStdCredits] = useState(DEFAULT_VSTD_CREDITS);
+  const [vPremCredits, setVPremCredits] = useState(DEFAULT_VPREM_CREDITS);
+  const [vStdYearly, setVStdYearly] = useState(500);
+  const [vPremYearly, setVPremYearly] = useState(100);
+
   const totals = useMemo(() => {
+    // ----- Físicas (XAF) -----
     const stdGross = stdPrice * stdYearly;
     const premGross = premPrice * premYearly;
-    const totalGross = stdGross + premGross;
+    const physicalGross = stdGross + premGross;
+
+    // ----- Virtuales (EUR → convertimos a XAF para unificar) -----
+    const vStdGrossEUR = vStdPriceEUR * vStdYearly;
+    const vPremGrossEUR = vPremPriceEUR * vPremYearly;
+    const virtualGrossEUR = vStdGrossEUR + vPremGrossEUR;
+    const vStdGrossXAF = vStdGrossEUR * XAF_PER_EUR;
+    const vPremGrossXAF = vPremGrossEUR * XAF_PER_EUR;
+    const virtualGrossXAF = virtualGrossEUR * XAF_PER_EUR;
+
+    const totalGross = physicalGross + virtualGrossXAF;
 
     const artistPct = artistShare / 100;
     const investorPct = investorShare / 100;
@@ -85,37 +104,59 @@ const SalesSimulator = () => {
 
     const stdArtist = stdGross * artistPct;
     const premArtist = premGross * artistPct;
-    const totalArtist = stdArtist + premArtist;
+    const vStdArtist = vStdGrossXAF * artistPct;
+    const vPremArtist = vPremGrossXAF * artistPct;
+    const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
     const totalInvestor = totalGross * investorPct;
     const totalPlatform = totalGross * platformPct;
 
+    // Las virtuales no tienen costes de producción
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
 
-    const totalUnits = stdYearly + premYearly;
+    const physicalUnits = stdYearly + premYearly;
+    const virtualUnits = vStdYearly + vPremYearly;
+    const totalUnits = physicalUnits + virtualUnits;
+
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
     const monthlyInvestor = totalInvestor / 12;
     const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
-    // Credits / downloads enabled
-    const totalDownloads = stdCredits * stdYearly + premCredits * premYearly;
+    const totalDownloads =
+      stdCredits * stdYearly +
+      premCredits * premYearly +
+      vStdCredits * vStdYearly +
+      vPremCredits * vPremYearly;
     const valuePerDlStd = stdCredits > 0 ? stdPrice / stdCredits : 0;
     const valuePerDlPrem = premCredits > 0 ? premPrice / premCredits : 0;
+    const valuePerDlVStd = vStdCredits > 0 ? vStdPriceEUR / vStdCredits : 0;
+    const valuePerDlVPrem = vPremCredits > 0 ? vPremPriceEUR / vPremCredits : 0;
 
     return {
       stdGross,
       premGross,
+      physicalGross,
+      vStdGrossEUR,
+      vPremGrossEUR,
+      virtualGrossEUR,
+      vStdGrossXAF,
+      vPremGrossXAF,
+      virtualGrossXAF,
       totalGross,
       stdArtist,
       premArtist,
+      vStdArtist,
+      vPremArtist,
       totalArtist,
       totalInvestor,
       totalPlatform,
       totalCosts,
       platformNet,
+      physicalUnits,
+      virtualUnits,
       totalUnits,
       monthlyGross,
       monthlyPlatform,
@@ -125,6 +166,8 @@ const SalesSimulator = () => {
       totalDownloads,
       valuePerDlStd,
       valuePerDlPrem,
+      valuePerDlVStd,
+      valuePerDlVPrem,
     };
   }, [
     stdPrice,
@@ -138,6 +181,12 @@ const SalesSimulator = () => {
     premYearly,
     stdCostXAF,
     premCostXAF,
+    vStdPriceEUR,
+    vPremPriceEUR,
+    vStdCredits,
+    vPremCredits,
+    vStdYearly,
+    vPremYearly,
   ]);
 
   const resetDefaults = () => {
@@ -148,6 +197,10 @@ const SalesSimulator = () => {
     setArtistShare(DEFAULT_ARTIST_SHARE);
     setInvestorShare(DEFAULT_INVESTOR_SHARE);
     setPlatformShare(DEFAULT_PLATFORM_SHARE);
+    setVStdPriceEUR(DEFAULT_VSTD_PRICE_EUR);
+    setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
+    setVStdCredits(DEFAULT_VSTD_CREDITS);
+    setVPremCredits(DEFAULT_VPREM_CREDITS);
   };
 
   return (
