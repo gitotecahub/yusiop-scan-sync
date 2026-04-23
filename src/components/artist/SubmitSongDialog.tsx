@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Music, AlertCircle } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Upload, Music, AlertCircle, Play, Pause } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
@@ -23,6 +24,7 @@ export interface EditingSubmission {
   cover_url: string | null;
   cover_path: string | null;
   duration_seconds: number;
+  preview_start_seconds?: number | null;
 }
 
 interface SubmitSongDialogProps {
@@ -41,6 +43,14 @@ interface FormState {
   release_date: string;
 }
 
+const PREVIEW_LENGTH = 20;
+
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
 const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmitted, editing = null }: SubmitSongDialogProps) => {
   const { user } = useAuthStore();
   const isEdit = !!editing;
@@ -54,13 +64,19 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   });
 
   const [trackFile, setTrackFile] = useState<File | null>(null);
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Preview selection
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [previewStart, setPreviewStart] = useState<number>(0);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const stopTimerRef = useRef<number | null>(null);
+
   const trackInputRef = useRef<HTMLInputElement>(null);
-  const previewInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Inicializar/precargar campos al abrir
@@ -74,6 +90,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         genre: editing.genre ?? '',
         release_date: editing.release_date ?? '',
       });
+      setAudioDuration(editing.duration_seconds || 0);
+      setPreviewStart(editing.preview_start_seconds ?? 0);
+      setAudioUrl(editing.track_url || null);
     } else {
       setFormData({
         title: '',
@@ -82,12 +101,52 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         genre: '',
         release_date: '',
       });
+      setAudioDuration(0);
+      setPreviewStart(0);
+      setAudioUrl(null);
     }
     setTrackFile(null);
-    setPreviewFile(null);
     setCoverFile(null);
     setProgress(0);
+    stopPreview();
   }, [open, editing, defaultArtistName]);
+
+  // Cleanup audio al cerrar
+  useEffect(() => {
+    if (!open) stopPreview();
+    return () => stopPreview();
+  }, [open]);
+
+  const stopPreview = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    if (stopTimerRef.current) {
+      window.clearTimeout(stopTimerRef.current);
+      stopTimerRef.current = null;
+    }
+    setIsPlayingPreview(false);
+  };
+
+  const playPreview = () => {
+    if (!audioRef.current || !audioUrl) return;
+    try {
+      audioRef.current.currentTime = previewStart;
+      audioRef.current.play();
+      setIsPlayingPreview(true);
+      const remaining = Math.min(PREVIEW_LENGTH, Math.max(0, audioDuration - previewStart));
+      stopTimerRef.current = window.setTimeout(() => {
+        stopPreview();
+      }, remaining * 1000);
+    } catch (e) {
+      console.error('No se pudo reproducir el preview', e);
+    }
+  };
+
+  const togglePreview = () => {
+    if (isPlayingPreview) stopPreview();
+    else playPreview();
+  };
 
   const getAudioDuration = (file: File): Promise<number> =>
     new Promise((resolve, reject) => {
@@ -108,18 +167,30 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     return { path: data.path, url: signed?.signedUrl ?? '' };
   };
 
-  const handleFileSelect = (type: 'track' | 'preview' | 'cover', file: File | null) => {
+  const handleFileSelect = async (type: 'track' | 'cover', file: File | null) => {
     if (!file) return;
     const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.error('Archivo demasiado grande. Máximo 50MB.');
       return;
     }
-    if (type === 'track' || type === 'preview') {
+    if (type === 'track') {
       const allowed = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/m4a', 'audio/x-m4a'];
       if (!allowed.includes(file.type)) {
         toast.error('Formato de audio no soportado. Usa MP3, WAV o M4A.');
         return;
+      }
+      setTrackFile(file);
+      // Preparar URL local para selector de preview
+      stopPreview();
+      const localUrl = URL.createObjectURL(file);
+      setAudioUrl(localUrl);
+      try {
+        const dur = await getAudioDuration(file);
+        setAudioDuration(dur);
+        setPreviewStart(0);
+      } catch {
+        setAudioDuration(0);
       }
     } else {
       const allowed = ['image/jpeg', 'image/png', 'image/webp'];
@@ -127,10 +198,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         toast.error('Formato de imagen no soportado. Usa JPG, PNG o WebP.');
         return;
       }
+      setCoverFile(file);
     }
-    if (type === 'track') setTrackFile(file);
-    if (type === 'preview') setPreviewFile(file);
-    if (type === 'cover') setCoverFile(file);
   };
 
   const validate = () => {
@@ -143,6 +212,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
 
   const handleSubmit = async () => {
     if (!validate() || !user) return;
+    stopPreview();
     setUploading(true);
     setProgress(0);
     try {
@@ -150,30 +220,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       const safe = formData.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       const folder = user.id;
 
-      let duration = editing?.duration_seconds ?? 0;
+      let duration = editing?.duration_seconds ?? audioDuration ?? 0;
       let trackUp: { path: string; url: string } | null = null;
-      let preview: { path: string; url: string } | null = null;
       let cover: { path: string; url: string } | null = null;
 
       if (trackFile) {
         duration = await getAudioDuration(trackFile);
-        setProgress(10);
+        setProgress(20);
         trackUp = await uploadFile(trackFile, `${folder}/${ts}_${safe}_full.${trackFile.name.split('.').pop()}`);
-        setProgress(50);
-      }
-
-      if (previewFile) {
-        preview = await uploadFile(previewFile, `${folder}/${ts}_${safe}_preview.${previewFile.name.split('.').pop()}`);
         setProgress(70);
       }
 
       if (coverFile) {
         cover = await uploadFile(coverFile, `${folder}/${ts}_${safe}_cover.${coverFile.name.split('.').pop()}`);
-        setProgress(85);
+        setProgress(90);
       }
 
+      // Asegurar que previewStart no exceda la duración
+      const safePreviewStart = Math.max(0, Math.min(previewStart, Math.max(0, duration - PREVIEW_LENGTH)));
+
       if (isEdit && editing) {
-        // Construir update: si no se subieron archivos nuevos, mantener los existentes
         const update: Record<string, any> = {
           title: formData.title.trim(),
           artist_name: formData.artist_name.trim(),
@@ -181,7 +247,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
           duration_seconds: duration,
-          // Reset estado a pendiente y limpiar motivo
+          preview_start_seconds: safePreviewStart,
           status: 'pending',
           rejection_reason: null,
           reviewed_at: null,
@@ -190,10 +256,6 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (trackUp) {
           update.track_url = trackUp.url;
           update.track_path = trackUp.path;
-        }
-        if (preview) {
-          update.preview_url = preview.url;
-          update.preview_path = preview.path;
         }
         if (cover) {
           update.cover_url = cover.url;
@@ -216,10 +278,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
           duration_seconds: duration,
+          preview_start_seconds: safePreviewStart,
           track_url: trackUp.url,
           track_path: trackUp.path,
-          preview_url: preview?.url ?? null,
-          preview_path: preview?.path ?? null,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
         });
@@ -237,6 +298,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setUploading(false);
     }
   };
+
+  const maxStart = Math.max(0, audioDuration - PREVIEW_LENGTH);
+  const previewEnd = Math.min(audioDuration, previewStart + PREVIEW_LENGTH);
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!uploading) onOpenChange(o); }}>
@@ -343,26 +407,6 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
 
             <div>
-              <Label>Preview (opcional)</Label>
-              <input
-                ref={previewInputRef}
-                type="file"
-                accept="audio/*"
-                className="hidden"
-                onChange={(e) => handleFileSelect('preview', e.target.files?.[0] || null)}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => previewInputRef.current?.click()}
-                className="w-full mt-2"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {previewFile ? `Seleccionado: ${previewFile.name}` : 'Seleccionar preview'}
-              </Button>
-            </div>
-
-            <div>
               <Label>Portada (opcional)</Label>
               <input
                 ref={coverInputRef}
@@ -382,6 +426,65 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               </Button>
             </div>
           </div>
+
+          {/* Selector de fragmento de preview */}
+          {audioUrl && audioDuration > 0 && (
+            <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-base font-semibold">Fragmento de previsualización</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Elige el momento donde empezarán los <strong>20 segundos</strong> que sonarán en el catálogo.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={isPlayingPreview ? 'secondary' : 'default'}
+                  onClick={togglePreview}
+                  disabled={maxStart < 0}
+                >
+                  {isPlayingPreview ? (
+                    <><Pause className="h-4 w-4 mr-1" /> Detener</>
+                  ) : (
+                    <><Play className="h-4 w-4 mr-1" /> Escuchar</>
+                  )}
+                </Button>
+              </div>
+
+              <audio
+                ref={audioRef}
+                src={audioUrl}
+                onEnded={stopPreview}
+                preload="metadata"
+                className="hidden"
+              />
+
+              {audioDuration <= PREVIEW_LENGTH ? (
+                <p className="text-xs text-muted-foreground">
+                  La canción dura menos de {PREVIEW_LENGTH}s, se reproducirá entera como preview.
+                </p>
+              ) : (
+                <>
+                  <Slider
+                    value={[previewStart]}
+                    min={0}
+                    max={maxStart}
+                    step={1}
+                    onValueChange={(v) => {
+                      stopPreview();
+                      setPreviewStart(v[0]);
+                    }}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Inicio: <strong className="text-foreground">{formatTime(previewStart)}</strong></span>
+                    <span>Fin: <strong className="text-foreground">{formatTime(previewEnd)}</strong></span>
+                    <span>Duración total: {formatTime(audioDuration)}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {uploading && (
             <div className="space-y-2">
