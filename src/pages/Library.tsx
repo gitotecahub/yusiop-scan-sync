@@ -633,7 +633,40 @@ const Library = () => {
         </TabsContent>
       </Tabs>
 
-      <PlaybackControls />
+      {!selectionMode && <PlaybackControls />}
+
+      {/* Barra de acciones múltiples */}
+      {selectionMode && (
+        <div className="fixed bottom-[88px] left-3 right-3 z-40">
+          <div className="max-w-md mx-auto glass-strong shadow-vapor rounded-2xl p-3 flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow vapor-text mb-0.5">Selección</p>
+              <p className="font-display font-bold text-sm text-foreground">
+                {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={selectedIds.size === 0}
+              onClick={() => { setBulkRecipient(''); setBulkShareOpen(true); }}
+              className="rounded-full"
+            >
+              <Send className="h-4 w-4 mr-1.5" />
+              Enviar
+            </Button>
+            <Button
+              size="sm"
+              disabled={selectedIds.size === 0}
+              onClick={() => setBulkDeleteOpen(true)}
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Borrar
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
         <AlertDialogContent>
