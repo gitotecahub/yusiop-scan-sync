@@ -667,6 +667,17 @@ export type Database = {
           success: boolean
         }[]
       }
+      transfer_card_to_user: {
+        Args: {
+          p_card_id: string
+          p_gift_message?: string
+          p_recipient_username: string
+        }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       transfer_song_to_user: {
         Args: { p_recipient_username: string; p_song_id: string }
         Returns: {
