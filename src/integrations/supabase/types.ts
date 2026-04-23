@@ -295,9 +295,11 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          birth_year: number | null
           created_at: string
           downloads_remaining: number | null
           full_name: string | null
+          gender: string | null
           id: string
           last_used_mode: string
           preferred_mode: string
@@ -308,9 +310,11 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          birth_year?: number | null
           created_at?: string
           downloads_remaining?: number | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           last_used_mode?: string
           preferred_mode?: string
@@ -321,9 +325,11 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          birth_year?: number | null
           created_at?: string
           downloads_remaining?: number | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           last_used_mode?: string
           preferred_mode?: string
@@ -611,10 +617,15 @@ export type Database = {
         Row: {
           card_id_str: string | null
           card_type: string | null
+          city: string | null
+          country_code: string | null
+          country_name: string | null
           downloaded_at: string
           id: string
+          ip_address: string | null
           local_user_id: string | null
           qr_card_id: string | null
+          region: string | null
           song_id: string
           user_email: string | null
           user_id: string | null
@@ -622,10 +633,15 @@ export type Database = {
         Insert: {
           card_id_str?: string | null
           card_type?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
           downloaded_at?: string
           id?: string
+          ip_address?: string | null
           local_user_id?: string | null
           qr_card_id?: string | null
+          region?: string | null
           song_id: string
           user_email?: string | null
           user_id?: string | null
@@ -633,10 +649,15 @@ export type Database = {
         Update: {
           card_id_str?: string | null
           card_type?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
           downloaded_at?: string
           id?: string
+          ip_address?: string | null
           local_user_id?: string | null
           qr_card_id?: string | null
+          region?: string | null
           song_id?: string
           user_email?: string | null
           user_id?: string | null
@@ -793,6 +814,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
       get_gift_preview: {
         Args: { p_token: string }
         Returns: {
@@ -851,6 +873,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      user_owns_artist: {
+        Args: { _artist_id: string; _user_id: string }
+        Returns: boolean
       }
       validate_qr_card: {
         Args: { card_code: string }
