@@ -325,17 +325,13 @@ const SongSubmissions = () => {
                   return (
                     <div className="text-xs text-destructive">
                       <p className="font-semibold mb-1">
-                        {items.length > 1 ? 'Motivos de rechazo:' : 'Motivo de rechazo:'}
+                        Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
                       </p>
-                      {items.length > 1 ? (
-                        <ul className="list-disc pl-5 space-y-0.5 marker:text-destructive">
-                          {items.map((it, i) => (
-                            <li key={i}>{it}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>{items[0] ?? row.rejection_reason}</p>
-                      )}
+                      <ul className="list-disc pl-5 space-y-0.5 marker:text-destructive">
+                        {(items.length > 0 ? items : [row.rejection_reason!]).map((it, i) => (
+                          <li key={i}>{it}</li>
+                        ))}
+                      </ul>
                     </div>
                   );
                 })()}
