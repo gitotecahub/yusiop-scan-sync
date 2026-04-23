@@ -356,12 +356,57 @@ const QRCards = () => {
         </CardContent>
       </Card>
 
+      {/* Barra de selección múltiple */}
+      <Card>
+        <CardContent className="p-4 flex flex-wrap items-center gap-3 justify-between">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="select-all"
+                checked={allFilteredSelected}
+                onCheckedChange={toggleSelectAllFiltered}
+              />
+              <Label htmlFor="select-all" className="cursor-pointer text-sm">
+                Seleccionar todos ({filteredQRCards.length})
+              </Label>
+            </div>
+            <Button variant="outline" size="sm" onClick={selectAllUsed}>
+              Seleccionar usadas
+            </Button>
+            {selectedIds.size > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearSelection}>
+                Limpiar selección
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              {selectedIds.size} seleccionada(s)
+            </span>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={selectedIds.size === 0 || isBulkDeleting}
+              onClick={bulkDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              {isBulkDeleting ? 'Eliminando...' : 'Eliminar seleccionadas'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4">
         {filteredQRCards.map((card) => (
-          <Card key={card.id}>
+          <Card key={card.id} className={selectedIds.has(card.id) ? 'ring-2 ring-primary' : ''}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
+                  <Checkbox
+                    checked={selectedIds.has(card.id)}
+                    onCheckedChange={() => toggleSelect(card.id)}
+                    aria-label={`Seleccionar ${card.code}`}
+                  />
                   <div className="w-16 h-16 bg-gradient-to-r from-yusiop-primary to-yusiop-accent rounded-lg flex items-center justify-center">
                     <QrCode className="h-8 w-8 text-white" />
                   </div>
