@@ -103,6 +103,7 @@ const SongSubmissions = () => {
       toast.success(result.message);
       sendEmailNotification('approved', row);
       load();
+      window.dispatchEvent(new CustomEvent('song-submissions-changed'));
     } else {
       toast.error(result?.message ?? 'Error');
     }
@@ -132,6 +133,7 @@ const SongSubmissions = () => {
       sendEmailNotification('rejected', rejectTarget, reason);
       setRejectOpen(false);
       load();
+      window.dispatchEvent(new CustomEvent('song-submissions-changed'));
     } else {
       toast.error(result?.message ?? 'Error');
     }
