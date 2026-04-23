@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { supabase } from '@/integrations/supabase/client';
 import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
+import DesktopUploadNotice from '@/components/artist/DesktopUploadNotice';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
@@ -71,6 +72,8 @@ const ArtistDashboard = () => {
         </Button>
         <span className="text-xs text-muted-foreground">Yusiop Artist</span>
       </div>
+
+      <DesktopUploadNotice />
 
       <div className="blob-card p-6 mb-6">
         <p className="eyebrow mb-1">Bienvenido</p>
