@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode } from 'lucide-react';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode, Briefcase } from 'lucide-react';
 import {
   formatEURNumber,
   formatXAFNumber,
