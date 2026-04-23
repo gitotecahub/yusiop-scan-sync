@@ -372,18 +372,20 @@ const Monetization = () => {
       <div>
         <h1 className="text-3xl font-bold">Monetización</h1>
         <p className="text-muted-foreground">
-          Ingresos por canción y bolsa del artista (40% del valor de cada descarga).
+          Reparto por descarga: artista 40% · Yusiop 50% · inversor 10%.
         </p>
       </div>
 
       {/* Pricing rules */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Reglas de precio</CardTitle>
+          <CardTitle className="text-base">Reglas de precio y reparto</CardTitle>
           <CardDescription>
             Estándar: {formatEUR(STANDARD_PRICE_EUR)} ({STANDARD_CREDITS} descargas →{' '}
             {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_EUR)} —
-            valor por descarga calculado según los créditos de cada tarjeta. Artista: 40% por descarga.
+            valor por descarga calculado según los créditos de cada tarjeta. Reparto por descarga:{' '}
+            <strong>Artista 40%</strong> · <strong>Yusiop 50%</strong> ·{' '}
+            <strong>Inversor 10%</strong>.
           </CardDescription>
         </CardHeader>
       </Card>
