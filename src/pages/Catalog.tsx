@@ -111,7 +111,8 @@ const Catalog = () => {
             *,
             artists!inner(name),
             albums(title, cover_url)
-          `);
+          `)
+          .order('created_at', { ascending: false });
 
         if (songsError) {
           console.error('Error fetching songs:', songsError);
