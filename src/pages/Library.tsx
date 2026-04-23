@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -21,6 +21,8 @@ import PlaybackControls from '@/components/PlaybackControls';
 import MyCards from '@/components/MyCards';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface DownloadedSong {
   id: string;
@@ -47,6 +49,12 @@ const Library = () => {
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkShareOpen, setBulkShareOpen] = useState(false);
+  const [bulkRecipient, setBulkRecipient] = useState('');
+  const [bulkProcessing, setBulkProcessing] = useState(false);
   const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
