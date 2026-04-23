@@ -18,8 +18,8 @@ interface Body {
 }
 
 const PRICING = {
-  standard: { amount_cents: 499, credits: 4 },
-  premium: { amount_cents: 999, credits: 10 },
+  standard: { amount_cents: 500, credits: 4 },
+  premium: { amount_cents: 1000, credits: 10 },
 };
 
 function genCode(prefix: string) {

@@ -11,19 +11,20 @@ import { Sparkles, Gift, Check, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Tier = 'standard' | 'premium';
 
-const TIERS: Record<Tier, { label: string; price: string; credits: number; perks: string[] }> = {
+const TIERS: Record<Tier, { label: string; priceEur: number; credits: number; perks: string[] }> = {
   standard: {
     label: 'YUSIOP Estándar',
-    price: '4,99€',
+    priceEur: 5,
     credits: 4,
     perks: ['4 descargas', 'Calidad máxima', 'Sin caducidad'],
   },
   premium: {
     label: 'YUSIOP Premium',
-    price: '9,99€',
+    priceEur: 10,
     credits: 10,
     perks: ['10 descargas', 'Calidad máxima', 'Acceso prioritario'],
   },
@@ -197,9 +198,16 @@ const Store = () => {
 
             <Card className="overflow-hidden border-primary/20">
               <CardHeader className="bg-gradient-to-br from-primary/10 to-transparent">
-                <CardTitle className="flex items-baseline justify-between">
+                <CardTitle className="flex items-baseline justify-between gap-3">
                   <span>{TIERS[t].label}</span>
-                  <span className="text-2xl font-bold text-primary">{TIERS[t].price}</span>
+                  <span className="flex flex-col items-end leading-tight">
+                    <span className="text-2xl font-bold text-primary tabular-nums">
+                      {formatEURNumber(TIERS[t].priceEur)}
+                    </span>
+                    <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
+                      {formatXAFNumber(TIERS[t].priceEur)}
+                    </span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-2">
@@ -262,7 +270,7 @@ const Store = () => {
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <>Pagar {TIERS[selected].price}{isGift ? ' como regalo' : ''}</>
+          <>Pagar {formatEURNumber(TIERS[selected].priceEur)} ({formatXAFNumber(TIERS[selected].priceEur)}){isGift ? ' como regalo' : ''}</>
         )}
       </Button>
 

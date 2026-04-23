@@ -23,6 +23,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Stats = {
   totals: { total_downloads: number; unique_listeners: number; total_revenue_cents: number };
@@ -44,8 +45,8 @@ const GENDER_LABEL: Record<string, string> = {
 
 const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#f59e0b', '#10b981', '#ef4444', '#94a3b8'];
 
-const formatEuros = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100);
+const formatEuros = (cents: number) => formatEURNumber((cents || 0) / 100);
+const formatXaf = (cents: number) => formatXAFNumber((cents || 0) / 100);
 
 const flagEmoji = (code: string) => {
   if (!code || code.length !== 2) return '🏳️';
@@ -192,7 +193,8 @@ const ArtistStats = () => {
                   <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
                   <div>
                     <p className="text-xs text-muted-foreground">Ingresos estimados (tu parte)</p>
-                    <p className="text-2xl font-bold">{formatEuros(stats.totals.total_revenue_cents)}</p>
+                    <p className="text-2xl font-bold leading-tight">{formatEuros(stats.totals.total_revenue_cents)}</p>
+                    <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.totals.total_revenue_cents)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -207,7 +209,8 @@ const ArtistStats = () => {
                   <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
                   <div>
                     <p className="text-xs text-muted-foreground">Pendiente en pozo común (sin reclamar)</p>
-                    <p className="text-xl font-bold">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
+                    <p className="text-xl font-bold leading-tight">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
+                    <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.pool_pending.pending_revenue_cents)}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} descargas afectadas</p>
                   </div>
                 </div>
@@ -267,7 +270,10 @@ const ArtistStats = () => {
                             <span className="truncate font-medium">{s.song_title}</span>
                           </div>
                           <div className="flex items-center gap-3 shrink-0 ml-3">
-                            <span className="text-xs text-muted-foreground">{formatEuros(s.revenue_cents)}</span>
+                            <span className="flex flex-col items-end leading-tight">
+                              <span className="text-xs text-muted-foreground tabular-nums">{formatEuros(s.revenue_cents)}</span>
+                              <span className="text-[10px] text-muted-foreground/70 tabular-nums">{formatXaf(s.revenue_cents)}</span>
+                            </span>
                             <Badge variant="secondary">{s.downloads}</Badge>
                           </div>
                         </div>

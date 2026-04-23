@@ -39,8 +39,10 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: '1y', label: '1 año' },
 ];
 
-const formatEur = (n: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+
+const formatEur = (n: number) => formatEURNumber(n);
+const formatXaf = (n: number) => formatXAFNumber(n);
 
 const formatShortDate = (d: string) => {
   const date = new Date(d);
@@ -134,6 +136,7 @@ const Dashboard = () => {
         <KpiCard
           title="Ingresos"
           value={formatEur(revenue.totalEur)}
+          subValue={formatXaf(revenue.totalEur)}
           icon={Euro}
           hint={`${revenue.count} compras`}
           loading={loading}
@@ -142,6 +145,7 @@ const Dashboard = () => {
         <KpiCard
           title="Ticket promedio"
           value={formatEur(revenue.avgTicketEur)}
+          subValue={formatXaf(revenue.avgTicketEur)}
           icon={Receipt}
           hint="Por compra"
           loading={loading}
@@ -316,6 +320,7 @@ const Dashboard = () => {
 const KpiCard = ({
   title,
   value,
+  subValue,
   icon: Icon,
   hint,
   loading,
@@ -323,6 +328,7 @@ const KpiCard = ({
 }: {
   title: string;
   value: string;
+  subValue?: string;
   icon: any;
   hint?: string;
   loading?: boolean;
@@ -334,7 +340,10 @@ const KpiCard = ({
       <Icon className={`h-4 w-4 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{loading ? '—' : value}</div>
+      <div className="text-2xl font-bold leading-tight">{loading ? '—' : value}</div>
+      {!loading && subValue && (
+        <div className="text-xs text-muted-foreground/80 tabular-nums mt-0.5">{subValue}</div>
+      )}
       {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
     </CardContent>
   </Card>

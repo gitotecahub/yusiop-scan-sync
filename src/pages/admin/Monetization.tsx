@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,21 +12,26 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 // Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
-const STANDARD_PRICE_EUR = 4.99;
+const STANDARD_PRICE_EUR = 5.00;
 const STANDARD_CREDITS = 4;
-const PREMIUM_PRICE_EUR = 9.99;
+const PREMIUM_PRICE_EUR = 10.00;
 const PREMIUM_CREDITS_DEFAULT = 10; // matches checkout PRICING.premium.credits
 const ARTIST_SHARE = 0.4;
 
-const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.2475 €
+const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.25 €
 
-const formatEUR = (eur: number) =>
-  `${eur.toLocaleString('es-ES', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} €`;
+// Importe en EUR con la equivalencia XAF debajo (Franco CFA - paridad oficial)
+const formatEUR = (eur: number, align: 'left' | 'right' = 'right'): ReactNode => (
+  <span className={`inline-flex flex-col leading-tight ${align === 'right' ? 'items-end' : 'items-start'}`}>
+    <span className="whitespace-nowrap tabular-nums">{formatEURNumber(eur)}</span>
+    <span className="text-[0.65em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
+      {formatXAFNumber(eur)}
+    </span>
+  </span>
+);
 
 interface DownloadRow {
   song_id: string;

@@ -23,8 +23,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const formatEur = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+
+const formatEur = (cents: number) => formatEURNumber(cents / 100);
+const formatXaf = (cents: number) => formatXAFNumber(cents / 100);
 const formatDate = (d?: string | null) => (d ? new Date(d).toLocaleString('es-ES') : '—');
 
 const UserDetail = () => {
@@ -205,7 +207,18 @@ const UserDetail = () => {
           </div>
 
           <div className="grid gap-3 md:grid-cols-4 mt-6">
-            <MiniStat icon={Euro} label="Total gastado" value={formatEur(totalSpentCents)} />
+            <MiniStat
+              icon={Euro}
+              label="Total gastado"
+              value={
+                <span className="flex flex-col leading-tight">
+                  <span>{formatEur(totalSpentCents)}</span>
+                  <span className="text-[10px] font-normal text-muted-foreground/80 tabular-nums">
+                    {formatXaf(totalSpentCents)}
+                  </span>
+                </span>
+              }
+            />
             <MiniStat icon={QrCode} label="Tarjetas" value={cards.length} />
             <MiniStat icon={Download} label="Créditos restantes" value={totalCredits} />
             <MiniStat icon={Heart} label="Favoritos" value={favorites.length} />
@@ -248,10 +261,11 @@ const UserDetail = () => {
                         <p className="text-xs text-muted-foreground">{formatDate(p.created_at)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{formatEur(p.amount_cents)}</p>
+                        <p className="font-semibold leading-tight">{formatEur(p.amount_cents)}</p>
+                        <p className="text-[10px] text-muted-foreground/80 tabular-nums">{formatXaf(p.amount_cents)}</p>
                         <Badge
                           variant={p.status === 'paid' ? 'default' : 'secondary'}
-                          className="text-xs"
+                          className="text-xs mt-1"
                         >
                           {p.status}
                         </Badge>

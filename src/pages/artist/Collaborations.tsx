@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { toast } from 'sonner';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 interface PendingCollab {
   collaborator_id: string;
@@ -31,8 +32,11 @@ interface MyClaim {
   reviewed_at: string | null;
 }
 
-const formatEuros = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100);
+const formatEuros = (cents: number) => formatEURNumber((cents || 0) / 100);
+const formatEurosWithXaf = (cents: number) => {
+  const eur = (cents || 0) / 100;
+  return `${formatEURNumber(eur)} (${formatXAFNumber(eur)})`;
+};
 
 const Collaborations = () => {
   const navigate = useNavigate();
@@ -128,7 +132,8 @@ const Collaborations = () => {
           <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
           <div>
             <p className="text-xs text-muted-foreground">Total estimado pendiente de reclamar</p>
-            <p className="text-2xl font-bold">{formatEuros(totalPending)}</p>
+            <p className="text-2xl font-bold leading-tight">{formatEuros(totalPending)}</p>
+            <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXAFNumber(totalPending / 100)}</p>
           </div>
         </CardContent>
       </Card>
@@ -158,7 +163,7 @@ const Collaborations = () => {
                     <Badge variant="secondary">{p.share_percent}%</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Como <strong>{p.artist_name}</strong> · {p.downloads} descargas · estimado: {formatEuros(p.estimated_revenue_cents)}
+                    Como <strong>{p.artist_name}</strong> · {p.downloads} descargas · estimado: {formatEurosWithXaf(p.estimated_revenue_cents)}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
