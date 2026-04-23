@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import AdminRealtimeNotifications from '@/components/admin/AdminRealtimeNotifications';
 import { useAuth } from '@/hooks/useAuth';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
 
@@ -27,6 +28,7 @@ const AdminLayout = () => {
 
   return (
     <SidebarProvider>
+      <AdminRealtimeNotifications />
       <div className="min-h-screen flex w-full">
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
