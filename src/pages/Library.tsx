@@ -690,6 +690,73 @@ const Library = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Diálogo borrado en lote */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkDeleteOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Las canciones seleccionadas desaparecerán de tu biblioteca para siempre
+              y perderás los créditos de descarga utilizados. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmBulkDelete(); }}
+              disabled={bulkProcessing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkProcessing ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Diálogo envío en lote */}
+      <AlertDialog open={bulkShareOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkShareOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Las canciones seleccionadas <span className="font-semibold text-foreground">cambiarán de biblioteca</span>:
+              dejarán la tuya y entrarán en la del destinatario. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="bulk-recipient-username">Username del destinatario</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
+              <Input
+                id="bulk-recipient-username"
+                value={bulkRecipient}
+                onChange={(e) => setBulkRecipient(e.target.value.replace(/^@/, ''))}
+                placeholder="usuario"
+                className="pl-7"
+                maxLength={50}
+                autoFocus
+                disabled={bulkProcessing}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !bulkProcessing) {
+                    e.preventDefault();
+                    confirmBulkShare();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmBulkShare(); }}
+              disabled={bulkProcessing || !bulkRecipient.trim()}
+            >
+              {bulkProcessing ? 'Enviando...' : 'Enviar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog
         open={!!songToShare}
         onOpenChange={(open) => !open && !sharing && setSongToShare(null)}
