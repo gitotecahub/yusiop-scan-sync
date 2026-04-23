@@ -198,6 +198,66 @@ const QRCards = () => {
     card.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allFilteredSelected =
+    filteredQRCards.length > 0 &&
+    filteredQRCards.every((c) => selectedIds.has(c.id));
+
+  const toggleSelectAllFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredQRCards.forEach((c) => next.delete(c.id));
+      } else {
+        filteredQRCards.forEach((c) => next.add(c.id));
+      }
+      return next;
+    });
+  };
+
+  const selectAllUsed = () => {
+    const used = filteredQRCards.filter((c) => c.is_activated).map((c) => c.id);
+    setSelectedIds(new Set(used));
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`¿Eliminar ${selectedIds.size} código(s) QR seleccionado(s)? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setIsBulkDeleting(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase.from('qr_cards').delete().in('id', ids);
+      if (error) throw error;
+      toast({
+        title: 'Éxito',
+        description: `${ids.length} código(s) QR eliminado(s)`,
+      });
+      clearSelection();
+      fetchQRCards();
+    } catch (error) {
+      console.error('Error bulk deleting QR cards:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron eliminar los códigos seleccionados',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
