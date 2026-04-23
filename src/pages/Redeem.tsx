@@ -35,12 +35,10 @@ const Redeem = () => {
         toast.error(result?.message ?? 'No se pudo canjear');
         return;
       }
-      setDone({
-        credits: result.download_credits,
-        type: result.card_type,
-      });
       sessionStorage.removeItem('pending_gift_token');
-      toast.success('¡Tarjeta canjeada con éxito!');
+      toast.success(`¡Tarjeta ${result.card_type} activada! ${result.download_credits} descargas añadidas.`);
+      navigate('/catalog', { replace: true });
+      return;
     } catch (e: any) {
       toast.error(e?.message ?? 'Error al canjear');
     } finally {
