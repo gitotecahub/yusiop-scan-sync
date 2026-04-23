@@ -236,6 +236,37 @@ const Monetization = () => {
     };
   }, [downloads.length, enrichedSongs]);
 
+  // Desglose por tipo de tarjeta (estándar / premium)
+  const byCardType = useMemo(() => {
+    const acc = {
+      standard: { downloads: 0, gross: 0 },
+      premium: { downloads: 0, gross: 0 },
+    };
+    downloads.forEach((d) => {
+      let cardType: string | null = d.card_type;
+      if (d.qr_card_id) {
+        const qr = qrCards.get(d.qr_card_id);
+        if (qr) cardType = qr.card_type;
+      }
+      const r = revenueForDownload(d);
+      const bucket = cardType === 'premium' ? 'premium' : 'standard';
+      acc[bucket].downloads += 1;
+      acc[bucket].gross += r;
+    });
+    return {
+      standard: {
+        ...acc.standard,
+        artist: acc.standard.gross * ARTIST_SHARE,
+        platform: acc.standard.gross * (1 - ARTIST_SHARE),
+      },
+      premium: {
+        ...acc.premium,
+        artist: acc.premium.gross * ARTIST_SHARE,
+        platform: acc.premium.gross * (1 - ARTIST_SHARE),
+      },
+    };
+  }, [downloads, qrCards]);
+
   if (loading) {
     return (
       <div className="p-6 space-y-4">
@@ -309,6 +340,67 @@ const Monetization = () => {
             </CardTitle>
           </CardHeader>
         </Card>
+      </div>
+
+      {/* Desglose por tipo de tarjeta */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {([
+          {
+            key: 'standard' as const,
+            label: 'Tarjeta Estándar',
+            price: STANDARD_PRICE_EUR,
+            credits: STANDARD_CREDITS,
+            data: byCardType.standard,
+          },
+          {
+            key: 'premium' as const,
+            label: 'Tarjeta Premium',
+            price: PREMIUM_PRICE_EUR,
+            credits: PREMIUM_CREDITS_DEFAULT,
+            data: byCardType.premium,
+          },
+        ]).map((card) => (
+          <Card key={card.key} className={card.key === 'premium' ? 'border-yusiop-primary/30' : ''}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-yusiop-primary" />
+                  {card.label}
+                </CardTitle>
+                <Badge variant={card.key === 'premium' ? 'default' : 'secondary'}>
+                  {formatEUR(card.price)} · {card.credits} descargas
+                </Badge>
+              </div>
+              <CardDescription>
+                {formatEUR(card.price / card.credits)} por descarga
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Descargas</p>
+                  <p className="text-xl font-semibold">
+                    {card.data.downloads.toLocaleString('es-ES')}
+                  </p>
+                </div>
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Bruto</p>
+                  <p className="text-xl font-semibold">{formatEUR(card.data.gross)}</p>
+                </div>
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Bolsa artistas (40%)</p>
+                  <p className="text-xl font-semibold text-yusiop-primary">
+                    {formatEUR(card.data.artist)}
+                  </p>
+                </div>
+                <div className="rounded-md border p-3">
+                  <p className="text-xs text-muted-foreground">Plataforma (60%)</p>
+                  <p className="text-xl font-semibold">{formatEUR(card.data.platform)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Songs revenue */}
