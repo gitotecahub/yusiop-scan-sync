@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +33,10 @@ interface DownloadedSong {
 }
 
 const Library = () => {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab =
+    tabParam === 'cards' || tabParam === 'recent' || tabParam === 'favorites' ? tabParam : 'all';
   const [downloads, setDownloads] = useState<DownloadedSong[]>([]);
   const [favorites, setFavorites] = useState<DownloadedSong[]>([]);
   const [loading, setLoading] = useState(true);
@@ -301,7 +305,7 @@ const Library = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="all" className="w-full">
+      <Tabs defaultValue={initialTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
             value="all"

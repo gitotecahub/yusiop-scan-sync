@@ -150,7 +150,7 @@ const Redeem = () => {
         {done ? (
           <div className="grid grid-cols-2 gap-2">
             <Button asChild variant="outline">
-              <Link to="/profile">Ver mis tarjetas</Link>
+              <Link to="/library?tab=cards">Ver mis tarjetas</Link>
             </Button>
             <Button asChild>
               <Link to="/catalog">Ir al catálogo</Link>
