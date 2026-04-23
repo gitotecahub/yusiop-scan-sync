@@ -12,9 +12,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
+import ApproveSubmissionDialog from '@/components/admin/ApproveSubmissionDialog';
+import { formatMadrid } from '@/lib/madridTime';
 
 interface SubmissionRow {
   id: string;
@@ -33,6 +35,7 @@ interface SubmissionRow {
   cover_path: string | null;
   status: 'pending' | 'approved' | 'rejected' | 'removed';
   rejection_reason: string | null;
+  scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
 }
@@ -52,6 +55,8 @@ const SongSubmissions = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsTarget, setDetailsTarget] = useState<SubmissionRow | null>(null);
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [approveTarget, setApproveTarget] = useState<SubmissionRow | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
@@ -95,13 +100,23 @@ const SongSubmissions = () => {
     }
   };
 
-  const approve = async (row: SubmissionRow) => {
-    const { data, error } = await supabase.rpc('approve_song_submission', { p_submission_id: row.id });
+  const openApprove = (row: SubmissionRow) => {
+    setApproveTarget(row);
+    setApproveOpen(true);
+  };
+
+  const confirmApprove = async (releaseAtIso: string | null) => {
+    if (!approveTarget) return;
+    const { data, error } = await supabase.rpc('approve_song_submission_scheduled', {
+      p_submission_id: approveTarget.id,
+      p_release_at: releaseAtIso,
+    });
     if (error) return toast.error(error.message);
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
-      sendEmailNotification('approved', row);
+      sendEmailNotification('approved', approveTarget);
+      setApproveOpen(false);
       load();
       window.dispatchEvent(new CustomEvent('song-submissions-changed'));
     } else {
