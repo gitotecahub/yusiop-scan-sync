@@ -165,6 +165,67 @@ const Monetization = () => {
     return Array.from(map.values()).sort((a, b) => b.artistShare - a.artistShare);
   }, [enrichedSongs]);
 
+  // Pozo de colaboradores no reclamados (artistas no dados de alta o sin reclamar)
+  // Para cada song con colaboradores, repartimos los ingresos del artista (40%) según share_percent
+  // de los colaboradores cuyo claimed_by_user_id IS NULL.
+  const unclaimedPool = useMemo(() => {
+    // Agrupar colaboradores por canción
+    const bySong = new Map<string, CollaboratorRow[]>();
+    collaborators.forEach((c) => {
+      if (!c.song_id) return;
+      const arr = bySong.get(c.song_id) ?? [];
+      arr.push(c);
+      bySong.set(c.song_id, arr);
+    });
+
+    // Por artist_name (no reclamado) acumular descargas y € pendientes
+    const byArtist = new Map<
+      string,
+      { name: string; downloads: number; pending: number; songs: Set<string> }
+    >();
+    let totalPending = 0;
+    let totalDownloadsInPool = 0;
+
+    enrichedSongs.forEach((s) => {
+      const collabs = bySong.get(s.id);
+      if (!collabs || collabs.length === 0) return;
+      const unclaimed = collabs.filter((c) => !c.claimed_by_user_id);
+      if (unclaimed.length === 0) return;
+
+      unclaimed.forEach((c) => {
+        const sharePct = Number(c.share_percent) / 100;
+        const pending = s.artistRevenue * sharePct;
+        const dlShare = s.downloads * sharePct;
+        const key = c.artist_name.trim().toLowerCase();
+        const cur = byArtist.get(key) ?? {
+          name: c.artist_name,
+          downloads: 0,
+          pending: 0,
+          songs: new Set<string>(),
+        };
+        cur.downloads += dlShare;
+        cur.pending += pending;
+        cur.songs.add(s.id);
+        byArtist.set(key, cur);
+        totalPending += pending;
+        totalDownloadsInPool += dlShare;
+      });
+    });
+
+    return {
+      list: Array.from(byArtist.values())
+        .map((a) => ({ ...a, songCount: a.songs.size }))
+        .sort((x, y) => y.pending - x.pending),
+      totalPending,
+      totalDownloadsInPool,
+    };
+  }, [collaborators, enrichedSongs]);
+
+  const filteredPool = useMemo(() => {
+    const q = poolSearch.toLowerCase();
+    return unclaimedPool.list.filter((a) => a.name.toLowerCase().includes(q));
+  }, [unclaimedPool, poolSearch]);
+
   const totals = useMemo(() => {
     const totalDownloads = downloads.length;
     const totalGross = enrichedSongs.reduce((acc, s) => acc + s.grossRevenue, 0);
