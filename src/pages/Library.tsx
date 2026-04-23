@@ -47,7 +47,7 @@ const Library = () => {
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
-  const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
+  const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
   useEffect(() => {
@@ -123,7 +123,7 @@ const Library = () => {
   };
 
   const handlePlay = (song: DownloadedSong) => {
-    if (currentSong?.id === song.id) {
+    if (currentSong?.id === song.id && !isPreview) {
       if (isPlaying) {
         pause();
       } else {
