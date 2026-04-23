@@ -635,7 +635,7 @@ const InvestorProgress = ({ totalInvestorXAF }: { totalInvestorXAF: number }) =>
 
         <div className="grid gap-3 sm:grid-cols-3 text-sm">
           <div className="space-y-0.5">
-            <p className="text-xs text-muted-foreground">Recibido por el inversor / año</p>
+            <p className="text-xs text-muted-foreground">Ganancias del inversor / año</p>
             <p className="font-semibold tabular-nums">
               {investorEUR.toLocaleString('es-ES', {
                 minimumFractionDigits: 2,
