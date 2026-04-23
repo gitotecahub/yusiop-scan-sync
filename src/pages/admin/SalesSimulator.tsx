@@ -41,7 +41,7 @@ const formatEURRaw = (eur: number): ReactNode => (
   </span>
 );
 
-// Defaults (XAF base)
+// Defaults físicas (XAF base)
 const DEFAULT_STD_PRICE_XAF = 3000;
 const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
@@ -49,6 +49,12 @@ const DEFAULT_PREM_CREDITS = 100;
 const DEFAULT_ARTIST_SHARE = 40; // %
 const DEFAULT_INVESTOR_SHARE = 10; // %
 const DEFAULT_PLATFORM_SHARE = 50; // %
+
+// Defaults virtuales (EUR base, sin costes de producción)
+const DEFAULT_VSTD_PRICE_EUR = 5;
+const DEFAULT_VPREM_PRICE_EUR = 10;
+const DEFAULT_VSTD_CREDITS = 4;
+const DEFAULT_VPREM_CREDITS = 10;
 
 const SalesSimulator = () => {
   // Pricing inputs
