@@ -467,6 +467,8 @@ const SalesSimulator = () => {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <Row label="Ingresos brutos / mes" value={formatEUR(totals.monthlyGross)} />
+            <Row label="Bolsa artistas / mes" value={formatEUR(totals.monthlyArtist)} />
+            <Row label="Inversor / mes" value={formatEUR(totals.monthlyInvestor)} />
             <Row
               label="Plataforma bruto / mes"
               value={formatEUR(totals.monthlyPlatform)}
