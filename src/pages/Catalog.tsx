@@ -19,6 +19,7 @@ interface Song {
   cover_url?: string;
   preview_url?: string;
   track_url?: string;
+  preview_start_seconds?: number;
 }
 
 const Catalog = () => {
