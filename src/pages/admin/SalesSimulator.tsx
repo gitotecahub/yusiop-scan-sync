@@ -749,14 +749,26 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label="Estándar / mes"
+              label="Físicas Estándar / mes"
               value={`${(stdYearly / 12).toLocaleString('es-ES', {
                 maximumFractionDigits: 1,
               })} tarjetas`}
             />
             <Row
-              label="Premium / mes"
+              label="Físicas Premium / mes"
               value={`${(premYearly / 12).toLocaleString('es-ES', {
+                maximumFractionDigits: 1,
+              })} tarjetas`}
+            />
+            <Row
+              label="Virtuales Estándar / mes"
+              value={`${(vStdYearly / 12).toLocaleString('es-ES', {
+                maximumFractionDigits: 1,
+              })} tarjetas`}
+            />
+            <Row
+              label="Virtuales Premium / mes"
+              value={`${(vPremYearly / 12).toLocaleString('es-ES', {
                 maximumFractionDigits: 1,
               })} tarjetas`}
             />
