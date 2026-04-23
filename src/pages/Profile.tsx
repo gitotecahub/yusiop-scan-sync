@@ -106,22 +106,48 @@ const Profile = () => {
     };
 
     const loadScannedCards = async () => {
-      if (!user?.email) return;
-      
+      if (!user?.email || !user?.id) return;
+
       try {
         setLoadingCards(true);
-        const { data, error } = await supabase
-          .from('user_credits')
-          .select('*')
-          .eq('user_email', user.email)
-          .order('scanned_at', { ascending: false });
 
-        if (error) throw error;
+        const [creditsRes, qrCardsRes, downloadsRes] = await Promise.all([
+          supabase
+            .from('user_credits')
+            .select('*')
+            .eq('user_email', user.email)
+            .order('scanned_at', { ascending: false }),
+          supabase
+            .from('qr_cards')
+            .select('id, download_credits')
+            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`),
+          supabase
+            .from('user_downloads')
+            .select('id', { count: 'exact', head: true })
+            .or(`user_id.eq.${user.id},user_email.eq.${user.email}`),
+        ]);
 
-        setScannedCards(data || []);
+        if (creditsRes.error) throw creditsRes.error;
+        if (qrCardsRes.error) throw qrCardsRes.error;
+        if (downloadsRes.error) throw downloadsRes.error;
+
+        const credits = creditsRes.data ?? [];
+        const qrCards = qrCardsRes.data ?? [];
+
+        const legacyAvailable = credits
+          .filter((c: any) => c.is_active && c.credits_remaining > 0)
+          .reduce((sum: number, c: any) => sum + (c.credits_remaining ?? 0), 0);
+        const ownedAvailable = qrCards.reduce(
+          (sum: number, c: any) => sum + (c.download_credits ?? 0),
+          0,
+        );
+
+        setScannedCards(credits);
         setProfile(prev => ({
           ...prev,
-          activatedCards: data?.length || 0
+          downloadsRemaining: legacyAvailable + ownedAvailable,
+          totalDownloads: downloadsRes.count ?? 0,
+          activatedCards: credits.length + qrCards.length,
         }));
       } catch (err) {
         console.error('Error loading scanned cards:', err);
@@ -135,51 +161,81 @@ const Profile = () => {
     loadScannedCards();
   }, [user]);
 
-  // Configurar actualizaciones en tiempo real para tarjetas escaneadas
+  // Refrescar contadores reales (disponibles, descargadas, tarjetas) en tiempo real
+  const refreshCounters = async () => {
+    if (!user?.email || !user?.id) return;
+    try {
+      const [creditsRes, qrCardsRes, downloadsRes] = await Promise.all([
+        supabase
+          .from('user_credits')
+          .select('*')
+          .eq('user_email', user.email)
+          .order('scanned_at', { ascending: false }),
+        supabase
+          .from('qr_cards')
+          .select('id, download_credits')
+          .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`),
+        supabase
+          .from('user_downloads')
+          .select('id', { count: 'exact', head: true })
+          .or(`user_id.eq.${user.id},user_email.eq.${user.email}`),
+      ]);
+
+      const credits = creditsRes.data ?? [];
+      const qrCards = qrCardsRes.data ?? [];
+
+      const legacyAvailable = credits
+        .filter((c: any) => c.is_active && c.credits_remaining > 0)
+        .reduce((sum: number, c: any) => sum + (c.credits_remaining ?? 0), 0);
+      const ownedAvailable = qrCards.reduce(
+        (sum: number, c: any) => sum + (c.download_credits ?? 0),
+        0,
+      );
+
+      setScannedCards(credits);
+      setProfile(prev => ({
+        ...prev,
+        downloadsRemaining: legacyAvailable + ownedAvailable,
+        totalDownloads: downloadsRes.count ?? 0,
+        activatedCards: credits.length + qrCards.length,
+      }));
+    } catch (err) {
+      console.error('Error refreshing counters:', err);
+    }
+  };
+
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user?.email || !user?.id) return;
 
     const channel = supabase
-      .channel('user-credits-changes')
+      .channel('profile-counters-changes')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_credits',
-          filter: `user_email=eq.${user.email}`
-        },
-        (payload) => {
-          console.log('Real-time update:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            setScannedCards(prev => [payload.new as ScannedCard, ...prev]);
-            setProfile(prev => ({
-              ...prev,
-              activatedCards: prev.activatedCards + 1
-            }));
-            toast.success('Nueva tarjeta escaneada detectada');
-          } else if (payload.eventType === 'UPDATE') {
-            setScannedCards(prev =>
-              prev.map(card =>
-                card.id === payload.new.id ? payload.new as ScannedCard : card
-              )
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setScannedCards(prev => prev.filter(card => card.id !== payload.old.id));
-            setProfile(prev => ({
-              ...prev,
-              activatedCards: Math.max(0, prev.activatedCards - 1)
-            }));
-          }
-        }
+        { event: '*', schema: 'public', table: 'user_credits', filter: `user_email=eq.${user.email}` },
+        () => refreshCounters(),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'qr_cards', filter: `owner_user_id=eq.${user.id}` },
+        () => refreshCounters(),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'qr_cards', filter: `activated_by=eq.${user.id}` },
+        () => refreshCounters(),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_downloads', filter: `user_id=eq.${user.id}` },
+        () => refreshCounters(),
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.email]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email, user?.id]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
