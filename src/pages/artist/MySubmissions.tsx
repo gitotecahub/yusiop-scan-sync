@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +16,7 @@ interface SubmissionRow {
   album_title: string | null;
   genre: string | null;
   release_date: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'removed';
   rejection_reason: string | null;
   cover_url: string | null;
   cover_path: string | null;
@@ -156,6 +156,11 @@ const MySubmissions = () => {
                       )}
                       {r.status === 'rejected' && (
                         <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
+                      )}
+                      {r.status === 'removed' && (
+                        <Badge variant="outline" className="border-destructive/50 text-destructive">
+                          <Ban className="h-3 w-3 mr-1" />Eliminada
+                        </Badge>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
