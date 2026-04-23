@@ -22,6 +22,8 @@ interface SubmissionRow {
   title: string;
   artist_name: string;
   album_title: string | null;
+  genre: string | null;
+  release_date: string | null;
   duration_seconds: number;
   track_url: string;
   track_path: string | null;
@@ -32,6 +34,7 @@ interface SubmissionRow {
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string | null;
   created_at: string;
+  reviewed_at: string | null;
 }
 
 const formatDuration = (s: number) => {
