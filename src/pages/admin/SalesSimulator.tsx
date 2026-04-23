@@ -45,7 +45,7 @@ const formatEURRaw = (eur: number): ReactNode => (
 const DEFAULT_STD_PRICE_XAF = 3000;
 const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
-const DEFAULT_PREM_CREDITS = 100;
+const DEFAULT_PREM_CREDITS = 10;
 const DEFAULT_ARTIST_SHARE = 40; // %
 const DEFAULT_INVESTOR_SHARE = 10; // %
 const DEFAULT_PLATFORM_SHARE = 50; // %
