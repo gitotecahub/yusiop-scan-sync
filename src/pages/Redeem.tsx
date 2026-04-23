@@ -69,6 +69,16 @@ const Redeem = () => {
     if (!token) return;
     setLoading(true);
     try {
+      // Refrescar sesión por si el JWT está caducado (causa "session_not_found")
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError || !refreshed.session) {
+        // Sesión inválida → forzar login y reintentar después
+        sessionStorage.setItem('pending_gift_token', token);
+        toast.error('Tu sesión ha expirado. Inicia sesión de nuevo.');
+        navigate('/auth?redirect=/redeem/' + token, { replace: true });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('redeem-gift', {
         body: { token },
       });
@@ -82,7 +92,14 @@ const Redeem = () => {
       toast.success(`¡Tarjeta ${result.card_type} activada!`);
       setDone(result);
     } catch (e: any) {
-      toast.error(e?.message ?? 'Error al canjear');
+      const msg = String(e?.message ?? '');
+      if (msg.toLowerCase().includes('unauthorized') || msg.includes('401')) {
+        sessionStorage.setItem('pending_gift_token', token);
+        toast.error('Sesión no válida. Inicia sesión de nuevo.');
+        navigate('/auth?redirect=/redeem/' + token, { replace: true });
+      } else {
+        toast.error(msg || 'Error al canjear');
+      }
     } finally {
       setLoading(false);
     }
