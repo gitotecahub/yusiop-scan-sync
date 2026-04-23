@@ -67,9 +67,12 @@ const Redeem = () => {
         .maybeSingle();
       if (!active) return;
       if (error || !data) {
-        toast.error('Tarjeta no encontrada o token inválido');
+        setInvalidDialog({ open: true, reason: 'invalid' });
       } else {
         setPreview(data as GiftPreview);
+        if ((data as GiftPreview).gift_redeemed) {
+          setInvalidDialog({ open: true, reason: 'used' });
+        }
       }
       setPreviewLoading(false);
     })();
