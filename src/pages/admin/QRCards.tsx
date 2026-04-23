@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Search, Plus, QrCode, Eye, Trash2, Download, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import QRCodeLib from 'qrcode';
 
 interface QRCard {
@@ -34,6 +35,8 @@ const QRCards = () => {
   const [newCardQuantity, setNewCardQuantity] = useState('1');
   const [isGenerating, setIsGenerating] = useState(false);
   const newCardCredits = newCardType === 'premium' ? '10' : '4';
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -195,6 +198,66 @@ const QRCards = () => {
     card.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allFilteredSelected =
+    filteredQRCards.length > 0 &&
+    filteredQRCards.every((c) => selectedIds.has(c.id));
+
+  const toggleSelectAllFiltered = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filteredQRCards.forEach((c) => next.delete(c.id));
+      } else {
+        filteredQRCards.forEach((c) => next.add(c.id));
+      }
+      return next;
+    });
+  };
+
+  const selectAllUsed = () => {
+    const used = filteredQRCards.filter((c) => c.is_activated).map((c) => c.id);
+    setSelectedIds(new Set(used));
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`¿Eliminar ${selectedIds.size} código(s) QR seleccionado(s)? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setIsBulkDeleting(true);
+    try {
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase.from('qr_cards').delete().in('id', ids);
+      if (error) throw error;
+      toast({
+        title: 'Éxito',
+        description: `${ids.length} código(s) QR eliminado(s)`,
+      });
+      clearSelection();
+      fetchQRCards();
+    } catch (error) {
+      console.error('Error bulk deleting QR cards:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudieron eliminar los códigos seleccionados',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -293,12 +356,57 @@ const QRCards = () => {
         </CardContent>
       </Card>
 
+      {/* Barra de selección múltiple */}
+      <Card>
+        <CardContent className="p-4 flex flex-wrap items-center gap-3 justify-between">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="select-all"
+                checked={allFilteredSelected}
+                onCheckedChange={toggleSelectAllFiltered}
+              />
+              <Label htmlFor="select-all" className="cursor-pointer text-sm">
+                Seleccionar todos ({filteredQRCards.length})
+              </Label>
+            </div>
+            <Button variant="outline" size="sm" onClick={selectAllUsed}>
+              Seleccionar usadas
+            </Button>
+            {selectedIds.size > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearSelection}>
+                Limpiar selección
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              {selectedIds.size} seleccionada(s)
+            </span>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={selectedIds.size === 0 || isBulkDeleting}
+              onClick={bulkDelete}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              {isBulkDeleting ? 'Eliminando...' : 'Eliminar seleccionadas'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4">
         {filteredQRCards.map((card) => (
-          <Card key={card.id}>
+          <Card key={card.id} className={selectedIds.has(card.id) ? 'ring-2 ring-primary' : ''}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
+                  <Checkbox
+                    checked={selectedIds.has(card.id)}
+                    onCheckedChange={() => toggleSelect(card.id)}
+                    aria-label={`Seleccionar ${card.code}`}
+                  />
                   <div className="w-16 h-16 bg-gradient-to-r from-yusiop-primary to-yusiop-accent rounded-lg flex items-center justify-center">
                     <QrCode className="h-8 w-8 text-white" />
                   </div>
