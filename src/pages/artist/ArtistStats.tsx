@@ -23,6 +23,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Stats = {
   totals: { total_downloads: number; unique_listeners: number; total_revenue_cents: number };
