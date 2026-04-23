@@ -29,8 +29,6 @@ const ArtistRequest = () => {
   const { artistRequestStatus, isArtist, loadForUser } = useModeStore();
 
   const [artistName, setArtistName] = useState('');
-  const [bio, setBio] = useState('');
-  const [genre, setGenre] = useState('');
   const [contactEmail, setContactEmail] = useState(user?.email ?? '');
   const [links, setLinks] = useState('');
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
