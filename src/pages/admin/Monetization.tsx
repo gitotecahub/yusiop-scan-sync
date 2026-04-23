@@ -262,7 +262,8 @@ const Monetization = () => {
       totalDownloads,
       totalGross,
       totalArtist: totalGross * ARTIST_SHARE,
-      totalPlatform: totalGross * (1 - ARTIST_SHARE),
+      totalPlatform: totalGross * PLATFORM_SHARE,
+      totalInvestor: totalGross * INVESTOR_SHARE,
     };
   }, [downloads.length, enrichedSongs]);
 
@@ -287,12 +288,14 @@ const Monetization = () => {
       standard: {
         ...acc.standard,
         artist: acc.standard.gross * ARTIST_SHARE,
-        platform: acc.standard.gross * (1 - ARTIST_SHARE),
+        platform: acc.standard.gross * PLATFORM_SHARE,
+        investor: acc.standard.gross * INVESTOR_SHARE,
       },
       premium: {
         ...acc.premium,
         artist: acc.premium.gross * ARTIST_SHARE,
-        platform: acc.premium.gross * (1 - ARTIST_SHARE),
+        platform: acc.premium.gross * PLATFORM_SHARE,
+        investor: acc.premium.gross * INVESTOR_SHARE,
       },
     };
   }, [downloads, qrCards]);
