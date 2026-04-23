@@ -14,8 +14,6 @@ import { toast } from 'sonner';
 
 const schema = z.object({
   artist_name: z.string().trim().min(2, 'Nombre demasiado corto').max(80),
-  bio: z.string().trim().max(800).optional().or(z.literal('')),
-  genre: z.string().trim().max(60).optional().or(z.literal('')),
   contact_email: z.string().trim().email('Email inválido').max(255),
   links: z.string().trim().max(500).optional().or(z.literal('')),
 });
