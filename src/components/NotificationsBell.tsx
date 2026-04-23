@@ -113,9 +113,12 @@ const NotificationsBell = () => {
 
     if (n.type === 'gift_received' && n.data?.redemption_token) {
       navigate(`/redeem/${n.data.redemption_token}`);
-    } else if (n.type === 'song_submission_rejected') {
-      await goArtist('/artist/submissions');
-    } else if (n.type === 'song_submission_approved') {
+    } else if (
+      n.type === 'song_submission_rejected' ||
+      n.type === 'song_submission_approved' ||
+      n.type === 'song_submission_scheduled' ||
+      n.type === 'song_released'
+    ) {
       await goArtist('/artist/submissions');
     } else if (n.type === 'artist_request_approved') {
       await goArtist('/artist');
