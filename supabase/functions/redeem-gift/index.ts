@@ -30,16 +30,16 @@ Deno.serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth
-      .getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData?.user) {
+      console.error("redeem-gift: auth error", userError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub;
-    const userEmail = (claimsData.claims.email as string) ?? "";
+    const userId = userData.user.id;
+    const userEmail = userData.user.email ?? "";
 
     const body = await req.json();
     const giftToken = String(body?.token ?? "").trim();
@@ -50,7 +50,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data, error } = await supabase.rpc("redeem_gift_card", {
+    // Usar service role para llamar a la función SQL (que es SECURITY DEFINER pero
+    // necesita poder hacer UPDATE sobre qr_cards sin pasar por RLS del usuario)
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const { data, error } = await admin.rpc("redeem_gift_card", {
       p_token: giftToken,
       p_user_id: userId,
       p_user_email: userEmail,
@@ -64,6 +71,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log("redeem-gift success", { userId, result: data?.[0] });
     return new Response(JSON.stringify({ result: data?.[0] ?? null }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
