@@ -16,21 +16,26 @@ const formatEURNumber = (xaf: number) =>
     maximumFractionDigits: 2,
   })} €`;
 
-// Importe en EUR con la equivalencia XAF debajo, como descripción
-const formatEUR = (xaf: number): ReactNode => (
-  <span className="inline-flex flex-col items-end leading-tight">
-    <span className="whitespace-nowrap">{formatEURNumber(xaf)}</span>
-    <span className="text-[0.7em] font-normal text-muted-foreground/70 whitespace-nowrap">
+// Importe en EUR con la equivalencia XAF debajo, como descripción.
+// `align` controla si el bloque se alinea a la izquierda (KPIs) o a la derecha (filas).
+const formatEUR = (xaf: number, align: 'left' | 'right' = 'right'): ReactNode => (
+  <span
+    className={`inline-flex flex-col leading-tight ${
+      align === 'right' ? 'items-end' : 'items-start'
+    }`}
+  >
+    <span className="whitespace-nowrap tabular-nums">{formatEURNumber(xaf)}</span>
+    <span className="text-[0.6em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
       {formatXAFNumber(xaf)}
     </span>
   </span>
 );
 const formatEURRaw = (eur: number): ReactNode => (
   <span className="inline-flex flex-col items-end leading-tight">
-    <span className="whitespace-nowrap">
+    <span className="whitespace-nowrap tabular-nums">
       {eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
     </span>
-    <span className="text-[0.7em] font-normal text-muted-foreground/70 whitespace-nowrap">
+    <span className="text-[0.6em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
       {Math.round(eur * XAF_PER_EUR).toLocaleString('es-ES')} XAF
     </span>
   </span>
