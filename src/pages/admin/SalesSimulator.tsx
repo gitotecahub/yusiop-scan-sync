@@ -8,13 +8,19 @@ import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase }
 
 // Currency
 const XAF_PER_EUR = 655.957;
-const formatEUR = (xaf: number) =>
+const formatXAF = (xaf: number) =>
+  `${Math.round(xaf).toLocaleString('es-ES')} XAF`;
+const formatEUROnly = (xaf: number) =>
   `${(xaf / XAF_PER_EUR).toLocaleString('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} €`;
+// Muestra EUR + equivalencia XAF, p.ej. "4,57 € · 3.000 XAF"
+const formatEUR = (xaf: number) => `${formatEUROnly(xaf)} · ${formatXAF(xaf)}`;
 const formatEURRaw = (eur: number) =>
-  `${eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  `${eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € · ${Math.round(
+    eur * XAF_PER_EUR,
+  ).toLocaleString('es-ES')} XAF`;
 
 // Defaults (XAF base)
 const DEFAULT_STD_PRICE_XAF = 3000;
