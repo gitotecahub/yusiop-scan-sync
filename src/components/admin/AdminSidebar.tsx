@@ -86,8 +86,15 @@ export function AdminSidebar() {
       )
       .subscribe();
 
+    const handleSongsChanged = () => loadPendingSongs();
+    const handleArtistsChanged = () => loadPendingCount();
+    window.addEventListener('song-submissions-changed', handleSongsChanged);
+    window.addEventListener('artist-requests-changed', handleArtistsChanged);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('song-submissions-changed', handleSongsChanged);
+      window.removeEventListener('artist-requests-changed', handleArtistsChanged);
     };
   }, []);
 
