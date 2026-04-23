@@ -84,6 +84,7 @@ const Library = () => {
             )
           `)
           .eq('user_id', user.id)
+          .eq('hidden_from_library', false)
           .order('downloaded_at', { ascending: false });
 
         if (error) {
