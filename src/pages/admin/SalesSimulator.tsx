@@ -395,52 +395,39 @@ const SalesSimulator = () => {
       </Card>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tarjetas vendidas / año</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Package className="h-5 w-5 text-yusiop-primary" />
-              {totals.totalUnits.toLocaleString('es-ES')}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Ingresos brutos anuales</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Coins className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalGross)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Bolsa artistas ({artistShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <UsersIcon className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalArtist)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Inversor ({investorShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalInvestor)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Plataforma ({platformShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalPlatform)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        <KpiCard
+          icon={<Package className="h-4 w-4 text-yusiop-primary" />}
+          label="Tarjetas vendidas / año"
+        >
+          <span className="whitespace-nowrap tabular-nums">
+            {totals.totalUnits.toLocaleString('es-ES')}
+          </span>
+        </KpiCard>
+        <KpiCard
+          icon={<Coins className="h-4 w-4 text-yusiop-primary" />}
+          label="Ingresos brutos anuales"
+        >
+          {formatEUR(totals.totalGross, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<UsersIcon className="h-4 w-4 text-yusiop-primary" />}
+          label={`Bolsa artistas (${artistShare}%)`}
+        >
+          {formatEUR(totals.totalArtist, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<Briefcase className="h-4 w-4 text-yusiop-primary" />}
+          label={`Inversor (${investorShare}%)`}
+        >
+          {formatEUR(totals.totalInvestor, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<TrendingUp className="h-4 w-4 text-yusiop-primary" />}
+          label={`Plataforma (${platformShare}%)`}
+        >
+          {formatEUR(totals.totalPlatform, 'left')}
+        </KpiCard>
       </div>
 
       {/* Detailed breakdown */}
