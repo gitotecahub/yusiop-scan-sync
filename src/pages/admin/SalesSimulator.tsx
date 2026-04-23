@@ -543,4 +543,30 @@ const Row = ({
   </div>
 );
 
+// Tarjeta KPI con tipografía fluida que se adapta al ancho disponible.
+const KpiCard = ({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) => (
+  <Card className="overflow-hidden">
+    <CardHeader className="pb-3 space-y-2">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <CardDescription className="truncate">{label}</CardDescription>
+      </div>
+      <div
+        className="font-semibold leading-tight w-full"
+        style={{ fontSize: 'clamp(1rem, 2.2vw, 1.5rem)' }}
+      >
+        {children}
+      </div>
+    </CardHeader>
+  </Card>
+);
+
 export default SalesSimulator;
