@@ -140,46 +140,22 @@ serve(async (req) => {
       )
     }
 
-    // 3. Calcular fecha de expiración (30 días desde ahora)
+    // 3. Calcular fecha de expiración (informativa, ya no se usa para legacy credits)
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 30)
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1)
 
-    // 4. Crear registro de créditos para el usuario
-    console.log('Creating credits row')
-    const { error: creditsError } = await supabaseClient
-      .from('user_credits')
-      .insert({
-        user_email: user.email,
-        card_id: qrCard.code,
-        card_type: qrCard.card_type,
-        max_credits: qrCard.download_credits,
-        credits_remaining: qrCard.download_credits,
-        expires_at: expiresAt.toISOString(),
-        is_active: true
-      })
-
-    if (creditsError) {
-      console.error('Error creating credits:', creditsError)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Error al activar créditos',
-          details: creditsError.message 
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
-
-    // 5. Marcar la tarjeta QR como activada
-    console.log('Marking QR card as activated')
+    // 4. Marcar la tarjeta QR como activada y asignarla al usuario
+    // NOTA: NO creamos registro en user_credits (sistema legacy) porque los créditos
+    // ahora viven en qr_cards.download_credits. Crear ambos causaba doble contabilidad
+    // (la UI sumaba user_credits + qr_cards mostrando el doble de créditos).
+    console.log('Marking QR card as activated and assigning ownership')
     const { error: updateError } = await supabaseClient
       .from('qr_cards')
       .update({
         is_activated: true,
         activated_at: new Date().toISOString(),
-        activated_by: user.id
+        activated_by: user.id,
+        owner_user_id: user.id,
       })
       .eq('id', qrCard.id)
 
