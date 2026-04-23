@@ -295,7 +295,58 @@ const Monetization = () => {
     };
   }, [downloads, qrCards]);
 
-  if (loading) {
+  // Desglose por ORIGEN de tarjeta (físicas XAF vs virtuales EUR)
+  // Físicas → vendidas en CFA (3000 XAF estándar / 7000 XAF premium) con QR o 6 dígitos.
+  // Virtuales → vendidas en EUR (5 € estándar / 10 € premium) por checkout digital.
+  const byOrigin = useMemo(() => {
+    const make = () => ({
+      standard: { count: 0, activated: 0, downloads: 0, gross: 0 },
+      premium: { count: 0, activated: 0, downloads: 0, gross: 0 },
+    });
+    const physical = make();
+    const digital = make();
+
+    // Inventario de tarjetas: contar todas las creadas por origen + tipo
+    qrCards.forEach((qr: any) => {
+      const bucket = qr.origin === 'digital' ? digital : physical;
+      const tier = qr.card_type === 'premium' ? 'premium' : 'standard';
+      bucket[tier].count += 1;
+      if (qr.is_activated) bucket[tier].activated += 1;
+    });
+
+    // Descargas: atribuir cada descarga al origen de su tarjeta
+    downloads.forEach((d) => {
+      if (!d.qr_card_id) return;
+      const qr = qrCards.get(d.qr_card_id);
+      if (!qr) return;
+      const bucket = qr.origin === 'digital' ? digital : physical;
+      const tier = qr.card_type === 'premium' ? 'premium' : 'standard';
+      bucket[tier].downloads += 1;
+      bucket[tier].gross += revenueForDownload(d);
+    });
+
+    // Para físicas: ingresos brutos POR VENTA en XAF (precio fijo × tarjetas activadas)
+    // Para virtuales: ingresos brutos POR VENTA en EUR (precio fijo × tarjetas activadas)
+    const physicalSalesXaf =
+      physical.standard.activated * PHYSICAL_STANDARD_PRICE_XAF +
+      physical.premium.activated * PHYSICAL_PREMIUM_PRICE_XAF;
+    const digitalSalesEur =
+      digital.standard.activated * STANDARD_PRICE_EUR +
+      digital.premium.activated * PREMIUM_PRICE_EUR;
+
+    return {
+      physical: {
+        ...physical,
+        salesXaf: physicalSalesXaf,
+        salesEur: physicalSalesXaf / 655.957, // referencia EUR
+      },
+      digital: {
+        ...digital,
+        salesEur: digitalSalesEur,
+        salesXaf: eurToXaf(digitalSalesEur),
+      },
+    };
+  }, [qrCards, downloads]);
     return (
       <div className="p-6 space-y-4">
         <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
