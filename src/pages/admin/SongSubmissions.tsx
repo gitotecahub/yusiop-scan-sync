@@ -448,13 +448,6 @@ const SongSubmissions = () => {
                     <dd className="col-span-2">{new Date(detailsTarget.reviewed_at).toLocaleString('es-ES')}</dd>
                   </>
                 )}
-
-                <dt className="text-muted-foreground">Preview</dt>
-                <dd className="col-span-2">
-                  {(detailsTarget.preview_url || detailsTarget.preview_path)
-                    ? 'Incluido'
-                    : <span className="text-muted-foreground">No incluido</span>}
-                </dd>
               </dl>
             </div>
           )}
