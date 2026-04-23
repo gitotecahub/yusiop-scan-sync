@@ -523,13 +523,38 @@ const Library = () => {
   return (
     <div className="space-y-6 pb-32">
       {/* Header */}
-      <div>
-        <h1 className="display-xl text-4xl">
-          Biblioteca
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Tu colección personal, lista para sonar.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="display-xl text-4xl">
+            Biblioteca
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+            Tu colección personal, lista para sonar.
+          </p>
+        </div>
+        {downloads.length > 0 && (
+          <Button
+            variant={selectionMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={toggleSelectionMode}
+            className={cn(
+              'rounded-full shrink-0',
+              selectionMode && 'vapor-bg text-primary-foreground border-0 shadow-glow'
+            )}
+          >
+            {selectionMode ? (
+              <>
+                <X className="h-4 w-4 mr-1.5" />
+                Cancelar
+              </>
+            ) : (
+              <>
+                <CheckSquare className="h-4 w-4 mr-1.5" />
+                Seleccionar
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Stats — blob cards */}
