@@ -67,6 +67,40 @@ serve(async (req) => {
       });
     }
 
+    // Geolocalización por IP (best-effort, no bloquea la descarga si falla)
+    const rawIp =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() ||
+      "";
+    const geo: {
+      ip_address: string | null;
+      country_code: string | null;
+      country_name: string | null;
+      city: string | null;
+      region: string | null;
+    } = {
+      ip_address: rawIp || null,
+      country_code: req.headers.get("cf-ipcountry") || null,
+      country_name: null,
+      city: null,
+      region: null,
+    };
+    if (rawIp) {
+      try {
+        const r = await fetch(`https://ipapi.co/${rawIp}/json/`);
+        if (r.ok) {
+          const j = await r.json();
+          geo.country_code = j.country_code || geo.country_code;
+          geo.country_name = j.country_name || null;
+          geo.city = j.city || null;
+          geo.region = j.region || null;
+        }
+      } catch (_e) {
+        // silencioso
+      }
+    }
+
     // 1) Tarjetas digitales/owned (qr_cards) primero
     const { data: ownedCard, error: ownedErr } = await supabase
       .from("qr_cards")
@@ -110,6 +144,18 @@ serve(async (req) => {
           },
         );
       }
+
+      // Enriquecer la última descarga con datos geo (consume_card_credit la insertó sin geo)
+      try {
+        await supabase
+          .from("user_downloads")
+          .update(geo)
+          .eq("user_id", user.id)
+          .eq("song_id", song.id)
+          .eq("qr_card_id", ownedCard.id)
+          .order("downloaded_at", { ascending: false })
+          .limit(1);
+      } catch (_e) { /* no bloquear */ }
 
       return new Response(
         JSON.stringify({
@@ -177,6 +223,7 @@ serve(async (req) => {
         user_email: user.email,
         song_id: song.id,
         card_type: credits.card_type,
+        ...geo,
       });
 
     if (downloadError) {
