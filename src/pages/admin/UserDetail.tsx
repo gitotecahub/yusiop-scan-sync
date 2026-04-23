@@ -23,8 +23,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const formatEur = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+
+const formatEur = (cents: number) => formatEURNumber(cents / 100);
+const formatXaf = (cents: number) => formatXAFNumber(cents / 100);
 const formatDate = (d?: string | null) => (d ? new Date(d).toLocaleString('es-ES') : '—');
 
 const UserDetail = () => {
