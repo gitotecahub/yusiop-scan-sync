@@ -207,7 +207,18 @@ const UserDetail = () => {
           </div>
 
           <div className="grid gap-3 md:grid-cols-4 mt-6">
-            <MiniStat icon={Euro} label="Total gastado" value={formatEur(totalSpentCents)} />
+            <MiniStat
+              icon={Euro}
+              label="Total gastado"
+              value={
+                <span className="flex flex-col leading-tight">
+                  <span>{formatEur(totalSpentCents)}</span>
+                  <span className="text-[10px] font-normal text-muted-foreground/80 tabular-nums">
+                    {formatXaf(totalSpentCents)}
+                  </span>
+                </span>
+              }
+            />
             <MiniStat icon={QrCode} label="Tarjetas" value={cards.length} />
             <MiniStat icon={Download} label="Créditos restantes" value={totalCredits} />
             <MiniStat icon={Heart} label="Favoritos" value={favorites.length} />
