@@ -521,6 +521,51 @@ const Profile = () => {
         )}
       </div>
 
+      {/* Modo Usuario / Artista (solo si es artista aprobado) */}
+      <ModeSwitcher />
+
+      {/* Conviértete en artista (solo si NO es artista) */}
+      {!isArtist && (
+        <div className="blob-card p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl sunset-bg flex items-center justify-center shrink-0">
+              <Music className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow mb-1">Yusiop Artist</p>
+              <h3 className="font-display text-lg font-bold leading-tight">
+                {artistRequestStatus === 'pending'
+                  ? 'Solicitud en revisión'
+                  : artistRequestStatus === 'rejected'
+                    ? 'Solicitud rechazada'
+                    : 'Convertirme en artista'}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {artistRequestStatus === 'pending'
+                  ? 'Estamos revisando tus documentos. Te avisaremos pronto.'
+                  : artistRequestStatus === 'rejected'
+                    ? 'Puedes enviar una nueva solicitud.'
+                    : 'Publica tu música en el catálogo y gestiona tu perfil.'}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => navigate('/artist/request')}
+                className="mt-3 rounded-full vapor-bg text-primary-foreground h-9 px-4 text-xs font-bold"
+                disabled={artistRequestStatus === 'pending'}
+              >
+                {artistRequestStatus === 'pending' ? (
+                  <><Hourglass className="h-3 w-3 mr-1.5" /> En revisión</>
+                ) : artistRequestStatus === 'rejected' ? (
+                  'Reenviar solicitud'
+                ) : (
+                  'Solicitar acceso'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Settings */}
       <div>
         <div className="flex items-center gap-2 mb-4">
