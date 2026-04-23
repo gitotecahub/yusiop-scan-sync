@@ -433,6 +433,16 @@ const Users = () => {
                       <><Shield className="h-4 w-4 mr-1" /> Admin</>
                     )}
                   </Button>
+                  {currentUserIsSuperAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPermissionsUser(user)}
+                      title="Asignar áreas del panel"
+                    >
+                      <KeyRound className="h-4 w-4 mr-1" /> Permisos
+                    </Button>
+                  )}
                   <Button variant="destructive" size="sm" onClick={() => setDeletingUser(user)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
