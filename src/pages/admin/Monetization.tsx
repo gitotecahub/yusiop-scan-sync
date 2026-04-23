@@ -99,7 +99,7 @@ const Monetization = () => {
       const [{ data: dls }, { data: sgs }, { data: qrs }, { data: collabs }] = await Promise.all([
         supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
         supabase.from('songs').select('id, title, artist_id, cover_url, artists(name)').order('title'),
-        supabase.from('qr_cards').select('id, card_type, download_credits'),
+        supabase.from('qr_cards').select('id, card_type, download_credits, origin'),
         supabase
           .from('song_collaborators')
           .select('id, song_id, artist_name, share_percent, claimed_by_user_id')
