@@ -421,6 +421,103 @@ const Monetization = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pozo de colaboradores no reclamados */}
+      <Card className="border-yusiop-primary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-yusiop-primary" />
+            Pozo de monetización pendiente
+          </CardTitle>
+          <CardDescription>
+            Importes de colaboradores cuyo nombre artístico aparece en splits pero que aún no están
+            registrados en la app o no han reclamado su parte. El dinero queda retenido hasta que el
+            artista verifique su identidad.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Total pendiente en el pozo</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Coins className="h-5 w-5 text-yusiop-primary" />
+                  {formatEUR(unclaimedPool.totalPending)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Artistas sin reclamar</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <UserX className="h-5 w-5 text-yusiop-primary" />
+                  {unclaimedPool.list.length}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Descargas asociadas</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <MusicIcon className="h-5 w-5 text-yusiop-primary" />
+                  {unclaimedPool.totalDownloadsInPool.toLocaleString('es-ES', {
+                    maximumFractionDigits: 1,
+                  })}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar artista colaborador..."
+              value={poolSearch}
+              onChange={(e) => setPoolSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Artista colaborador</TableHead>
+                  <TableHead className="text-right">Canciones</TableHead>
+                  <TableHead className="text-right">Descargas (su parte)</TableHead>
+                  <TableHead className="text-right">Importe pendiente</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPool.map((a) => (
+                  <TableRow key={a.name}>
+                    <TableCell className="font-medium">
+                      {a.name}
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        Sin reclamar
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{a.songCount}</TableCell>
+                    <TableCell className="text-right">
+                      {a.downloads.toLocaleString('es-ES', { maximumFractionDigits: 1 })}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-yusiop-primary">
+                      {formatEUR(a.pending)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredPool.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      No hay importes pendientes en el pozo.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
