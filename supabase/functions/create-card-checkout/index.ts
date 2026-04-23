@@ -20,8 +20,8 @@ interface CheckoutBody {
 }
 
 const PRICING = {
-  standard: { amount_cents: 499, credits: 4, label: "Tarjeta YUSIOP Estándar" },
-  premium: { amount_cents: 999, credits: 10, label: "Tarjeta YUSIOP Premium" },
+  standard: { amount_cents: 500, credits: 4, label: "Tarjeta YUSIOP Estándar" },
+  premium: { amount_cents: 1000, credits: 10, label: "Tarjeta YUSIOP Premium" },
 };
 
 Deno.serve(async (req) => {
