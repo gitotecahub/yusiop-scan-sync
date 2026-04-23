@@ -161,7 +161,16 @@ serve(async (req) => {
 
     if (updateError) {
       console.error('Error updating QR card:', updateError)
-      // No devolver error aquí porque los créditos ya se crearon exitosamente
+      return new Response(
+        JSON.stringify({
+          error: 'Error al activar la tarjeta',
+          details: updateError.message,
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
     }
 
     console.log('QR activation successful')
