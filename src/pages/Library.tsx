@@ -202,6 +202,60 @@ const Library = () => {
     }
   };
 
+  const handleShareRequest = (song: DownloadedSong) => {
+    setRecipientUsername('');
+    setSongToShare(song);
+  };
+
+  const confirmShare = async () => {
+    if (!songToShare) return;
+    const username = recipientUsername.trim().replace(/^@/, '');
+    if (!username) {
+      toast.error('Escribe el username del destinatario');
+      return;
+    }
+    if (username.length > 50) {
+      toast.error('Username demasiado largo');
+      return;
+    }
+
+    setSharing(true);
+    try {
+      const { data, error } = await supabase.rpc('transfer_song_to_user', {
+        p_song_id: songToShare.id,
+        p_recipient_username: username,
+      });
+
+      if (error) {
+        console.error('Share error:', error);
+        toast.error('No se pudo compartir la canción');
+        return;
+      }
+
+      const result = Array.isArray(data) ? data[0] : data;
+      if (!result?.success) {
+        toast.error(result?.message || 'No se pudo compartir');
+        return;
+      }
+
+      // Si está sonando, detener (la canción ya no es nuestra)
+      if (currentSong?.id === songToShare.id) {
+        stop();
+      }
+
+      // Quitar la canción de nuestra biblioteca local
+      setDownloads((prev) => prev.filter((s) => s.id !== songToShare.id));
+      setFavorites((prev) => prev.filter((s) => s.id !== songToShare.id));
+      toast.success(result.message);
+      setSongToShare(null);
+    } catch (err) {
+      console.error('Error sharing song:', err);
+      toast.error('Ocurrió un error al compartir');
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
     if (songs.length === 0) {
       return (
