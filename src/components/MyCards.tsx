@@ -118,9 +118,9 @@ const MyCards = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 auto-rows-min">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="aspect-[1.586/1] w-full rounded-2xl" />
+          <Skeleton key={i} className="aspect-[1.4/1] w-full rounded-2xl" />
         ))}
       </div>
     );
@@ -141,7 +141,7 @@ const MyCards = () => {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 auto-rows-min">
         {cards.map((c) => {
           const depleted = c.download_credits <= 0;
           return (

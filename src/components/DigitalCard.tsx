@@ -164,7 +164,9 @@ const DigitalCard = ({
 
   return (
     <div
-      className="relative w-full aspect-[1.586/1] rounded-[28px] overflow-hidden border shadow-2xl transition-all"
+      className={`relative w-full rounded-[28px] overflow-hidden border shadow-2xl transition-all ${
+        compact ? 'aspect-[1.4/1]' : 'aspect-[1.586/1]'
+      }`}
       style={{
         background: `linear-gradient(135deg, ${p.bgFrom} 0%, ${p.bgVia} 55%, ${p.bgTo} 100%)`,
         borderColor: p.border,
@@ -242,7 +244,7 @@ const DigitalCard = ({
       />
 
       {/* Contenido */}
-      <div className={`relative h-full flex flex-col ${compact ? 'p-3' : 'p-4 sm:p-5'}`}>
+      <div className={`relative h-full flex flex-col ${compact ? 'p-2.5' : 'p-4 sm:p-5'}`}>
         {/* Top: marca + badge tipo */}
         <div className="flex items-start justify-between">
           <div>
