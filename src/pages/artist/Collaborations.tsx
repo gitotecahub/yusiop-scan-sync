@@ -60,6 +60,28 @@ const Collaborations = () => {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [user?.id]);
 
+  // Realtime: refrescar al cambiar mis solicitudes de colaboración (aprobadas/rechazadas)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`collab-claims-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'collaboration_claims',
+          filter: `claimant_user_id=eq.${user.id}`,
+        },
+        () => load(),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   const claim = async (collaboratorId: string) => {
     const { data, error } = await supabase.rpc('claim_collaboration' as any, {
       p_collaborator_id: collaboratorId,
