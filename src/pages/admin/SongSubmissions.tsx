@@ -134,14 +134,16 @@ const SongSubmissions = () => {
       toast.error('Indica un motivo de rechazo');
       return;
     }
+    const reason = rejectReason.trim();
     const { data, error } = await supabase.rpc('reject_song_submission', {
       p_submission_id: rejectTarget.id,
-      p_reason: rejectReason.trim(),
+      p_reason: reason,
     });
     if (error) return toast.error(error.message);
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
+      sendEmailNotification('song-rejected', rejectTarget, { reason });
       setRejectOpen(false);
       load();
     } else {
