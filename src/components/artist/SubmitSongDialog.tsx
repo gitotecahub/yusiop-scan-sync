@@ -288,9 +288,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       return;
     }
     if (type === 'track') {
-      const allowed = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/m4a', 'audio/x-m4a'];
-      if (!allowed.includes(file.type)) {
-        toast.error('Formato de audio no soportado. Usa MP3, WAV o M4A.');
+      const allowedMime = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave', 'audio/x-wav', 'audio/vnd.wave'];
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      const allowedExt = ['mp3', 'wav'];
+      if (!allowedMime.includes(file.type) && !allowedExt.includes(ext)) {
+        toast.error('Formato de audio no soportado. Usa MP3 o WAV.');
         return;
       }
       setTrackFile(file);
@@ -527,7 +529,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               <input
                 ref={trackInputRef}
                 type="file"
-                accept=".mp3,.m4a,.wav,.aac,.ogg,.flac,.opus,.weba,.webm,audio/*"
+                accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav"
                 className="hidden"
                 onChange={(e) => handleFileSelect('track', e.target.files?.[0] || null)}
               />
@@ -542,7 +544,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                   ? `Seleccionado: ${trackFile.name}`
                   : isEdit
                     ? 'Reemplazar audio (opcional)'
-                    : 'Seleccionar audio (MP3/WAV/M4A)'}
+                    : 'Seleccionar audio (MP3 o WAV)'}
               </Button>
             </div>
 
