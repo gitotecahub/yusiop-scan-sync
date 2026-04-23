@@ -198,9 +198,16 @@ const Store = () => {
 
             <Card className="overflow-hidden border-primary/20">
               <CardHeader className="bg-gradient-to-br from-primary/10 to-transparent">
-                <CardTitle className="flex items-baseline justify-between">
+                <CardTitle className="flex items-baseline justify-between gap-3">
                   <span>{TIERS[t].label}</span>
-                  <span className="text-2xl font-bold text-primary">{TIERS[t].price}</span>
+                  <span className="flex flex-col items-end leading-tight">
+                    <span className="text-2xl font-bold text-primary tabular-nums">
+                      {formatEURNumber(TIERS[t].priceEur)}
+                    </span>
+                    <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
+                      {formatXAFNumber(TIERS[t].priceEur)}
+                    </span>
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-2">
