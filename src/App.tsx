@@ -15,6 +15,7 @@ import Auth from '@/pages/Auth';
 import Install from './pages/Install';
 import Store from '@/pages/Store';
 import Redeem from '@/pages/Redeem';
+import Unsubscribe from '@/pages/Unsubscribe';
 import NotFound from "./pages/NotFound";
 
 // Admin Pages
@@ -76,6 +77,7 @@ const AppContent = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/install" element={<Install />} />
       <Route path="/redeem/:token" element={<Redeem />} />
+      <Route path="/unsubscribe" element={<Unsubscribe />} />
 
       <Route path="/*" element={
         !session ? (
