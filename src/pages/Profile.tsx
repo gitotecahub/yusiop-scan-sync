@@ -98,7 +98,9 @@ const Profile = () => {
     email: user?.email || '',
     downloadsRemaining: 0,
     totalDownloads: 0,
-    activatedCards: 0
+    activatedCards: 0,
+    birthYear: '' as string,
+    gender: '' as string,
   });
 
   useEffect(() => {
@@ -107,7 +109,7 @@ const Profile = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('username, full_name, avatar_url, downloads_remaining')
+          .select('username, full_name, avatar_url, downloads_remaining, birth_year, gender')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -119,6 +121,8 @@ const Profile = () => {
             username: data.username || '',
             fullName: data.full_name || '',
             downloadsRemaining: data.downloads_remaining ?? 0,
+            birthYear: data.birth_year ? String(data.birth_year) : '',
+            gender: data.gender || '',
           }));
           if (data.avatar_url) setAvatarUrl(data.avatar_url);
         } else {
@@ -289,20 +293,25 @@ const Profile = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      const birthYearNum = profile.birthYear ? parseInt(profile.birthYear, 10) : null;
+      const genderVal = profile.gender || null;
+      const updates = {
+        full_name: profile.fullName,
+        username: profile.username,
+        birth_year: birthYearNum && birthYearNum >= 1900 && birthYearNum <= new Date().getFullYear() ? birthYearNum : null,
+        gender: genderVal,
+      };
+
       if (existing) {
         const { error } = await supabase
           .from('profiles')
-          .update({ full_name: profile.fullName, username: profile.username })
+          .update(updates)
           .eq('user_id', user.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('profiles')
-          .insert({
-            user_id: user.id,
-            full_name: profile.fullName,
-            username: profile.username,
-          });
+          .insert({ user_id: user.id, ...updates });
         if (error) throw error;
       }
 
@@ -497,6 +506,42 @@ const Profile = () => {
                 className="rounded-2xl border-border bg-input h-11"
               />
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="eyebrow">Año nacimiento</Label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="1995"
+                  min={1900}
+                  max={new Date().getFullYear()}
+                  value={profile.birthYear}
+                  onChange={(e) => setProfile(prev => ({ ...prev, birthYear: e.target.value }))}
+                  className="rounded-2xl border-border bg-input h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="eyebrow">Género</Label>
+                <Select
+                  value={profile.gender || 'unset'}
+                  onValueChange={(v) => setProfile(prev => ({ ...prev, gender: v === 'unset' ? '' : v }))}
+                >
+                  <SelectTrigger className="rounded-2xl border-border bg-input h-11">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unset">Sin especificar</SelectItem>
+                    <SelectItem value="female">Mujer</SelectItem>
+                    <SelectItem value="male">Hombre</SelectItem>
+                    <SelectItem value="non_binary">No binario</SelectItem>
+                    <SelectItem value="prefer_not_to_say">Prefiero no decirlo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Estos datos son opcionales y ayudan a los artistas a conocer a su audiencia de forma anónima.
+            </p>
             <Button onClick={handleSaveProfile} className="w-full rounded-full vapor-bg text-primary-foreground hover:opacity-90 h-11 font-bold shadow-glow">
               Guardar Cambios
             </Button>
