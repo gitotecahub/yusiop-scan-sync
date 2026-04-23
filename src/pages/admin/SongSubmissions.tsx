@@ -384,6 +384,81 @@ const SongSubmissions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Detalles del envío</DialogTitle>
+            <DialogDescription>
+              Información rellenada por el artista en el formulario.
+            </DialogDescription>
+          </DialogHeader>
+          {detailsTarget && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-20 h-20 rounded-md bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
+                  {detailsTarget.cover_url ? (
+                    <img src={detailsTarget.cover_url} alt={detailsTarget.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{detailsTarget.title}</p>
+                  <p className="text-xs text-muted-foreground">{detailsTarget.artist_name}</p>
+                </div>
+              </div>
+
+              <dl className="grid grid-cols-3 gap-x-3 gap-y-2 text-sm">
+                <dt className="text-muted-foreground">Título</dt>
+                <dd className="col-span-2 font-medium">{detailsTarget.title}</dd>
+
+                <dt className="text-muted-foreground">Artista</dt>
+                <dd className="col-span-2 font-medium">{detailsTarget.artist_name}</dd>
+
+                <dt className="text-muted-foreground">Álbum</dt>
+                <dd className="col-span-2">{detailsTarget.album_title || <span className="text-muted-foreground">—</span>}</dd>
+
+                <dt className="text-muted-foreground">Género</dt>
+                <dd className="col-span-2">{detailsTarget.genre || <span className="text-muted-foreground">—</span>}</dd>
+
+                <dt className="text-muted-foreground">Fecha lanzamiento</dt>
+                <dd className="col-span-2">
+                  {detailsTarget.release_date
+                    ? new Date(detailsTarget.release_date).toLocaleDateString('es-ES')
+                    : <span className="text-muted-foreground">—</span>}
+                </dd>
+
+                <dt className="text-muted-foreground">Duración</dt>
+                <dd className="col-span-2">{formatDuration(detailsTarget.duration_seconds)}</dd>
+
+                <dt className="text-muted-foreground">Estado</dt>
+                <dd className="col-span-2 capitalize">{detailsTarget.status}</dd>
+
+                <dt className="text-muted-foreground">Enviado</dt>
+                <dd className="col-span-2">{new Date(detailsTarget.created_at).toLocaleString('es-ES')}</dd>
+
+                {detailsTarget.reviewed_at && (
+                  <>
+                    <dt className="text-muted-foreground">Revisado</dt>
+                    <dd className="col-span-2">{new Date(detailsTarget.reviewed_at).toLocaleString('es-ES')}</dd>
+                  </>
+                )}
+
+                <dt className="text-muted-foreground">Preview</dt>
+                <dd className="col-span-2">
+                  {(detailsTarget.preview_url || detailsTarget.preview_path)
+                    ? 'Incluido'
+                    : <span className="text-muted-foreground">No incluido</span>}
+                </dd>
+              </dl>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetailsOpen(false)}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
