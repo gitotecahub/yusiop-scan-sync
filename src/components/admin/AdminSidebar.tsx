@@ -58,9 +58,12 @@ export function AdminSidebar() {
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { signOut } = useAuth();
+  const { has } = useStaffAreas();
   const currentPath = location.pathname;
   const [pendingArtistCount, setPendingArtistCount] = useState(0);
   const [pendingSongCount, setPendingSongCount] = useState(0);
+
+  const visibleItems = menuItems.filter((item) => item.area === null || has(item.area));
 
   const loadPendingCount = async () => {
     const { count } = await supabase
