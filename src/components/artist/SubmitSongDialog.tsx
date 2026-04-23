@@ -270,7 +270,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (!formData.title.trim()) return toast.error('El título es requerido'), false;
     if (!formData.artist_name.trim()) return toast.error('El nombre del artista es requerido'), false;
     if (!isEdit && !trackFile) return toast.error('Debes subir el archivo de audio completo'), false;
+    if (hasCollabs) {
+      if (collaborators.length < 2) return toast.error('Una colaboración requiere al menos 2 artistas'), false;
+      if (collaborators.some(c => !c.artist_name.trim())) return toast.error('Todos los colaboradores deben tener nombre artístico'), false;
+      if (Math.abs(collabSum - 100) > 0.01) return toast.error(`La suma de splits debe ser 100% (actual: ${collabSum}%)`), false;
+    }
     return true;
+  };
+
+  const persistCollaborators = async (submissionId: string) => {
+    // Borrar todos y reinsertar (más simple y consistente)
+    await supabase.from('song_collaborators').delete().eq('submission_id', submissionId);
+    if (!hasCollabs || collaborators.length === 0) return;
+    const rows = collaborators.map(c => ({
+      submission_id: submissionId,
+      artist_name: c.artist_name.trim(),
+      share_percent: c.share_percent,
+      is_primary: c.is_primary,
+    }));
+    const { error } = await supabase.from('song_collaborators').insert(rows);
+    if (error) throw error;
   };
 
   const handleSubmit = async () => {
