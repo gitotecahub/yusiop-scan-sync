@@ -215,6 +215,132 @@ const Library = () => {
     setSongToShare(song);
   };
 
+  const toggleSelectionMode = () => {
+    setSelectionMode((prev) => {
+      if (prev) setSelectedIds(new Set());
+      return !prev;
+    });
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllVisible = (ids: string[]) => {
+    setSelectedIds((prev) => {
+      const allSelected = ids.every((id) => prev.has(id));
+      if (allSelected) {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      }
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Debes iniciar sesión');
+        return;
+      }
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase
+        .from('user_downloads')
+        .delete()
+        .eq('user_id', user.id)
+        .in('song_id', ids);
+
+      if (error) {
+        console.error('Bulk delete error:', error);
+        toast.error('No se pudieron eliminar todas las canciones');
+        return;
+      }
+
+      if (currentSong && ids.includes(currentSong.id)) stop();
+
+      setDownloads((prev) => prev.filter((s) => !selectedIds.has(s.id)));
+      setFavorites((prev) => prev.filter((s) => !selectedIds.has(s.id)));
+      toast.success(`${ids.length} ${ids.length === 1 ? 'canción eliminada' : 'canciones eliminadas'}`);
+      setSelectedIds(new Set());
+      setSelectionMode(false);
+      setBulkDeleteOpen(false);
+    } catch (err) {
+      console.error('Bulk delete failed:', err);
+      toast.error('Ocurrió un error al eliminar');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const confirmBulkShare = async () => {
+    if (selectedIds.size === 0) return;
+    const username = bulkRecipient.trim().replace(/^@/, '');
+    if (!username) {
+      toast.error('Escribe el username del destinatario');
+      return;
+    }
+    if (username.length > 50) {
+      toast.error('Username demasiado largo');
+      return;
+    }
+
+    setBulkProcessing(true);
+    const ids = Array.from(selectedIds);
+    let successCount = 0;
+    const failed: string[] = [];
+
+    try {
+      for (const id of ids) {
+        const { data, error } = await supabase.rpc('transfer_song_to_user', {
+          p_song_id: id,
+          p_recipient_username: username,
+        });
+        const result = Array.isArray(data) ? data[0] : data;
+        if (error || !result?.success) {
+          failed.push(id);
+        } else {
+          successCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        const transferredIds = ids.filter((id) => !failed.includes(id));
+        if (currentSong && transferredIds.includes(currentSong.id)) stop();
+        setDownloads((prev) => prev.filter((s) => !transferredIds.includes(s.id)));
+        setFavorites((prev) => prev.filter((s) => !transferredIds.includes(s.id)));
+      }
+
+      if (failed.length === 0) {
+        toast.success(`${successCount} ${successCount === 1 ? 'canción enviada' : 'canciones enviadas'} a @${username}`);
+      } else if (successCount > 0) {
+        toast.warning(`${successCount} enviadas, ${failed.length} fallaron`);
+      } else {
+        toast.error('No se pudo enviar ninguna canción');
+      }
+
+      setSelectedIds(new Set());
+      setSelectionMode(false);
+      setBulkShareOpen(false);
+      setBulkRecipient('');
+    } catch (err) {
+      console.error('Bulk share failed:', err);
+      toast.error('Ocurrió un error al compartir');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
   const confirmShare = async () => {
     if (!songToShare) return;
     const username = recipientUsername.trim().replace(/^@/, '');
