@@ -11,19 +11,20 @@ import { Sparkles, Gift, Check, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Tier = 'standard' | 'premium';
 
-const TIERS: Record<Tier, { label: string; price: string; credits: number; perks: string[] }> = {
+const TIERS: Record<Tier, { label: string; priceEur: number; credits: number; perks: string[] }> = {
   standard: {
     label: 'YUSIOP Estándar',
-    price: '4,99€',
+    priceEur: 5,
     credits: 4,
     perks: ['4 descargas', 'Calidad máxima', 'Sin caducidad'],
   },
   premium: {
     label: 'YUSIOP Premium',
-    price: '9,99€',
+    priceEur: 10,
     credits: 10,
     perks: ['10 descargas', 'Calidad máxima', 'Acceso prioritario'],
   },
