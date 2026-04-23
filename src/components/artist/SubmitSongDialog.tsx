@@ -5,17 +5,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type CollabRole = 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
+
+const COLLAB_ROLES: { value: CollabRole; label: string }[] = [
+  { value: 'featuring', label: 'Featuring' },
+  { value: 'producer', label: 'Productor' },
+  { value: 'performer', label: 'Intérprete' },
+  { value: 'composer', label: 'Compositor' },
+  { value: 'remix', label: 'Remix' },
+];
 
 interface CollaboratorRow {
   id?: string; // existing DB id when editing
   artist_name: string;
   share_percent: number;
   is_primary: boolean;
+  role: CollabRole;
 }
+
+/**
+ * Construye el nombre artístico mostrado en catálogo a partir del artista
+ * principal y los colaboradores con rol "featuring".
+ *  - 1 feat:  "Diddyes ft Kanteo"
+ *  - 2 feats: "Diddyes ft Kanteo & Tito Nsue"
+ *  - 3+ feats: "Diddyes ft Kanteo, Tito Nsue & Otro"
+ */
+export const buildDisplayArtist = (
+  primary: string,
+  collaborators: { artist_name: string; is_primary: boolean; role: CollabRole }[],
+): string => {
+  const main = primary.trim();
+  const feats = collaborators
+    .filter(c => !c.is_primary && c.role === 'featuring' && c.artist_name.trim())
+    .map(c => c.artist_name.trim());
+  if (feats.length === 0) return main;
+  if (feats.length === 1) return `${main} ft ${feats[0]}`;
+  const last = feats[feats.length - 1];
+  const head = feats.slice(0, -1).join(', ');
+  return `${main} ft ${head} & ${last}`;
+};
 
 export interface EditingSubmission {
   id: string;
@@ -111,16 +145,17 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary')
+          .select('id,artist_name,share_percent,is_primary,role')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
           setHasCollabs(true);
-          setCollaborators(data.map(d => ({
+          setCollaborators(data.map((d: any) => ({
             id: d.id,
             artist_name: d.artist_name,
             share_percent: Number(d.share_percent),
             is_primary: !!d.is_primary,
+            role: (d.role as CollabRole) ?? 'featuring',
           })));
         } else {
           setHasCollabs(false);
@@ -151,8 +186,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setHasCollabs(true);
     if (collaborators.length === 0) {
       setCollaborators([
-        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true },
-        { artist_name: '', share_percent: 50, is_primary: false },
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring' },
+        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring' },
       ]);
     }
   };
@@ -163,7 +198,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   };
 
   const addCollaborator = () => {
-    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false }]);
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring' }]);
   };
 
   const removeCollaborator = (idx: number) => {
@@ -287,6 +322,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       artist_name: c.artist_name.trim(),
       share_percent: c.share_percent,
       is_primary: c.is_primary,
+      role: c.role,
     }));
     const { error } = await supabase.from('song_collaborators').insert(rows);
     if (error) throw error;
@@ -414,11 +450,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               />
             </div>
             <div>
-              <Label htmlFor="artist">Nombre artístico *</Label>
+              <Label htmlFor="artist">Artista principal *</Label>
               <Input
                 id="artist"
                 value={formData.artist_name}
-                onChange={(e) => setFormData((p) => ({ ...p, artist_name: e.target.value }))}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFormData((p) => ({ ...p, artist_name: v }));
+                  // Mantener sincronizado el "principal" en la lista de colaboradores
+                  setCollaborators((prev) => prev.map((c) => c.is_primary ? { ...c, artist_name: v } : c));
+                }}
                 placeholder="Tu nombre artístico"
                 maxLength={80}
               />
@@ -535,46 +576,93 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
 
             {hasCollabs && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {collaborators.map((c, i) => (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                    <Input
-                      className="col-span-7"
-                      placeholder="Nombre artístico"
-                      value={c.artist_name}
-                      onChange={(e) => updateCollab(i, { artist_name: e.target.value })}
-                      maxLength={80}
-                    />
-                    <div className="col-span-3 flex items-center gap-1">
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={c.share_percent}
-                        onChange={(e) => updateCollab(i, { share_percent: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
-                      />
-                      <span className="text-sm text-muted-foreground">%</span>
-                    </div>
-                    <div className="col-span-2 flex justify-end items-center gap-1">
-                      {c.is_primary ? (
-                        <span className="text-[10px] uppercase tracking-wider text-primary font-semibold">Principal</span>
-                      ) : (
-                        <Button type="button" size="icon" variant="ghost" onClick={() => removeCollaborator(i)}>
+                  <div key={i} className="rounded-lg border border-border/60 bg-background/40 p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] uppercase tracking-wider font-semibold ${c.is_primary ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {c.is_primary ? 'Artista principal' : `Colaborador ${i}`}
+                      </span>
+                      {!c.is_primary && (
+                        <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeCollaborator(i)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       )}
                     </div>
+
+                    <div className="grid grid-cols-12 gap-2">
+                      <Input
+                        className="col-span-12 sm:col-span-6"
+                        placeholder="Nombre artístico"
+                        value={c.artist_name}
+                        onChange={(e) => {
+                          updateCollab(i, { artist_name: e.target.value });
+                          // Si edito el principal aquí, también actualizo el campo de arriba
+                          if (c.is_primary) {
+                            setFormData((p) => ({ ...p, artist_name: e.target.value }));
+                          }
+                        }}
+                        maxLength={80}
+                        disabled={c.is_primary}
+                      />
+
+                      <div className="col-span-7 sm:col-span-4">
+                        {c.is_primary ? (
+                          <div className="h-10 flex items-center px-3 rounded-md border border-input bg-muted/40 text-sm text-muted-foreground">
+                            Principal
+                          </div>
+                        ) : (
+                          <Select
+                            value={c.role}
+                            onValueChange={(v) => updateCollab(i, { role: v as CollabRole })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Rol" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {COLLAB_ROLES.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      <div className="col-span-5 sm:col-span-2 flex items-center gap-1">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={c.share_percent}
+                          onChange={(e) => updateCollab(i, { share_percent: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })}
+                        />
+                        <span className="text-sm text-muted-foreground">%</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
                   <Button type="button" size="sm" variant="outline" onClick={addCollaborator}>
                     <Plus className="h-4 w-4 mr-1" /> Añadir artista
                   </Button>
                   <span className={`text-sm font-semibold ${Math.abs(collabSum - 100) < 0.01 ? 'text-primary' : 'text-destructive'}`}>
                     Total: {collabSum}% {Math.abs(collabSum - 100) < 0.01 ? '✓' : '(debe ser 100%)'}
                   </span>
+                </div>
+
+                {/* Vista previa del nombre que se mostrará en el catálogo */}
+                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-primary font-semibold">
+                    <Sparkles className="h-3.5 w-3.5" /> Cómo aparecerá en el catálogo
+                  </div>
+                  <p className="font-display font-bold text-base mt-1 break-words">
+                    {buildDisplayArtist(formData.artist_name, collaborators) || '—'}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Solo los colaboradores con rol <strong>Featuring</strong> aparecen en el nombre. El resto (productor, intérprete, etc.) se guardan en los créditos de la canción.
+                  </p>
                 </div>
               </div>
             )}

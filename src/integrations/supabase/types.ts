@@ -464,6 +464,7 @@ export type Database = {
           created_at: string
           id: string
           is_primary: boolean
+          role: Database["public"]["Enums"]["collab_role"]
           share_percent: number
           song_id: string | null
           submission_id: string | null
@@ -476,6 +477,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_primary?: boolean
+          role?: Database["public"]["Enums"]["collab_role"]
           share_percent: number
           song_id?: string | null
           submission_id?: string | null
@@ -488,6 +490,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_primary?: boolean
+          role?: Database["public"]["Enums"]["collab_role"]
           share_percent?: number
           song_id?: string | null
           submission_id?: string | null
@@ -1048,6 +1051,7 @@ export type Database = {
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
       collab_claim_status: "pending" | "approved" | "rejected"
+      collab_role: "featuring" | "producer" | "performer" | "composer" | "remix"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
       staff_area:
@@ -1190,6 +1194,7 @@ export const Constants = {
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
       collab_claim_status: ["pending", "approved", "rejected"],
+      collab_role: ["featuring", "producer", "performer", "composer", "remix"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
       staff_area: [
