@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_sessions: {
+        Row: {
+          device_id: string
+          device_info: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          device_id: string
+          device_info?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          device_id?: string
+          device_info?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_user_notes: {
         Row: {
           author_user_id: string
