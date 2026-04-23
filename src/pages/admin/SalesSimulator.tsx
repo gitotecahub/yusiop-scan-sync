@@ -16,21 +16,26 @@ const formatEURNumber = (xaf: number) =>
     maximumFractionDigits: 2,
   })} €`;
 
-// Importe en EUR con la equivalencia XAF debajo, como descripción
-const formatEUR = (xaf: number): ReactNode => (
-  <span className="inline-flex flex-col items-end leading-tight">
-    <span className="whitespace-nowrap">{formatEURNumber(xaf)}</span>
-    <span className="text-[0.7em] font-normal text-muted-foreground/70 whitespace-nowrap">
+// Importe en EUR con la equivalencia XAF debajo, como descripción.
+// `align` controla si el bloque se alinea a la izquierda (KPIs) o a la derecha (filas).
+const formatEUR = (xaf: number, align: 'left' | 'right' = 'right'): ReactNode => (
+  <span
+    className={`inline-flex flex-col leading-tight ${
+      align === 'right' ? 'items-end' : 'items-start'
+    }`}
+  >
+    <span className="whitespace-nowrap tabular-nums">{formatEURNumber(xaf)}</span>
+    <span className="text-[0.6em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
       {formatXAFNumber(xaf)}
     </span>
   </span>
 );
 const formatEURRaw = (eur: number): ReactNode => (
   <span className="inline-flex flex-col items-end leading-tight">
-    <span className="whitespace-nowrap">
+    <span className="whitespace-nowrap tabular-nums">
       {eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
     </span>
-    <span className="text-[0.7em] font-normal text-muted-foreground/70 whitespace-nowrap">
+    <span className="text-[0.6em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
       {Math.round(eur * XAF_PER_EUR).toLocaleString('es-ES')} XAF
     </span>
   </span>
@@ -390,52 +395,39 @@ const SalesSimulator = () => {
       </Card>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Tarjetas vendidas / año</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Package className="h-5 w-5 text-yusiop-primary" />
-              {totals.totalUnits.toLocaleString('es-ES')}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Ingresos brutos anuales</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Coins className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalGross)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Bolsa artistas ({artistShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <UsersIcon className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalArtist)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Inversor ({investorShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalInvestor)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Plataforma ({platformShare}%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalPlatform)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+        <KpiCard
+          icon={<Package className="h-4 w-4 text-yusiop-primary" />}
+          label="Tarjetas vendidas / año"
+        >
+          <span className="whitespace-nowrap tabular-nums">
+            {totals.totalUnits.toLocaleString('es-ES')}
+          </span>
+        </KpiCard>
+        <KpiCard
+          icon={<Coins className="h-4 w-4 text-yusiop-primary" />}
+          label="Ingresos brutos anuales"
+        >
+          {formatEUR(totals.totalGross, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<UsersIcon className="h-4 w-4 text-yusiop-primary" />}
+          label={`Bolsa artistas (${artistShare}%)`}
+        >
+          {formatEUR(totals.totalArtist, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<Briefcase className="h-4 w-4 text-yusiop-primary" />}
+          label={`Inversor (${investorShare}%)`}
+        >
+          {formatEUR(totals.totalInvestor, 'left')}
+        </KpiCard>
+        <KpiCard
+          icon={<TrendingUp className="h-4 w-4 text-yusiop-primary" />}
+          label={`Plataforma (${platformShare}%)`}
+        >
+          {formatEUR(totals.totalPlatform, 'left')}
+        </KpiCard>
       </div>
 
       {/* Detailed breakdown */}
@@ -549,6 +541,32 @@ const Row = ({
       {value}
     </span>
   </div>
+);
+
+// Tarjeta KPI con tipografía fluida que se adapta al ancho disponible.
+const KpiCard = ({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) => (
+  <Card className="overflow-hidden">
+    <CardHeader className="pb-3 space-y-2">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {icon}
+        <CardDescription className="truncate">{label}</CardDescription>
+      </div>
+      <div
+        className="font-semibold leading-tight w-full"
+        style={{ fontSize: 'clamp(1rem, 2.2vw, 1.5rem)' }}
+      >
+        {children}
+      </div>
+    </CardHeader>
+  </Card>
 );
 
 export default SalesSimulator;
