@@ -45,8 +45,8 @@ const GENDER_LABEL: Record<string, string> = {
 
 const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#f59e0b', '#10b981', '#ef4444', '#94a3b8'];
 
-const formatEuros = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100);
+const formatEuros = (cents: number) => formatEURNumber((cents || 0) / 100);
+const formatXaf = (cents: number) => formatXAFNumber((cents || 0) / 100);
 
 const flagEmoji = (code: string) => {
   if (!code || code.length !== 2) return '🏳️';
