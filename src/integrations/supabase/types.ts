@@ -100,6 +100,57 @@ export type Database = {
           },
         ]
       }
+      artist_requests: {
+        Row: {
+          artist_name: string
+          bio: string | null
+          contact_email: string | null
+          created_at: string
+          document_urls: Json | null
+          genre: string | null
+          id: string
+          links: Json | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["artist_request_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_name: string
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          document_urls?: Json | null
+          genre?: string | null
+          id?: string
+          links?: Json | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["artist_request_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_name?: string
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          document_urls?: Json | null
+          genre?: string | null
+          id?: string
+          links?: Json | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["artist_request_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       artists: {
         Row: {
           avatar_url: string | null
@@ -248,6 +299,9 @@ export type Database = {
           downloads_remaining: number | null
           full_name: string | null
           id: string
+          last_used_mode: string
+          preferred_mode: string
+          profile_choice_made: boolean
           updated_at: string
           user_id: string
           username: string
@@ -258,6 +312,9 @@ export type Database = {
           downloads_remaining?: number | null
           full_name?: string | null
           id?: string
+          last_used_mode?: string
+          preferred_mode?: string
+          profile_choice_made?: boolean
           updated_at?: string
           user_id: string
           username: string
@@ -268,6 +325,9 @@ export type Database = {
           downloads_remaining?: number | null
           full_name?: string | null
           id?: string
+          last_used_mode?: string
+          preferred_mode?: string
+          profile_choice_made?: boolean
           updated_at?: string
           user_id?: string
           username?: string
@@ -632,6 +692,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_artist_request: {
+        Args: { p_request_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -667,6 +734,13 @@ export type Database = {
           success: boolean
         }[]
       }
+      reject_artist_request: {
+        Args: { p_reason?: string; p_request_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       transfer_card_to_user: {
         Args: {
           p_card_id: string
@@ -696,7 +770,8 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "artist"
+      artist_request_status: "pending" | "approved" | "rejected"
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
@@ -828,7 +903,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "artist"],
+      artist_request_status: ["pending", "approved", "rejected"],
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
