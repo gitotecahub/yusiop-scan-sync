@@ -41,7 +41,7 @@ const formatEURRaw = (eur: number): ReactNode => (
   </span>
 );
 
-// Defaults (XAF base)
+// Defaults físicas (XAF base)
 const DEFAULT_STD_PRICE_XAF = 3000;
 const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
@@ -49,6 +49,12 @@ const DEFAULT_PREM_CREDITS = 100;
 const DEFAULT_ARTIST_SHARE = 40; // %
 const DEFAULT_INVESTOR_SHARE = 10; // %
 const DEFAULT_PLATFORM_SHARE = 50; // %
+
+// Defaults virtuales (EUR base, sin costes de producción)
+const DEFAULT_VSTD_PRICE_EUR = 5;
+const DEFAULT_VPREM_PRICE_EUR = 10;
+const DEFAULT_VSTD_CREDITS = 4;
+const DEFAULT_VPREM_CREDITS = 10;
 
 const SalesSimulator = () => {
   // Pricing inputs
@@ -60,18 +66,37 @@ const SalesSimulator = () => {
   const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
   const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
-  // Volume inputs (annual)
+  // Volume inputs físicas (annual)
   const [stdYearly, setStdYearly] = useState(1000);
   const [premYearly, setPremYearly] = useState(200);
 
-  // Optional cost inputs (XAF per unit) — opcional, para neto
+  // Optional cost inputs físicas (XAF per unit) — opcional, para neto
   const [stdCostXAF, setStdCostXAF] = useState(0);
   const [premCostXAF, setPremCostXAF] = useState(0);
 
+  // ----- Virtuales (EUR) -----
+  const [vStdPriceEUR, setVStdPriceEUR] = useState(DEFAULT_VSTD_PRICE_EUR);
+  const [vPremPriceEUR, setVPremPriceEUR] = useState(DEFAULT_VPREM_PRICE_EUR);
+  const [vStdCredits, setVStdCredits] = useState(DEFAULT_VSTD_CREDITS);
+  const [vPremCredits, setVPremCredits] = useState(DEFAULT_VPREM_CREDITS);
+  const [vStdYearly, setVStdYearly] = useState(500);
+  const [vPremYearly, setVPremYearly] = useState(100);
+
   const totals = useMemo(() => {
+    // ----- Físicas (XAF) -----
     const stdGross = stdPrice * stdYearly;
     const premGross = premPrice * premYearly;
-    const totalGross = stdGross + premGross;
+    const physicalGross = stdGross + premGross;
+
+    // ----- Virtuales (EUR → convertimos a XAF para unificar) -----
+    const vStdGrossEUR = vStdPriceEUR * vStdYearly;
+    const vPremGrossEUR = vPremPriceEUR * vPremYearly;
+    const virtualGrossEUR = vStdGrossEUR + vPremGrossEUR;
+    const vStdGrossXAF = vStdGrossEUR * XAF_PER_EUR;
+    const vPremGrossXAF = vPremGrossEUR * XAF_PER_EUR;
+    const virtualGrossXAF = virtualGrossEUR * XAF_PER_EUR;
+
+    const totalGross = physicalGross + virtualGrossXAF;
 
     const artistPct = artistShare / 100;
     const investorPct = investorShare / 100;
@@ -79,37 +104,59 @@ const SalesSimulator = () => {
 
     const stdArtist = stdGross * artistPct;
     const premArtist = premGross * artistPct;
-    const totalArtist = stdArtist + premArtist;
+    const vStdArtist = vStdGrossXAF * artistPct;
+    const vPremArtist = vPremGrossXAF * artistPct;
+    const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
     const totalInvestor = totalGross * investorPct;
     const totalPlatform = totalGross * platformPct;
 
+    // Las virtuales no tienen costes de producción
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
 
-    const totalUnits = stdYearly + premYearly;
+    const physicalUnits = stdYearly + premYearly;
+    const virtualUnits = vStdYearly + vPremYearly;
+    const totalUnits = physicalUnits + virtualUnits;
+
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
     const monthlyInvestor = totalInvestor / 12;
     const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
-    // Credits / downloads enabled
-    const totalDownloads = stdCredits * stdYearly + premCredits * premYearly;
+    const totalDownloads =
+      stdCredits * stdYearly +
+      premCredits * premYearly +
+      vStdCredits * vStdYearly +
+      vPremCredits * vPremYearly;
     const valuePerDlStd = stdCredits > 0 ? stdPrice / stdCredits : 0;
     const valuePerDlPrem = premCredits > 0 ? premPrice / premCredits : 0;
+    const valuePerDlVStd = vStdCredits > 0 ? vStdPriceEUR / vStdCredits : 0;
+    const valuePerDlVPrem = vPremCredits > 0 ? vPremPriceEUR / vPremCredits : 0;
 
     return {
       stdGross,
       premGross,
+      physicalGross,
+      vStdGrossEUR,
+      vPremGrossEUR,
+      virtualGrossEUR,
+      vStdGrossXAF,
+      vPremGrossXAF,
+      virtualGrossXAF,
       totalGross,
       stdArtist,
       premArtist,
+      vStdArtist,
+      vPremArtist,
       totalArtist,
       totalInvestor,
       totalPlatform,
       totalCosts,
       platformNet,
+      physicalUnits,
+      virtualUnits,
       totalUnits,
       monthlyGross,
       monthlyPlatform,
@@ -119,6 +166,8 @@ const SalesSimulator = () => {
       totalDownloads,
       valuePerDlStd,
       valuePerDlPrem,
+      valuePerDlVStd,
+      valuePerDlVPrem,
     };
   }, [
     stdPrice,
@@ -132,6 +181,12 @@ const SalesSimulator = () => {
     premYearly,
     stdCostXAF,
     premCostXAF,
+    vStdPriceEUR,
+    vPremPriceEUR,
+    vStdCredits,
+    vPremCredits,
+    vStdYearly,
+    vPremYearly,
   ]);
 
   const resetDefaults = () => {
@@ -142,6 +197,10 @@ const SalesSimulator = () => {
     setArtistShare(DEFAULT_ARTIST_SHARE);
     setInvestorShare(DEFAULT_INVESTOR_SHARE);
     setPlatformShare(DEFAULT_PLATFORM_SHARE);
+    setVStdPriceEUR(DEFAULT_VSTD_PRICE_EUR);
+    setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
+    setVStdCredits(DEFAULT_VSTD_CREDITS);
+    setVPremCredits(DEFAULT_VPREM_CREDITS);
   };
 
   return (
@@ -168,9 +227,10 @@ const SalesSimulator = () => {
       {/* Pricing config */}
       <Card>
         <CardHeader>
-          <CardTitle>Configuración de precios y créditos</CardTitle>
+          <CardTitle>Tarjetas físicas (XAF)</CardTitle>
           <CardDescription>
-            Ajusta el precio (XAF), descargas incluidas y reparto del artista.
+            Tarjetas vendidas físicamente con QR / código manual. Precio en francos CFA,
+            con coste opcional de producción por unidad.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -264,135 +324,321 @@ const SalesSimulator = () => {
 
           <Separator />
 
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-1">Reparto de ingresos brutos</h4>
-              <p className="text-xs text-muted-foreground">
-                Ajusta los porcentajes entre artistas, inversor y plataforma. Por defecto:
-                40% artistas, 10% inversor, 50% plataforma.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Bolsa artistas (%)</Label>
-                <span className="text-sm font-semibold">{artistShare}%</span>
-              </div>
-              <Slider
-                value={[artistShare]}
-                onValueChange={(v) => setArtistShare(v[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Inversor (%)</Label>
-                <span className="text-sm font-semibold">{investorShare}%</span>
-              </div>
-              <Slider
-                value={[investorShare]}
-                onValueChange={(v) => setInvestorShare(v[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Plataforma (%)</Label>
-                <span className="text-sm font-semibold">{platformShare}%</span>
-              </div>
-              <Slider
-                value={[platformShare]}
-                onValueChange={(v) => setPlatformShare(v[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
-            </div>
-
-            {(() => {
-              const sum = artistShare + investorShare + platformShare;
-              const ok = sum === 100;
-              return (
-                <div
-                  className={`text-xs px-3 py-2 rounded-md border ${
-                    ok
-                      ? 'bg-muted/40 text-muted-foreground'
-                      : 'bg-destructive/10 text-destructive border-destructive/30'
-                  }`}
-                >
-                  Suma actual: <span className="font-semibold">{sum}%</span>{' '}
-                  {ok ? '✓ correcto' : '— debe sumar 100% para un reparto coherente'}
+          {/* Volumen físicas */}
+          <div>
+            <h4 className="font-semibold mb-3">Volumen anual de tarjetas físicas</h4>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Estándar / año</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={stdYearly}
+                    onChange={(e) => setStdYearly(Number(e.target.value) || 0)}
+                    className="w-32 text-right"
+                  />
                 </div>
-              );
-            })()}
+                <Slider
+                  value={[stdYearly]}
+                  onValueChange={(v) => setStdYearly(v[0])}
+                  min={0}
+                  max={50000}
+                  step={100}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso bruto: <span className="font-semibold">{formatEUR(totals.stdGross)}</span>
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Premium / año</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={premYearly}
+                    onChange={(e) => setPremYearly(Number(e.target.value) || 0)}
+                    className="w-32 text-right"
+                  />
+                </div>
+                <Slider
+                  value={[premYearly]}
+                  onValueChange={(v) => setPremYearly(v[0])}
+                  min={0}
+                  max={20000}
+                  step={50}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso bruto: <span className="font-semibold">{formatEUR(totals.premGross)}</span>
+                </p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Volume config */}
+      {/* Tarjetas virtuales (EUR) */}
       <Card>
         <CardHeader>
-          <CardTitle>Volumen anual estimado</CardTitle>
+          <CardTitle>Tarjetas virtuales (EUR)</CardTitle>
           <CardDescription>
-            Introduce cuántas tarjetas esperas vender al año de cada tipo.
+            Tarjetas digitales vendidas online (Stripe). Precio en euros, sin coste
+            de producción.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Tarjetas Estándar / año</Label>
+            {/* Virtual Standard */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Package className="h-4 w-4" /> Estándar virtual
+              </h3>
+              <div className="space-y-2">
+                <Label>Precio (EUR)</Label>
                 <Input
                   type="number"
                   min={0}
-                  value={stdYearly}
-                  onChange={(e) => setStdYearly(Number(e.target.value) || 0)}
-                  className="w-32 text-right"
+                  step="0.01"
+                  value={vStdPriceEUR}
+                  onChange={(e) => setVStdPriceEUR(Number(e.target.value) || 0)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Equivale a {formatXAFNumber(vStdPriceEUR * XAF_PER_EUR)}
+                </p>
               </div>
-              <Slider
-                value={[stdYearly]}
-                onValueChange={(v) => setStdYearly(v[0])}
-                min={0}
-                max={50000}
-                step={100}
-              />
-              <p className="text-xs text-muted-foreground">
-                Ingreso bruto: <span className="font-semibold">{formatEUR(totals.stdGross)}</span>
-              </p>
+              <div className="space-y-2">
+                <Label>Descargas incluidas</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={vStdCredits}
+                  onChange={(e) => setVStdCredits(Number(e.target.value) || 1)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Valor por descarga:{' '}
+                  {totals.valuePerDlVStd.toLocaleString('es-ES', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{' '}
+                  €
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Tarjetas Premium / año</Label>
+            {/* Virtual Premium */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Package className="h-4 w-4" /> Premium virtual
+              </h3>
+              <div className="space-y-2">
+                <Label>Precio (EUR)</Label>
                 <Input
                   type="number"
                   min={0}
-                  value={premYearly}
-                  onChange={(e) => setPremYearly(Number(e.target.value) || 0)}
-                  className="w-32 text-right"
+                  step="0.01"
+                  value={vPremPriceEUR}
+                  onChange={(e) => setVPremPriceEUR(Number(e.target.value) || 0)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Equivale a {formatXAFNumber(vPremPriceEUR * XAF_PER_EUR)}
+                </p>
               </div>
-              <Slider
-                value={[premYearly]}
-                onValueChange={(v) => setPremYearly(v[0])}
-                min={0}
-                max={20000}
-                step={50}
-              />
-              <p className="text-xs text-muted-foreground">
-                Ingreso bruto: <span className="font-semibold">{formatEUR(totals.premGross)}</span>
-              </p>
+              <div className="space-y-2">
+                <Label>Descargas incluidas</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={vPremCredits}
+                  onChange={(e) => setVPremCredits(Number(e.target.value) || 1)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Valor por descarga:{' '}
+                  {totals.valuePerDlVPrem.toLocaleString('es-ES', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{' '}
+                  €
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Volumen virtuales */}
+          <div>
+            <h4 className="font-semibold mb-3">Volumen anual de tarjetas virtuales</h4>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Estándar virtual / año</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={vStdYearly}
+                    onChange={(e) => setVStdYearly(Number(e.target.value) || 0)}
+                    className="w-32 text-right"
+                  />
+                </div>
+                <Slider
+                  value={[vStdYearly]}
+                  onValueChange={(v) => setVStdYearly(v[0])}
+                  min={0}
+                  max={50000}
+                  step={100}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso bruto:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.vStdGrossEUR)}</span>
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Premium virtual / año</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={vPremYearly}
+                    onChange={(e) => setVPremYearly(Number(e.target.value) || 0)}
+                    className="w-32 text-right"
+                  />
+                </div>
+                <Slider
+                  value={[vPremYearly]}
+                  onValueChange={(v) => setVPremYearly(v[0])}
+                  min={0}
+                  max={20000}
+                  step={50}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso bruto:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.vPremGrossEUR)}</span>
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Reparto global */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Reparto de ingresos brutos</CardTitle>
+          <CardDescription>
+            Aplica al total combinado (físicas + virtuales). Por defecto: 40% artistas,
+            10% inversor, 50% plataforma.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Bolsa artistas (%)</Label>
+              <span className="text-sm font-semibold">{artistShare}%</span>
+            </div>
+            <Slider
+              value={[artistShare]}
+              onValueChange={(v) => setArtistShare(v[0])}
+              min={0}
+              max={100}
+              step={1}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Inversor (%)</Label>
+              <span className="text-sm font-semibold">{investorShare}%</span>
+            </div>
+            <Slider
+              value={[investorShare]}
+              onValueChange={(v) => setInvestorShare(v[0])}
+              min={0}
+              max={100}
+              step={1}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Plataforma (%)</Label>
+              <span className="text-sm font-semibold">{platformShare}%</span>
+            </div>
+            <Slider
+              value={[platformShare]}
+              onValueChange={(v) => setPlatformShare(v[0])}
+              min={0}
+              max={100}
+              step={1}
+            />
+          </div>
+
+          {(() => {
+            const sum = artistShare + investorShare + platformShare;
+            const ok = sum === 100;
+            return (
+              <div
+                className={`text-xs px-3 py-2 rounded-md border ${
+                  ok
+                    ? 'bg-muted/40 text-muted-foreground'
+                    : 'bg-destructive/10 text-destructive border-destructive/30'
+                }`}
+              >
+                Suma actual: <span className="font-semibold">{sum}%</span>{' '}
+                {ok ? '✓ correcto' : '— debe sumar 100% para un reparto coherente'}
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
+      {/* Resumen ingresos por origen */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Package className="h-4 w-4 text-yusiop-primary" />
+              Ingresos físicas / año
+            </CardTitle>
+            <CardDescription>
+              {totals.physicalUnits.toLocaleString('es-ES')} tarjetas físicas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">
+              {formatXAFNumber(totals.physicalGross)}
+            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              ≈ {formatEURNumber(totals.physicalGross)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Package className="h-4 w-4 text-yusiop-primary" />
+              Ingresos virtuales / año
+            </CardTitle>
+            <CardDescription>
+              {totals.virtualUnits.toLocaleString('es-ES')} tarjetas virtuales
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">
+              {totals.virtualGrossEUR.toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{' '}
+              €
+            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              ≈ {formatXAFNumber(totals.virtualGrossXAF)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Investor ROI progress */}
       <InvestorProgress totalInvestorXAF={totals.totalInvestor} />
@@ -441,11 +687,18 @@ const SalesSimulator = () => {
             <CardDescription>Resultados detallados de la simulación.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Ingresos brutos Estándar" value={formatEUR(totals.stdGross)} />
-            <Row label="Ingresos brutos Premium" value={formatEUR(totals.premGross)} />
+            <Row label="Físicas Estándar (XAF)" value={formatEUR(totals.stdGross)} />
+            <Row label="Físicas Premium (XAF)" value={formatEUR(totals.premGross)} />
+            <Row label="Total físicas" value={formatEUR(totals.physicalGross)} bold />
             <Separator />
-            <Row label="Bolsa artistas Estándar" value={formatEUR(totals.stdArtist)} />
-            <Row label="Bolsa artistas Premium" value={formatEUR(totals.premArtist)} />
+            <Row label="Virtuales Estándar (EUR)" value={formatEURRaw(totals.vStdGrossEUR)} />
+            <Row label="Virtuales Premium (EUR)" value={formatEURRaw(totals.vPremGrossEUR)} />
+            <Row label="Total virtuales" value={formatEURRaw(totals.virtualGrossEUR)} bold />
+            <Separator />
+            <Row label="Total combinado" value={formatEUR(totals.totalGross)} bold highlight />
+            <Separator />
+            <Row label="Bolsa artistas físicas" value={formatEUR(totals.stdArtist + totals.premArtist)} />
+            <Row label="Bolsa artistas virtuales" value={formatEUR(totals.vStdArtist + totals.vPremArtist)} />
             <Row
               label={`Total artistas (${artistShare}%)`}
               value={formatEUR(totals.totalArtist)}
@@ -496,14 +749,26 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label="Estándar / mes"
+              label="Físicas Estándar / mes"
               value={`${(stdYearly / 12).toLocaleString('es-ES', {
                 maximumFractionDigits: 1,
               })} tarjetas`}
             />
             <Row
-              label="Premium / mes"
+              label="Físicas Premium / mes"
               value={`${(premYearly / 12).toLocaleString('es-ES', {
+                maximumFractionDigits: 1,
+              })} tarjetas`}
+            />
+            <Row
+              label="Virtuales Estándar / mes"
+              value={`${(vStdYearly / 12).toLocaleString('es-ES', {
+                maximumFractionDigits: 1,
+              })} tarjetas`}
+            />
+            <Row
+              label="Virtuales Premium / mes"
+              value={`${(vPremYearly / 12).toLocaleString('es-ES', {
                 maximumFractionDigits: 1,
               })} tarjetas`}
             />
