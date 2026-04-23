@@ -624,6 +624,30 @@ export type Database = {
           },
         ]
       }
+      staff_permissions: {
+        Row: {
+          area: Database["public"]["Enums"]["staff_area"]
+          created_at: string
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          area: Database["public"]["Enums"]["staff_area"]
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          area?: Database["public"]["Enums"]["staff_area"]
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_balance: {
         Row: {
           created_at: string | null
@@ -920,6 +944,12 @@ export type Database = {
           gift_redeemed: boolean
         }[]
       }
+      get_my_staff_areas: {
+        Args: never
+        Returns: {
+          area: Database["public"]["Enums"]["staff_area"]
+        }[]
+      }
       get_pending_collaborations_for_artist: {
         Args: never
         Returns: {
@@ -937,6 +967,13 @@ export type Database = {
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_staff_area: {
+        Args: {
+          _area: Database["public"]["Enums"]["staff_area"]
           _user_id: string
         }
         Returns: boolean
@@ -1013,6 +1050,13 @@ export type Database = {
       collab_claim_status: "pending" | "approved" | "rejected"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
+      staff_area:
+        | "catalog"
+        | "users"
+        | "artist_requests"
+        | "qr_cards"
+        | "monetization"
+        | "settings"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -1148,6 +1192,14 @@ export const Constants = {
       collab_claim_status: ["pending", "approved", "rejected"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
+      staff_area: [
+        "catalog",
+        "users",
+        "artist_requests",
+        "qr_cards",
+        "monetization",
+        "settings",
+      ],
       user_role: ["user", "admin"],
     },
   },

@@ -2,11 +2,13 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { useStaffAreas } from '@/hooks/useStaffAreas';
 
 const AdminLayout = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const { areas, loading: areasLoading, isSuperAdmin } = useStaffAreas();
 
-  if (loading) {
+  if (loading || areasLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -18,7 +20,8 @@ const AdminLayout = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isAdmin) {
+  // Acceso al panel: super-admin O cualquier área asignada
+  if (!isSuperAdmin && areas.size === 0) {
     return <Navigate to="/" replace />;
   }
 

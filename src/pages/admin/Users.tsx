@@ -43,9 +43,12 @@ import {
   Crown,
   Gift,
   ShoppingBag,
+  KeyRound,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
+import { StaffPermissionsDialog } from '@/components/admin/StaffPermissionsDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserProfile {
   id: string;
@@ -67,6 +70,7 @@ type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purcha
 
 const Users = () => {
   const navigate = useNavigate();
+  const { isAdmin: currentUserIsSuperAdmin } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,6 +78,7 @@ const Users = () => {
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [deletingUser, setDeletingUser] = useState<UserProfile | null>(null);
+  const [permissionsUser, setPermissionsUser] = useState<UserProfile | null>(null);
   const [editForm, setEditForm] = useState({ full_name: '', username: '', downloads_remaining: 0 });
   const [savingEdit, setSavingEdit] = useState(false);
   const { toast } = useToast();
@@ -428,6 +433,16 @@ const Users = () => {
                       <><Shield className="h-4 w-4 mr-1" /> Admin</>
                     )}
                   </Button>
+                  {currentUserIsSuperAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPermissionsUser(user)}
+                      title="Asignar áreas del panel"
+                    >
+                      <KeyRound className="h-4 w-4 mr-1" /> Permisos
+                    </Button>
+                  )}
                   <Button variant="destructive" size="sm" onClick={() => setDeletingUser(user)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -512,6 +527,16 @@ const Users = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {permissionsUser && (
+        <StaffPermissionsDialog
+          open={!!permissionsUser}
+          onOpenChange={(open) => !open && setPermissionsUser(null)}
+          userId={permissionsUser.user_id}
+          username={permissionsUser.username || 'usuario'}
+          isSuperAdmin={permissionsUser.role === 'admin'}
+        />
+      )}
     </div>
   );
 };
