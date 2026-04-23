@@ -16,7 +16,7 @@ import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon } fro
 // Pricing rules (XAF)
 const STANDARD_PRICE_XAF = 3000;
 const STANDARD_CREDITS = 4;
-const PREMIUM_PRICE_XAF = 70000;
+const PREMIUM_PRICE_XAF = 7000;
 const PREMIUM_CREDITS_DEFAULT = 100; // fallback if not specified on card
 const ARTIST_SHARE = 0.4;
 
