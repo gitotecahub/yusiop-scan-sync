@@ -340,6 +340,49 @@ useEffect(() => {
         </div>
       </div>
 
+      {/* Próximos lanzamientos */}
+      {upcoming.length > 0 && !searchTerm && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            <h2 className="font-display text-sm font-bold uppercase tracking-wider">
+              Próximos lanzamientos
+            </h2>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+            {upcoming.map((u) => (
+              <div
+                key={u.id}
+                className="snap-start shrink-0 w-44 rounded-2xl border border-primary/20 bg-card/40 overflow-hidden"
+              >
+                <div className="relative aspect-square bg-muted">
+                  {u.cover_url ? (
+                    <img src={u.cover_url} alt={u.title} className="w-full h-full object-cover blur-[1px] opacity-90" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <span className="inline-block rounded-full bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      Próximamente
+                    </span>
+                  </div>
+                </div>
+                <div className="p-2.5">
+                  <p className="font-display font-bold text-sm truncate">{u.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{u.artist_name}</p>
+                  <p className="text-[10px] text-primary mt-1 tabular-nums">
+                    {formatMadrid(u.scheduled_release_at)} · {timeUntil(u.scheduled_release_at)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Songs List */}
       <div>
 
