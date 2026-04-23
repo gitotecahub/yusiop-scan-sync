@@ -48,11 +48,16 @@ const SalesSimulator = () => {
     const premGross = premPrice * premYearly;
     const totalGross = stdGross + premGross;
 
-    const sharePct = artistShare / 100;
-    const stdArtist = stdGross * sharePct;
-    const premArtist = premGross * sharePct;
+    const artistPct = artistShare / 100;
+    const investorPct = investorShare / 100;
+    const platformPct = platformShare / 100;
+
+    const stdArtist = stdGross * artistPct;
+    const premArtist = premGross * artistPct;
     const totalArtist = stdArtist + premArtist;
-    const totalPlatform = totalGross - totalArtist;
+
+    const totalInvestor = totalGross * investorPct;
+    const totalPlatform = totalGross * platformPct;
 
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
@@ -60,6 +65,8 @@ const SalesSimulator = () => {
     const totalUnits = stdYearly + premYearly;
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
+    const monthlyInvestor = totalInvestor / 12;
+    const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
     // Credits / downloads enabled
