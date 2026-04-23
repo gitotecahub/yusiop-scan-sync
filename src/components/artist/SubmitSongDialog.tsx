@@ -5,17 +5,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type CollabRole = 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
+
+const COLLAB_ROLES: { value: CollabRole; label: string }[] = [
+  { value: 'featuring', label: 'Featuring' },
+  { value: 'producer', label: 'Productor' },
+  { value: 'performer', label: 'Intérprete' },
+  { value: 'composer', label: 'Compositor' },
+  { value: 'remix', label: 'Remix' },
+];
 
 interface CollaboratorRow {
   id?: string; // existing DB id when editing
   artist_name: string;
   share_percent: number;
   is_primary: boolean;
+  role: CollabRole;
 }
+
+/**
+ * Construye el nombre artístico mostrado en catálogo a partir del artista
+ * principal y los colaboradores con rol "featuring".
+ *  - 1 feat:  "Diddyes ft Kanteo"
+ *  - 2 feats: "Diddyes ft Kanteo & Tito Nsue"
+ *  - 3+ feats: "Diddyes ft Kanteo, Tito Nsue & Otro"
+ */
+export const buildDisplayArtist = (
+  primary: string,
+  collaborators: { artist_name: string; is_primary: boolean; role: CollabRole }[],
+): string => {
+  const main = primary.trim();
+  const feats = collaborators
+    .filter(c => !c.is_primary && c.role === 'featuring' && c.artist_name.trim())
+    .map(c => c.artist_name.trim());
+  if (feats.length === 0) return main;
+  if (feats.length === 1) return `${main} ft ${feats[0]}`;
+  const last = feats[feats.length - 1];
+  const head = feats.slice(0, -1).join(', ');
+  return `${main} ft ${head} & ${last}`;
+};
 
 export interface EditingSubmission {
   id: string;
