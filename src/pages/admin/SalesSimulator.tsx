@@ -32,6 +32,8 @@ const SalesSimulator = () => {
   const [stdCredits, setStdCredits] = useState(DEFAULT_STD_CREDITS);
   const [premCredits, setPremCredits] = useState(DEFAULT_PREM_CREDITS);
   const [artistShare, setArtistShare] = useState(DEFAULT_ARTIST_SHARE);
+  const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
+  const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
   // Volume inputs (annual)
   const [stdYearly, setStdYearly] = useState(1000);
