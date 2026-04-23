@@ -33,6 +33,10 @@ interface DownloadedSong {
 }
 
 const Library = () => {
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const initialTab =
+    tabParam === 'cards' || tabParam === 'recent' || tabParam === 'favorites' ? tabParam : 'all';
   const [downloads, setDownloads] = useState<DownloadedSong[]>([]);
   const [favorites, setFavorites] = useState<DownloadedSong[]>([]);
   const [loading, setLoading] = useState(true);
