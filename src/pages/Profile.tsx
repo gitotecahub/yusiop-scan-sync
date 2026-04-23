@@ -22,12 +22,18 @@ import {
   Sun,
   Monitor,
   Clock,
-  Calendar
+  Calendar,
+  Music,
+  CheckCircle2,
+  Hourglass,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
+import { useModeStore } from '@/stores/modeStore';
+import ModeSwitcher from '@/components/ModeSwitcher';
 
 interface ScannedCard {
   id: string;
@@ -43,6 +49,8 @@ interface ScannedCard {
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const { isArtist, artistRequestStatus } = useModeStore();
   const [editing, setEditing] = useState(false);
   const [wifiOnly, setWifiOnly] = useState(true);
   const [notifications, setNotifications] = useState(true);
