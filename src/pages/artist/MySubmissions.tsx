@@ -227,6 +227,25 @@ const MySubmissions = () => {
                     </div>
                   </div>
                 )}
+
+                {r.status === 'approved' && r.scheduled_release_at && (
+                  <div className="mt-3 rounded-md border border-primary/30 bg-primary/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <CalendarClock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="text-sm flex-1">
+                        <p className="font-semibold text-primary">
+                          Lanzamiento programado
+                        </p>
+                        <p className="text-foreground/80 mt-1">
+                          "{r.title}" se publicará automáticamente el{' '}
+                          <strong>{formatMadrid(r.scheduled_release_at)}</strong> (Europa/Madrid)
+                          {' · '}
+                          <span className="text-muted-foreground">{timeUntil(r.scheduled_release_at)}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
