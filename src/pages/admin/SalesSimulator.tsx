@@ -438,7 +438,13 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Plataforma bruto (${100 - artistShare}%)`}
+              label={`Inversor (${investorShare}%)`}
+              value={formatEUR(totals.totalInvestor)}
+              bold
+            />
+            <Separator />
+            <Row
+              label={`Plataforma bruto (${platformShare}%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
             />
