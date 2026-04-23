@@ -12,6 +12,7 @@ import {
   Home,
   Coins,
   Calculator,
+  UserCheck,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -29,6 +30,7 @@ import { useAuth } from '@/hooks/useAuth';
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Usuarios', url: '/admin/users', icon: Users },
+  { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck },
   { title: 'Canciones', url: '/admin/songs', icon: Music },
   { title: 'Álbumes', url: '/admin/albums', icon: Album },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
