@@ -239,21 +239,73 @@ const SalesSimulator = () => {
 
           <Separator />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Reparto del artista (%)</Label>
-              <span className="text-sm font-semibold">{artistShare}%</span>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-1">Reparto de ingresos brutos</h4>
+              <p className="text-xs text-muted-foreground">
+                Ajusta los porcentajes entre artistas, inversor y plataforma. Por defecto:
+                40% artistas, 10% inversor, 50% plataforma.
+              </p>
             </div>
-            <Slider
-              value={[artistShare]}
-              onValueChange={(v) => setArtistShare(v[0])}
-              min={0}
-              max={100}
-              step={1}
-            />
-            <p className="text-xs text-muted-foreground">
-              Plataforma se queda con el {100 - artistShare}% de los ingresos brutos.
-            </p>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Bolsa artistas (%)</Label>
+                <span className="text-sm font-semibold">{artistShare}%</span>
+              </div>
+              <Slider
+                value={[artistShare]}
+                onValueChange={(v) => setArtistShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Inversor (%)</Label>
+                <span className="text-sm font-semibold">{investorShare}%</span>
+              </div>
+              <Slider
+                value={[investorShare]}
+                onValueChange={(v) => setInvestorShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Plataforma (%)</Label>
+                <span className="text-sm font-semibold">{platformShare}%</span>
+              </div>
+              <Slider
+                value={[platformShare]}
+                onValueChange={(v) => setPlatformShare(v[0])}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            {(() => {
+              const sum = artistShare + investorShare + platformShare;
+              const ok = sum === 100;
+              return (
+                <div
+                  className={`text-xs px-3 py-2 rounded-md border ${
+                    ok
+                      ? 'bg-muted/40 text-muted-foreground'
+                      : 'bg-destructive/10 text-destructive border-destructive/30'
+                  }`}
+                >
+                  Suma actual: <span className="font-semibold">{sum}%</span>{' '}
+                  {ok ? '✓ correcto' : '— debe sumar 100% para un reparto coherente'}
+                </div>
+              );
+            })()}
           </div>
         </CardContent>
       </Card>
