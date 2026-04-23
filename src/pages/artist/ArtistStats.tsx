@@ -191,13 +191,32 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Ingresos estimados</p>
+                    <p className="text-xs text-muted-foreground">Ingresos estimados (tu parte)</p>
                     <p className="text-2xl font-bold">{formatEuros(stats.totals.total_revenue_cents)}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Pool pendiente de colaboraciones */}
+          {stats.pool_pending && stats.pool_pending.pending_revenue_cents > 0 && (
+            <Card className="mb-6 border-primary/40 bg-primary/5">
+              <CardContent className="p-5 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pendiente en pozo común (sin reclamar)</p>
+                    <p className="text-xl font-bold">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} descargas afectadas</p>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => navigate('/artist/collaborations')}>
+                  Ir a reclamar
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Evolución 30 días */}
           <Card className="mb-6">
