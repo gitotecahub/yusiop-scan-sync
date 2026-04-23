@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useCreditsStore } from '@/stores/creditsStore';
 import { qrCodeSchema } from '@/lib/validation';
+import DigitalCard from '@/components/DigitalCard';
 
 const QRScanner = () => {
   const [manualCode, setManualCode] = useState('');
@@ -325,22 +326,22 @@ const QRScanner = () => {
         </div>
       </div>
 
-      {/* Card types — gradient cards */}
+      {/* Card types — tarjetas reales de muestra */}
       <div>
         <p className="eyebrow mb-3">Tipos de tarjeta</p>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="blob-card blob-card-aurora p-5">
-            <p className="font-display text-lg font-bold">Estándar</p>
-            <p className="text-[11px] text-foreground/70 mt-1 mb-4">Para descubrir</p>
-            <p className="display-xl text-4xl">04</p>
-            <p className="eyebrow mt-1">descargas</p>
-          </div>
-          <div className="blob-card blob-card-sunset p-5">
-            <p className="font-display text-lg font-bold vapor-text">Premium</p>
-            <p className="text-[11px] text-foreground/70 mt-1 mb-4">Para fanáticos</p>
-            <p className="display-xl text-4xl vapor-text">10</p>
-            <p className="eyebrow mt-1">descargas</p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DigitalCard
+            code="YUSIOP-DEMO-A7K9X2"
+            cardType="standard"
+            downloadCredits={4}
+            qrValue="YUSIOP-DEMO-STANDARD"
+          />
+          <DigitalCard
+            code="YUSIOP-DEMO-B3R7D9"
+            cardType="premium"
+            downloadCredits={10}
+            qrValue="YUSIOP-DEMO-PREMIUM"
+          />
         </div>
       </div>
     </div>
