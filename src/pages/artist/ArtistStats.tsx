@@ -270,7 +270,10 @@ const ArtistStats = () => {
                             <span className="truncate font-medium">{s.song_title}</span>
                           </div>
                           <div className="flex items-center gap-3 shrink-0 ml-3">
-                            <span className="text-xs text-muted-foreground">{formatEuros(s.revenue_cents)}</span>
+                            <span className="flex flex-col items-end leading-tight">
+                              <span className="text-xs text-muted-foreground tabular-nums">{formatEuros(s.revenue_cents)}</span>
+                              <span className="text-[10px] text-muted-foreground/70 tabular-nums">{formatXaf(s.revenue_cents)}</span>
+                            </span>
                             <Badge variant="secondary">{s.downloads}</Badge>
                           </div>
                         </div>
