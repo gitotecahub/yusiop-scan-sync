@@ -69,12 +69,16 @@ const MyCards = () => {
   };
 
   useEffect(() => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let userId: string | null = null;
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setLoading(false);
         return;
       }
+      userId = user.id;
       const { data, error } = await supabase
         .from('qr_cards')
         .select('id, code, card_type, download_credits, origin, is_gift, created_at')
@@ -87,7 +91,29 @@ const MyCards = () => {
       }
       setLoading(false);
     };
-    load();
+
+    const setupRealtime = () => {
+      if (!userId) return;
+      channel = supabase
+        .channel(`my-cards-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'qr_cards', filter: `owner_user_id=eq.${userId}` },
+          () => load()
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'qr_cards', filter: `activated_by=eq.${userId}` },
+          () => load()
+        )
+        .subscribe();
+    };
+
+    load().then(setupRealtime);
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
 
   if (loading) {
