@@ -65,12 +65,57 @@ const SongSubmissions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
+  const sendEmailNotification = async (
+    template: 'song-approved' | 'song-rejected',
+    row: SubmissionRow,
+    extra: Record<string, any> = {},
+  ) => {
+    try {
+      // Buscar email del usuario
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', row.user_id)
+        .maybeSingle();
+      if (!profile) return;
+      // Email vía edge function admin-helper: buscamos email en auth via RPC indirecta
+      // En su lugar leemos public.users que sí tiene email para usuarios sincronizados
+      const { data: u } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', row.user_id)
+        .maybeSingle();
+      const recipient = u?.email;
+      if (!recipient) {
+        console.warn('No se encontró email para enviar notificación', row.user_id);
+        return;
+      }
+      const appUrl = window.location.origin;
+      await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: template,
+          recipientEmail: recipient,
+          idempotencyKey: `${template}-${row.id}`,
+          templateData: {
+            songTitle: row.title,
+            artistName: row.artist_name,
+            appUrl,
+            ...extra,
+          },
+        },
+      });
+    } catch (e) {
+      console.error('Error enviando email', e);
+    }
+  };
+
   const approve = async (row: SubmissionRow) => {
     const { data, error } = await supabase.rpc('approve_song_submission', { p_submission_id: row.id });
     if (error) return toast.error(error.message);
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
+      sendEmailNotification('song-approved', row);
       load();
     } else {
       toast.error(result?.message ?? 'Error');
