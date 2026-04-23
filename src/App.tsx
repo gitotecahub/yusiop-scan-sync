@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from 'react';
 
 // Pages
@@ -17,6 +17,9 @@ import Store from '@/pages/Store';
 import Redeem from '@/pages/Redeem';
 import Unsubscribe from '@/pages/Unsubscribe';
 import NotFound from "./pages/NotFound";
+import ProfileSelection from '@/pages/ProfileSelection';
+import ArtistRequest from '@/pages/ArtistRequest';
+import ArtistDashboard from '@/pages/artist/ArtistDashboard';
 
 // Admin Pages
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -30,6 +33,7 @@ import Downloads from '@/pages/admin/Downloads';
 import Monetization from '@/pages/admin/Monetization';
 import SalesSimulator from '@/pages/admin/SalesSimulator';
 import Settings from '@/pages/admin/Settings';
+import ArtistRequests from '@/pages/admin/ArtistRequests';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -38,12 +42,14 @@ import SplashScreen from '@/components/SplashScreen';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
+import { useModeStore } from '@/stores/modeStore';
 import { AuthProvider } from '@/hooks/useAuth';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { session, initialize } = useAuthStore();
+  const { session, user, initialize } = useAuthStore();
+  const { loadForUser, profileChoiceMade, mode, loading: modeLoading, reset } = useModeStore();
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -51,16 +57,20 @@ const AppContent = () => {
   }, [initialize]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
-
+    const timer = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
-  if (showSplash) {
-    return <SplashScreen />;
-  }
+  // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra
+  useEffect(() => {
+    if (user?.id) {
+      loadForUser(user.id);
+    } else {
+      reset();
+    }
+  }, [user?.id, loadForUser, reset]);
+
+  if (showSplash) return <SplashScreen />;
 
   return (
     <Routes>
@@ -76,6 +86,7 @@ const AppContent = () => {
         <Route path="monetization" element={<Monetization />} />
         <Route path="simulator" element={<SalesSimulator />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="artist-requests" element={<ArtistRequests />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -86,7 +97,29 @@ const AppContent = () => {
       <Route path="/*" element={
         !session ? (
           <Auth />
+        ) : modeLoading ? (
+          <SplashScreen />
+        ) : !profileChoiceMade ? (
+          // Tras registro: pantalla de elección de perfil
+          <Routes>
+            <Route path="/artist/request" element={<ArtistRequest />} />
+            <Route path="*" element={<ProfileSelection />} />
+          </Routes>
+        ) : mode === 'artist' ? (
+          // Modo artista
+          <Routes>
+            <Route path="/artist" element={<ArtistDashboard />} />
+            <Route path="/artist/request" element={<ArtistRequest />} />
+            <Route path="/profile" element={
+              <Layout>
+                <AudioPlayer />
+                <Profile />
+              </Layout>
+            } />
+            <Route path="*" element={<Navigate to="/artist" replace />} />
+          </Routes>
         ) : (
+          // Modo usuario (por defecto)
           <Layout>
             <AudioPlayer />
             <Routes>
@@ -96,6 +129,7 @@ const AppContent = () => {
               <Route path="/library" element={<Library />} />
               <Route path="/store" element={<Store />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/artist/request" element={<ArtistRequest />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
