@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { toast } from 'sonner';
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 interface PendingCollab {
   collaborator_id: string;
