@@ -6,17 +6,25 @@ import { Gift, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import DigitalCard from '@/components/DigitalCard';
+
+type RedeemResult = {
+  success: boolean;
+  message?: string;
+  card_id: string;
+  card_type: 'standard' | 'premium';
+  download_credits: number;
+};
 
 const Redeem = () => {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { session } = useAuthStore();
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState<null | { credits: number; type: string }>(null);
+  const [done, setDone] = useState<RedeemResult | null>(null);
 
   useEffect(() => {
     if (!session && token) {
-      // Guardar token para tras login
       sessionStorage.setItem('pending_gift_token', token);
       navigate('/auth?redirect=/redeem/' + token, { replace: true });
     }
@@ -30,15 +38,14 @@ const Redeem = () => {
         body: { token },
       });
       if (error) throw error;
-      const result = data?.result;
+      const result = data?.result as RedeemResult | undefined;
       if (!result?.success) {
         toast.error(result?.message ?? 'No se pudo canjear');
         return;
       }
       sessionStorage.removeItem('pending_gift_token');
-      toast.success(`¡Tarjeta ${result.card_type} activada! ${result.download_credits} descargas añadidas.`);
-      navigate('/catalog', { replace: true });
-      return;
+      toast.success(`¡Tarjeta ${result.card_type} activada!`);
+      setDone(result);
     } catch (e: any) {
       toast.error(e?.message ?? 'Error al canjear');
     } finally {
@@ -49,7 +56,7 @@ const Redeem = () => {
   if (!session) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -64,12 +71,22 @@ const Redeem = () => {
         <CardContent className="space-y-4 text-center">
           {done ? (
             <>
-              <p className="text-muted-foreground">
-                Tarjeta {done.type} con {done.credits} descargas añadida a tu cuenta.
+              <DigitalCard
+                code={done.card_id}
+                cardType={done.card_type}
+                downloadCredits={done.download_credits}
+                isGift
+                celebrate
+              />
+              <p className="text-muted-foreground text-sm">
+                {done.download_credits} descargas añadidas a tu cuenta.
               </p>
-              <Button className="w-full" onClick={() => navigate('/library')}>
-                Ir a mi biblioteca
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => navigate('/profile')}>
+                  Ver mis tarjetas
+                </Button>
+                <Button onClick={() => navigate('/library')}>Ir a biblioteca</Button>
+              </div>
             </>
           ) : (
             <>
