@@ -212,30 +212,6 @@ const ArtistRequest = () => {
         </div>
 
         <div>
-          <Label className="eyebrow">Género musical</Label>
-          <Input
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            maxLength={60}
-            className="rounded-2xl h-11 mt-2"
-            placeholder="Indie, electrónica, hip-hop…"
-          />
-        </div>
-
-        <div>
-          <Label className="eyebrow">Biografía</Label>
-          <Textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            maxLength={800}
-            rows={4}
-            className="rounded-2xl mt-2"
-            placeholder="Cuéntanos sobre tu proyecto…"
-          />
-          <p className="text-xs text-muted-foreground mt-1">{bio.length}/800</p>
-        </div>
-
-        <div>
           <Label className="eyebrow">Email de contacto *</Label>
           <Input
             type="email"
