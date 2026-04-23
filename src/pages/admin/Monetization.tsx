@@ -391,7 +391,7 @@ const Monetization = () => {
       </Card>
 
       {/* KPI cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Descargas totales</CardDescription>
@@ -421,10 +421,19 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Plataforma (60%)</CardDescription>
+            <CardDescription>Yusiop (50%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalPlatform)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Inversor (10%)</CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-yusiop-primary" />
+              {formatEUR(totals.totalInvestor)}
             </CardTitle>
           </CardHeader>
         </Card>
