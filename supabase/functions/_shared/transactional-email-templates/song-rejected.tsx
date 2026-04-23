@@ -165,3 +165,13 @@ const footer: React.CSSProperties = {
   textAlign: 'center',
   lineHeight: '1.5',
 }
+const listStyle: React.CSSProperties = {
+  margin: '4px 0 0',
+  paddingLeft: '20px',
+  color: '#0F172A',
+  fontSize: '15px',
+  lineHeight: '1.6',
+}
+const listItem: React.CSSProperties = {
+  marginBottom: '4px',
+}
