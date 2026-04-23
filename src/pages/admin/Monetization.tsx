@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/table';
 import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon } from 'lucide-react';
 
-// Pricing rules (XAF)
+// Pricing rules (XAF base, displayed in EUR using fixed CFA peg)
+const XAF_PER_EUR = 655.957; // fixed parity
 const STANDARD_PRICE_XAF = 3000;
 const STANDARD_CREDITS = 4;
 const PREMIUM_PRICE_XAF = 7000;
@@ -22,8 +23,11 @@ const ARTIST_SHARE = 0.4;
 
 const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_XAF / STANDARD_CREDITS; // 750 XAF
 
-const formatXAF = (n: number) =>
-  `${Math.round(n).toLocaleString('es-ES')} XAF`;
+const formatEUR = (xaf: number) =>
+  `${(xaf / XAF_PER_EUR).toLocaleString('es-ES', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} €`;
 
 interface DownloadRow {
   song_id: string;
