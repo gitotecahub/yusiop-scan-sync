@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2 } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2, Send, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogAction,
