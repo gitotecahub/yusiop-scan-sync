@@ -137,7 +137,11 @@ const MySubmissions = () => {
       ) : (
         <div className="grid gap-3">
           {rows.map((r) => (
-            <Card key={r.id} className={r.status === 'rejected' ? 'border-destructive/40' : ''}>
+            <Card key={r.id} className={
+              r.status === 'rejected' || r.status === 'removed'
+                ? 'border-destructive/40'
+                : ''
+            }>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-md bg-muted overflow-hidden flex-shrink-0">
@@ -198,6 +202,23 @@ const MySubmissions = () => {
                     </div>
                   );
                 })()}
+
+                {r.status === 'removed' && (
+                  <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <Ban className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                      <div className="text-sm flex-1">
+                        <p className="font-semibold text-destructive">
+                          Tu canción ha sido eliminada del catálogo de Yusiop
+                        </p>
+                        <p className="text-foreground/80 mt-1">
+                          El equipo de administración ha retirado "{r.title}" del catálogo.
+                          Si necesitas más información, ponte en contacto con soporte.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
