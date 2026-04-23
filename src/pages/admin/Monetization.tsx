@@ -101,7 +101,7 @@ const Monetization = () => {
     }
     if (cardType === 'premium') {
       const c = credits > 0 ? credits : PREMIUM_CREDITS_DEFAULT;
-      return PREMIUM_PRICE_XAF / c;
+      return PREMIUM_PRICE_EUR / c;
     }
     // default standard
     return STANDARD_PER_DOWNLOAD;
@@ -264,8 +264,8 @@ const Monetization = () => {
         <CardHeader>
           <CardTitle className="text-base">Reglas de precio</CardTitle>
           <CardDescription>
-            Estándar: {formatEUR(STANDARD_PRICE_XAF)} ({STANDARD_CREDITS} descargas →{' '}
-            {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_XAF)} —
+            Estándar: {formatEUR(STANDARD_PRICE_EUR)} ({STANDARD_CREDITS} descargas →{' '}
+            {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_EUR)} —
             valor por descarga calculado según los créditos de cada tarjeta. Artista: 40% por descarga.
           </CardDescription>
         </CardHeader>
