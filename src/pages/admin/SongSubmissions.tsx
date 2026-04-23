@@ -65,12 +65,32 @@ const SongSubmissions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
+  const sendEmailNotification = async (
+    kind: 'approved' | 'rejected',
+    row: SubmissionRow,
+    reason?: string,
+  ) => {
+    try {
+      await supabase.functions.invoke('notify-song-review', {
+        body: {
+          submission_id: row.id,
+          kind,
+          reason,
+          app_url: window.location.origin,
+        },
+      });
+    } catch (e) {
+      console.error('Error enviando email', e);
+    }
+  };
+
   const approve = async (row: SubmissionRow) => {
     const { data, error } = await supabase.rpc('approve_song_submission', { p_submission_id: row.id });
     if (error) return toast.error(error.message);
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
+      sendEmailNotification('approved', row);
       load();
     } else {
       toast.error(result?.message ?? 'Error');
@@ -89,14 +109,16 @@ const SongSubmissions = () => {
       toast.error('Indica un motivo de rechazo');
       return;
     }
+    const reason = rejectReason.trim();
     const { data, error } = await supabase.rpc('reject_song_submission', {
       p_submission_id: rejectTarget.id,
-      p_reason: rejectReason.trim(),
+      p_reason: reason,
     });
     if (error) return toast.error(error.message);
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
+      sendEmailNotification('rejected', rejectTarget, reason);
       setRejectOpen(false);
       load();
     } else {

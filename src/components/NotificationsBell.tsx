@@ -102,6 +102,12 @@ const NotificationsBell = () => {
     setOpen(false);
     if (n.type === 'gift_received' && n.data?.redemption_token) {
       navigate(`/redeem/${n.data.redemption_token}`);
+    } else if (n.type === 'song_submission_rejected' && n.data?.submission_id) {
+      navigate(`/artist/submissions?edit=${n.data.submission_id}`);
+    } else if (n.type === 'song_submission_approved') {
+      navigate('/artist/submissions');
+    } else if (n.type === 'artist_request_approved') {
+      navigate('/artist');
     }
     load();
   };

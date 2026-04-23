@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,25 +9,48 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 
+export interface EditingSubmission {
+  id: string;
+  title: string;
+  artist_name: string;
+  album_title: string | null;
+  genre: string | null;
+  release_date: string | null;
+  track_url: string;
+  track_path: string | null;
+  preview_url: string | null;
+  preview_path: string | null;
+  cover_url: string | null;
+  cover_path: string | null;
+  duration_seconds: number;
+}
+
 interface SubmitSongDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultArtistName?: string;
   onSubmitted?: () => void;
+  editing?: EditingSubmission | null;
 }
 
 interface FormState {
   title: string;
   artist_name: string;
   album_title: string;
+  genre: string;
+  release_date: string;
 }
 
-const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmitted }: SubmitSongDialogProps) => {
+const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmitted, editing = null }: SubmitSongDialogProps) => {
   const { user } = useAuthStore();
+  const isEdit = !!editing;
+
   const [formData, setFormData] = useState<FormState>({
     title: '',
     artist_name: defaultArtistName,
     album_title: '',
+    genre: '',
+    release_date: '',
   });
 
   const [trackFile, setTrackFile] = useState<File | null>(null);
@@ -40,13 +63,31 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const previewInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  const reset = () => {
-    setFormData({ title: '', artist_name: defaultArtistName, album_title: '' });
+  // Inicializar/precargar campos al abrir
+  useEffect(() => {
+    if (!open) return;
+    if (editing) {
+      setFormData({
+        title: editing.title,
+        artist_name: editing.artist_name,
+        album_title: editing.album_title ?? '',
+        genre: editing.genre ?? '',
+        release_date: editing.release_date ?? '',
+      });
+    } else {
+      setFormData({
+        title: '',
+        artist_name: defaultArtistName,
+        album_title: '',
+        genre: '',
+        release_date: '',
+      });
+    }
     setTrackFile(null);
     setPreviewFile(null);
     setCoverFile(null);
     setProgress(0);
-  };
+  }, [open, editing, defaultArtistName]);
 
   const getAudioDuration = (file: File): Promise<number> =>
     new Promise((resolve, reject) => {
@@ -96,55 +137,97 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (!user) return toast.error('Debes iniciar sesión'), false;
     if (!formData.title.trim()) return toast.error('El título es requerido'), false;
     if (!formData.artist_name.trim()) return toast.error('El nombre del artista es requerido'), false;
-    if (!trackFile) return toast.error('Debes subir el archivo de audio completo'), false;
+    if (!isEdit && !trackFile) return toast.error('Debes subir el archivo de audio completo'), false;
     return true;
   };
 
   const handleSubmit = async () => {
-    if (!validate() || !user || !trackFile) return;
+    if (!validate() || !user) return;
     setUploading(true);
     setProgress(0);
     try {
-      const duration = await getAudioDuration(trackFile);
-      setProgress(10);
-
       const ts = Date.now();
       const safe = formData.title.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       const folder = user.id;
 
-      const trackUp = await uploadFile(trackFile, `${folder}/${ts}_${safe}_full.${trackFile.name.split('.').pop()}`);
-      setProgress(50);
-
+      let duration = editing?.duration_seconds ?? 0;
+      let trackUp: { path: string; url: string } | null = null;
       let preview: { path: string; url: string } | null = null;
+      let cover: { path: string; url: string } | null = null;
+
+      if (trackFile) {
+        duration = await getAudioDuration(trackFile);
+        setProgress(10);
+        trackUp = await uploadFile(trackFile, `${folder}/${ts}_${safe}_full.${trackFile.name.split('.').pop()}`);
+        setProgress(50);
+      }
+
       if (previewFile) {
         preview = await uploadFile(previewFile, `${folder}/${ts}_${safe}_preview.${previewFile.name.split('.').pop()}`);
         setProgress(70);
       }
 
-      let cover: { path: string; url: string } | null = null;
       if (coverFile) {
         cover = await uploadFile(coverFile, `${folder}/${ts}_${safe}_cover.${coverFile.name.split('.').pop()}`);
         setProgress(85);
       }
 
-      const { error: dbError } = await supabase.from('song_submissions').insert({
-        user_id: user.id,
-        title: formData.title.trim(),
-        artist_name: formData.artist_name.trim(),
-        album_title: formData.album_title.trim() || null,
-        duration_seconds: duration,
-        track_url: trackUp.url,
-        track_path: trackUp.path,
-        preview_url: preview?.url ?? null,
-        preview_path: preview?.path ?? null,
-        cover_url: cover?.url ?? null,
-        cover_path: cover?.path ?? null,
-      });
-      if (dbError) throw dbError;
+      if (isEdit && editing) {
+        // Construir update: si no se subieron archivos nuevos, mantener los existentes
+        const update: Record<string, any> = {
+          title: formData.title.trim(),
+          artist_name: formData.artist_name.trim(),
+          album_title: formData.album_title.trim() || null,
+          genre: formData.genre.trim() || null,
+          release_date: formData.release_date || null,
+          duration_seconds: duration,
+          // Reset estado a pendiente y limpiar motivo
+          status: 'pending',
+          rejection_reason: null,
+          reviewed_at: null,
+          reviewed_by: null,
+        };
+        if (trackUp) {
+          update.track_url = trackUp.url;
+          update.track_path = trackUp.path;
+        }
+        if (preview) {
+          update.preview_url = preview.url;
+          update.preview_path = preview.path;
+        }
+        if (cover) {
+          update.cover_url = cover.url;
+          update.cover_path = cover.path;
+        }
+        const { error: dbError } = await supabase
+          .from('song_submissions')
+          .update(update)
+          .eq('id', editing.id);
+        if (dbError) throw dbError;
+        setProgress(100);
+        toast.success('Envío actualizado y reenviado a revisión');
+      } else {
+        if (!trackUp) throw new Error('Falta archivo de audio');
+        const { error: dbError } = await supabase.from('song_submissions').insert({
+          user_id: user.id,
+          title: formData.title.trim(),
+          artist_name: formData.artist_name.trim(),
+          album_title: formData.album_title.trim() || null,
+          genre: formData.genre.trim() || null,
+          release_date: formData.release_date || null,
+          duration_seconds: duration,
+          track_url: trackUp.url,
+          track_path: trackUp.path,
+          preview_url: preview?.url ?? null,
+          preview_path: preview?.path ?? null,
+          cover_url: cover?.url ?? null,
+          cover_path: cover?.path ?? null,
+        });
+        if (dbError) throw dbError;
+        setProgress(100);
+        toast.success('Canción enviada a revisión');
+      }
 
-      setProgress(100);
-      toast.success('Canción enviada a revisión');
-      reset();
       onOpenChange(false);
       onSubmitted?.();
     } catch (err: any) {
@@ -161,10 +244,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Music className="h-5 w-5" />
-            Enviar canción a revisión
+            {isEdit ? 'Editar y reenviar canción' : 'Enviar canción a revisión'}
           </DialogTitle>
           <DialogDescription>
-            Tu canción será revisada por la administración antes de publicarse en el catálogo.
+            {isEdit
+              ? 'Corrige los datos y/o archivos. Al guardar volverá al estado "en revisión".'
+              : 'Tu canción será revisada por la administración antes de publicarse en el catálogo.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -192,6 +277,28 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="genre">Género musical</Label>
+              <Input
+                id="genre"
+                value={formData.genre}
+                onChange={(e) => setFormData((p) => ({ ...p, genre: e.target.value }))}
+                placeholder="Pop, Rock, Reggaetón…"
+                maxLength={60}
+              />
+            </div>
+            <div>
+              <Label htmlFor="release_date">Fecha de lanzamiento</Label>
+              <Input
+                id="release_date"
+                type="date"
+                value={formData.release_date}
+                onChange={(e) => setFormData((p) => ({ ...p, release_date: e.target.value }))}
+              />
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="album">Álbum (opcional)</Label>
             <Input
@@ -205,9 +312,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
 
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Archivos</h3>
+            {isEdit && (
+              <p className="text-xs text-muted-foreground">
+                Solo necesitas volver a subir los archivos que quieras reemplazar.
+              </p>
+            )}
 
             <div>
-              <Label>Audio completo *</Label>
+              <Label>Audio completo {!isEdit && '*'}</Label>
               <input
                 ref={trackInputRef}
                 type="file"
@@ -222,7 +334,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                 className="w-full mt-2"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {trackFile ? `Seleccionado: ${trackFile.name}` : 'Seleccionar audio (MP3/WAV/M4A)'}
+                {trackFile
+                  ? `Seleccionado: ${trackFile.name}`
+                  : isEdit
+                    ? 'Reemplazar audio (opcional)'
+                    : 'Seleccionar audio (MP3/WAV/M4A)'}
               </Button>
             </div>
 
@@ -271,7 +387,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4" />
-                <span className="text-sm">Enviando…</span>
+                <span className="text-sm">{isEdit ? 'Guardando…' : 'Enviando…'}</span>
               </div>
               <Progress value={progress} />
             </div>
@@ -282,8 +398,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={uploading || !formData.title || !formData.artist_name || !trackFile}>
-            {uploading ? 'Enviando…' : 'Enviar a revisión'}
+          <Button
+            onClick={handleSubmit}
+            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile)}
+          >
+            {uploading ? 'Guardando…' : isEdit ? 'Guardar y reenviar' : 'Enviar a revisión'}
           </Button>
         </DialogFooter>
       </DialogContent>

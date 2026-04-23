@@ -408,11 +408,13 @@ export type Database = {
           cover_url: string | null
           created_at: string
           duration_seconds: number
+          genre: string | null
           id: string
           preview_path: string | null
           preview_url: string | null
           published_song_id: string | null
           rejection_reason: string | null
+          release_date: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["song_submission_status"]
@@ -429,11 +431,13 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds?: number
+          genre?: string | null
           id?: string
           preview_path?: string | null
           preview_url?: string | null
           published_song_id?: string | null
           rejection_reason?: string | null
+          release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
@@ -450,11 +454,13 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds?: number
+          genre?: string | null
           id?: string
           preview_path?: string | null
           preview_url?: string | null
           published_song_id?: string | null
           rejection_reason?: string | null
+          release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
