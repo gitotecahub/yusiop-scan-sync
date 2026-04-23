@@ -594,6 +594,8 @@ const Monetization = () => {
             </div>
           </div>
         </CardContent>
+      </Card>
+
       {/* Songs revenue */}
       <Card>
         <CardHeader>
