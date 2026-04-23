@@ -105,13 +105,13 @@ const SongSubmissions = () => {
     setApproveOpen(true);
   };
 
-  const confirmApprove = async (releaseAtIso: string | null) => {
+  const confirmApprove = async (releaseAtIso: string | null): Promise<void> => {
     if (!approveTarget) return;
     const { data, error } = await supabase.rpc('approve_song_submission_scheduled', {
       p_submission_id: approveTarget.id,
       p_release_at: releaseAtIso,
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     const result = (data as any)?.[0];
     if (result?.success) {
       toast.success(result.message);
