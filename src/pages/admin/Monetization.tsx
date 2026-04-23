@@ -485,14 +485,18 @@ const Monetization = () => {
                   <p className="text-xl font-semibold">{formatEUR(card.data.gross)}</p>
                 </div>
                 <div className="rounded-md border p-3">
-                  <p className="text-xs text-muted-foreground">Bolsa artistas (40%)</p>
+                  <p className="text-xs text-muted-foreground">Artistas (40%)</p>
                   <p className="text-xl font-semibold text-yusiop-primary">
                     {formatEUR(card.data.artist)}
                   </p>
                 </div>
                 <div className="rounded-md border p-3">
-                  <p className="text-xs text-muted-foreground">Plataforma (60%)</p>
+                  <p className="text-xs text-muted-foreground">Yusiop (50%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.platform)}</p>
+                </div>
+                <div className="rounded-md border p-3 col-span-2">
+                  <p className="text-xs text-muted-foreground">Inversor (10%)</p>
+                  <p className="text-xl font-semibold">{formatEUR(card.data.investor)}</p>
                 </div>
               </div>
             </CardContent>
