@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -21,6 +21,8 @@ import PlaybackControls from '@/components/PlaybackControls';
 import MyCards from '@/components/MyCards';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface DownloadedSong {
   id: string;
@@ -47,6 +49,12 @@ const Library = () => {
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkShareOpen, setBulkShareOpen] = useState(false);
+  const [bulkRecipient, setBulkRecipient] = useState('');
+  const [bulkProcessing, setBulkProcessing] = useState(false);
   const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
@@ -207,6 +215,132 @@ const Library = () => {
     setSongToShare(song);
   };
 
+  const toggleSelectionMode = () => {
+    setSelectionMode((prev) => {
+      if (prev) setSelectedIds(new Set());
+      return !prev;
+    });
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAllVisible = (ids: string[]) => {
+    setSelectedIds((prev) => {
+      const allSelected = ids.every((id) => prev.has(id));
+      if (allSelected) {
+        const next = new Set(prev);
+        ids.forEach((id) => next.delete(id));
+        return next;
+      }
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Debes iniciar sesión');
+        return;
+      }
+      const ids = Array.from(selectedIds);
+      const { error } = await supabase
+        .from('user_downloads')
+        .delete()
+        .eq('user_id', user.id)
+        .in('song_id', ids);
+
+      if (error) {
+        console.error('Bulk delete error:', error);
+        toast.error('No se pudieron eliminar todas las canciones');
+        return;
+      }
+
+      if (currentSong && ids.includes(currentSong.id)) stop();
+
+      setDownloads((prev) => prev.filter((s) => !selectedIds.has(s.id)));
+      setFavorites((prev) => prev.filter((s) => !selectedIds.has(s.id)));
+      toast.success(`${ids.length} ${ids.length === 1 ? 'canción eliminada' : 'canciones eliminadas'}`);
+      setSelectedIds(new Set());
+      setSelectionMode(false);
+      setBulkDeleteOpen(false);
+    } catch (err) {
+      console.error('Bulk delete failed:', err);
+      toast.error('Ocurrió un error al eliminar');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const confirmBulkShare = async () => {
+    if (selectedIds.size === 0) return;
+    const username = bulkRecipient.trim().replace(/^@/, '');
+    if (!username) {
+      toast.error('Escribe el username del destinatario');
+      return;
+    }
+    if (username.length > 50) {
+      toast.error('Username demasiado largo');
+      return;
+    }
+
+    setBulkProcessing(true);
+    const ids = Array.from(selectedIds);
+    let successCount = 0;
+    const failed: string[] = [];
+
+    try {
+      for (const id of ids) {
+        const { data, error } = await supabase.rpc('transfer_song_to_user', {
+          p_song_id: id,
+          p_recipient_username: username,
+        });
+        const result = Array.isArray(data) ? data[0] : data;
+        if (error || !result?.success) {
+          failed.push(id);
+        } else {
+          successCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        const transferredIds = ids.filter((id) => !failed.includes(id));
+        if (currentSong && transferredIds.includes(currentSong.id)) stop();
+        setDownloads((prev) => prev.filter((s) => !transferredIds.includes(s.id)));
+        setFavorites((prev) => prev.filter((s) => !transferredIds.includes(s.id)));
+      }
+
+      if (failed.length === 0) {
+        toast.success(`${successCount} ${successCount === 1 ? 'canción enviada' : 'canciones enviadas'} a @${username}`);
+      } else if (successCount > 0) {
+        toast.warning(`${successCount} enviadas, ${failed.length} fallaron`);
+      } else {
+        toast.error('No se pudo enviar ninguna canción');
+      }
+
+      setSelectedIds(new Set());
+      setSelectionMode(false);
+      setBulkShareOpen(false);
+      setBulkRecipient('');
+    } catch (err) {
+      console.error('Bulk share failed:', err);
+      toast.error('Ocurrió un error al compartir');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
   const confirmShare = async () => {
     if (!songToShare) return;
     const username = recipientUsername.trim().replace(/^@/, '');
@@ -266,29 +400,65 @@ const Library = () => {
       );
     }
 
+    const visibleIds = songs.map((s) => s.id);
+    const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
     return (
       <div className="space-y-2">
+        {selectionMode && (
+          <button
+            type="button"
+            onClick={() => selectAllVisible(visibleIds)}
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors px-1 py-1"
+          >
+            {allVisibleSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+            {allVisibleSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
+          </button>
+        )}
         {songs.map((song, idx) => {
           const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+          const isSelected = selectedIds.has(song.id);
 
           return (
-            <div key={song.id} className="flex items-center gap-3 p-2.5 pr-3 rounded-2xl bg-card/40 border border-border transition-colors">
-              <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
-                {String(idx + 1).padStart(2, '0')}
-              </span>
+            <div
+              key={song.id}
+              onClick={selectionMode ? () => toggleSelected(song.id) : undefined}
+              className={cn(
+                'flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-colors',
+                selectionMode && 'cursor-pointer',
+                isSelected
+                  ? 'bg-primary/10 border-primary/50 shadow-glow'
+                  : 'bg-card/40 border-border'
+              )}
+            >
+              {selectionMode ? (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={() => toggleSelected(song.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="shrink-0"
+                  aria-label={isSelected ? 'Deseleccionar' : 'Seleccionar'}
+                />
+              ) : (
+                <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+              )}
               <div className="relative shrink-0 group">
                 <img
                   src={song.cover_url}
                   alt={`${song.title} cover`}
                   className="w-12 h-12 object-cover rounded-xl"
                 />
-                <Button
-                  size="sm"
-                  onClick={() => handlePlay(song)}
-                  className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
-                >
-                  {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
-                </Button>
+                {!selectionMode && (
+                  <Button
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handlePlay(song); }}
+                    className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+                  >
+                    {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
+                  </Button>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -300,6 +470,7 @@ const Library = () => {
                 </div>
               </div>
 
+              {!selectionMode && (
               <div className="flex items-center shrink-0">
                 <Button
                   size="icon"
@@ -327,6 +498,7 @@ const Library = () => {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+              )}
             </div>
           );
         })}
@@ -351,13 +523,38 @@ const Library = () => {
   return (
     <div className="space-y-6 pb-32">
       {/* Header */}
-      <div>
-        <h1 className="display-xl text-4xl">
-          Biblioteca
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Tu colección personal, lista para sonar.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="display-xl text-4xl">
+            Biblioteca
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+            Tu colección personal, lista para sonar.
+          </p>
+        </div>
+        {downloads.length > 0 && (
+          <Button
+            variant={selectionMode ? 'default' : 'outline'}
+            size="sm"
+            onClick={toggleSelectionMode}
+            className={cn(
+              'rounded-full shrink-0',
+              selectionMode && 'vapor-bg text-primary-foreground border-0 shadow-glow'
+            )}
+          >
+            {selectionMode ? (
+              <>
+                <X className="h-4 w-4 mr-1.5" />
+                Cancelar
+              </>
+            ) : (
+              <>
+                <CheckSquare className="h-4 w-4 mr-1.5" />
+                Seleccionar
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Stats — blob cards */}
@@ -436,7 +633,40 @@ const Library = () => {
         </TabsContent>
       </Tabs>
 
-      <PlaybackControls />
+      {!selectionMode && <PlaybackControls />}
+
+      {/* Barra de acciones múltiples */}
+      {selectionMode && (
+        <div className="fixed bottom-[88px] left-3 right-3 z-40">
+          <div className="max-w-md mx-auto glass-strong shadow-vapor rounded-2xl p-3 flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow vapor-text mb-0.5">Selección</p>
+              <p className="font-display font-bold text-sm text-foreground">
+                {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={selectedIds.size === 0}
+              onClick={() => { setBulkRecipient(''); setBulkShareOpen(true); }}
+              className="rounded-full"
+            >
+              <Send className="h-4 w-4 mr-1.5" />
+              Enviar
+            </Button>
+            <Button
+              size="sm"
+              disabled={selectedIds.size === 0}
+              onClick={() => setBulkDeleteOpen(true)}
+              className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Borrar
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
         <AlertDialogContent>
@@ -455,6 +685,73 @@ const Library = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Diálogo borrado en lote */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkDeleteOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Las canciones seleccionadas desaparecerán de tu biblioteca para siempre
+              y perderás los créditos de descarga utilizados. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmBulkDelete(); }}
+              disabled={bulkProcessing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkProcessing ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Diálogo envío en lote */}
+      <AlertDialog open={bulkShareOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkShareOpen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Las canciones seleccionadas <span className="font-semibold text-foreground">cambiarán de biblioteca</span>:
+              dejarán la tuya y entrarán en la del destinatario. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="bulk-recipient-username">Username del destinatario</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
+              <Input
+                id="bulk-recipient-username"
+                value={bulkRecipient}
+                onChange={(e) => setBulkRecipient(e.target.value.replace(/^@/, ''))}
+                placeholder="usuario"
+                className="pl-7"
+                maxLength={50}
+                autoFocus
+                disabled={bulkProcessing}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !bulkProcessing) {
+                    e.preventDefault();
+                    confirmBulkShare();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmBulkShare(); }}
+              disabled={bulkProcessing || !bulkRecipient.trim()}
+            >
+              {bulkProcessing ? 'Enviando...' : 'Enviar'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
