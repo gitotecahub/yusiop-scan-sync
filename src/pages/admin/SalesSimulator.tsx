@@ -370,7 +370,7 @@ const SalesSimulator = () => {
       </Card>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Tarjetas vendidas / año</CardDescription>
@@ -400,7 +400,16 @@ const SalesSimulator = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Plataforma ({100 - artistShare}%)</CardDescription>
+            <CardDescription>Inversor ({investorShare}%)</CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-yusiop-primary" />
+              {formatEUR(totals.totalInvestor)}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Plataforma ({platformShare}%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalPlatform)}
