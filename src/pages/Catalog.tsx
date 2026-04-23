@@ -139,6 +139,16 @@ const Catalog = () => {
         
         // Cargar canciones descargadas
         await loadDownloadedSongs();
+
+        // Cargar próximos lanzamientos
+        const { data: upcomingData } = await supabase.rpc('get_upcoming_releases');
+        setUpcoming(((upcomingData ?? []) as any[]).map((u) => ({
+          id: u.id,
+          title: u.title,
+          artist_name: u.artist_name,
+          cover_url: u.cover_url,
+          scheduled_release_at: u.scheduled_release_at,
+        })));
       } catch (error) {
         console.error('Error:', error);
       } finally {
