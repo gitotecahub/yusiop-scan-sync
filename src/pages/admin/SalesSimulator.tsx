@@ -468,7 +468,7 @@ const SalesSimulator = () => {
               value={formatEUR(totals.totalPlatform)}
               bold
             />
-            <Row label="Costes de producción" value={`- ${formatEUR(totals.totalCosts)}`} />
+            <Row label="Costes de producción" value={<>− {formatEUR(totals.totalCosts)}</>} />
             <Row
               label="Plataforma neto"
               value={formatEUR(totals.platformNet)}
