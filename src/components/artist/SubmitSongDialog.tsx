@@ -544,7 +544,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                   ? `Seleccionado: ${trackFile.name}`
                   : isEdit
                     ? 'Reemplazar audio (opcional)'
-                    : 'Seleccionar audio (MP3/WAV/M4A)'}
+                    : 'Seleccionar audio (MP3 o WAV)'}
               </Button>
             </div>
 
