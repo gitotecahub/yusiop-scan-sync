@@ -26,7 +26,8 @@ interface Notification {
 }
 
 const NotificationsBell = () => {
-  const { session } = useAuthStore();
+  const { session, user } = useAuthStore();
+  const { mode, isArtist, setMode } = useModeStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
