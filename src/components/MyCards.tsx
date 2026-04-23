@@ -319,6 +319,17 @@ const MyCards = () => {
                   )}
                 </div>
 
+                {selected.download_credits > 0 && (
+                  <Button
+                    onClick={() => setGiftOpen(true)}
+                    variant="outline"
+                    className="w-full h-11 gap-2 mt-2 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
+                  >
+                    <Gift className="h-4 w-4" />
+                    Regalar esta tarjeta
+                  </Button>
+                )}
+
                 {selected.download_credits <= 0 && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -349,6 +360,98 @@ const MyCards = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo de confirmación de regalo */}
+      <Dialog
+        open={giftOpen}
+        onOpenChange={(open) => {
+          if (!gifting) {
+            setGiftOpen(open);
+            if (!open) {
+              setGiftUsername('');
+              setGiftMessage('');
+            }
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Gift className="h-5 w-5 text-primary" />
+              Regalar tarjeta
+            </DialogTitle>
+            <DialogDescription>
+              La tarjeta pasará a la biblioteca del destinatario y dejará de estar en la tuya.
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selected && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted/40 p-3 text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tarjeta</span>
+                  <span className="font-semibold capitalize">{selected.card_type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Descargas</span>
+                  <span className="font-semibold text-primary">{selected.download_credits}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gift-username">Username del destinatario</Label>
+                <Input
+                  id="gift-username"
+                  placeholder="@username"
+                  value={giftUsername}
+                  onChange={(e) => setGiftUsername(e.target.value)}
+                  disabled={gifting}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="gift-message">Mensaje (opcional)</Label>
+                <Textarea
+                  id="gift-message"
+                  placeholder="¡Para que disfrutes la música!"
+                  value={giftMessage}
+                  onChange={(e) => setGiftMessage(e.target.value.slice(0, 280))}
+                  disabled={gifting}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {giftMessage.length}/280
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => setGiftOpen(false)}
+              disabled={gifting}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleGift} disabled={gifting || !giftUsername.trim()} className="gap-2">
+              {gifting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Confirmar regalo
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
