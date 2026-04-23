@@ -14,8 +14,6 @@ import { toast } from 'sonner';
 
 const schema = z.object({
   artist_name: z.string().trim().min(2, 'Nombre demasiado corto').max(80),
-  bio: z.string().trim().max(800).optional().or(z.literal('')),
-  genre: z.string().trim().max(60).optional().or(z.literal('')),
   contact_email: z.string().trim().email('Email inválido').max(255),
   links: z.string().trim().max(500).optional().or(z.literal('')),
 });
@@ -31,8 +29,6 @@ const ArtistRequest = () => {
   const { artistRequestStatus, isArtist, loadForUser } = useModeStore();
 
   const [artistName, setArtistName] = useState('');
-  const [bio, setBio] = useState('');
-  const [genre, setGenre] = useState('');
   const [contactEmail, setContactEmail] = useState(user?.email ?? '');
   const [links, setLinks] = useState('');
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
@@ -99,8 +95,6 @@ const ArtistRequest = () => {
     if (!user) return;
     const parsed = schema.safeParse({
       artist_name: artistName,
-      bio,
-      genre,
       contact_email: contactEmail,
       links,
     });
@@ -124,8 +118,8 @@ const ArtistRequest = () => {
       const { error } = await supabase.from('artist_requests').insert([{
         user_id: user.id,
         artist_name: parsed.data.artist_name,
-        bio: parsed.data.bio || null,
-        genre: parsed.data.genre || null,
+        bio: null,
+        genre: null,
         contact_email: parsed.data.contact_email,
         links: linkArray as any,
         document_urls: docs as any,
@@ -185,7 +179,7 @@ const ArtistRequest = () => {
 
       <h1 className="display-xl text-3xl mb-2">Solicitar perfil de artista</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Completa la información y sube documentos que acrediten tu identidad como artista (DNI, contratos, ficha de sello, prensa…). La administración revisará tu solicitud.
+        Completa la información y sube un documento que acredite tu identidad (DNI, NIE o pasaporte). La administración revisará tu solicitud.
       </p>
 
       {existingRequest?.status === 'rejected' && (
@@ -218,30 +212,6 @@ const ArtistRequest = () => {
         </div>
 
         <div>
-          <Label className="eyebrow">Género musical</Label>
-          <Input
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            maxLength={60}
-            className="rounded-2xl h-11 mt-2"
-            placeholder="Indie, electrónica, hip-hop…"
-          />
-        </div>
-
-        <div>
-          <Label className="eyebrow">Biografía</Label>
-          <Textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            maxLength={800}
-            rows={4}
-            className="rounded-2xl mt-2"
-            placeholder="Cuéntanos sobre tu proyecto…"
-          />
-          <p className="text-xs text-muted-foreground mt-1">{bio.length}/800</p>
-        </div>
-
-        <div>
           <Label className="eyebrow">Email de contacto *</Label>
           <Input
             type="email"
@@ -267,7 +237,7 @@ const ArtistRequest = () => {
         <div>
           <Label className="eyebrow">Documentos de verificación *</Label>
           <p className="text-xs text-muted-foreground mt-1 mb-2">
-            PDF o imágenes. Máximo 5 archivos, 10 MB cada uno.
+            Sube tu DNI, NIE o pasaporte (foto o PDF). Máximo 5 archivos, 10 MB cada uno.
           </p>
 
           <input
