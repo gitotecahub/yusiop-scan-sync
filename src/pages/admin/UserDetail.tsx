@@ -250,10 +250,11 @@ const UserDetail = () => {
                         <p className="text-xs text-muted-foreground">{formatDate(p.created_at)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{formatEur(p.amount_cents)}</p>
+                        <p className="font-semibold leading-tight">{formatEur(p.amount_cents)}</p>
+                        <p className="text-[10px] text-muted-foreground/80 tabular-nums">{formatXaf(p.amount_cents)}</p>
                         <Badge
                           variant={p.status === 'paid' ? 'default' : 'secondary'}
-                          className="text-xs"
+                          className="text-xs mt-1"
                         >
                           {p.status}
                         </Badge>
