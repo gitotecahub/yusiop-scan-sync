@@ -232,6 +232,56 @@ export type Database = {
         }
         Relationships: []
       }
+      collaboration_claims: {
+        Row: {
+          claimant_artist_name: string
+          claimant_user_id: string
+          collaborator_id: string
+          created_at: string
+          id: string
+          message: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["collab_claim_status"]
+          updated_at: string
+        }
+        Insert: {
+          claimant_artist_name: string
+          claimant_user_id: string
+          collaborator_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["collab_claim_status"]
+          updated_at?: string
+        }
+        Update: {
+          claimant_artist_name?: string
+          claimant_user_id?: string
+          collaborator_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["collab_claim_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaboration_claims_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "song_collaborators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_redemptions: {
         Row: {
           id: string
@@ -403,6 +453,45 @@ export type Database = {
           price_cents?: number | null
           purchase_id?: string | null
           redemption_token?: string | null
+        }
+        Relationships: []
+      }
+      song_collaborators: {
+        Row: {
+          artist_name: string
+          claimed_at: string | null
+          claimed_by_user_id: string | null
+          created_at: string
+          id: string
+          is_primary: boolean
+          share_percent: number
+          song_id: string | null
+          submission_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          artist_name: string
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          share_percent: number
+          song_id?: string | null
+          submission_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          artist_name?: string
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          share_percent?: number
+          song_id?: string | null
+          submission_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -806,6 +895,13 @@ export type Database = {
           success: boolean
         }[]
       }
+      claim_collaboration: {
+        Args: { p_collaborator_id: string; p_message?: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -822,6 +918,20 @@ export type Database = {
           code: string
           download_credits: number
           gift_redeemed: boolean
+        }[]
+      }
+      get_pending_collaborations_for_artist: {
+        Args: never
+        Returns: {
+          artist_name: string
+          collaborator_id: string
+          downloads: number
+          estimated_revenue_cents: number
+          has_pending_claim: boolean
+          share_percent: number
+          song_cover_url: string
+          song_id: string
+          song_title: string
         }[]
       }
       has_role: {
@@ -851,6 +961,13 @@ export type Database = {
       }
       reject_song_submission: {
         Args: { p_reason?: string; p_submission_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
+      resolve_collaboration_claim: {
+        Args: { p_approve: boolean; p_claim_id: string; p_reason?: string }
         Returns: {
           message: string
           success: boolean
@@ -893,6 +1010,7 @@ export type Database = {
       artist_request_status: "pending" | "approved" | "rejected"
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
+      collab_claim_status: "pending" | "approved" | "rejected"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
       user_role: "user" | "admin"
@@ -1027,6 +1145,7 @@ export const Constants = {
       artist_request_status: ["pending", "approved", "rejected"],
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
+      collab_claim_status: ["pending", "approved", "rejected"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
       user_role: ["user", "admin"],
