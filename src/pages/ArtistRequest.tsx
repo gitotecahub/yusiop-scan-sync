@@ -144,7 +144,13 @@ const ArtistRequest = () => {
         <div className="blob-card p-6 text-center space-y-4">
           <CheckCircle2 className="h-12 w-12 text-primary mx-auto" />
           <h2 className="font-display text-2xl font-bold">Ya eres artista en Yusiop</h2>
-          <Button onClick={() => navigate('/artist')} className="rounded-full vapor-bg">
+          <Button
+            onClick={async () => {
+              if (user) await useModeStore.getState().setMode(user.id, 'artist');
+              navigate('/artist');
+            }}
+            className="rounded-full vapor-bg"
+          >
             Ir al panel de artista
           </Button>
         </div>
