@@ -1,21 +1,29 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
-import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
+import SubmitSongDialog, { type EditingSubmission } from '@/components/artist/SubmitSongDialog';
 
 interface SubmissionRow {
   id: string;
   title: string;
   artist_name: string;
   album_title: string | null;
+  genre: string | null;
+  release_date: string | null;
   status: 'pending' | 'approved' | 'rejected';
   rejection_reason: string | null;
   cover_url: string | null;
+  cover_path: string | null;
+  preview_url: string | null;
+  preview_path: string | null;
+  track_url: string;
+  track_path: string | null;
+  duration_seconds: number;
   created_at: string;
   reviewed_at: string | null;
 }
@@ -23,17 +31,19 @@ interface SubmissionRow {
 const MySubmissions = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [defaultName, setDefaultName] = useState('');
+  const [editing, setEditing] = useState<EditingSubmission | null>(null);
 
   const load = async () => {
     if (!user) return;
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,status,rejection_reason,cover_url,created_at,reviewed_at')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,created_at,reviewed_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setRows((data ?? []) as SubmissionRow[]);
@@ -58,13 +68,51 @@ const MySubmissions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Deep link: si llega ?edit=<submission_id> abrir el editor cuando carguen las filas
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (!editId || rows.length === 0) return;
+    const target = rows.find((r) => r.id === editId);
+    if (target) {
+      handleEdit(target);
+      // limpiar para no reabrir al volver
+      searchParams.delete('edit');
+      setSearchParams(searchParams, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, searchParams]);
+
+  const handleEdit = (r: SubmissionRow) => {
+    setEditing({
+      id: r.id,
+      title: r.title,
+      artist_name: r.artist_name,
+      album_title: r.album_title,
+      genre: r.genre,
+      release_date: r.release_date,
+      track_url: r.track_url,
+      track_path: r.track_path,
+      preview_url: r.preview_url,
+      preview_path: r.preview_path,
+      cover_url: r.cover_url,
+      cover_path: r.cover_path,
+      duration_seconds: r.duration_seconds,
+    });
+    setOpen(true);
+  };
+
+  const handleNew = () => {
+    setEditing(null);
+    setOpen(true);
+  };
+
   return (
     <div className="min-h-screen p-6 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
           <ArrowLeft className="h-4 w-4 mr-2" /> Panel artista
         </Button>
-        <Button onClick={() => setOpen(true)}>
+        <Button onClick={handleNew}>
           <Plus className="h-4 w-4 mr-2" /> Subir música
         </Button>
       </div>
@@ -82,41 +130,59 @@ const MySubmissions = () => {
       ) : rows.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Aún no has enviado ninguna canción. Pulsa “Subir música” para empezar.
+            Aún no has enviado ninguna canción. Pulsa "Subir música" para empezar.
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-3">
           {rows.map((r) => (
-            <Card key={r.id}>
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-md bg-muted overflow-hidden flex-shrink-0">
-                  {r.cover_url ? (
-                    <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover" />
-                  ) : null}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold truncate">{r.title}</h3>
-                    {r.status === 'pending' && (
-                      <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
-                    )}
-                    {r.status === 'approved' && (
-                      <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
-                    )}
-                    {r.status === 'rejected' && (
-                      <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
-                    )}
+            <Card key={r.id} className={r.status === 'rejected' ? 'border-destructive/40' : ''}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-md bg-muted overflow-hidden flex-shrink-0">
+                    {r.cover_url ? (
+                      <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover" />
+                    ) : null}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {r.artist_name}{r.album_title ? ` · ${r.album_title}` : ''} · {new Date(r.created_at).toLocaleString('es-ES')}
-                  </p>
-                  {r.status === 'rejected' && r.rejection_reason && (
-                    <p className="text-xs text-destructive mt-2">
-                      <span className="font-semibold">Motivo:</span> {r.rejection_reason}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold truncate">{r.title}</h3>
+                      {r.status === 'pending' && (
+                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
+                      )}
+                      {r.status === 'approved' && (
+                        <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                      )}
+                      {r.status === 'rejected' && (
+                        <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {r.artist_name}
+                      {r.album_title ? ` · ${r.album_title}` : ''}
+                      {r.genre ? ` · ${r.genre}` : ''}
+                      {' · '}
+                      {new Date(r.created_at).toLocaleString('es-ES')}
                     </p>
+                  </div>
+                  {r.status === 'rejected' && (
+                    <Button size="sm" onClick={() => handleEdit(r)} className="flex-shrink-0">
+                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> Editar y reenviar
+                    </Button>
                   )}
                 </div>
+
+                {r.status === 'rejected' && r.rejection_reason && (
+                  <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-destructive">Motivo a corregir</p>
+                        <p className="text-foreground/80 mt-0.5">{r.rejection_reason}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -128,6 +194,7 @@ const MySubmissions = () => {
         onOpenChange={setOpen}
         defaultArtistName={defaultName}
         onSubmitted={load}
+        editing={editing}
       />
     </div>
   );
