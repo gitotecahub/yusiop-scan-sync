@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -26,6 +26,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const menuItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
@@ -46,6 +47,39 @@ export function AdminSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
   const currentPath = location.pathname;
+  const [pendingArtistCount, setPendingArtistCount] = useState(0);
+
+  const loadPendingCount = async () => {
+    const { count } = await supabase
+      .from('artist_requests')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    setPendingArtistCount(count ?? 0);
+  };
+
+  useEffect(() => {
+    loadPendingCount();
+
+    const channel = supabase
+      .channel('artist-requests-pending')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'artist_requests' },
+        () => loadPendingCount()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Reload when navigating to the artist requests page (in case admin reviewed some)
+  useEffect(() => {
+    if (currentPath.startsWith('/admin/artist-requests')) {
+      loadPendingCount();
+    }
+  }, [currentPath]);
 
   const isActive = (path: string) => {
     if (path === '/admin') {
@@ -76,16 +110,34 @@ export function AdminSidebar() {
           <SidebarGroupLabel>Gestión</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls(item.url)}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isArtistRequests = item.url === '/admin/artist-requests';
+                const showBadge = isArtistRequests && pendingArtistCount > 0;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url} className={getNavCls(item.url)}>
+                        <div className="relative mr-2">
+                          <item.icon className="h-4 w-4" />
+                          {showBadge && collapsed && (
+                            <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+                          )}
+                        </div>
+                        {!collapsed && (
+                          <span className="flex-1 flex items-center justify-between gap-2">
+                            <span>{item.title}</span>
+                            {showBadge && (
+                              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                                {pendingArtistCount > 99 ? '99+' : pendingArtistCount}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
