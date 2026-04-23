@@ -8,6 +8,7 @@ interface Song {
   preview_url?: string;
   track_url?: string;
   cover_url?: string;
+  preview_start_seconds?: number;
 }
 
 interface PlayerState {

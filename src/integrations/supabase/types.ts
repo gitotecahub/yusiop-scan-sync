@@ -411,6 +411,7 @@ export type Database = {
           genre: string | null
           id: string
           preview_path: string | null
+          preview_start_seconds: number
           preview_url: string | null
           published_song_id: string | null
           rejection_reason: string | null
@@ -434,6 +435,7 @@ export type Database = {
           genre?: string | null
           id?: string
           preview_path?: string | null
+          preview_start_seconds?: number
           preview_url?: string | null
           published_song_id?: string | null
           rejection_reason?: string | null
@@ -457,6 +459,7 @@ export type Database = {
           genre?: string | null
           id?: string
           preview_path?: string | null
+          preview_start_seconds?: number
           preview_url?: string | null
           published_song_id?: string | null
           rejection_reason?: string | null
@@ -480,6 +483,7 @@ export type Database = {
           created_at: string
           duration_seconds: number
           id: string
+          preview_start_seconds: number
           preview_url: string | null
           title: string
           track_url: string | null
@@ -491,6 +495,7 @@ export type Database = {
           created_at?: string
           duration_seconds: number
           id?: string
+          preview_start_seconds?: number
           preview_url?: string | null
           title: string
           track_url?: string | null
@@ -502,6 +507,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           id?: string
+          preview_start_seconds?: number
           preview_url?: string | null
           title?: string
           track_url?: string | null
