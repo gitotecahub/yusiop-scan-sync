@@ -21,6 +21,7 @@ import ProfileSelection from '@/pages/ProfileSelection';
 import ArtistRequest from '@/pages/ArtistRequest';
 import ArtistDashboard from '@/pages/artist/ArtistDashboard';
 import MySubmissions from '@/pages/artist/MySubmissions';
+import ArtistStats from '@/pages/artist/ArtistStats';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
 
 // Admin Pages
@@ -113,6 +114,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/artist" element={<ArtistDashboard />} />
             <Route path="/artist/submissions" element={<MySubmissions />} />
+            <Route path="/artist/stats" element={<ArtistStats />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
             <Route path="/profile" element={
               <Layout>
