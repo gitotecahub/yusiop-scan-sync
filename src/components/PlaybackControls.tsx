@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { Slider } from '@/components/ui/slider';
 import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const PlaybackControls = () => {
   const {
@@ -11,6 +14,67 @@ const PlaybackControls = () => {
     play, pause, setPosition
   } = usePlayerStore();
   const [open, setOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  // Cargar estado de favorito cuando cambia la canción
+  useEffect(() => {
+    let cancelled = false;
+    const loadFavorite = async () => {
+      if (!currentSong?.id) {
+        setIsFavorite(false);
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        if (!cancelled) setIsFavorite(false);
+        return;
+      }
+      const { data } = await supabase
+        .from('user_favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('song_id', currentSong.id)
+        .maybeSingle();
+      if (!cancelled) setIsFavorite(!!data);
+    };
+    loadFavorite();
+    return () => { cancelled = true; };
+  }, [currentSong?.id]);
+
+  const toggleFavorite = async () => {
+    if (!currentSong?.id || favoriteLoading) return;
+    setFavoriteLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Inicia sesión para guardar favoritos');
+        return;
+      }
+      if (isFavorite) {
+        const { error } = await supabase
+          .from('user_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('song_id', currentSong.id);
+        if (error) throw error;
+        setIsFavorite(false);
+        toast.success('Eliminado de favoritos');
+      } else {
+        const { error } = await supabase
+          .from('user_favorites')
+          .insert({ user_id: user.id, song_id: currentSong.id });
+        if (error) throw error;
+        setIsFavorite(true);
+        toast.success('Añadido a favoritos');
+      }
+    } catch (e: any) {
+      console.error('toggle favorite failed', e);
+      toast.error('No se pudo actualizar el favorito');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
 
   if (!currentSong) return null;
 
@@ -127,10 +191,16 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted/40 text-primary shrink-0"
-              aria-label="Favorito"
+              onClick={toggleFavorite}
+              disabled={favoriteLoading}
+              className={cn(
+                "h-9 w-9 rounded-full hover:bg-muted/40 shrink-0 transition-colors",
+                isFavorite ? "text-destructive" : "text-primary"
+              )}
+              aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+              aria-pressed={isFavorite}
             >
-              <Heart className="h-5 w-5" />
+              <Heart className={cn("h-5 w-5 transition-all", isFavorite && "fill-current")} />
             </Button>
           </div>
 
