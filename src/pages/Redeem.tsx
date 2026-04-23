@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -149,10 +149,12 @@ const Redeem = () => {
         {/* Acciones */}
         {done ? (
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={() => navigate('/profile')}>
-              Ver mis tarjetas
+            <Button asChild variant="outline">
+              <Link to="/profile">Ver mis tarjetas</Link>
             </Button>
-            <Button onClick={() => navigate('/catalog')}>Ir al catálogo</Button>
+            <Button asChild>
+              <Link to="/catalog">Ir al catálogo</Link>
+            </Button>
           </div>
         ) : (
           <Button
