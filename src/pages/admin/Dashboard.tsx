@@ -318,6 +318,7 @@ const Dashboard = () => {
 const KpiCard = ({
   title,
   value,
+  subValue,
   icon: Icon,
   hint,
   loading,
@@ -325,6 +326,7 @@ const KpiCard = ({
 }: {
   title: string;
   value: string;
+  subValue?: string;
   icon: any;
   hint?: string;
   loading?: boolean;
@@ -336,7 +338,10 @@ const KpiCard = ({
       <Icon className={`h-4 w-4 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{loading ? '—' : value}</div>
+      <div className="text-2xl font-bold leading-tight">{loading ? '—' : value}</div>
+      {!loading && subValue && (
+        <div className="text-xs text-muted-foreground/80 tabular-nums mt-0.5">{subValue}</div>
+      )}
       {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
     </CardContent>
   </Card>
