@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import DigitalCard from '@/components/DigitalCard';
 
+type CardType = 'standard' | 'premium';
+
 type RedeemResult = {
   success: boolean;
   message?: string;
   card_id: string;
-  card_type: 'standard' | 'premium';
+  card_type: CardType;
   download_credits: number;
+};
+
+type GiftPreview = {
+  code: string;
+  card_type: CardType;
+  download_credits: number;
+  gift_redeemed: boolean;
 };
 
 const Redeem = () => {
@@ -21,14 +29,41 @@ const Redeem = () => {
   const navigate = useNavigate();
   const { session } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(true);
+  const [preview, setPreview] = useState<GiftPreview | null>(null);
   const [done, setDone] = useState<RedeemResult | null>(null);
 
+  // Redirige a auth si no hay sesión
   useEffect(() => {
     if (!session && token) {
       sessionStorage.setItem('pending_gift_token', token);
       navigate('/auth?redirect=/redeem/' + token, { replace: true });
     }
   }, [session, token, navigate]);
+
+  // Cargar preview de la tarjeta a partir del token
+  useEffect(() => {
+    if (!session || !token) return;
+    let active = true;
+    (async () => {
+      setPreviewLoading(true);
+      const { data, error } = await supabase
+        .from('qr_cards')
+        .select('code, card_type, download_credits, gift_redeemed')
+        .eq('redemption_token', token)
+        .maybeSingle();
+      if (!active) return;
+      if (error || !data) {
+        toast.error('Tarjeta no encontrada o token inválido');
+      } else {
+        setPreview(data as GiftPreview);
+      }
+      setPreviewLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [session, token]);
 
   const handleRedeem = async () => {
     if (!token) return;
@@ -55,51 +90,86 @@ const Redeem = () => {
 
   if (!session) return null;
 
+  // Datos a mostrar en la DigitalCard (preview o resultado)
+  const cardData = done
+    ? {
+        code: done.card_id,
+        cardType: done.card_type,
+        credits: done.download_credits,
+      }
+    : preview
+      ? {
+          code: preview.code,
+          cardType: preview.card_type,
+          credits: preview.download_credits,
+        }
+      : null;
+
+  const alreadyRedeemed = !done && preview?.gift_redeemed;
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="w-full max-w-md space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
             {done ? (
-              <Check className="h-8 w-8 text-primary" />
+              <Check className="h-7 w-7 text-primary" />
             ) : (
-              <Gift className="h-8 w-8 text-primary" />
+              <Sparkles className="h-7 w-7 text-primary" />
             )}
           </div>
-          <CardTitle>{done ? '¡Tarjeta activada!' : 'Tienes un regalo'}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          {done ? (
-            <>
-              <DigitalCard
-                code={done.card_id}
-                cardType={done.card_type}
-                downloadCredits={done.download_credits}
-                isGift
-                celebrate
-              />
-              <p className="text-muted-foreground text-sm">
-                {done.download_credits} descargas añadidas a tu cuenta.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" onClick={() => navigate('/profile')}>
-                  Ver mis tarjetas
-                </Button>
-                <Button onClick={() => navigate('/library')}>Ir a biblioteca</Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-muted-foreground">
-                Canjea tu tarjeta YUSIOP para empezar a descargar música.
-              </p>
-              <Button className="w-full" onClick={handleRedeem} disabled={loading}>
-                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Canjear ahora'}
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+          <h1 className="text-2xl font-display font-black">
+            {done ? '¡Tarjeta activada!' : 'Tienes un regalo'}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {done
+              ? `${done.download_credits} descargas añadidas a tu cuenta.`
+              : alreadyRedeemed
+                ? 'Esta tarjeta ya fue canjeada anteriormente.'
+                : 'Esta es tu tarjeta YUSIOP. Canjéala para empezar a descargar música.'}
+          </p>
+        </div>
+
+        {/* Tarjeta digital con confeti */}
+        <div className="relative">
+          {previewLoading && !done ? (
+            <div className="aspect-[1.586/1] rounded-[28px] bg-muted/40 animate-pulse" />
+          ) : cardData ? (
+            <DigitalCard
+              code={cardData.code}
+              cardType={cardData.cardType}
+              downloadCredits={cardData.credits}
+              isGift
+              celebrate={!alreadyRedeemed}
+            />
+          ) : null}
+        </div>
+
+        {/* Acciones */}
+        {done ? (
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={() => navigate('/profile')}>
+              Ver mis tarjetas
+            </Button>
+            <Button onClick={() => navigate('/library')}>Ir a biblioteca</Button>
+          </div>
+        ) : (
+          <Button
+            className="w-full h-12 text-base font-semibold"
+            onClick={handleRedeem}
+            disabled={loading || previewLoading || alreadyRedeemed}
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : alreadyRedeemed ? (
+              'Tarjeta ya canjeada'
+            ) : (
+              'Canjear ahora'
+            )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
