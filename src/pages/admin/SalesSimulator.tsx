@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,19 +8,33 @@ import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase }
 
 // Currency
 const XAF_PER_EUR = 655.957;
-const formatXAF = (xaf: number) =>
+const formatXAFNumber = (xaf: number) =>
   `${Math.round(xaf).toLocaleString('es-ES')} XAF`;
-const formatEUROnly = (xaf: number) =>
+const formatEURNumber = (xaf: number) =>
   `${(xaf / XAF_PER_EUR).toLocaleString('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} €`;
-// Muestra EUR + equivalencia XAF, p.ej. "4,57 € · 3.000 XAF"
-const formatEUR = (xaf: number) => `${formatEUROnly(xaf)} · ${formatXAF(xaf)}`;
-const formatEURRaw = (eur: number) =>
-  `${eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} € · ${Math.round(
-    eur * XAF_PER_EUR,
-  ).toLocaleString('es-ES')} XAF`;
+
+// Importe en EUR + equivalencia XAF más pequeña y atenuada
+const formatEUR = (xaf: number): ReactNode => (
+  <>
+    <span>{formatEURNumber(xaf)}</span>
+    <span className="ml-1.5 text-[0.75em] font-normal text-muted-foreground/70">
+      · {formatXAFNumber(xaf)}
+    </span>
+  </>
+);
+const formatEURRaw = (eur: number): ReactNode => (
+  <>
+    <span>
+      {eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+    </span>
+    <span className="ml-1.5 text-[0.75em] font-normal text-muted-foreground/70">
+      · {Math.round(eur * XAF_PER_EUR).toLocaleString('es-ES')} XAF
+    </span>
+  </>
+);
 
 // Defaults (XAF base)
 const DEFAULT_STD_PRICE_XAF = 3000;
