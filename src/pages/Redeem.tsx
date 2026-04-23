@@ -148,71 +148,102 @@ const Redeem = () => {
   const alreadyRedeemed = !done && preview?.gift_redeemed;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-            {done ? (
-              <Check className="h-7 w-7 text-primary" />
-            ) : (
-              <Sparkles className="h-7 w-7 text-primary" />
-            )}
+    <>
+      <div className="min-h-screen flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+              {done ? (
+                <Check className="h-7 w-7 text-primary" />
+              ) : (
+                <Sparkles className="h-7 w-7 text-primary" />
+              )}
+            </div>
+            <h1 className="text-2xl font-display font-black">
+              {done ? '¡Tarjeta activada!' : 'Tienes un regalo'}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {done
+                ? `${done.download_credits} descargas añadidas a tu cuenta.`
+                : alreadyRedeemed
+                  ? 'Esta tarjeta ya fue canjeada anteriormente.'
+                  : 'Esta es tu tarjeta YUSIOP. Canjéala para empezar a descargar música.'}
+            </p>
           </div>
-          <h1 className="text-2xl font-display font-black">
-            {done ? '¡Tarjeta activada!' : 'Tienes un regalo'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {done
-              ? `${done.download_credits} descargas añadidas a tu cuenta.`
-              : alreadyRedeemed
-                ? 'Esta tarjeta ya fue canjeada anteriormente.'
-                : 'Esta es tu tarjeta YUSIOP. Canjéala para empezar a descargar música.'}
-          </p>
-        </div>
 
-        {/* Tarjeta digital con confeti */}
-        <div className="relative">
-          {previewLoading && !done ? (
-            <div className="aspect-[1.586/1] rounded-[28px] bg-muted/40 animate-pulse" />
-          ) : cardData ? (
-            <DigitalCard
-              code={cardData.code}
-              cardType={cardData.cardType}
-              downloadCredits={cardData.credits}
-              isGift
-              celebrate={!alreadyRedeemed}
-            />
-          ) : null}
-        </div>
-
-        {/* Acciones */}
-        {done ? (
-          <div className="grid grid-cols-2 gap-2">
-            <Button asChild variant="outline">
-              <Link to="/library?tab=cards">Ver mis tarjetas</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/catalog">Ir al catálogo</Link>
-            </Button>
+          {/* Tarjeta digital con confeti */}
+          <div className="relative">
+            {previewLoading && !done ? (
+              <div className="aspect-[1.586/1] rounded-[28px] bg-muted/40 animate-pulse" />
+            ) : cardData ? (
+              <DigitalCard
+                code={cardData.code}
+                cardType={cardData.cardType}
+                downloadCredits={cardData.credits}
+                isGift
+                celebrate={!alreadyRedeemed}
+              />
+            ) : null}
           </div>
-        ) : (
-          <Button
-            className="w-full h-12 text-base font-semibold"
-            onClick={handleRedeem}
-            disabled={loading || previewLoading || alreadyRedeemed}
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : alreadyRedeemed ? (
-              'Tarjeta ya canjeada'
-            ) : (
-              'Canjear ahora'
-            )}
-          </Button>
-        )}
+
+          {/* Acciones */}
+          {done ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Button asChild variant="outline">
+                <Link to="/library?tab=cards">Ver mis tarjetas</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/catalog">Ir al catálogo</Link>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full h-12 text-base font-semibold"
+              onClick={handleRedeem}
+              disabled={loading || previewLoading || alreadyRedeemed}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : alreadyRedeemed ? (
+                'Tarjeta ya canjeada'
+              ) : (
+                'Canjear ahora'
+              )}
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+
+      <AlertDialog open={invalidDialog.open}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">
+              {invalidDialog.reason === 'used' ? 'Tarjeta ya usada' : 'Tarjeta inválida'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              {invalidDialog.reason === 'used'
+                ? 'Esta tarjeta ya ha sido canjeada anteriormente y no puede usarse de nuevo.'
+                : 'No hemos podido encontrar esta tarjeta. Puede que el enlace sea incorrecto o haya expirado.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setInvalidDialog({ ...invalidDialog, open: false });
+                navigate('/', { replace: true });
+              }}
+              className="w-full"
+            >
+              Volver al inicio
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
