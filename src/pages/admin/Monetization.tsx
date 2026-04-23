@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/table';
 import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon } from 'lucide-react';
 
-// Pricing rules (XAF)
+// Pricing rules (XAF base, displayed in EUR using fixed CFA peg)
+const XAF_PER_EUR = 655.957; // fixed parity
 const STANDARD_PRICE_XAF = 3000;
 const STANDARD_CREDITS = 4;
 const PREMIUM_PRICE_XAF = 7000;
@@ -22,8 +23,11 @@ const ARTIST_SHARE = 0.4;
 
 const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_XAF / STANDARD_CREDITS; // 750 XAF
 
-const formatXAF = (n: number) =>
-  `${Math.round(n).toLocaleString('es-ES')} XAF`;
+const formatEUR = (xaf: number) =>
+  `${(xaf / XAF_PER_EUR).toLocaleString('es-ES', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} €`;
 
 interface DownloadRow {
   song_id: string;
@@ -185,8 +189,8 @@ const Monetization = () => {
         <CardHeader>
           <CardTitle className="text-base">Reglas de precio</CardTitle>
           <CardDescription>
-            Estándar: {formatXAF(STANDARD_PRICE_XAF)} ({STANDARD_CREDITS} descargas →{' '}
-            {formatXAF(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatXAF(PREMIUM_PRICE_XAF)} —
+            Estándar: {formatEUR(STANDARD_PRICE_XAF)} ({STANDARD_CREDITS} descargas →{' '}
+            {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_XAF)} —
             valor por descarga calculado según los créditos de cada tarjeta. Artista: 40% por descarga.
           </CardDescription>
         </CardHeader>
@@ -208,7 +212,7 @@ const Monetization = () => {
             <CardDescription>Ingresos brutos</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Coins className="h-5 w-5 text-yusiop-primary" />
-              {formatXAF(totals.totalGross)}
+              {formatEUR(totals.totalGross)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -217,7 +221,7 @@ const Monetization = () => {
             <CardDescription>Bolsa artistas (40%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <UsersIcon className="h-5 w-5 text-yusiop-primary" />
-              {formatXAF(totals.totalArtist)}
+              {formatEUR(totals.totalArtist)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -226,7 +230,7 @@ const Monetization = () => {
             <CardDescription>Plataforma (60%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-yusiop-primary" />
-              {formatXAF(totals.totalPlatform)}
+              {formatEUR(totals.totalPlatform)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -275,15 +279,15 @@ const Monetization = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         {s.downloads > 0 ? (
-                          formatXAF(pricePerDl)
+                          formatEUR(pricePerDl)
                         ) : (
-                          <Badge variant="outline">{formatXAF(STANDARD_PER_DOWNLOAD)}</Badge>
+                          <Badge variant="outline">{formatEUR(STANDARD_PER_DOWNLOAD)}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">{s.downloads}</TableCell>
-                      <TableCell className="text-right">{formatXAF(s.grossRevenue)}</TableCell>
+                      <TableCell className="text-right">{formatEUR(s.grossRevenue)}</TableCell>
                       <TableCell className="text-right font-semibold text-yusiop-primary">
-                        {formatXAF(s.artistRevenue)}
+                        {formatEUR(s.artistRevenue)}
                       </TableCell>
                     </TableRow>
                   );
@@ -323,9 +327,9 @@ const Monetization = () => {
                   <TableRow key={a.name}>
                     <TableCell className="font-medium">{a.name}</TableCell>
                     <TableCell className="text-right">{a.downloads}</TableCell>
-                    <TableCell className="text-right">{formatXAF(a.gross)}</TableCell>
+                    <TableCell className="text-right">{formatEUR(a.gross)}</TableCell>
                     <TableCell className="text-right font-semibold text-yusiop-primary">
-                      {formatXAF(a.artistShare)}
+                      {formatEUR(a.artistShare)}
                     </TableCell>
                   </TableRow>
                 ))}
