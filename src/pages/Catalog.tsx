@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search, Music } from 'lucide-react';
+import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
 import { logger } from '@/lib/logger';
+import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
 interface Song {
   id: string;
@@ -31,6 +32,7 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
+  const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
   const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
