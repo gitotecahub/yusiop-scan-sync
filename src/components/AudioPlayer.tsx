@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const loadedSongIdRef = useRef<string | null>(null);
+  const loadedPlaybackRef = useRef<string | null>(null);
   const shouldAutoPlayRef = useRef<boolean>(false);
 
   const { currentSong, isPlaying, isPreview, setPosition, setDuration, pause } =
@@ -79,10 +79,6 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
 
-    if (loadedSongIdRef.current === currentSong.id) return;
-
-    // Reproducción completa: SIEMPRE usar track_url (no el preview legado).
-    // Reproducción preview: usar track_url si hay preview_start_seconds, si no, fallback al preview_url legado.
     let audioUrl = '';
     if (isPreview) {
       const hasCustomPreview =
@@ -102,7 +98,10 @@ const AudioPlayer = () => {
       return;
     }
 
-    loadedSongIdRef.current = currentSong.id;
+    const playbackKey = `${currentSong.id}:${isPreview ? 'preview' : 'full'}:${audioUrl}`;
+    if (loadedPlaybackRef.current === playbackKey) return;
+
+    loadedPlaybackRef.current = playbackKey;
     shouldAutoPlayRef.current = isPlaying;
     audio.src = audioUrl;
     audio.load();
@@ -113,7 +112,7 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
     // Si la canción aún no está cargada, dejar que canplay haga el autoplay
-    if (loadedSongIdRef.current !== currentSong.id) return;
+    if (!loadedPlaybackRef.current?.startsWith(`${currentSong.id}:`)) return;
 
     if (isPlaying) {
       if (audio.paused) {

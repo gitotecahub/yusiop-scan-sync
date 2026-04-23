@@ -31,7 +31,7 @@ const Catalog = () => {
   const [loading, setLoading] = useState(true);
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
-  const { currentSong, isPlaying, setCurrentSong, play, pause } = usePlayerStore();
+  const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
@@ -212,12 +212,19 @@ useEffect(() => {
   };
 
   const handlePlayPreview = (song: Song) => {
-    if (currentSong?.id === song.id && isPlaying) {
-      pause();
-    } else {
-      setCurrentSong(song, true); // true = preview mode
-      play();
+    const shouldUsePreview = !downloadedSongs.has(song.id);
+
+    if (currentSong?.id === song.id && isPreview === shouldUsePreview) {
+      if (isPlaying) {
+        pause();
+      } else {
+        play();
+      }
+      return;
     }
+
+    setCurrentSong(song, shouldUsePreview);
+    play();
   };
 
   const handleDownload = async (song: Song) => {
