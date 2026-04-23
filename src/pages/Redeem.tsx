@@ -41,6 +41,10 @@ const Redeem = () => {
   const [previewLoading, setPreviewLoading] = useState(true);
   const [preview, setPreview] = useState<GiftPreview | null>(null);
   const [done, setDone] = useState<RedeemResult | null>(null);
+  const [invalidDialog, setInvalidDialog] = useState<{ open: boolean; reason: 'invalid' | 'used' }>({
+    open: false,
+    reason: 'invalid',
+  });
 
   // Redirige a auth si no hay sesión
   useEffect(() => {
