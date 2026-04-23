@@ -136,6 +136,7 @@ const Dashboard = () => {
         <KpiCard
           title="Ingresos"
           value={formatEur(revenue.totalEur)}
+          subValue={formatXaf(revenue.totalEur)}
           icon={Euro}
           hint={`${revenue.count} compras`}
           loading={loading}
@@ -144,6 +145,7 @@ const Dashboard = () => {
         <KpiCard
           title="Ticket promedio"
           value={formatEur(revenue.avgTicketEur)}
+          subValue={formatXaf(revenue.avgTicketEur)}
           icon={Receipt}
           hint="Por compra"
           loading={loading}
