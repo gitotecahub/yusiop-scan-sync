@@ -573,6 +573,36 @@ const Profile = () => {
       {/* Modo Usuario / Artista (solo si es artista aprobado) */}
       <ModeSwitcher />
 
+      {/* Acceso al panel de administración (solo si tiene rol o áreas asignadas) */}
+      {hasPanelAccess && (
+        <div className="blob-card p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl vapor-bg flex items-center justify-center shrink-0">
+              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="eyebrow mb-1">Equipo Yusiop</p>
+              <h3 className="font-display text-lg font-bold leading-tight">
+                Panel de administración
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isSuperAdmin
+                  ? 'Tienes acceso completo a todas las áreas del panel.'
+                  : `Tienes acceso a ${areas.size} ${areas.size === 1 ? 'área' : 'áreas'} del panel.`}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="mt-3 rounded-full vapor-bg text-primary-foreground h-9 px-4 text-xs font-bold shadow-glow"
+              >
+                <ShieldCheck className="h-3 w-3 mr-1.5" />
+                Ir al panel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Conviértete en artista (solo si NO es artista) */}
       {!isArtist && (
         <div className="blob-card p-5">
