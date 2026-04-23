@@ -450,11 +450,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               />
             </div>
             <div>
-              <Label htmlFor="artist">Nombre artístico *</Label>
+              <Label htmlFor="artist">Artista principal *</Label>
               <Input
                 id="artist"
                 value={formData.artist_name}
-                onChange={(e) => setFormData((p) => ({ ...p, artist_name: e.target.value }))}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFormData((p) => ({ ...p, artist_name: v }));
+                  // Mantener sincronizado el "principal" en la lista de colaboradores
+                  setCollaborators((prev) => prev.map((c) => c.is_primary ? { ...c, artist_name: v } : c));
+                }}
                 placeholder="Tu nombre artístico"
                 maxLength={80}
               />
