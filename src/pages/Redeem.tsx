@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Loader2, Check, Sparkles } from 'lucide-react';
+import { Loader2, Check, Sparkles, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import DigitalCard from '@/components/DigitalCard';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type CardType = 'standard' | 'premium';
 
@@ -32,6 +41,10 @@ const Redeem = () => {
   const [previewLoading, setPreviewLoading] = useState(true);
   const [preview, setPreview] = useState<GiftPreview | null>(null);
   const [done, setDone] = useState<RedeemResult | null>(null);
+  const [invalidDialog, setInvalidDialog] = useState<{ open: boolean; reason: 'invalid' | 'used' }>({
+    open: false,
+    reason: 'invalid',
+  });
 
   // Redirige a auth si no hay sesión
   useEffect(() => {
@@ -54,9 +67,12 @@ const Redeem = () => {
         .maybeSingle();
       if (!active) return;
       if (error || !data) {
-        toast.error('Tarjeta no encontrada o token inválido');
+        setInvalidDialog({ open: true, reason: 'invalid' });
       } else {
         setPreview(data as GiftPreview);
+        if ((data as GiftPreview).gift_redeemed) {
+          setInvalidDialog({ open: true, reason: 'used' });
+        }
       }
       setPreviewLoading(false);
     })();
@@ -85,7 +101,14 @@ const Redeem = () => {
       if (error) throw error;
       const result = data?.result as RedeemResult | undefined;
       if (!result?.success) {
-        toast.error(result?.message ?? 'No se pudo canjear');
+        const msg = (result?.message ?? '').toLowerCase();
+        if (msg.includes('canjead') || msg.includes('redeem')) {
+          setInvalidDialog({ open: true, reason: 'used' });
+        } else if (msg.includes('inválid') || msg.includes('invalid') || msg.includes('no es un regalo')) {
+          setInvalidDialog({ open: true, reason: 'invalid' });
+        } else {
+          toast.error(result?.message ?? 'No se pudo canjear');
+        }
         return;
       }
       sessionStorage.removeItem('pending_gift_token');
@@ -125,71 +148,102 @@ const Redeem = () => {
   const alreadyRedeemed = !done && preview?.gift_redeemed;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-            {done ? (
-              <Check className="h-7 w-7 text-primary" />
-            ) : (
-              <Sparkles className="h-7 w-7 text-primary" />
-            )}
+    <>
+      <div className="min-h-screen flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+              {done ? (
+                <Check className="h-7 w-7 text-primary" />
+              ) : (
+                <Sparkles className="h-7 w-7 text-primary" />
+              )}
+            </div>
+            <h1 className="text-2xl font-display font-black">
+              {done ? '¡Tarjeta activada!' : 'Tienes un regalo'}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {done
+                ? `${done.download_credits} descargas añadidas a tu cuenta.`
+                : alreadyRedeemed
+                  ? 'Esta tarjeta ya fue canjeada anteriormente.'
+                  : 'Esta es tu tarjeta YUSIOP. Canjéala para empezar a descargar música.'}
+            </p>
           </div>
-          <h1 className="text-2xl font-display font-black">
-            {done ? '¡Tarjeta activada!' : 'Tienes un regalo'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {done
-              ? `${done.download_credits} descargas añadidas a tu cuenta.`
-              : alreadyRedeemed
-                ? 'Esta tarjeta ya fue canjeada anteriormente.'
-                : 'Esta es tu tarjeta YUSIOP. Canjéala para empezar a descargar música.'}
-          </p>
-        </div>
 
-        {/* Tarjeta digital con confeti */}
-        <div className="relative">
-          {previewLoading && !done ? (
-            <div className="aspect-[1.586/1] rounded-[28px] bg-muted/40 animate-pulse" />
-          ) : cardData ? (
-            <DigitalCard
-              code={cardData.code}
-              cardType={cardData.cardType}
-              downloadCredits={cardData.credits}
-              isGift
-              celebrate={!alreadyRedeemed}
-            />
-          ) : null}
-        </div>
-
-        {/* Acciones */}
-        {done ? (
-          <div className="grid grid-cols-2 gap-2">
-            <Button asChild variant="outline">
-              <Link to="/library?tab=cards">Ver mis tarjetas</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/catalog">Ir al catálogo</Link>
-            </Button>
+          {/* Tarjeta digital con confeti */}
+          <div className="relative">
+            {previewLoading && !done ? (
+              <div className="aspect-[1.586/1] rounded-[28px] bg-muted/40 animate-pulse" />
+            ) : cardData ? (
+              <DigitalCard
+                code={cardData.code}
+                cardType={cardData.cardType}
+                downloadCredits={cardData.credits}
+                isGift
+                celebrate={!alreadyRedeemed}
+              />
+            ) : null}
           </div>
-        ) : (
-          <Button
-            className="w-full h-12 text-base font-semibold"
-            onClick={handleRedeem}
-            disabled={loading || previewLoading || alreadyRedeemed}
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : alreadyRedeemed ? (
-              'Tarjeta ya canjeada'
-            ) : (
-              'Canjear ahora'
-            )}
-          </Button>
-        )}
+
+          {/* Acciones */}
+          {done ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Button asChild variant="outline">
+                <Link to="/library?tab=cards">Ver mis tarjetas</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/catalog">Ir al catálogo</Link>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full h-12 text-base font-semibold"
+              onClick={handleRedeem}
+              disabled={loading || previewLoading || alreadyRedeemed}
+            >
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : alreadyRedeemed ? (
+                'Tarjeta ya canjeada'
+              ) : (
+                'Canjear ahora'
+              )}
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+
+      <AlertDialog open={invalidDialog.open}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">
+              {invalidDialog.reason === 'used' ? 'Tarjeta ya usada' : 'Tarjeta inválida'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              {invalidDialog.reason === 'used'
+                ? 'Esta tarjeta ya ha sido canjeada anteriormente y no puede usarse de nuevo.'
+                : 'No hemos podido encontrar esta tarjeta. Puede que el enlace sea incorrecto o haya expirado.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setInvalidDialog({ ...invalidDialog, open: false });
+                navigate('/', { replace: true });
+              }}
+              className="w-full"
+            >
+              Volver al inicio
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
