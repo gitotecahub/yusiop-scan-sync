@@ -52,6 +52,10 @@ const MyCards = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
   const [copied, setCopied] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [giftUsername, setGiftUsername] = useState('');
+  const [giftMessage, setGiftMessage] = useState('');
+  const [gifting, setGifting] = useState(false);
 
   const handleCopy = async (code: string) => {
     try {
@@ -69,6 +73,40 @@ const MyCards = () => {
     setCards((prev) => prev.filter((c) => c.id !== id));
     setSelected(null);
     toast.success('Tarjeta eliminada de tu biblioteca');
+  };
+
+  const handleGift = async () => {
+    if (!selected) return;
+    const username = giftUsername.trim().replace(/^@/, '');
+    if (!username) {
+      toast.error('Introduce el username del destinatario');
+      return;
+    }
+    setGifting(true);
+    try {
+      const { data, error } = await supabase.rpc('transfer_card_to_user', {
+        p_card_id: selected.id,
+        p_recipient_username: username,
+        p_gift_message: giftMessage.trim() || null,
+      });
+      if (error) throw error;
+      const result = Array.isArray(data) ? data[0] : data;
+      if (!result?.success) {
+        toast.error(result?.message ?? 'No se pudo regalar la tarjeta');
+        return;
+      }
+      toast.success(result.message);
+      // Quitar la tarjeta de la lista local (ya no es del usuario)
+      setCards((prev) => prev.filter((c) => c.id !== selected.id));
+      setGiftOpen(false);
+      setSelected(null);
+      setGiftUsername('');
+      setGiftMessage('');
+    } catch (e) {
+      toast.error((e as Error).message ?? 'Error al regalar la tarjeta');
+    } finally {
+      setGifting(false);
+    }
   };
 
   useEffect(() => {
