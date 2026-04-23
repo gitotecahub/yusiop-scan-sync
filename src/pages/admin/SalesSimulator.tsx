@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
