@@ -45,6 +45,28 @@ const ArtistDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Realtime: refrescar contador de envíos pendientes cuando cambian
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`artist-dashboard-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'song_submissions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => loadPending(),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
   if (!isArtist) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
