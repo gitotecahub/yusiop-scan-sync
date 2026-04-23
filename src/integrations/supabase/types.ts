@@ -400,6 +400,72 @@ export type Database = {
         }
         Relationships: []
       }
+      song_submissions: {
+        Row: {
+          album_title: string | null
+          artist_name: string
+          cover_path: string | null
+          cover_url: string | null
+          created_at: string
+          duration_seconds: number
+          id: string
+          preview_path: string | null
+          preview_url: string | null
+          published_song_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["song_submission_status"]
+          title: string
+          track_path: string | null
+          track_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          album_title?: string | null
+          artist_name: string
+          cover_path?: string | null
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          preview_path?: string | null
+          preview_url?: string | null
+          published_song_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["song_submission_status"]
+          title: string
+          track_path?: string | null
+          track_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          album_title?: string | null
+          artist_name?: string
+          cover_path?: string | null
+          cover_url?: string | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          preview_path?: string | null
+          preview_url?: string | null
+          published_song_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["song_submission_status"]
+          title?: string
+          track_path?: string | null
+          track_url?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       songs: {
         Row: {
           album_id: string | null
@@ -699,6 +765,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      approve_song_submission: {
+        Args: { p_submission_id: string }
+        Returns: {
+          message: string
+          song_id: string
+          success: boolean
+        }[]
+      }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -741,6 +815,13 @@ export type Database = {
           success: boolean
         }[]
       }
+      reject_song_submission: {
+        Args: { p_reason?: string; p_submission_id: string }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
       transfer_card_to_user: {
         Args: {
           p_card_id: string
@@ -775,6 +856,7 @@ export type Database = {
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
+      song_submission_status: "pending" | "approved" | "rejected"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -908,6 +990,7 @@ export const Constants = {
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
+      song_submission_status: ["pending", "approved", "rejected"],
       user_role: ["user", "admin"],
     },
   },

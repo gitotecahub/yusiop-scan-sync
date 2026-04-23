@@ -20,6 +20,8 @@ import NotFound from "./pages/NotFound";
 import ProfileSelection from '@/pages/ProfileSelection';
 import ArtistRequest from '@/pages/ArtistRequest';
 import ArtistDashboard from '@/pages/artist/ArtistDashboard';
+import MySubmissions from '@/pages/artist/MySubmissions';
+import SongSubmissions from '@/pages/admin/SongSubmissions';
 
 // Admin Pages
 import AdminLayout from '@/pages/admin/AdminLayout';
@@ -87,6 +89,7 @@ const AppContent = () => {
         <Route path="simulator" element={<SalesSimulator />} />
         <Route path="settings" element={<Settings />} />
         <Route path="artist-requests" element={<ArtistRequests />} />
+        <Route path="song-submissions" element={<SongSubmissions />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -109,6 +112,7 @@ const AppContent = () => {
           // Modo artista
           <Routes>
             <Route path="/artist" element={<ArtistDashboard />} />
+            <Route path="/artist/submissions" element={<MySubmissions />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
             <Route path="/profile" element={
               <Layout>

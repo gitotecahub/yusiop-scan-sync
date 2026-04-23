@@ -13,6 +13,7 @@ import {
   Coins,
   Calculator,
   UserCheck,
+  Upload,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -33,6 +34,7 @@ const menuItems = [
   { title: 'Usuarios', url: '/admin/users', icon: Users },
   { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck },
   { title: 'Canciones', url: '/admin/songs', icon: Music },
+  { title: 'Envíos canciones', url: '/admin/song-submissions', icon: Upload },
   { title: 'Álbumes', url: '/admin/albums', icon: Album },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
   { title: 'Descargas', url: '/admin/downloads', icon: Download },
@@ -48,6 +50,7 @@ export function AdminSidebar() {
   const { signOut } = useAuth();
   const currentPath = location.pathname;
   const [pendingArtistCount, setPendingArtistCount] = useState(0);
+  const [pendingSongCount, setPendingSongCount] = useState(0);
 
   const loadPendingCount = async () => {
     const { count } = await supabase
@@ -57,15 +60,29 @@ export function AdminSidebar() {
     setPendingArtistCount(count ?? 0);
   };
 
+  const loadPendingSongs = async () => {
+    const { count } = await supabase
+      .from('song_submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    setPendingSongCount(count ?? 0);
+  };
+
   useEffect(() => {
     loadPendingCount();
+    loadPendingSongs();
 
     const channel = supabase
-      .channel('artist-requests-pending')
+      .channel('admin-sidebar-counts')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'artist_requests' },
         () => loadPendingCount()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'song_submissions' },
+        () => loadPendingSongs()
       )
       .subscribe();
 
@@ -78,6 +95,9 @@ export function AdminSidebar() {
   useEffect(() => {
     if (currentPath.startsWith('/admin/artist-requests')) {
       loadPendingCount();
+    }
+    if (currentPath.startsWith('/admin/song-submissions')) {
+      loadPendingSongs();
     }
   }, [currentPath]);
 
@@ -112,7 +132,13 @@ export function AdminSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const isArtistRequests = item.url === '/admin/artist-requests';
-                const showBadge = isArtistRequests && pendingArtistCount > 0;
+                const isSongSubmissions = item.url === '/admin/song-submissions';
+                const badgeCount = isArtistRequests
+                  ? pendingArtistCount
+                  : isSongSubmissions
+                    ? pendingSongCount
+                    : 0;
+                const showBadge = badgeCount > 0;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
@@ -128,7 +154,7 @@ export function AdminSidebar() {
                             <span>{item.title}</span>
                             {showBadge && (
                               <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
-                                {pendingArtistCount > 99 ? '99+' : pendingArtistCount}
+                                {badgeCount > 99 ? '99+' : badgeCount}
                               </span>
                             )}
                           </span>

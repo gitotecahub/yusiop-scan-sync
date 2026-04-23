@@ -1,17 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Disc3, BarChart3, ArrowLeft } from 'lucide-react';
+import { Music, Disc3, BarChart3, ArrowLeft, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { supabase } from '@/integrations/supabase/client';
+import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist, setMode } = useModeStore();
   const [artistName, setArtistName] = useState<string>('');
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const loadPending = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('song_submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'pending');
+    setPendingCount(count ?? 0);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -27,6 +40,8 @@ const ArtistDashboard = () => {
       if (data?.artist_name) setArtistName(data.artist_name);
     };
     load();
+    loadPending();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (!isArtist) {
@@ -63,14 +78,24 @@ const ArtistDashboard = () => {
         <p className="text-sm text-muted-foreground mt-2">
           Gestiona tu catálogo, sube música y revisa estadísticas.
         </p>
+        <div className="mt-4 flex gap-2 flex-wrap">
+          <Button onClick={() => setSubmitOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" /> Subir música
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/artist/submissions')}>
+            Mis envíos{pendingCount > 0 ? ` (${pendingCount} en revisión)` : ''}
+          </Button>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => {}}>
+        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/submissions')}>
           <CardContent className="p-6">
             <Music className="h-8 w-8 text-primary mb-3" />
             <h3 className="font-display font-bold text-lg">Mis canciones</h3>
-            <p className="text-xs text-muted-foreground mt-1">Subir y gestionar tu catálogo. Próximamente.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Sube nuevas canciones y consulta el estado de tus envíos.
+            </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => {}}>
@@ -88,6 +113,13 @@ const ArtistDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <SubmitSongDialog
+        open={submitOpen}
+        onOpenChange={setSubmitOpen}
+        defaultArtistName={artistName}
+        onSubmitted={loadPending}
+      />
     </div>
   );
 };
