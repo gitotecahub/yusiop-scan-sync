@@ -14,6 +14,7 @@ import {
   Calculator,
   UserCheck,
   Upload,
+  Users2,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -35,6 +36,7 @@ const menuItems = [
   { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck },
   { title: 'Canciones', url: '/admin/songs', icon: Music },
   { title: 'Envíos canciones', url: '/admin/song-submissions', icon: Upload },
+  { title: 'Reclamaciones colab.', url: '/admin/collab-claims', icon: Users2 },
   { title: 'Álbumes', url: '/admin/albums', icon: Album },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
   { title: 'Descargas', url: '/admin/downloads', icon: Download },

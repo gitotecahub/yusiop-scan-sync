@@ -655,7 +655,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile)}
+            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile) || !collabValid}
           >
             {uploading ? 'Guardando…' : isEdit ? 'Guardar y reenviar' : 'Enviar a revisión'}
           </Button>

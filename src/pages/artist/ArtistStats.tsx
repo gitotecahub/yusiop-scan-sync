@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,7 @@ type Stats = {
   by_age: { bucket: string; downloads: number }[];
   by_gender: { gender: string; downloads: number }[];
   by_day: { day: string; downloads: number; revenue_cents: number }[];
+  pool_pending?: { pending_revenue_cents: number; pending_downloads: number } | null;
 };
 
 const GENDER_LABEL: Record<string, string> = {
@@ -96,6 +97,7 @@ const ArtistStats = () => {
           setStats({
             totals: { total_downloads: 0, unique_listeners: 0, total_revenue_cents: 0 },
             by_song: [], by_country: [], by_age: [], by_gender: [], by_day: [],
+            pool_pending: null,
           });
           setLoading(false);
           return;
