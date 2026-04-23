@@ -105,7 +105,8 @@ const ArtistRequest = () => {
       links,
     });
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+      const issues = (parsed.error as any).issues ?? (parsed.error as any).errors ?? [];
+      toast.error(issues[0]?.message ?? 'Datos inválidos');
       return;
     }
     if (docs.length === 0) {
@@ -120,15 +121,15 @@ const ArtistRequest = () => {
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const { error } = await supabase.from('artist_requests').insert({
+      const { error } = await supabase.from('artist_requests').insert([{
         user_id: user.id,
         artist_name: parsed.data.artist_name,
         bio: parsed.data.bio || null,
         genre: parsed.data.genre || null,
         contact_email: parsed.data.contact_email,
-        links: linkArray,
-        document_urls: docs,
-      });
+        links: linkArray as any,
+        document_urls: docs as any,
+      }]);
       if (error) throw error;
 
       await loadForUser(user.id);
