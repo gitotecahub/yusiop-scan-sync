@@ -32,8 +32,11 @@ interface MyClaim {
   reviewed_at: string | null;
 }
 
-const formatEuros = (cents: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100);
+const formatEuros = (cents: number) => formatEURNumber((cents || 0) / 100);
+const formatEurosWithXaf = (cents: number) => {
+  const eur = (cents || 0) / 100;
+  return `${formatEURNumber(eur)} (${formatXAFNumber(eur)})`;
+};
 
 const Collaborations = () => {
   const navigate = useNavigate();
