@@ -25,6 +25,7 @@ import ArtistStats from '@/pages/artist/ArtistStats';
 import Collaborations from '@/pages/artist/Collaborations';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
 import CollaborationClaims from '@/pages/admin/CollaborationClaims';
+import { RequireStaffArea } from '@/components/admin/RequireStaffArea';
 
 // Admin Pages
 import AdminLayout from '@/pages/admin/AdminLayout';
