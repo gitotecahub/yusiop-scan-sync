@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
@@ -301,6 +301,25 @@ const Library = () => {
       </div>
 
       {/* Tabs */}
+      <LibraryTabs />
+    </div>
+  );
+};
+
+const LibraryTabsInner = ({ children }: { children?: never }) => null;
+
+// Inline component to read URL param
+const useInitialTab = () => {
+  const [params] = useSearchParams();
+  const tab = params.get('tab');
+  return tab === 'cards' || tab === 'recent' || tab === 'favorites' ? tab : 'all';
+};
+
+// Replace this placeholder via the next edit (kept to satisfy TS during patching)
+const LibraryTabs = () => null as any;
+
+// (Original Tabs JSX continues below — not reached because of return above)
+{/* keep-original */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
