@@ -347,6 +347,8 @@ const Monetization = () => {
       },
     };
   }, [qrCards, downloads]);
+
+  if (loading) {
     return (
       <div className="p-6 space-y-4">
         <div className="h-8 w-1/3 bg-muted rounded animate-pulse" />
