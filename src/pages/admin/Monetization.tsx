@@ -27,7 +27,7 @@ const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.25 €
 const formatEUR = (eur: number, align: 'left' | 'right' = 'right'): ReactNode => (
   <span className={`inline-flex flex-col leading-tight ${align === 'right' ? 'items-end' : 'items-start'}`}>
     <span className="whitespace-nowrap tabular-nums">{formatEURNumber(eur)}</span>
-    <span className="text-[0.65em] font-normal text-muted-foreground/70 whitespace-nowrap tabular-nums">
+    <span className="text-[0.65em] font-normal text-foreground whitespace-nowrap tabular-nums">
       {formatXAFNumber(eur)}
     </span>
   </span>
@@ -373,7 +373,7 @@ const Monetization = () => {
                   {card.label}
                 </CardTitle>
                 <Badge variant={card.key === 'premium' ? 'default' : 'secondary'}>
-                  {formatEUR(card.price)} · {card.credits} descargas
+                  {formatEUR(card.price)}
                 </Badge>
               </div>
               <CardDescription>
