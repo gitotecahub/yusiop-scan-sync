@@ -29,20 +29,28 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useStaffAreas, StaffArea } from '@/hooks/useStaffAreas';
 
-const menuItems = [
-  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Usuarios', url: '/admin/users', icon: Users },
-  { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck },
-  { title: 'Canciones', url: '/admin/songs', icon: Music },
-  { title: 'Envíos canciones', url: '/admin/song-submissions', icon: Upload },
-  { title: 'Reclamaciones colab.', url: '/admin/collab-claims', icon: Users2 },
-  { title: 'Álbumes', url: '/admin/albums', icon: Album },
-  { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
-  { title: 'Descargas', url: '/admin/downloads', icon: Download },
-  { title: 'Monetización', url: '/admin/monetization', icon: Coins },
-  { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator },
-  { title: 'Configuración', url: '/admin/settings', icon: Settings },
+type MenuItem = {
+  title: string;
+  url: string;
+  icon: typeof LayoutDashboard;
+  area: StaffArea | null; // null = visible para todos los miembros del panel
+};
+
+const menuItems: MenuItem[] = [
+  { title: 'Dashboard', url: '/admin', icon: LayoutDashboard, area: null },
+  { title: 'Usuarios', url: '/admin/users', icon: Users, area: 'users' },
+  { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck, area: 'artist_requests' },
+  { title: 'Canciones', url: '/admin/songs', icon: Music, area: 'catalog' },
+  { title: 'Envíos canciones', url: '/admin/song-submissions', icon: Upload, area: 'catalog' },
+  { title: 'Reclamaciones colab.', url: '/admin/collab-claims', icon: Users2, area: 'catalog' },
+  { title: 'Álbumes', url: '/admin/albums', icon: Album, area: 'catalog' },
+  { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode, area: 'qr_cards' },
+  { title: 'Descargas', url: '/admin/downloads', icon: Download, area: 'monetization' },
+  { title: 'Monetización', url: '/admin/monetization', icon: Coins, area: 'monetization' },
+  { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator, area: 'monetization' },
+  { title: 'Configuración', url: '/admin/settings', icon: Settings, area: 'settings' },
 ];
 
 export function AdminSidebar() {
