@@ -3,6 +3,7 @@ import { Bell, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { useModeStore } from '@/stores/modeStore';
 import {
   Popover,
   PopoverContent,
@@ -25,7 +26,8 @@ interface Notification {
 }
 
 const NotificationsBell = () => {
-  const { session } = useAuthStore();
+  const { session, user } = useAuthStore();
+  const { mode, isArtist, setMode } = useModeStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
@@ -100,14 +102,23 @@ const NotificationsBell = () => {
       await supabase.from('notifications').update({ read: true }).eq('id', n.id);
     }
     setOpen(false);
+
+    const goArtist = async (path: string) => {
+      // Si el usuario es artista pero está en modo user, cambia a modo artista
+      if (isArtist && mode !== 'artist' && user?.id) {
+        await setMode(user.id, 'artist');
+      }
+      navigate(path);
+    };
+
     if (n.type === 'gift_received' && n.data?.redemption_token) {
       navigate(`/redeem/${n.data.redemption_token}`);
     } else if (n.type === 'song_submission_rejected' && n.data?.submission_id) {
-      navigate(`/artist/submissions?edit=${n.data.submission_id}`);
+      await goArtist(`/artist/submissions?edit=${n.data.submission_id}`);
     } else if (n.type === 'song_submission_approved') {
-      navigate('/artist/submissions');
+      await goArtist('/artist/submissions');
     } else if (n.type === 'artist_request_approved') {
-      navigate('/artist');
+      await goArtist('/artist');
     }
     load();
   };
