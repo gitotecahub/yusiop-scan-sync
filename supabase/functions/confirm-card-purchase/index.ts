@@ -4,6 +4,7 @@
 // Es idempotente: si ya se procesó esa sesión, devuelve la tarjeta existente.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=denonext";
+import { notifyGiftRecipient } from "../_shared/notify-gift.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -180,55 +181,19 @@ Deno.serve(async (req) => {
     console.log(`confirm-card-purchase: created card ${card.code} for user ${userId}`);
 
     // 5) Si es regalo: crear notificación in-app + enviar email al destinatario
-    if (isGift && giftEmail) {
-      try {
-        const { data: recipientUser } = await supabase
-          .from("users")
-          .select("id")
-          .eq("email", giftEmail.toLowerCase())
-          .maybeSingle();
-
-        const origin = req.headers.get("origin") ?? "https://yusiop.com";
-        const redemptionUrl = `${origin}/redeem/${redemptionToken}`;
-
-        if (recipientUser?.id) {
-          await supabase.from("notifications").insert({
-            user_id: recipientUser.id,
-            type: "gift_received",
-            title: "🎁 Has recibido un regalo",
-            body: giftMessage
-              ? `Mensaje: "${giftMessage}"`
-              : `Tarjeta ${cardType} con ${credits} descargas`,
-            data: {
-              qr_card_id: card.id,
-              redemption_token: redemptionToken,
-              card_type: cardType,
-              download_credits: credits,
-              sender_email: buyerEmail,
-              gift_message: giftMessage,
-              redemption_url: redemptionUrl,
-            },
-          });
-        }
-
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "gift-received",
-            recipientEmail: giftEmail,
-            idempotencyKey: `gift-${card.id}`,
-            templateData: {
-              senderName: buyerEmail.split("@")[0],
-              giftMessage: giftMessage,
-              cardType: cardType,
-              downloadCredits: credits,
-              redemptionUrl,
-            },
-          },
-        });
-        console.log(`gift email queued for ${giftEmail}`);
-      } catch (notifyErr) {
-        console.error("gift notification failed", notifyErr);
-      }
+    if (isGift && giftEmail && redemptionToken) {
+      const origin = req.headers.get("origin") ?? "https://yusiop.com";
+      await notifyGiftRecipient({
+        admin: supabase,
+        cardId: card.id,
+        redemptionToken,
+        giftEmail,
+        giftMessage,
+        cardType,
+        credits,
+        buyerEmail,
+        origin,
+      });
     }
 
     return new Response(

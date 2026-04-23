@@ -2,6 +2,7 @@
 // Simula una compra completa SIN pasar por Stripe. Crea card_purchases + qr_cards
 // y la asocia al usuario (o al destinatario si es regalo). Solo para pruebas.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { notifyGiftRecipient } from "../_shared/notify-gift.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,6 +144,22 @@ Deno.serve(async (req) => {
       .eq("id", purchase.id);
 
     console.log(`[SIM] Tarjeta creada ${card.code} gift=${isGift} token=${redemptionToken}`);
+
+    // Notificar al destinatario si es regalo
+    if (isGift && body.gift_recipient_email && redemptionToken) {
+      const origin = req.headers.get("origin") ?? "https://yusiop.com";
+      await notifyGiftRecipient({
+        admin,
+        cardId: card.id,
+        redemptionToken,
+        giftEmail: body.gift_recipient_email,
+        giftMessage: body.gift_message ?? null,
+        cardType: body.card_type,
+        credits: tier.credits,
+        buyerEmail: userEmail,
+        origin,
+      });
+    }
 
     return new Response(
       JSON.stringify({
