@@ -394,6 +394,9 @@ const SalesSimulator = () => {
         </CardContent>
       </Card>
 
+      {/* Investor ROI progress */}
+      <InvestorProgress totalInvestorXAF={totals.totalInvestor} />
+
       {/* KPIs */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
@@ -568,5 +571,106 @@ const KpiCard = ({
     </CardHeader>
   </Card>
 );
+
+// Capital inicial y objetivo del inversor
+const INVESTOR_CAPITAL_EUR = 26500;
+const INVESTOR_OPEX_EUR = 16000;
+const INVESTOR_INTEREST_PCT = 0.25;
+const INVESTOR_TARGET_EUR = INVESTOR_CAPITAL_EUR * (1 + INVESTOR_INTEREST_PCT); // 33.125 €
+
+const InvestorProgress = ({ totalInvestorXAF }: { totalInvestorXAF: number }) => {
+  const investorEUR = totalInvestorXAF / XAF_PER_EUR;
+  const pct = Math.max(0, Math.min(100, (investorEUR / INVESTOR_TARGET_EUR) * 100));
+  const remaining = Math.max(0, INVESTOR_TARGET_EUR - investorEUR);
+  const reached = investorEUR >= INVESTOR_TARGET_EUR;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-yusiop-primary" />
+          Retorno del inversor
+        </CardTitle>
+        <CardDescription>
+          Capital inicial {INVESTOR_CAPITAL_EUR.toLocaleString('es-ES')} € + 25% de intereses ={' '}
+          <span className="font-semibold text-foreground">
+            {INVESTOR_TARGET_EUR.toLocaleString('es-ES')} €
+          </span>
+          . Costes operativos de referencia: {INVESTOR_OPEX_EUR.toLocaleString('es-ES')} €.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="relative h-7 w-full overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-inner">
+          {/* Barra degradada rojo→verde, estilo cristal */}
+          <div
+            className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
+            style={{
+              width: `${pct}%`,
+              background:
+                'linear-gradient(90deg, hsl(0 85% 55%) 0%, hsl(35 90% 55%) 40%, hsl(70 80% 50%) 70%, hsl(140 75% 45%) 100%)',
+              boxShadow:
+                'inset 0 1px 0 hsl(0 0% 100% / 0.45), inset 0 -6px 10px hsl(0 0% 0% / 0.18), 0 0 12px hsl(var(--primary) / 0.15)',
+            }}
+          >
+            {/* Brillo cristal superior */}
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full"
+              style={{
+                background:
+                  'linear-gradient(180deg, hsl(0 0% 100% / 0.45) 0%, hsl(0 0% 100% / 0.05) 100%)',
+              }}
+            />
+          </div>
+          {/* Marcador de objetivo (100%) */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+            <span
+              className={`text-[10px] font-semibold tabular-nums ${
+                reached ? 'text-white drop-shadow' : 'text-muted-foreground'
+              }`}
+            >
+              {pct.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3 text-sm">
+          <div className="space-y-0.5">
+            <p className="text-xs text-muted-foreground">Recibido por el inversor / año</p>
+            <p className="font-semibold tabular-nums">
+              {investorEUR.toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{' '}
+              €
+            </p>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-xs text-muted-foreground">Objetivo (capital + 25%)</p>
+            <p className="font-semibold tabular-nums">
+              {INVESTOR_TARGET_EUR.toLocaleString('es-ES')} €
+            </p>
+          </div>
+          <div className="space-y-0.5">
+            <p className="text-xs text-muted-foreground">
+              {reached ? 'Estado' : 'Pendiente por devolver'}
+            </p>
+            <p
+              className={`font-semibold tabular-nums ${
+                reached ? 'text-green-500' : 'text-destructive'
+              }`}
+            >
+              {reached
+                ? '✓ Inversión recuperada con intereses'
+                : `${remaining.toLocaleString('es-ES', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })} €`}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default SalesSimulator;
