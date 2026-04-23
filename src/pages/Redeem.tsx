@@ -101,7 +101,14 @@ const Redeem = () => {
       if (error) throw error;
       const result = data?.result as RedeemResult | undefined;
       if (!result?.success) {
-        toast.error(result?.message ?? 'No se pudo canjear');
+        const msg = (result?.message ?? '').toLowerCase();
+        if (msg.includes('canjead') || msg.includes('redeem')) {
+          setInvalidDialog({ open: true, reason: 'used' });
+        } else if (msg.includes('inválid') || msg.includes('invalid') || msg.includes('no es un regalo')) {
+          setInvalidDialog({ open: true, reason: 'invalid' });
+        } else {
+          toast.error(result?.message ?? 'No se pudo canjear');
+        }
         return;
       }
       sessionStorage.removeItem('pending_gift_token');
