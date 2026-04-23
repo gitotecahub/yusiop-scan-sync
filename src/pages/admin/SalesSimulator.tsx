@@ -535,7 +535,7 @@ const Row = ({
   highlight,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   bold?: boolean;
   highlight?: boolean;
 }) => (
