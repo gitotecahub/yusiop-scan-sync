@@ -266,7 +266,11 @@ const SongSubmissions = () => {
                         }
                       >
                         {row.status === 'pending' && (<><Clock className="h-3 w-3 mr-1" /> Pendiente</>)}
-                        {row.status === 'approved' && 'Publicada'}
+                        {row.status === 'approved' && (
+                          row.scheduled_release_at
+                            ? (<><CalendarClock className="h-3 w-3 mr-1" /> Programada</>)
+                            : 'Publicada'
+                        )}
                         {row.status === 'rejected' && 'Rechazada'}
                         {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                       </Badge>
@@ -276,6 +280,9 @@ const SongSubmissions = () => {
                       {row.album_title ? ` · ${row.album_title}` : ''}
                       {' · '}{formatDuration(row.duration_seconds)}
                       {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
+                      {row.status === 'approved' && row.scheduled_release_at && (
+                        <> · 📅 lanza {formatMadrid(row.scheduled_release_at)} (Madrid)</>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -286,7 +293,7 @@ const SongSubmissions = () => {
                     </Button>
                     {row.status === 'pending' && (
                       <>
-                        <Button size="sm" onClick={() => approve(row)}>
+                        <Button size="sm" onClick={() => openApprove(row)}>
                           <Check className="h-4 w-4 mr-1" /> Aprobar
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => openReject(row)}>
