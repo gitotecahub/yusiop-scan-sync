@@ -11,8 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
-import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode } from 'lucide-react';
+import {
+  formatEURNumber,
+  formatXAFNumber,
+  formatXAFFixed,
+  eurToXaf,
+  PHYSICAL_STANDARD_PRICE_XAF,
+  PHYSICAL_PREMIUM_PRICE_XAF,
+} from '@/lib/currency';
 
 // Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
 const STANDARD_PRICE_EUR = 5.00;
