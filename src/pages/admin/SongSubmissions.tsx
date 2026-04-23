@@ -478,6 +478,14 @@ const SongSubmissions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ApproveSubmissionDialog
+        open={approveOpen}
+        onOpenChange={setApproveOpen}
+        defaultReleaseDate={approveTarget?.release_date ?? null}
+        songTitle={approveTarget?.title ?? ''}
+        onConfirm={confirmApprove}
+      />
     </div>
   );
 };
