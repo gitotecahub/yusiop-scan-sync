@@ -27,6 +27,7 @@ import Songs from '@/pages/admin/Songs';
 import Albums from '@/pages/admin/Albums';
 import QRCards from '@/pages/admin/QRCards';
 import Downloads from '@/pages/admin/Downloads';
+import Monetization from '@/pages/admin/Monetization';
 import Settings from '@/pages/admin/Settings';
 
 // Layout
@@ -71,6 +72,7 @@ const AppContent = () => {
         <Route path="albums" element={<Albums />} />
         <Route path="qr-cards" element={<QRCards />} />
         <Route path="downloads" element={<Downloads />} />
+        <Route path="monetization" element={<Monetization />} />
         <Route path="settings" element={<Settings />} />
       </Route>
 

@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Home,
+  Coins,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -31,6 +32,7 @@ const menuItems = [
   { title: 'Álbumes', url: '/admin/albums', icon: Album },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
   { title: 'Descargas', url: '/admin/downloads', icon: Download },
+  { title: 'Monetización', url: '/admin/monetization', icon: Coins },
   { title: 'Configuración', url: '/admin/settings', icon: Settings },
 ];
 
