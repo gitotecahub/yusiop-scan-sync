@@ -124,7 +124,8 @@ const Catalog = () => {
             duration_seconds: song.duration_seconds,
             cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
             preview_url: song.preview_url,
-            track_url: song.track_url
+            track_url: song.track_url,
+            preview_start_seconds: (song as any).preview_start_seconds ?? 0,
           }));
           setSongs(formattedSongs);
           setFilteredSongs(formattedSongs);
