@@ -15,11 +15,14 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    const previewStart = currentSong?.preview_start_seconds ?? 0;
+
     const handleTimeUpdate = () => {
-      setPosition(Math.floor(audio.currentTime));
-      if (isPreview && audio.currentTime >= 20) {
+      const elapsed = isPreview ? Math.max(0, audio.currentTime - previewStart) : audio.currentTime;
+      setPosition(Math.floor(elapsed));
+      if (isPreview && elapsed >= 20) {
         audio.pause();
-        audio.currentTime = 0;
+        audio.currentTime = previewStart;
         setPosition(0);
         pause();
       }
@@ -27,11 +30,17 @@ const AudioPlayer = () => {
 
     const handleLoadedMetadata = () => {
       setDuration(isPreview ? 20 : Math.floor(audio.duration || 0));
+      if (isPreview && previewStart > 0) {
+        try { audio.currentTime = previewStart; } catch {}
+      }
     };
 
     const handleCanPlay = () => {
       if (shouldAutoPlayRef.current) {
         shouldAutoPlayRef.current = false;
+        if (isPreview && previewStart > 0 && audio.currentTime < previewStart) {
+          try { audio.currentTime = previewStart; } catch {}
+        }
         audio.play().catch((err) => {
           console.error('Auto-play failed:', err);
           pause();
@@ -63,7 +72,7 @@ const AudioPlayer = () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [isPreview, setPosition, setDuration, pause]);
+  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause]);
 
   // Cargar nueva canción cuando cambia el ID
   useEffect(() => {
@@ -72,7 +81,15 @@ const AudioPlayer = () => {
 
     if (loadedSongIdRef.current === currentSong.id) return;
 
-    const audioUrl = currentSong.preview_url || currentSong.track_url || '';
+    // En preview: si tenemos track_url y preview_start_seconds definido, usamos el track completo
+    // y reproducimos desde ese punto. Si no, fallback al preview_url legado.
+    const hasCustomPreview =
+      isPreview &&
+      typeof currentSong.preview_start_seconds === 'number' &&
+      !!currentSong.track_url;
+    const audioUrl = hasCustomPreview
+      ? (currentSong.track_url as string)
+      : (currentSong.preview_url || currentSong.track_url || '');
     if (!audioUrl) {
       console.warn('Canción sin URL de audio', currentSong);
       toast.error('Esta canción no tiene archivo de audio');
@@ -81,12 +98,10 @@ const AudioPlayer = () => {
     }
 
     loadedSongIdRef.current = currentSong.id;
-    // Si el store dice "playing" cuando cargamos, autoplay al estar listo
     shouldAutoPlayRef.current = isPlaying;
     audio.src = audioUrl;
     audio.load();
-    // No llamamos play() aquí — esperamos al evento canplay
-  }, [currentSong?.id, currentSong?.preview_url, currentSong?.track_url, isPlaying, pause]);
+  }, [currentSong?.id, currentSong?.preview_url, currentSong?.track_url, currentSong?.preview_start_seconds, isPreview, isPlaying, pause]);
 
   // Play / pause cuando cambia el estado (sin tocar src ni currentTime)
   useEffect(() => {
