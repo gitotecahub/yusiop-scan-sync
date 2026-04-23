@@ -743,6 +743,7 @@ export type Database = {
           country_code: string | null
           country_name: string | null
           downloaded_at: string
+          hidden_from_library: boolean
           id: string
           ip_address: string | null
           local_user_id: string | null
@@ -759,6 +760,7 @@ export type Database = {
           country_code?: string | null
           country_name?: string | null
           downloaded_at?: string
+          hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
           local_user_id?: string | null
@@ -775,6 +777,7 @@ export type Database = {
           country_code?: string | null
           country_name?: string | null
           downloaded_at?: string
+          hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
           local_user_id?: string | null
