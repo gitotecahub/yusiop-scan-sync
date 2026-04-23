@@ -516,6 +516,7 @@ export type Database = {
           release_date: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          scheduled_release_at: string | null
           status: Database["public"]["Enums"]["song_submission_status"]
           title: string
           track_path: string | null
@@ -540,6 +541,7 @@ export type Database = {
           release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title: string
           track_path?: string | null
@@ -564,6 +566,7 @@ export type Database = {
           release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title?: string
           track_path?: string | null
@@ -583,6 +586,7 @@ export type Database = {
           id: string
           preview_start_seconds: number
           preview_url: string | null
+          scheduled_release_at: string | null
           title: string
           track_url: string | null
         }
@@ -595,6 +599,7 @@ export type Database = {
           id?: string
           preview_start_seconds?: number
           preview_url?: string | null
+          scheduled_release_at?: string | null
           title: string
           track_url?: string | null
         }
@@ -607,6 +612,7 @@ export type Database = {
           id?: string
           preview_start_seconds?: number
           preview_url?: string | null
+          scheduled_release_at?: string | null
           title?: string
           track_url?: string | null
         }
@@ -922,6 +928,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      approve_song_submission_scheduled: {
+        Args: { p_release_at?: string; p_submission_id: string }
+        Returns: {
+          message: string
+          song_id: string
+          success: boolean
+        }[]
+      }
       claim_collaboration: {
         Args: { p_collaborator_id: string; p_message?: string }
         Returns: {
@@ -967,6 +981,16 @@ export type Database = {
           song_title: string
         }[]
       }
+      get_upcoming_releases: {
+        Args: never
+        Returns: {
+          artist_name: string
+          cover_url: string
+          id: string
+          scheduled_release_at: string
+          title: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1006,6 +1030,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      release_scheduled_songs: { Args: never; Returns: number }
       resolve_collaboration_claim: {
         Args: { p_approve: boolean; p_claim_id: string; p_reason?: string }
         Returns: {
