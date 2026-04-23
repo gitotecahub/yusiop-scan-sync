@@ -752,13 +752,18 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          {disabledReason && !uploading && (
+            <p className="text-xs text-destructive sm:mr-auto sm:self-center">
+              {disabledReason}
+            </p>
+          )}
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={uploading || !formData.title || !formData.artist_name || (!isEdit && !trackFile) || !collabValid}
+            disabled={!!disabledReason}
           >
             {uploading ? 'Guardando…' : isEdit ? 'Guardar y reenviar' : 'Enviar a revisión'}
           </Button>
