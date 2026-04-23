@@ -50,6 +50,37 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [scannedCards, setScannedCards] = useState<ScannedCard[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
+
+  // Construye el historial unificando user_credits (legacy) + qr_cards (sistema actual)
+  const buildScannedCards = (
+    credits: any[],
+    qrCards: any[],
+  ): ScannedCard[] => {
+    const fromQr: ScannedCard[] = qrCards.map((c: any) => ({
+      id: c.id,
+      card_id: c.code ?? c.id,
+      card_type: c.card_type ?? 'standard',
+      scanned_at: c.activated_at ?? c.created_at,
+      credits_remaining: c.download_credits ?? 0,
+      max_credits:
+        c.card_type === 'premium' ? 12 : c.card_type === 'standard' ? 4 : (c.download_credits ?? 0),
+      expires_at: c.activated_at ?? c.created_at,
+      is_active: (c.download_credits ?? 0) > 0,
+    }));
+    const fromLegacy: ScannedCard[] = credits.map((c: any) => ({
+      id: c.id,
+      card_id: c.card_id,
+      card_type: c.card_type,
+      scanned_at: c.scanned_at,
+      credits_remaining: c.credits_remaining,
+      max_credits: c.max_credits,
+      expires_at: c.expires_at,
+      is_active: !!c.is_active,
+    }));
+    return [...fromQr, ...fromLegacy].sort(
+      (a, b) => new Date(b.scanned_at).getTime() - new Date(a.scanned_at).getTime(),
+    );
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Perfil del usuario (se carga desde Supabase)
