@@ -39,8 +39,10 @@ const RANGES: { key: RangeKey; label: string }[] = [
   { key: '1y', label: '1 año' },
 ];
 
-const formatEur = (n: number) =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+
+const formatEur = (n: number) => formatEURNumber(n);
+const formatXaf = (n: number) => formatXAFNumber(n);
 
 const formatShortDate = (d: string) => {
   const date = new Date(d);
