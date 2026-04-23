@@ -640,6 +640,15 @@ export type Database = {
           success: boolean
         }[]
       }
+      get_gift_preview: {
+        Args: { p_token: string }
+        Returns: {
+          card_type: Database["public"]["Enums"]["card_type"]
+          code: string
+          download_credits: number
+          gift_redeemed: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
