@@ -61,9 +61,7 @@ const Redeem = () => {
     (async () => {
       setPreviewLoading(true);
       const { data, error } = await supabase
-        .from('qr_cards')
-        .select('code, card_type, download_credits, gift_redeemed')
-        .eq('redemption_token', token)
+        .rpc('get_gift_preview', { p_token: token })
         .maybeSingle();
       if (!active) return;
       if (error || !data) {
