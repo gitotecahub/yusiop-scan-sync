@@ -127,6 +127,21 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
   const collabValid = !hasCollabs || (collaborators.length >= 2 && Math.abs(collabSum - 100) < 0.01 && collaborators.every(c => c.artist_name.trim().length > 0));
 
+  // Razón por la que el botón "Enviar a revisión" está deshabilitado (para mostrar al usuario)
+  const getDisabledReason = (): string | null => {
+    if (uploading) return 'Subiendo…';
+    if (!formData.title.trim()) return 'Falta el título';
+    if (!formData.artist_name.trim()) return 'Falta el nombre del artista';
+    if (!isEdit && !trackFile) return 'Falta seleccionar el archivo de audio';
+    if (hasCollabs) {
+      if (collaborators.length < 2) return 'Añade al menos 2 artistas en la colaboración';
+      if (collaborators.some(c => !c.artist_name.trim())) return 'Todos los colaboradores necesitan un nombre artístico';
+      if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
+    }
+    return null;
+  };
+  const disabledReason = getDisabledReason();
+
   // Inicializar/precargar campos al abrir
   useEffect(() => {
     if (!open) return;
