@@ -12,6 +12,27 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
+function parseReason(raw: string): string[] {
+  const text = (raw ?? '').trim()
+  if (!text) return []
+  let parts = text.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean)
+  if (parts.length === 1) {
+    const inline = parts[0]
+      .split(/\s*(?:[•·]|(?:^|\s)-\s|(?:^|\s)\*\s|;\s|\|\s)/g)
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (inline.length > 1) parts = inline
+  }
+  if (parts.length === 1 && parts[0].length > 90) {
+    const sentences = parts[0]
+      .split(/(?<=\.)\s+(?=[A-ZÁÉÍÓÚÑ])/g)
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (sentences.length > 1) parts = sentences
+  }
+  return parts.map((p) => p.replace(/^\s*(?:[-*•·]|\d+[.)])\s+/, '').trim()).filter(Boolean)
+}
+
 const SITE_NAME = 'Yusiop'
 const BRAND_COLOR = '#9D5DFF'
 
@@ -42,12 +63,25 @@ const SongRejectedEmail = ({
             Hemos revisado <strong>"{songTitle}"</strong> y no podemos publicarla todavía.
           </Text>
 
-          {reason ? (
-            <Section style={messageBox}>
-              <Text style={messageLabel}>Motivo:</Text>
-              <Text style={messageText}>{reason}</Text>
-            </Section>
-          ) : null}
+          {reason ? (() => {
+            const items = parseReason(reason)
+            return (
+              <Section style={messageBox}>
+                <Text style={messageLabel}>
+                  {items.length > 1 ? 'Motivos a corregir:' : 'Motivo:'}
+                </Text>
+                {items.length > 1 ? (
+                  <ul style={listStyle}>
+                    {items.map((it, i) => (
+                      <li key={i} style={listItem}>{it}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Text style={messageText}>{items[0] ?? reason}</Text>
+                )}
+              </Section>
+            )
+          })() : null}
 
           <Text style={text}>
             Puedes editar tu envío y volver a enviarlo a revisión desde el panel de artista.
@@ -80,7 +114,7 @@ export const template = {
   previewData: {
     songTitle: 'Mi nueva canción',
     artistName: 'Artista',
-    reason: 'La calidad del audio es baja, sube un archivo a 320 kbps.',
+    reason: 'La calidad del audio es baja, sube un archivo a 320 kbps.\nLa portada no cumple las dimensiones mínimas (mínimo 1000x1000).\nEl título contiene errores tipográficos.',
     appUrl: 'https://yusiop.com',
   },
 } satisfies TemplateEntry
@@ -130,4 +164,14 @@ const footer: React.CSSProperties = {
   margin: '32px 0 0',
   textAlign: 'center',
   lineHeight: '1.5',
+}
+const listStyle: React.CSSProperties = {
+  margin: '4px 0 0',
+  paddingLeft: '20px',
+  color: '#0F172A',
+  fontSize: '15px',
+  lineHeight: '1.6',
+}
+const listItem: React.CSSProperties = {
+  marginBottom: '4px',
 }

@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, X, Clock, Play, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { parseRejectionReason } from '@/lib/parseRejectionReason';
 
 interface SubmissionRow {
   id: string;
@@ -319,11 +320,25 @@ const SongSubmissions = () => {
                   </div>
                 )}
 
-                {row.status === 'rejected' && row.rejection_reason && (
-                  <div className="text-xs text-destructive">
-                    <span className="font-semibold">Motivo de rechazo:</span> {row.rejection_reason}
-                  </div>
-                )}
+                {row.status === 'rejected' && row.rejection_reason && (() => {
+                  const items = parseRejectionReason(row.rejection_reason);
+                  return (
+                    <div className="text-xs text-destructive">
+                      <p className="font-semibold mb-1">
+                        {items.length > 1 ? 'Motivos de rechazo:' : 'Motivo de rechazo:'}
+                      </p>
+                      {items.length > 1 ? (
+                        <ul className="list-disc pl-5 space-y-0.5 marker:text-destructive">
+                          {items.map((it, i) => (
+                            <li key={i}>{it}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>{items[0] ?? row.rejection_reason}</p>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
@@ -336,13 +351,14 @@ const SongSubmissions = () => {
             <DialogTitle>Rechazar envío</DialogTitle>
             <DialogDescription>
               Explica al artista por qué su canción no ha sido aprobada. Recibirá una notificación.
+              Escribe <strong>un motivo por línea</strong> para que se muestre como lista.
             </DialogDescription>
           </DialogHeader>
           <Textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Motivo del rechazo (obligatorio)"
-            rows={4}
+            placeholder={'Motivos del rechazo (uno por línea)\n\nEj.:\n- La calidad del audio es baja\n- La portada no cumple las dimensiones mínimas\n- El título contiene errores'}
+            rows={6}
             maxLength={500}
           />
           <DialogFooter>

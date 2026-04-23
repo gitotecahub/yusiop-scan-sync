@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import SubmitSongDialog, { type EditingSubmission } from '@/components/artist/SubmitSongDialog';
+import { parseRejectionReason } from '@/lib/parseRejectionReason';
 
 interface SubmissionRow {
   id: string;
@@ -172,17 +173,30 @@ const MySubmissions = () => {
                   )}
                 </div>
 
-                {r.status === 'rejected' && r.rejection_reason && (
-                  <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 p-3">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-destructive">Motivo a corregir</p>
-                        <p className="text-foreground/80 mt-0.5">{r.rejection_reason}</p>
+                {r.status === 'rejected' && r.rejection_reason && (() => {
+                  const items = parseRejectionReason(r.rejection_reason);
+                  return (
+                    <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                        <div className="text-sm flex-1">
+                          <p className="font-semibold text-destructive">
+                            {items.length > 1 ? 'Motivos a corregir' : 'Motivo a corregir'}
+                          </p>
+                          {items.length > 1 ? (
+                            <ul className="list-disc pl-5 mt-1.5 space-y-1 text-foreground/80 marker:text-destructive">
+                              {items.map((it, i) => (
+                                <li key={i}>{it}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-foreground/80 mt-0.5">{items[0] ?? r.rejection_reason}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
