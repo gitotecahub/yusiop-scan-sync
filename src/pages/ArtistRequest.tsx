@@ -179,7 +179,7 @@ const ArtistRequest = () => {
 
       <h1 className="display-xl text-3xl mb-2">Solicitar perfil de artista</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Completa la información y sube documentos que acrediten tu identidad como artista (DNI, contratos, ficha de sello, prensa…). La administración revisará tu solicitud.
+        Completa la información y sube un documento que acredite tu identidad (DNI, NIE o pasaporte). La administración revisará tu solicitud.
       </p>
 
       {existingRequest?.status === 'rejected' && (
