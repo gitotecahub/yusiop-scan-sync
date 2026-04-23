@@ -84,6 +84,7 @@ const Library = () => {
             )
           `)
           .eq('user_id', user.id)
+          .eq('hidden_from_library', false)
           .order('downloaded_at', { ascending: false });
 
         if (error) {
@@ -179,15 +180,15 @@ const Library = () => {
         return;
       }
 
-      // 1. Eliminar registro de descarga
+      // 1. Ocultar de la biblioteca (soft delete) — preserva la descarga en estadísticas
       const { error: deleteError } = await supabase
         .from('user_downloads')
-        .delete()
+        .update({ hidden_from_library: true })
         .eq('user_id', user.id)
         .eq('song_id', songToDelete.id);
 
       if (deleteError) {
-        console.error('Error deleting download:', deleteError);
+        console.error('Error hiding download:', deleteError);
         toast.error('No se pudo eliminar la canción');
         return;
       }
@@ -257,7 +258,7 @@ const Library = () => {
       const ids = Array.from(selectedIds);
       const { error } = await supabase
         .from('user_downloads')
-        .delete()
+        .update({ hidden_from_library: true })
         .eq('user_id', user.id)
         .in('song_id', ids);
 
