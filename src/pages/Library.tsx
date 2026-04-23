@@ -12,13 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
 import MyCards from '@/components/MyCards';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface DownloadedSong {
   id: string;
@@ -42,6 +44,9 @@ const Library = () => {
   const [loading, setLoading] = useState(true);
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
+  const [recipientUsername, setRecipientUsername] = useState('');
+  const [sharing, setSharing] = useState(false);
   const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
@@ -197,6 +202,60 @@ const Library = () => {
     }
   };
 
+  const handleShareRequest = (song: DownloadedSong) => {
+    setRecipientUsername('');
+    setSongToShare(song);
+  };
+
+  const confirmShare = async () => {
+    if (!songToShare) return;
+    const username = recipientUsername.trim().replace(/^@/, '');
+    if (!username) {
+      toast.error('Escribe el username del destinatario');
+      return;
+    }
+    if (username.length > 50) {
+      toast.error('Username demasiado largo');
+      return;
+    }
+
+    setSharing(true);
+    try {
+      const { data, error } = await supabase.rpc('transfer_song_to_user', {
+        p_song_id: songToShare.id,
+        p_recipient_username: username,
+      });
+
+      if (error) {
+        console.error('Share error:', error);
+        toast.error('No se pudo compartir la canción');
+        return;
+      }
+
+      const result = Array.isArray(data) ? data[0] : data;
+      if (!result?.success) {
+        toast.error(result?.message || 'No se pudo compartir');
+        return;
+      }
+
+      // Si está sonando, detener (la canción ya no es nuestra)
+      if (currentSong?.id === songToShare.id) {
+        stop();
+      }
+
+      // Quitar la canción de nuestra biblioteca local
+      setDownloads((prev) => prev.filter((s) => s.id !== songToShare.id));
+      setFavorites((prev) => prev.filter((s) => s.id !== songToShare.id));
+      toast.success(result.message);
+      setSongToShare(null);
+    } catch (err) {
+      console.error('Error sharing song:', err);
+      toast.error('Ocurrió un error al compartir');
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const SongList = ({ songs, showDate = false }: { songs: DownloadedSong[], showDate?: boolean }) => {
     if (songs.length === 0) {
       return (
@@ -249,6 +308,15 @@ const Library = () => {
                   className={`h-9 w-9 rounded-full hover:bg-muted ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
                 >
                   <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleShareRequest(song)}
+                  className="h-9 w-9 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                  aria-label="Compartir canción"
+                >
+                  <Send className="h-4 w-4" />
                 </Button>
                 <Button
                   size="icon"
@@ -387,6 +455,55 @@ const Library = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? 'Eliminando...' : 'Eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!songToShare}
+        onOpenChange={(open) => !open && !sharing && setSongToShare(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Compartir canción</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Quieres compartir <span className="font-semibold text-foreground">"{songToShare?.title}"</span>{' '}
+              de <span className="font-semibold text-foreground">{songToShare?.artist}</span>?
+              <br />
+              <br />
+              La canción <span className="font-semibold text-foreground">cambiará de biblioteca</span>: dejará la tuya y entrará directamente en la del destinatario. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="recipient-username">Username del destinatario</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
+              <Input
+                id="recipient-username"
+                value={recipientUsername}
+                onChange={(e) => setRecipientUsername(e.target.value.replace(/^@/, ''))}
+                placeholder="usuario"
+                className="pl-7"
+                maxLength={50}
+                autoFocus
+                disabled={sharing}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !sharing) {
+                    e.preventDefault();
+                    confirmShare();
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sharing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmShare(); }}
+              disabled={sharing || !recipientUsername.trim()}
+            >
+              {sharing ? 'Compartiendo...' : 'Compartir'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
