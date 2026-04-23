@@ -26,8 +26,10 @@ import {
   Music,
   CheckCircle2,
   Hourglass,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useStaffAreas } from '@/hooks/useStaffAreas';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from 'next-themes';
