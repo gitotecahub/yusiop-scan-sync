@@ -104,19 +104,56 @@ const SongSubmissions = () => {
     }
   };
 
-  const playTrack = async (path: string | null, fallbackUrl: string) => {
-    if (!path) {
-      window.open(fallbackUrl, '_blank');
-      return;
+  const ensureSignedUrl = async (
+    rowId: string,
+    kind: 'track' | 'preview',
+    path: string | null,
+    fallbackUrl: string | null,
+  ): Promise<string | null> => {
+    const existing = signedUrls[rowId]?.[kind];
+    if (existing) return existing;
+
+    setLoadingAudio((s) => ({ ...s, [rowId]: kind }));
+    try {
+      let url: string | null = null;
+      if (path) {
+        const { data, error } = await supabase.storage
+          .from('artist-submissions')
+          .createSignedUrl(path, 60 * 60);
+        if (!error && data) url = data.signedUrl;
+      }
+      if (!url) url = fallbackUrl;
+      if (!url) {
+        toast.error('No se pudo cargar el audio');
+        return null;
+      }
+      setSignedUrls((s) => ({ ...s, [rowId]: { ...s[rowId], [kind]: url! } }));
+      return url;
+    } finally {
+      setLoadingAudio((s) => ({ ...s, [rowId]: null }));
     }
-    const { data, error } = await supabase.storage
-      .from('artist-submissions')
-      .createSignedUrl(path, 60 * 10);
-    if (error || !data) {
-      window.open(fallbackUrl, '_blank');
-      return;
+  };
+
+  const loadAndPlay = async (
+    rowId: string,
+    kind: 'track' | 'preview',
+    path: string | null,
+    fallbackUrl: string | null,
+  ) => {
+    const url = await ensureSignedUrl(rowId, kind, path, fallbackUrl);
+    if (!url) return;
+    // Pause any other audio currently playing
+    Object.entries(audioRefs.current).forEach(([key, el]) => {
+      if (key !== `${rowId}:${kind}` && el && !el.paused) el.pause();
+    });
+    const el = audioRefs.current[`${rowId}:${kind}`];
+    if (el) {
+      try {
+        await el.play();
+      } catch (e) {
+        console.error('Play failed', e);
+      }
     }
-    window.open(data.signedUrl, '_blank');
   };
 
   return (
