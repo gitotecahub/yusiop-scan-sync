@@ -115,6 +115,8 @@ const SalesSimulator = () => {
     setStdCredits(DEFAULT_STD_CREDITS);
     setPremCredits(DEFAULT_PREM_CREDITS);
     setArtistShare(DEFAULT_ARTIST_SHARE);
+    setInvestorShare(DEFAULT_INVESTOR_SHARE);
+    setPlatformShare(DEFAULT_PLATFORM_SHARE);
   };
 
   return (
