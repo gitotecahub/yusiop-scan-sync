@@ -227,9 +227,10 @@ const SalesSimulator = () => {
       {/* Pricing config */}
       <Card>
         <CardHeader>
-          <CardTitle>Configuración de precios y créditos</CardTitle>
+          <CardTitle>Tarjetas físicas (XAF)</CardTitle>
           <CardDescription>
-            Ajusta el precio (XAF), descargas incluidas y reparto del artista.
+            Tarjetas vendidas físicamente con QR / código manual. Precio en francos CFA,
+            con coste opcional de producción por unidad.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
