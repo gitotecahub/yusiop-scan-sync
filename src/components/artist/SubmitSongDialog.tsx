@@ -145,16 +145,17 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary')
+          .select('id,artist_name,share_percent,is_primary,role')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
           setHasCollabs(true);
-          setCollaborators(data.map(d => ({
+          setCollaborators(data.map((d: any) => ({
             id: d.id,
             artist_name: d.artist_name,
             share_percent: Number(d.share_percent),
             is_primary: !!d.is_primary,
+            role: (d.role as CollabRole) ?? 'featuring',
           })));
         } else {
           setHasCollabs(false);
@@ -185,8 +186,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setHasCollabs(true);
     if (collaborators.length === 0) {
       setCollaborators([
-        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true },
-        { artist_name: '', share_percent: 50, is_primary: false },
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring' },
+        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring' },
       ]);
     }
   };
@@ -197,7 +198,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   };
 
   const addCollaborator = () => {
-    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false }]);
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring' }]);
   };
 
   const removeCollaborator = (idx: number) => {
