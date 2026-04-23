@@ -83,18 +83,18 @@ const AppContent = () => {
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
-        <Route path="users" element={<Users />} />
-        <Route path="users/:userId" element={<UserDetail />} />
-        <Route path="songs" element={<Songs />} />
-        <Route path="albums" element={<Albums />} />
-        <Route path="qr-cards" element={<QRCards />} />
-        <Route path="downloads" element={<Downloads />} />
-        <Route path="monetization" element={<Monetization />} />
-        <Route path="simulator" element={<SalesSimulator />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="artist-requests" element={<ArtistRequests />} />
-        <Route path="song-submissions" element={<SongSubmissions />} />
-        <Route path="collab-claims" element={<CollaborationClaims />} />
+        <Route path="users" element={<RequireStaffArea area="users"><Users /></RequireStaffArea>} />
+        <Route path="users/:userId" element={<RequireStaffArea area="users"><UserDetail /></RequireStaffArea>} />
+        <Route path="songs" element={<RequireStaffArea area="catalog"><Songs /></RequireStaffArea>} />
+        <Route path="albums" element={<RequireStaffArea area="catalog"><Albums /></RequireStaffArea>} />
+        <Route path="qr-cards" element={<RequireStaffArea area="qr_cards"><QRCards /></RequireStaffArea>} />
+        <Route path="downloads" element={<RequireStaffArea area="monetization"><Downloads /></RequireStaffArea>} />
+        <Route path="monetization" element={<RequireStaffArea area="monetization"><Monetization /></RequireStaffArea>} />
+        <Route path="simulator" element={<RequireStaffArea area="monetization"><SalesSimulator /></RequireStaffArea>} />
+        <Route path="settings" element={<RequireStaffArea area="settings"><Settings /></RequireStaffArea>} />
+        <Route path="artist-requests" element={<RequireStaffArea area="artist_requests"><ArtistRequests /></RequireStaffArea>} />
+        <Route path="song-submissions" element={<RequireStaffArea area="catalog"><SongSubmissions /></RequireStaffArea>} />
+        <Route path="collab-claims" element={<RequireStaffArea area="catalog"><CollaborationClaims /></RequireStaffArea>} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
