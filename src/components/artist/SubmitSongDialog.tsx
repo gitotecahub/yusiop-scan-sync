@@ -5,10 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+
+interface CollaboratorRow {
+  id?: string; // existing DB id when editing
+  artist_name: string;
+  share_percent: number;
+  is_primary: boolean;
+}
 
 export interface EditingSubmission {
   id: string;
@@ -79,6 +86,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const trackInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
+  // Colaboraciones
+  const [hasCollabs, setHasCollabs] = useState(false);
+  const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
+
+  const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
+  const collabValid = !hasCollabs || (collaborators.length >= 2 && Math.abs(collabSum - 100) < 0.01 && collaborators.every(c => c.artist_name.trim().length > 0));
+
   // Inicializar/precargar campos al abrir
   useEffect(() => {
     if (!open) return;
@@ -93,6 +107,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      // Cargar colaboradores existentes del envío
+      (async () => {
+        const { data } = await supabase
+          .from('song_collaborators')
+          .select('id,artist_name,share_percent,is_primary')
+          .eq('submission_id', editing.id)
+          .order('is_primary', { ascending: false });
+        if (data && data.length > 0) {
+          setHasCollabs(true);
+          setCollaborators(data.map(d => ({
+            id: d.id,
+            artist_name: d.artist_name,
+            share_percent: Number(d.share_percent),
+            is_primary: !!d.is_primary,
+          })));
+        } else {
+          setHasCollabs(false);
+          setCollaborators([]);
+        }
+      })();
     } else {
       setFormData({
         title: '',
@@ -104,12 +138,41 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(0);
       setPreviewStart(0);
       setAudioUrl(null);
+      setHasCollabs(false);
+      setCollaborators([]);
     }
     setTrackFile(null);
     setCoverFile(null);
     setProgress(0);
     stopPreview();
   }, [open, editing, defaultArtistName]);
+
+  const enableCollabs = () => {
+    setHasCollabs(true);
+    if (collaborators.length === 0) {
+      setCollaborators([
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true },
+        { artist_name: '', share_percent: 50, is_primary: false },
+      ]);
+    }
+  };
+
+  const disableCollabs = () => {
+    setHasCollabs(false);
+    setCollaborators([]);
+  };
+
+  const addCollaborator = () => {
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false }]);
+  };
+
+  const removeCollaborator = (idx: number) => {
+    setCollaborators(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateCollab = (idx: number, patch: Partial<CollaboratorRow>) => {
+    setCollaborators(prev => prev.map((c, i) => i === idx ? { ...c, ...patch } : c));
+  };
 
   // Cleanup audio al cerrar
   useEffect(() => {
