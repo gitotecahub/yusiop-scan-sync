@@ -13,18 +13,17 @@ import {
 } from '@/components/ui/table';
 import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
 
-// Pricing rules (XAF base, displayed in EUR using fixed CFA peg)
-const XAF_PER_EUR = 655.957; // fixed parity
-const STANDARD_PRICE_XAF = 3000;
+// Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
+const STANDARD_PRICE_EUR = 4.99;
 const STANDARD_CREDITS = 4;
-const PREMIUM_PRICE_XAF = 7000;
-const PREMIUM_CREDITS_DEFAULT = 100; // fallback if not specified on card
+const PREMIUM_PRICE_EUR = 9.99;
+const PREMIUM_CREDITS_DEFAULT = 10; // matches checkout PRICING.premium.credits
 const ARTIST_SHARE = 0.4;
 
-const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_XAF / STANDARD_CREDITS; // 750 XAF
+const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.2475 €
 
-const formatEUR = (xaf: number) =>
-  `${(xaf / XAF_PER_EUR).toLocaleString('es-ES', {
+const formatEUR = (eur: number) =>
+  `${eur.toLocaleString('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} €`;
