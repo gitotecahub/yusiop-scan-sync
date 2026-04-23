@@ -11,6 +11,7 @@ import {
   LogOut,
   Home,
   Coins,
+  Calculator,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -33,6 +34,7 @@ const menuItems = [
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode },
   { title: 'Descargas', url: '/admin/downloads', icon: Download },
   { title: 'Monetización', url: '/admin/monetization', icon: Coins },
+  { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator },
   { title: 'Configuración', url: '/admin/settings', icon: Settings },
 ];
 
