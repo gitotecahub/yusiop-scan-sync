@@ -65,20 +65,17 @@ const SongRejectedEmail = ({
 
           {reason ? (() => {
             const items = parseReason(reason)
+            const list = items.length > 0 ? items : [reason]
             return (
               <Section style={messageBox}>
                 <Text style={messageLabel}>
-                  {items.length > 1 ? 'Motivos a corregir:' : 'Motivo:'}
+                  Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
                 </Text>
-                {items.length > 1 ? (
-                  <ul style={listStyle}>
-                    {items.map((it, i) => (
-                      <li key={i} style={listItem}>{it}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <Text style={messageText}>{items[0] ?? reason}</Text>
-                )}
+                <ul style={listStyle}>
+                  {list.map((it, i) => (
+                    <li key={i} style={listItem}>{it}</li>
+                  ))}
+                </ul>
               </Section>
             )
           })() : null}
