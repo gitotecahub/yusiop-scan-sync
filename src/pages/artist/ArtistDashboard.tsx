@@ -105,11 +105,13 @@ const ArtistDashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">Crear álbumes y EPs. Próximamente.</p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => {}}>
+        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/stats')}>
           <CardContent className="p-6">
             <BarChart3 className="h-8 w-8 text-primary mb-3" />
             <h3 className="font-display font-bold text-lg">Estadísticas</h3>
-            <p className="text-xs text-muted-foreground mt-1">Descargas, oyentes y favoritos. Próximamente.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Descargas, ingresos, países y demografía de tu audiencia.
+            </p>
           </CardContent>
         </Card>
       </div>

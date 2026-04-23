@@ -1,0 +1,370 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthStore } from '@/stores/authStore';
+import { useModeStore } from '@/stores/modeStore';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
+
+type Stats = {
+  totals: { total_downloads: number; unique_listeners: number; total_revenue_cents: number };
+  by_song: { song_id: string; song_title: string; downloads: number; revenue_cents: number }[];
+  by_country: { country_code: string; country_name: string; downloads: number }[];
+  by_age: { bucket: string; downloads: number }[];
+  by_gender: { gender: string; downloads: number }[];
+  by_day: { day: string; downloads: number; revenue_cents: number }[];
+};
+
+const GENDER_LABEL: Record<string, string> = {
+  male: 'Hombre',
+  female: 'Mujer',
+  non_binary: 'No binario',
+  prefer_not_to_say: 'Prefiere no decirlo',
+  unknown: 'Desconocido',
+};
+
+const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#f59e0b', '#10b981', '#ef4444', '#94a3b8'];
+
+const formatEuros = (cents: number) =>
+  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format((cents || 0) / 100);
+
+const flagEmoji = (code: string) => {
+  if (!code || code.length !== 2) return '🏳️';
+  const A = 0x1f1e6;
+  const a = 'A'.charCodeAt(0);
+  return String.fromCodePoint(A + (code.toUpperCase().charCodeAt(0) - a)) +
+    String.fromCodePoint(A + (code.toUpperCase().charCodeAt(1) - a));
+};
+
+const ArtistStats = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { isArtist } = useModeStore();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [artistName, setArtistName] = useState<string>('');
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!user) return;
+      setLoading(true);
+      setError(null);
+      try {
+        // 1. Obtener el nombre de artista aprobado del usuario
+        const { data: req } = await supabase
+          .from('artist_requests')
+          .select('artist_name')
+          .eq('user_id', user.id)
+          .eq('status', 'approved')
+          .order('reviewed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const name = req?.artist_name;
+        if (!name) {
+          setError('No se encontró tu perfil de artista aprobado.');
+          setLoading(false);
+          return;
+        }
+        setArtistName(name);
+
+        // 2. Buscar el id del artista en el catálogo
+        const { data: artist } = await supabase
+          .from('artists')
+          .select('id')
+          .ilike('name', name)
+          .maybeSingle();
+        if (!artist?.id) {
+          setStats({
+            totals: { total_downloads: 0, unique_listeners: 0, total_revenue_cents: 0 },
+            by_song: [], by_country: [], by_age: [], by_gender: [], by_day: [],
+          });
+          setLoading(false);
+          return;
+        }
+
+        // 3. Llamar a la función agregada
+        const { data, error: rpcErr } = await supabase.rpc('get_artist_stats' as any, {
+          p_artist_id: artist.id,
+        });
+        if (rpcErr) throw rpcErr;
+        setStats(data as unknown as Stats);
+      } catch (e: any) {
+        setError(e?.message || 'Error cargando estadísticas');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]);
+
+  const topCountry = useMemo(
+    () => stats?.by_country?.[0],
+    [stats],
+  );
+
+  if (!isArtist) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <Card><CardContent className="p-6">No tienes acceso al panel de artista.</CardContent></Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-6 max-w-5xl mx-auto pb-24">
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Panel de artista
+        </Button>
+        <span className="text-xs text-muted-foreground">Estadísticas</span>
+      </div>
+
+      <div className="blob-card p-6 mb-6">
+        <p className="eyebrow mb-1">Tu audiencia</p>
+        <h1 className="display-xl text-3xl">{artistName || 'Artista'}</h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          Descargas, ingresos estimados y desde dónde te escuchan.
+        </p>
+      </div>
+
+      {loading && (
+        <div className="grid sm:grid-cols-3 gap-4 mb-6">
+          <Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" />
+        </div>
+      )}
+
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="p-6 text-sm text-destructive">{error}</CardContent>
+        </Card>
+      )}
+
+      {!loading && !error && stats && (
+        <>
+          {/* KPI Cards */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-primary/10 p-2"><Download className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Descargas totales</p>
+                    <p className="text-2xl font-bold">{stats.totals.total_downloads}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-primary/10 p-2"><Users className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Oyentes únicos</p>
+                    <p className="text-2xl font-bold">{stats.totals.unique_listeners}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Ingresos estimados</p>
+                    <p className="text-2xl font-bold">{formatEuros(stats.totals.total_revenue_cents)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Evolución 30 días */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" /> Últimos 30 días
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.by_day.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sin descargas en los últimos 30 días.</p>
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={stats.by_day}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                      <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                      <Line type="monotone" dataKey="downloads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Descargas" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Top canciones */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" /> Top canciones
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.by_song.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aún no tienes descargas.</p>
+              ) : (
+                <div className="space-y-2">
+                  {stats.by_song.map((s, i) => {
+                    const max = stats.by_song[0].downloads || 1;
+                    const pct = (s.downloads / max) * 100;
+                    return (
+                      <div key={s.song_id} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-muted-foreground w-5 text-right">{i + 1}</span>
+                            <span className="truncate font-medium">{s.song_title}</span>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0 ml-3">
+                            <span className="text-xs text-muted-foreground">{formatEuros(s.revenue_cents)}</span>
+                            <Badge variant="secondary">{s.downloads}</Badge>
+                          </div>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Geografía */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" /> Países
+                {topCountry && (
+                  <span className="ml-auto text-xs text-muted-foreground font-normal">
+                    Top: {flagEmoji(topCountry.country_code)} {topCountry.country_name}
+                  </span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.by_country.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sin datos geográficos todavía.</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                  {stats.by_country.slice(0, 12).map((c) => {
+                    const max = stats.by_country[0].downloads || 1;
+                    const pct = (c.downloads / max) * 100;
+                    return (
+                      <div key={c.country_code} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="flex items-center gap-2 min-w-0 truncate">
+                            <span>{flagEmoji(c.country_code)}</span>
+                            <span className="truncate">{c.country_name}</span>
+                          </span>
+                          <Badge variant="secondary">{c.downloads}</Badge>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <p className="mt-4 text-xs text-muted-foreground">
+                La ubicación se obtiene de la IP en el momento de la descarga (aproximada).
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Demografía */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader><CardTitle className="text-base">Edad</CardTitle></CardHeader>
+              <CardContent>
+                {stats.by_age.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sin datos.</p>
+                ) : (
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={stats.by_age}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="bucket" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                        <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                        <Bar dataKey="downloads" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Género</CardTitle></CardHeader>
+              <CardContent>
+                {stats.by_gender.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sin datos.</p>
+                ) : (
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={stats.by_gender.map((g) => ({ ...g, name: GENDER_LABEL[g.gender] || g.gender }))}
+                          dataKey="downloads"
+                          nameKey="name"
+                          innerRadius={40}
+                          outerRadius={75}
+                          paddingAngle={2}
+                        >
+                          {stats.by_gender.map((_, i) => (
+                            <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <p className="mt-6 text-xs text-muted-foreground text-center">
+            Los datos demográficos se basan en los oyentes que han rellenado su edad y género en el perfil.
+          </p>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ArtistStats;
