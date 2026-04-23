@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon } from 'lucide-react';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
 
 // Pricing rules (XAF base, displayed in EUR using fixed CFA peg)
 const XAF_PER_EUR = 655.957; // fixed parity
@@ -49,26 +49,41 @@ interface QrCardRow {
   download_credits: number;
 }
 
+interface CollaboratorRow {
+  id: string;
+  song_id: string | null;
+  artist_name: string;
+  share_percent: number;
+  claimed_by_user_id: string | null;
+}
+
 const Monetization = () => {
   const [loading, setLoading] = useState(true);
   const [downloads, setDownloads] = useState<DownloadRow[]>([]);
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [qrCards, setQrCards] = useState<Map<string, QrCardRow>>(new Map());
+  const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
   const [search, setSearch] = useState('');
+  const [poolSearch, setPoolSearch] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
-      const [{ data: dls }, { data: sgs }, { data: qrs }] = await Promise.all([
+      const [{ data: dls }, { data: sgs }, { data: qrs }, { data: collabs }] = await Promise.all([
         supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
         supabase.from('songs').select('id, title, artist_id, cover_url, artists(name)').order('title'),
         supabase.from('qr_cards').select('id, card_type, download_credits'),
+        supabase
+          .from('song_collaborators')
+          .select('id, song_id, artist_name, share_percent, claimed_by_user_id')
+          .not('song_id', 'is', null),
       ]);
       setDownloads((dls as any) ?? []);
       setSongs((sgs as any) ?? []);
       const map = new Map<string, QrCardRow>();
       (qrs ?? []).forEach((q: any) => map.set(q.id, q));
       setQrCards(map);
+      setCollaborators((collabs as any) ?? []);
       setLoading(false);
     };
     fetchAll();
@@ -149,6 +164,67 @@ const Monetization = () => {
     });
     return Array.from(map.values()).sort((a, b) => b.artistShare - a.artistShare);
   }, [enrichedSongs]);
+
+  // Pozo de colaboradores no reclamados (artistas no dados de alta o sin reclamar)
+  // Para cada song con colaboradores, repartimos los ingresos del artista (40%) según share_percent
+  // de los colaboradores cuyo claimed_by_user_id IS NULL.
+  const unclaimedPool = useMemo(() => {
+    // Agrupar colaboradores por canción
+    const bySong = new Map<string, CollaboratorRow[]>();
+    collaborators.forEach((c) => {
+      if (!c.song_id) return;
+      const arr = bySong.get(c.song_id) ?? [];
+      arr.push(c);
+      bySong.set(c.song_id, arr);
+    });
+
+    // Por artist_name (no reclamado) acumular descargas y € pendientes
+    const byArtist = new Map<
+      string,
+      { name: string; downloads: number; pending: number; songs: Set<string> }
+    >();
+    let totalPending = 0;
+    let totalDownloadsInPool = 0;
+
+    enrichedSongs.forEach((s) => {
+      const collabs = bySong.get(s.id);
+      if (!collabs || collabs.length === 0) return;
+      const unclaimed = collabs.filter((c) => !c.claimed_by_user_id);
+      if (unclaimed.length === 0) return;
+
+      unclaimed.forEach((c) => {
+        const sharePct = Number(c.share_percent) / 100;
+        const pending = s.artistRevenue * sharePct;
+        const dlShare = s.downloads * sharePct;
+        const key = c.artist_name.trim().toLowerCase();
+        const cur = byArtist.get(key) ?? {
+          name: c.artist_name,
+          downloads: 0,
+          pending: 0,
+          songs: new Set<string>(),
+        };
+        cur.downloads += dlShare;
+        cur.pending += pending;
+        cur.songs.add(s.id);
+        byArtist.set(key, cur);
+        totalPending += pending;
+        totalDownloadsInPool += dlShare;
+      });
+    });
+
+    return {
+      list: Array.from(byArtist.values())
+        .map((a) => ({ ...a, songCount: a.songs.size }))
+        .sort((x, y) => y.pending - x.pending),
+      totalPending,
+      totalDownloadsInPool,
+    };
+  }, [collaborators, enrichedSongs]);
+
+  const filteredPool = useMemo(() => {
+    const q = poolSearch.toLowerCase();
+    return unclaimedPool.list.filter((a) => a.name.toLowerCase().includes(q));
+  }, [unclaimedPool, poolSearch]);
 
   const totals = useMemo(() => {
     const totalDownloads = downloads.length;
@@ -337,6 +413,103 @@ const Monetization = () => {
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                       Sin datos todavía
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pozo de colaboradores no reclamados */}
+      <Card className="border-yusiop-primary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-yusiop-primary" />
+            Pozo de monetización pendiente
+          </CardTitle>
+          <CardDescription>
+            Importes de colaboradores cuyo nombre artístico aparece en splits pero que aún no están
+            registrados en la app o no han reclamado su parte. El dinero queda retenido hasta que el
+            artista verifique su identidad.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Total pendiente en el pozo</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Coins className="h-5 w-5 text-yusiop-primary" />
+                  {formatEUR(unclaimedPool.totalPending)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Artistas sin reclamar</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <UserX className="h-5 w-5 text-yusiop-primary" />
+                  {unclaimedPool.list.length}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="bg-muted/30">
+              <CardHeader className="pb-2">
+                <CardDescription>Descargas asociadas</CardDescription>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <MusicIcon className="h-5 w-5 text-yusiop-primary" />
+                  {unclaimedPool.totalDownloadsInPool.toLocaleString('es-ES', {
+                    maximumFractionDigits: 1,
+                  })}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar artista colaborador..."
+              value={poolSearch}
+              onChange={(e) => setPoolSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Artista colaborador</TableHead>
+                  <TableHead className="text-right">Canciones</TableHead>
+                  <TableHead className="text-right">Descargas (su parte)</TableHead>
+                  <TableHead className="text-right">Importe pendiente</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPool.map((a) => (
+                  <TableRow key={a.name}>
+                    <TableCell className="font-medium">
+                      {a.name}
+                      <Badge variant="outline" className="ml-2 text-xs">
+                        Sin reclamar
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{a.songCount}</TableCell>
+                    <TableCell className="text-right">
+                      {a.downloads.toLocaleString('es-ES', { maximumFractionDigits: 1 })}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-yusiop-primary">
+                      {formatEUR(a.pending)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredPool.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      No hay importes pendientes en el pozo.
                     </TableCell>
                   </TableRow>
                 )}
