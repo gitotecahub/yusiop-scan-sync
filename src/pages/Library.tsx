@@ -44,6 +44,9 @@ const Library = () => {
   const [loading, setLoading] = useState(true);
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
+  const [recipientUsername, setRecipientUsername] = useState('');
+  const [sharing, setSharing] = useState(false);
   const { currentSong, isPlaying, setCurrentSong, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
