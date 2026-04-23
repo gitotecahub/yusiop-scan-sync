@@ -394,6 +394,9 @@ const SalesSimulator = () => {
         </CardContent>
       </Card>
 
+      {/* Investor ROI progress */}
+      <InvestorProgress totalInvestorXAF={totals.totalInvestor} />
+
       {/* KPIs */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <KpiCard
