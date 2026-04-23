@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
 
@@ -31,7 +31,7 @@ interface SubmissionRow {
   preview_path: string | null;
   cover_url: string | null;
   cover_path: string | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'removed';
   rejection_reason: string | null;
   created_at: string;
   reviewed_at: string | null;
@@ -46,7 +46,7 @@ const formatDuration = (s: number) => {
 const SongSubmissions = () => {
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'removed' | 'all'>('pending');
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<SubmissionRow | null>(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -201,7 +201,7 @@ const SongSubmissions = () => {
       </div>
 
       <div className="flex gap-2 flex-wrap">
-        {(['pending', 'approved', 'rejected', 'all'] as const).map((f) => (
+        {(['pending', 'approved', 'rejected', 'removed', 'all'] as const).map((f) => (
           <Button
             key={f}
             size="sm"
@@ -211,6 +211,7 @@ const SongSubmissions = () => {
             {f === 'pending' && 'Pendientes'}
             {f === 'approved' && 'Aprobadas'}
             {f === 'rejected' && 'Rechazadas'}
+            {f === 'removed' && 'Eliminadas'}
             {f === 'all' && 'Todas'}
           </Button>
         ))}
@@ -244,7 +245,7 @@ const SongSubmissions = () => {
                         variant={
                           row.status === 'approved'
                             ? 'default'
-                            : row.status === 'rejected'
+                            : row.status === 'rejected' || row.status === 'removed'
                               ? 'destructive'
                               : 'secondary'
                         }
@@ -252,6 +253,7 @@ const SongSubmissions = () => {
                         {row.status === 'pending' && (<><Clock className="h-3 w-3 mr-1" /> Pendiente</>)}
                         {row.status === 'approved' && 'Publicada'}
                         {row.status === 'rejected' && 'Rechazada'}
+                        {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                       </Badge>
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
