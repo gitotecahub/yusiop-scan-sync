@@ -348,11 +348,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           .update(update)
           .eq('id', editing.id);
         if (dbError) throw dbError;
+        await persistCollaborators(editing.id);
         setProgress(100);
         toast.success('Envío actualizado y reenviado a revisión');
       } else {
         if (!trackUp) throw new Error('Falta archivo de audio');
-        const { error: dbError } = await supabase.from('song_submissions').insert({
+        const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
           user_id: user.id,
           title: formData.title.trim(),
           artist_name: formData.artist_name.trim(),
@@ -365,8 +366,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
-        });
+        }).select('id').single();
         if (dbError) throw dbError;
+        if (inserted?.id) await persistCollaborators(inserted.id);
         setProgress(100);
         toast.success('Canción enviada a revisión');
       }
