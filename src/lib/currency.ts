@@ -15,3 +15,14 @@ export const formatXAFNumber = (eur: number): string =>
 // "4,99 € · 3.273 XAF" — para usar en una sola línea (botones, badges)
 export const formatEURWithXAFInline = (eur: number): string =>
   `${formatEURNumber(eur)} · ${formatXAFNumber(eur)}`;
+
+// Formatear un importe ya expresado en XAF (sin conversión)
+export const formatXAFFixed = (xaf: number): string =>
+  `${Math.round(xaf).toLocaleString('es-ES')} XAF`;
+
+// Convertir un importe en EUR a XAF y devolverlo como string ya formateado
+export const eurToXafString = (eur: number): string => formatXAFFixed(eurToXaf(eur));
+
+// Precios fijos de tarjetas FÍSICAS (vendidas en XAF)
+export const PHYSICAL_STANDARD_PRICE_XAF = 3000;
+export const PHYSICAL_PREMIUM_PRICE_XAF = 7000;

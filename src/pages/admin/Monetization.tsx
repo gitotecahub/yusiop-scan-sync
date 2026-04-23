@@ -11,8 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
-import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode } from 'lucide-react';
+import {
+  formatEURNumber,
+  formatXAFNumber,
+  formatXAFFixed,
+  eurToXaf,
+  PHYSICAL_STANDARD_PRICE_XAF,
+  PHYSICAL_PREMIUM_PRICE_XAF,
+} from '@/lib/currency';
 
 // Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
 const STANDARD_PRICE_EUR = 5.00;
@@ -29,6 +36,21 @@ const formatEUR = (eur: number, align: 'left' | 'right' = 'right'): ReactNode =>
     <span className="whitespace-nowrap tabular-nums">{formatEURNumber(eur)}</span>
     <span className="text-[0.65em] font-normal text-foreground whitespace-nowrap tabular-nums">
       {formatXAFNumber(eur)}
+    </span>
+  </span>
+);
+
+// XAF como valor principal (grande) y EUR como valor secundario debajo (pequeño)
+// Útil para la sección de origen de tarjetas, donde el XAF tiene prioridad visual.
+const formatXAFPrimary = (
+  xaf: number,
+  eur: number,
+  align: 'left' | 'right' = 'right',
+): ReactNode => (
+  <span className={`inline-flex flex-col leading-tight ${align === 'right' ? 'items-end' : 'items-start'}`}>
+    <span className="whitespace-nowrap tabular-nums font-semibold">{formatXAFFixed(xaf)}</span>
+    <span className="text-[0.7em] font-normal text-muted-foreground whitespace-nowrap tabular-nums">
+      {formatEURNumber(eur)}
     </span>
   </span>
 );
@@ -51,6 +73,7 @@ interface QrCardRow {
   id: string;
   card_type: 'standard' | 'premium';
   download_credits: number;
+  origin: 'physical' | 'digital';
 }
 
 interface CollaboratorRow {
@@ -76,7 +99,7 @@ const Monetization = () => {
       const [{ data: dls }, { data: sgs }, { data: qrs }, { data: collabs }] = await Promise.all([
         supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
         supabase.from('songs').select('id, title, artist_id, cover_url, artists(name)').order('title'),
-        supabase.from('qr_cards').select('id, card_type, download_credits'),
+        supabase.from('qr_cards').select('id, card_type, download_credits, origin'),
         supabase
           .from('song_collaborators')
           .select('id, song_id, artist_name, share_percent, claimed_by_user_id')
@@ -272,6 +295,59 @@ const Monetization = () => {
     };
   }, [downloads, qrCards]);
 
+  // Desglose por ORIGEN de tarjeta (físicas XAF vs virtuales EUR)
+  // Físicas → vendidas en CFA (3000 XAF estándar / 7000 XAF premium) con QR o 6 dígitos.
+  // Virtuales → vendidas en EUR (5 € estándar / 10 € premium) por checkout digital.
+  const byOrigin = useMemo(() => {
+    const make = () => ({
+      standard: { count: 0, activated: 0, downloads: 0, gross: 0 },
+      premium: { count: 0, activated: 0, downloads: 0, gross: 0 },
+    });
+    const physical = make();
+    const digital = make();
+
+    // Inventario de tarjetas: contar todas las creadas por origen + tipo
+    qrCards.forEach((qr: any) => {
+      const bucket = qr.origin === 'digital' ? digital : physical;
+      const tier = qr.card_type === 'premium' ? 'premium' : 'standard';
+      bucket[tier].count += 1;
+      if (qr.is_activated) bucket[tier].activated += 1;
+    });
+
+    // Descargas: atribuir cada descarga al origen de su tarjeta
+    downloads.forEach((d) => {
+      if (!d.qr_card_id) return;
+      const qr = qrCards.get(d.qr_card_id);
+      if (!qr) return;
+      const bucket = qr.origin === 'digital' ? digital : physical;
+      const tier = qr.card_type === 'premium' ? 'premium' : 'standard';
+      bucket[tier].downloads += 1;
+      bucket[tier].gross += revenueForDownload(d);
+    });
+
+    // Para físicas: ingresos brutos POR VENTA en XAF (precio fijo × tarjetas activadas)
+    // Para virtuales: ingresos brutos POR VENTA en EUR (precio fijo × tarjetas activadas)
+    const physicalSalesXaf =
+      physical.standard.activated * PHYSICAL_STANDARD_PRICE_XAF +
+      physical.premium.activated * PHYSICAL_PREMIUM_PRICE_XAF;
+    const digitalSalesEur =
+      digital.standard.activated * STANDARD_PRICE_EUR +
+      digital.premium.activated * PREMIUM_PRICE_EUR;
+
+    return {
+      physical: {
+        ...physical,
+        salesXaf: physicalSalesXaf,
+        salesEur: physicalSalesXaf / 655.957, // referencia EUR
+      },
+      digital: {
+        ...digital,
+        salesEur: digitalSalesEur,
+        salesXaf: eurToXaf(digitalSalesEur),
+      },
+    };
+  }, [qrCards, downloads]);
+
   if (loading) {
     return (
       <div className="p-6 space-y-4">
@@ -407,6 +483,189 @@ const Monetization = () => {
           </Card>
         ))}
       </div>
+
+      {/* Facturación por origen de tarjeta — XAF en primer plano */}
+      <Card className="border-yusiop-primary/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-yusiop-primary" />
+            Facturación por origen de tarjeta
+          </CardTitle>
+          <CardDescription>
+            Tarjetas <strong>físicas</strong> vendidas en XAF (3.000 estándar / 7.000 premium) con QR
+            o código de 6 dígitos. Tarjetas <strong>virtuales</strong> vendidas en EUR (5 € estándar
+            / 10 € premium) por compra digital. El XAF se muestra como referencia principal.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Físicas */}
+            <Card className="bg-muted/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <QrCode className="h-5 w-5 text-yusiop-primary" />
+                    Tarjetas físicas (XAF)
+                  </CardTitle>
+                  <Badge variant="secondary">QR · 6 dígitos</Badge>
+                </div>
+                <CardDescription>
+                  Estándar {formatXAFFixed(PHYSICAL_STANDARD_PRICE_XAF)} · Premium{' '}
+                  {formatXAFFixed(PHYSICAL_PREMIUM_PRICE_XAF)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="rounded-md border p-4 bg-background">
+                  <p className="text-xs text-muted-foreground mb-1">Facturación total (activadas)</p>
+                  <p className="text-2xl font-bold tabular-nums">
+                    {formatXAFFixed(byOrigin.physical.salesXaf)}
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    ≈ {formatEURNumber(byOrigin.physical.salesEur)}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Estándar activadas</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.physical.standard.activated}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {' '}/ {byOrigin.physical.standard.count}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums mt-1">
+                      {formatXAFFixed(
+                        byOrigin.physical.standard.activated * PHYSICAL_STANDARD_PRICE_XAF,
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Premium activadas</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.physical.premium.activated}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {' '}/ {byOrigin.physical.premium.count}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums mt-1">
+                      {formatXAFFixed(
+                        byOrigin.physical.premium.activated * PHYSICAL_PREMIUM_PRICE_XAF,
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Descargas usadas</p>
+                    <p className="text-lg font-semibold">
+                      {(byOrigin.physical.standard.downloads + byOrigin.physical.premium.downloads).toLocaleString('es-ES')}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Inventario total</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.physical.standard.count + byOrigin.physical.premium.count}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Virtuales */}
+            <Card className="bg-muted/20 border-yusiop-primary/30">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-yusiop-primary" />
+                    Tarjetas virtuales (EUR)
+                  </CardTitle>
+                  <Badge>Stripe checkout</Badge>
+                </div>
+                <CardDescription>
+                  Estándar {formatEURNumber(STANDARD_PRICE_EUR)} · Premium{' '}
+                  {formatEURNumber(PREMIUM_PRICE_EUR)}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="rounded-md border p-4 bg-background">
+                  <p className="text-xs text-muted-foreground mb-1">Facturación total (activadas)</p>
+                  <p className="text-2xl font-bold tabular-nums">
+                    {formatXAFFixed(byOrigin.digital.salesXaf)}
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    ≈ {formatEURNumber(byOrigin.digital.salesEur)}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Estándar activadas</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.digital.standard.activated}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {' '}/ {byOrigin.digital.standard.count}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums mt-1">
+                      {formatXAFFixed(
+                        eurToXaf(byOrigin.digital.standard.activated * STANDARD_PRICE_EUR),
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Premium activadas</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.digital.premium.activated}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {' '}/ {byOrigin.digital.premium.count}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums mt-1">
+                      {formatXAFFixed(
+                        eurToXaf(byOrigin.digital.premium.activated * PREMIUM_PRICE_EUR),
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Descargas usadas</p>
+                    <p className="text-lg font-semibold">
+                      {(byOrigin.digital.standard.downloads + byOrigin.digital.premium.downloads).toLocaleString('es-ES')}
+                    </p>
+                  </div>
+                  <div className="rounded-md border p-3">
+                    <p className="text-xs text-muted-foreground">Inventario total</p>
+                    <p className="text-lg font-semibold">
+                      {byOrigin.digital.standard.count + byOrigin.digital.premium.count}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Total combinado */}
+          <div className="rounded-lg border-2 border-yusiop-primary/40 p-4 bg-gradient-to-br from-yusiop-primary/5 to-transparent">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Facturación combinada (físicas + virtuales)</p>
+                <p className="text-3xl font-bold tabular-nums mt-1">
+                  {formatXAFFixed(byOrigin.physical.salesXaf + byOrigin.digital.salesXaf)}
+                </p>
+                <p className="text-sm text-muted-foreground tabular-nums">
+                  ≈ {formatEURNumber(byOrigin.physical.salesEur + byOrigin.digital.salesEur)}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-right">
+                <div>
+                  <p className="text-xs text-muted-foreground">Físicas</p>
+                  <p className="font-semibold tabular-nums">{formatXAFFixed(byOrigin.physical.salesXaf)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Virtuales</p>
+                  <p className="font-semibold tabular-nums">{formatXAFFixed(byOrigin.digital.salesXaf)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Songs revenue */}
       <Card>
