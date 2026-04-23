@@ -329,18 +329,20 @@ const QRScanner = () => {
       {/* Card types — tarjetas reales de muestra */}
       <div>
         <p className="eyebrow mb-3">Tipos de tarjeta</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <DigitalCard
             code="YUSIOP-DEMO-A7K9X2"
             cardType="standard"
             downloadCredits={4}
             qrValue="YUSIOP-DEMO-STANDARD"
+            compact
           />
           <DigitalCard
             code="YUSIOP-DEMO-B3R7D9"
             cardType="premium"
             downloadCredits={10}
             qrValue="YUSIOP-DEMO-PREMIUM"
+            compact
           />
         </div>
       </div>
