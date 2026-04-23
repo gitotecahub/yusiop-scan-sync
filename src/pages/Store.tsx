@@ -67,7 +67,7 @@ const Store = () => {
             if (error) {
               lastError = error.message;
             } else if (data?.success) {
-              const wasGift = !!data?.is_gift;
+              const wasGift = !!(data?.is_gift ?? data?.card?.is_gift);
               if (wasGift) {
                 toast.success('🎁 ¡Regalo enviado con éxito!', { duration: 3000 });
                 navigate('/library', { replace: true });
