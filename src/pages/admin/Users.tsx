@@ -43,9 +43,12 @@ import {
   Crown,
   Gift,
   ShoppingBag,
+  KeyRound,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
+import { StaffPermissionsDialog } from '@/components/admin/StaffPermissionsDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserProfile {
   id: string;
