@@ -13,7 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const schema = z.object({
-  artist_name: z.string().trim().min(2, 'Nombre demasiado corto').max(80),
+  full_name: z.string().trim().min(2, 'Nombre completo demasiado corto').max(120, 'Nombre completo demasiado largo'),
+  artist_name: z.string().trim().min(2, 'Nombre artístico demasiado corto').max(80),
   contact_email: z.string().trim().email('Email inválido').max(255),
   links: z.string().trim().max(500).optional().or(z.literal('')),
 });
@@ -28,6 +29,7 @@ const ArtistRequest = () => {
   const { user } = useAuthStore();
   const { artistRequestStatus, isArtist, loadForUser } = useModeStore();
 
+  const [fullName, setFullName] = useState('');
   const [artistName, setArtistName] = useState('');
   const [contactEmail, setContactEmail] = useState(user?.email ?? '');
   const [links, setLinks] = useState('');
@@ -94,6 +96,7 @@ const ArtistRequest = () => {
   const handleSubmit = async () => {
     if (!user) return;
     const parsed = schema.safeParse({
+      full_name: fullName,
       artist_name: artistName,
       contact_email: contactEmail,
       links,
@@ -118,13 +121,19 @@ const ArtistRequest = () => {
       const { error } = await supabase.from('artist_requests').insert([{
         user_id: user.id,
         artist_name: parsed.data.artist_name,
-        bio: null,
+        bio: `Nombre completo: ${parsed.data.full_name}`,
         genre: null,
         contact_email: parsed.data.contact_email,
         links: linkArray as any,
         document_urls: docs as any,
       }]);
       if (error) throw error;
+
+      // Actualizar el nombre completo del perfil
+      await supabase
+        .from('profiles')
+        .update({ full_name: parsed.data.full_name })
+        .eq('user_id', user.id);
 
       await loadForUser(user.id);
       toast.success('Solicitud enviada. Te avisaremos cuando sea revisada.');
@@ -207,13 +216,24 @@ const ArtistRequest = () => {
 
       <div className="space-y-4">
         <div>
+          <Label className="eyebrow">Nombre completo *</Label>
+          <Input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            maxLength={120}
+            className="rounded-2xl h-11 mt-2"
+            placeholder="Tu nombre y apellidos reales (como aparecen en el documento)"
+          />
+        </div>
+
+        <div>
           <Label className="eyebrow">Nombre artístico *</Label>
           <Input
             value={artistName}
             onChange={(e) => setArtistName(e.target.value)}
             maxLength={80}
             className="rounded-2xl h-11 mt-2"
-            placeholder="Tu nombre o el de tu proyecto"
+            placeholder="Tu nombre artístico o el de tu proyecto"
           />
         </div>
 
