@@ -163,7 +163,7 @@ const Collaborations = () => {
                     <Badge variant="secondary">{p.share_percent}%</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Como <strong>{p.artist_name}</strong> · {p.downloads} descargas · estimado: {formatEuros(p.estimated_revenue_cents)}
+                    Como <strong>{p.artist_name}</strong> · {p.downloads} descargas · estimado: {formatEurosWithXaf(p.estimated_revenue_cents)}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
