@@ -53,6 +53,8 @@ const Profile = () => {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
+  const { areas, isSuperAdmin, loading: staffLoading } = useStaffAreas();
+  const hasPanelAccess = !staffLoading && (isSuperAdmin || areas.size > 0);
   const [editing, setEditing] = useState(false);
   const [wifiOnly, setWifiOnly] = useState(true);
   const [notifications, setNotifications] = useState(true);
