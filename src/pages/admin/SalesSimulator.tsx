@@ -16,24 +16,24 @@ const formatEURNumber = (xaf: number) =>
     maximumFractionDigits: 2,
   })} €`;
 
-// Importe en EUR + equivalencia XAF más pequeña y atenuada
+// Importe en EUR con la equivalencia XAF debajo, como descripción
 const formatEUR = (xaf: number): ReactNode => (
-  <>
+  <span className="inline-flex flex-col items-end leading-tight">
     <span>{formatEURNumber(xaf)}</span>
-    <span className="ml-1.5 text-[0.75em] font-normal text-muted-foreground/70">
-      · {formatXAFNumber(xaf)}
+    <span className="text-[0.7em] font-normal text-muted-foreground/70">
+      {formatXAFNumber(xaf)}
     </span>
-  </>
+  </span>
 );
 const formatEURRaw = (eur: number): ReactNode => (
-  <>
+  <span className="inline-flex flex-col items-end leading-tight">
     <span>
       {eur.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
     </span>
-    <span className="ml-1.5 text-[0.75em] font-normal text-muted-foreground/70">
-      · {Math.round(eur * XAF_PER_EUR).toLocaleString('es-ES')} XAF
+    <span className="text-[0.7em] font-normal text-muted-foreground/70">
+      {Math.round(eur * XAF_PER_EUR).toLocaleString('es-ES')} XAF
     </span>
-  </>
+  </span>
 );
 
 // Defaults (XAF base)
