@@ -270,7 +270,7 @@ const Store = () => {
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <>Pagar {TIERS[selected].price}{isGift ? ' como regalo' : ''}</>
+          <>Pagar {formatEURNumber(TIERS[selected].priceEur)} ({formatXAFNumber(TIERS[selected].priceEur)}){isGift ? ' como regalo' : ''}</>
         )}
       </Button>
 
