@@ -119,17 +119,38 @@ const Catalog = () => {
         if (songsError) {
           console.error('Error fetching songs:', songsError);
         } else {
-          const formattedSongs = songsData.map(song => ({
-            id: song.id,
-            title: song.title,
-            artist: song.artists.name,
-            album: song.albums?.title,
-            duration_seconds: song.duration_seconds,
-            cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
-            preview_url: song.preview_url,
-            track_url: song.track_url,
-            preview_start_seconds: (song as any).preview_start_seconds ?? 0,
-          }));
+          // Cargar colaboradores (featuring) para componer "Artista ft Colab1, Colab2"
+          const songIds = (songsData ?? []).map((s: any) => s.id);
+          let collabsBySong = new Map<string, string[]>();
+          if (songIds.length > 0) {
+            const { data: collabsData } = await supabase
+              .from('song_collaborators')
+              .select('song_id, artist_name, is_primary, created_at')
+              .in('song_id', songIds);
+            (collabsData ?? []).forEach((c: any) => {
+              if (c.is_primary) return; // El principal viene de songs.artists.name
+              const list = collabsBySong.get(c.song_id) ?? [];
+              list.push(c.artist_name);
+              collabsBySong.set(c.song_id, list);
+            });
+          }
+
+          const formattedSongs = songsData.map(song => {
+            const primary = song.artists.name;
+            const feats = collabsBySong.get(song.id) ?? [];
+            const artistDisplay = feats.length > 0 ? `${primary} ft ${feats.join(', ')}` : primary;
+            return {
+              id: song.id,
+              title: song.title,
+              artist: artistDisplay,
+              album: song.albums?.title,
+              duration_seconds: song.duration_seconds,
+              cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+              preview_url: song.preview_url,
+              track_url: song.track_url,
+              preview_start_seconds: (song as any).preview_start_seconds ?? 0,
+            };
+          });
           setSongs(formattedSongs);
           setFilteredSongs(formattedSongs);
         }
