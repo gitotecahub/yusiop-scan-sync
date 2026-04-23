@@ -687,11 +687,18 @@ const SalesSimulator = () => {
             <CardDescription>Resultados detallados de la simulación.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Ingresos brutos Estándar" value={formatEUR(totals.stdGross)} />
-            <Row label="Ingresos brutos Premium" value={formatEUR(totals.premGross)} />
+            <Row label="Físicas Estándar (XAF)" value={formatEUR(totals.stdGross)} />
+            <Row label="Físicas Premium (XAF)" value={formatEUR(totals.premGross)} />
+            <Row label="Total físicas" value={formatEUR(totals.physicalGross)} bold />
             <Separator />
-            <Row label="Bolsa artistas Estándar" value={formatEUR(totals.stdArtist)} />
-            <Row label="Bolsa artistas Premium" value={formatEUR(totals.premArtist)} />
+            <Row label="Virtuales Estándar (EUR)" value={formatEURRaw(totals.vStdGrossEUR)} />
+            <Row label="Virtuales Premium (EUR)" value={formatEURRaw(totals.vPremGrossEUR)} />
+            <Row label="Total virtuales" value={formatEURRaw(totals.virtualGrossEUR)} bold />
+            <Separator />
+            <Row label="Total combinado" value={formatEUR(totals.totalGross)} bold highlight />
+            <Separator />
+            <Row label="Bolsa artistas físicas" value={formatEUR(totals.stdArtist + totals.premArtist)} />
+            <Row label="Bolsa artistas virtuales" value={formatEUR(totals.vStdArtist + totals.vPremArtist)} />
             <Row
               label={`Total artistas (${artistShare}%)`}
               value={formatEUR(totals.totalArtist)}
