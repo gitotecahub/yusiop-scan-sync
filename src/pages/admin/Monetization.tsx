@@ -236,6 +236,37 @@ const Monetization = () => {
     };
   }, [downloads.length, enrichedSongs]);
 
+  // Desglose por tipo de tarjeta (estándar / premium)
+  const byCardType = useMemo(() => {
+    const acc = {
+      standard: { downloads: 0, gross: 0 },
+      premium: { downloads: 0, gross: 0 },
+    };
+    downloads.forEach((d) => {
+      let cardType: string | null = d.card_type;
+      if (d.qr_card_id) {
+        const qr = qrCards.get(d.qr_card_id);
+        if (qr) cardType = qr.card_type;
+      }
+      const r = revenueForDownload(d);
+      const bucket = cardType === 'premium' ? 'premium' : 'standard';
+      acc[bucket].downloads += 1;
+      acc[bucket].gross += r;
+    });
+    return {
+      standard: {
+        ...acc.standard,
+        artist: acc.standard.gross * ARTIST_SHARE,
+        platform: acc.standard.gross * (1 - ARTIST_SHARE),
+      },
+      premium: {
+        ...acc.premium,
+        artist: acc.premium.gross * ARTIST_SHARE,
+        platform: acc.premium.gross * (1 - ARTIST_SHARE),
+      },
+    };
+  }, [downloads, qrCards]);
+
   if (loading) {
     return (
       <div className="p-6 space-y-4">
