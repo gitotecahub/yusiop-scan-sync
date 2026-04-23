@@ -81,15 +81,20 @@ const AudioPlayer = () => {
 
     if (loadedSongIdRef.current === currentSong.id) return;
 
-    // En preview: si tenemos track_url y preview_start_seconds definido, usamos el track completo
-    // y reproducimos desde ese punto. Si no, fallback al preview_url legado.
-    const hasCustomPreview =
-      isPreview &&
-      typeof currentSong.preview_start_seconds === 'number' &&
-      !!currentSong.track_url;
-    const audioUrl = hasCustomPreview
-      ? (currentSong.track_url as string)
-      : (currentSong.preview_url || currentSong.track_url || '');
+    // Reproducción completa: SIEMPRE usar track_url (no el preview legado).
+    // Reproducción preview: usar track_url si hay preview_start_seconds, si no, fallback al preview_url legado.
+    let audioUrl = '';
+    if (isPreview) {
+      const hasCustomPreview =
+        typeof currentSong.preview_start_seconds === 'number' &&
+        !!currentSong.track_url;
+      audioUrl = hasCustomPreview
+        ? (currentSong.track_url as string)
+        : (currentSong.preview_url || currentSong.track_url || '');
+    } else {
+      // Modo completo: priorizar track_url SIEMPRE
+      audioUrl = currentSong.track_url || currentSong.preview_url || '';
+    }
     if (!audioUrl) {
       console.warn('Canción sin URL de audio', currentSong);
       toast.error('Esta canción no tiene archivo de audio');
