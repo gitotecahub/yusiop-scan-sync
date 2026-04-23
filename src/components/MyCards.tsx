@@ -141,7 +141,7 @@ const MyCards = () => {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 auto-rows-min">
         {cards.map((c) => {
           const depleted = c.download_credits <= 0;
           return (
