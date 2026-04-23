@@ -102,7 +102,7 @@ const MySubmissions = () => {
                       <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
                     )}
                     {r.status === 'approved' && (
-                      <Badge className="bg-green-600 hover:bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                      <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
                     )}
                     {r.status === 'rejected' && (
                       <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>

@@ -132,7 +132,13 @@ export function AdminSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const isArtistRequests = item.url === '/admin/artist-requests';
-                const showBadge = isArtistRequests && pendingArtistCount > 0;
+                const isSongSubmissions = item.url === '/admin/song-submissions';
+                const badgeCount = isArtistRequests
+                  ? pendingArtistCount
+                  : isSongSubmissions
+                    ? pendingSongCount
+                    : 0;
+                const showBadge = badgeCount > 0;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
@@ -148,7 +154,7 @@ export function AdminSidebar() {
                             <span>{item.title}</span>
                             {showBadge && (
                               <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
-                                {pendingArtistCount > 99 ? '99+' : pendingArtistCount}
+                                {badgeCount > 99 ? '99+' : badgeCount}
                               </span>
                             )}
                           </span>
