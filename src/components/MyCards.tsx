@@ -215,6 +215,7 @@ const MyCards = () => {
                 cardType={selected.card_type}
                 downloadCredits={selected.download_credits}
                 isGift={selected.is_gift}
+                celebrate
               />
 
               {/* Botón principal de copia rápida */}
