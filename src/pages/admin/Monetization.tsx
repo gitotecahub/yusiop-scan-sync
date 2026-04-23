@@ -40,6 +40,21 @@ const formatEUR = (eur: number, align: 'left' | 'right' = 'right'): ReactNode =>
   </span>
 );
 
+// XAF como valor principal (grande) y EUR como valor secundario debajo (pequeño)
+// Útil para la sección de origen de tarjetas, donde el XAF tiene prioridad visual.
+const formatXAFPrimary = (
+  xaf: number,
+  eur: number,
+  align: 'left' | 'right' = 'right',
+): ReactNode => (
+  <span className={`inline-flex flex-col leading-tight ${align === 'right' ? 'items-end' : 'items-start'}`}>
+    <span className="whitespace-nowrap tabular-nums font-semibold">{formatXAFFixed(xaf)}</span>
+    <span className="text-[0.7em] font-normal text-muted-foreground whitespace-nowrap tabular-nums">
+      {formatEURNumber(eur)}
+    </span>
+  </span>
+);
+
 interface DownloadRow {
   song_id: string;
   card_type: string | null;
