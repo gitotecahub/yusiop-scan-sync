@@ -155,8 +155,8 @@ const Store = () => {
         toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 2500 });
         navigate('/library', { replace: true });
       } else {
-        toast.success('🎉 ¡Felicidades! Compra simulada con éxito. Tu tarjeta ya está activa.', { duration: 2500 });
-        navigate('/library', { replace: true });
+        toast.success('🎉 ¡Felicidades! Tu tarjeta está lista. Explora el catálogo y empieza a descargar.', { duration: 3500 });
+        navigate('/catalog', { replace: true });
       }
     } catch (e: any) {
       console.error(e);
