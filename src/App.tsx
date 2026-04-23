@@ -28,6 +28,7 @@ import Albums from '@/pages/admin/Albums';
 import QRCards from '@/pages/admin/QRCards';
 import Downloads from '@/pages/admin/Downloads';
 import Monetization from '@/pages/admin/Monetization';
+import SalesSimulator from '@/pages/admin/SalesSimulator';
 import Settings from '@/pages/admin/Settings';
 
 // Layout
@@ -73,6 +74,7 @@ const AppContent = () => {
         <Route path="qr-cards" element={<QRCards />} />
         <Route path="downloads" element={<Downloads />} />
         <Route path="monetization" element={<Monetization />} />
+        <Route path="simulator" element={<SalesSimulator />} />
         <Route path="settings" element={<Settings />} />
       </Route>
 
