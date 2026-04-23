@@ -527,6 +527,16 @@ const Users = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {permissionsUser && (
+        <StaffPermissionsDialog
+          open={!!permissionsUser}
+          onOpenChange={(open) => !open && setPermissionsUser(null)}
+          userId={permissionsUser.user_id}
+          username={permissionsUser.username || 'usuario'}
+          isSuperAdmin={permissionsUser.role === 'admin'}
+        />
+      )}
     </div>
   );
 };
