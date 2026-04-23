@@ -51,8 +51,8 @@ const Store = () => {
       const confirm = async () => {
         try {
           if (!sessionId) {
-            toast.success('🎉 Compra completada. Tu tarjeta ya está disponible.', { duration: 2500 });
-            navigate('/library', { replace: true });
+            toast.success('🎉 ¡Felicidades! Compra completada. Tu tarjeta ya está activa.', { duration: 3000 });
+            navigate('/catalog', { replace: true });
             return;
           }
 
@@ -67,8 +67,14 @@ const Store = () => {
             if (error) {
               lastError = error.message;
             } else if (data?.success) {
-              toast.success('🎉 ¡Compra completada! Tu tarjeta ya está disponible.', { duration: 2500 });
-              navigate('/library', { replace: true });
+              const wasGift = !!(data?.is_gift ?? data?.card?.is_gift);
+              if (wasGift) {
+                toast.success('🎁 ¡Regalo enviado con éxito!', { duration: 3000 });
+                navigate('/library', { replace: true });
+              } else {
+                toast.success('🎉 ¡Felicidades! Tu tarjeta está lista. Explora el catálogo y empieza a descargar.', { duration: 3500 });
+                navigate('/catalog', { replace: true });
+              }
               return;
             } else if (data?.payment_status && data.payment_status !== 'paid') {
               lastError = `Estado de pago: ${data.payment_status}`;
@@ -149,8 +155,8 @@ const Store = () => {
         toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 2500 });
         navigate('/library', { replace: true });
       } else {
-        toast.success('🎉 ¡Felicidades! Compra simulada con éxito. Tu tarjeta ya está activa.', { duration: 2500 });
-        navigate('/library', { replace: true });
+        toast.success('🎉 ¡Felicidades! Tu tarjeta está lista. Explora el catálogo y empieza a descargar.', { duration: 3500 });
+        navigate('/catalog', { replace: true });
       }
     } catch (e: any) {
       console.error(e);
