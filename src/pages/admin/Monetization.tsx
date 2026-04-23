@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon } from 'lucide-react';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet } from 'lucide-react';
 
 // Pricing rules (XAF base, displayed in EUR using fixed CFA peg)
 const XAF_PER_EUR = 655.957; // fixed parity
