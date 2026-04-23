@@ -150,8 +150,9 @@ const Profile = () => {
             .order('scanned_at', { ascending: false }),
           supabase
             .from('qr_cards')
-            .select('id, download_credits')
-            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`),
+            .select('id, code, card_type, download_credits, activated_at, created_at')
+            .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+            .order('activated_at', { ascending: false }),
           supabase
             .from('user_downloads')
             .select('id', { count: 'exact', head: true })
@@ -173,7 +174,7 @@ const Profile = () => {
           0,
         );
 
-        setScannedCards(credits);
+        setScannedCards(buildScannedCards(credits, qrCards));
         setProfile(prev => ({
           ...prev,
           downloadsRemaining: legacyAvailable + ownedAvailable,
