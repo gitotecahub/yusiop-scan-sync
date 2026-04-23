@@ -12,13 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
 import PlaybackControls from '@/components/PlaybackControls';
 import MyCards from '@/components/MyCards';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface DownloadedSong {
   id: string;

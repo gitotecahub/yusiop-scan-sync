@@ -250,7 +250,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
-          username: string | null
+          username: string
         }
         Insert: {
           avatar_url?: string | null
@@ -260,7 +260,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
-          username?: string | null
+          username: string
         }
         Update: {
           avatar_url?: string | null
@@ -270,7 +270,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
-          username?: string | null
+          username?: string
         }
         Relationships: []
       }
@@ -663,6 +663,13 @@ export type Database = {
           card_id: string
           card_type: Database["public"]["Enums"]["card_type"]
           download_credits: number
+          message: string
+          success: boolean
+        }[]
+      }
+      transfer_song_to_user: {
+        Args: { p_recipient_username: string; p_song_id: string }
+        Returns: {
           message: string
           success: boolean
         }[]
