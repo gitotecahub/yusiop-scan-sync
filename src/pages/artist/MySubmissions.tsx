@@ -40,12 +40,15 @@ interface SubmissionRow {
 const MySubmissions = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { t, language } = useLanguageStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [defaultName, setDefaultName] = useState('');
   const [editing, setEditing] = useState<EditingSubmission | null>(null);
+
+  const dateLocale = language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US';
 
   const load = async () => {
     if (!user) return;
