@@ -54,6 +54,33 @@ serve(async (req) => {
       );
     }
 
+    const getRemainingCredits = async () => {
+      const [{ data: ownedCards }, { data: creditsRows }] = await Promise.all([
+        supabase
+          .from("qr_cards")
+          .select("download_credits")
+          .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
+          .gt("download_credits", 0),
+        supabase
+          .from("user_credits")
+          .select("credits_remaining")
+          .eq("user_email", user.email)
+          .eq("is_active", true)
+          .gt("credits_remaining", 0),
+      ]);
+
+      const totalOwned = (ownedCards ?? []).reduce(
+        (sum, card) => sum + (card.download_credits ?? 0),
+        0,
+      );
+      const totalLegacy = (creditsRows ?? []).reduce(
+        (sum, credit) => sum + (credit.credits_remaining ?? 0),
+        0,
+      );
+
+      return totalOwned + totalLegacy;
+    };
+
     const { data: song, error: songError } = await supabase
       .from("songs")
       .select("id, title")
@@ -65,6 +92,35 @@ serve(async (req) => {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    const { data: existingDownload } = await supabase
+      .from("user_downloads")
+      .select("id, hidden_from_library")
+      .eq("user_id", user.id)
+      .eq("song_id", song.id)
+      .maybeSingle();
+
+    if (existingDownload) {
+      if (existingDownload.hidden_from_library) {
+        await supabase
+          .from("user_downloads")
+          .update({ hidden_from_library: false })
+          .eq("id", existingDownload.id);
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          credits_remaining: await getRemainingCredits(),
+          source: "existing_download",
+          restored: Boolean(existingDownload.hidden_from_library),
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Geolocalización por IP (best-effort, no bloquea la descarga si falla)
@@ -125,6 +181,37 @@ serve(async (req) => {
 
       if (rpcError) {
         console.error("consume_card_credit error:", rpcError);
+
+        if (rpcError.code === "23505") {
+          const { data: duplicatedDownload } = await supabase
+            .from("user_downloads")
+            .select("id, hidden_from_library")
+            .eq("user_id", user.id)
+            .eq("song_id", song.id)
+            .maybeSingle();
+
+          if (duplicatedDownload?.hidden_from_library) {
+            await supabase
+              .from("user_downloads")
+              .update({ hidden_from_library: false })
+              .eq("id", duplicatedDownload.id);
+          }
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              credits_remaining: await getRemainingCredits(),
+              card_type: ownedCard.card_type,
+              source: "existing_download",
+              restored: Boolean(duplicatedDownload?.hidden_from_library),
+            }),
+            {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            },
+          );
+        }
+
         return new Response(
           JSON.stringify({ error: "Error al consumir crédito" }),
           {
