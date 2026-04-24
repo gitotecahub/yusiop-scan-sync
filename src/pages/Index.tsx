@@ -215,7 +215,7 @@ const Index = () => {
       </Section>
 
       {/* === TRENDING — lista numerada en grid 2 cols === */}
-      <Section title="Trending" eyebrow="Lo más sonado" link="/catalog">
+      <Section title={t('home.section.trending')} eyebrow={language === 'es' ? 'Lo más sonado' : language === 'en' ? 'Most played' : language === 'fr' ? 'Les plus écoutés' : 'Mais tocadas'} link="/catalog">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {[1, 2, 3, 4].map((i) => (
@@ -248,7 +248,7 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <EmptyState text="Aún sin trending" />
+          <EmptyState text={language === 'es' ? 'Aún sin trending' : language === 'en' ? 'No trending yet' : language === 'fr' ? 'Pas encore de tendances' : 'Sem tendências ainda'} />
         )}
       </Section>
 
