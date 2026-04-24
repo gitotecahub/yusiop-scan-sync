@@ -294,12 +294,12 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" /> Top canciones
+                <BarChart3 className="h-4 w-4 text-primary" /> {t('artist.topSongs')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_song.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aún no tienes descargas.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noDownloadsYet')}</p>
               ) : (
                 <div className="space-y-2">
                   {stats.by_song.map((s, i) => {
