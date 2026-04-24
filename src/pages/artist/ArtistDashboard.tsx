@@ -14,6 +14,7 @@ const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist, setMode } = useModeStore();
+  const { t } = useLanguageStore();
   const [artistName, setArtistName] = useState<string>('');
   const [submitOpen, setSubmitOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
