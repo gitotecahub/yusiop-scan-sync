@@ -175,14 +175,24 @@ const MyCards = () => {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Aún no tienes tarjetas.</p>
-        <p className="text-xs mt-1">Compra una en la Tienda o escanea un QR.</p>
+        <p className="text-sm">
+          {language === 'es' ? 'Aún no tienes tarjetas.' :
+           language === 'en' ? 'You have no cards yet.' :
+           language === 'fr' ? "Vous n'avez pas encore de cartes." :
+           'Você ainda não tem cartões.'}
+        </p>
+        <p className="text-xs mt-1">
+          {language === 'es' ? 'Compra una en la Tienda o escanea un QR.' :
+           language === 'en' ? 'Buy one in the Store or scan a QR.' :
+           language === 'fr' ? "Achetez-en une dans la Boutique ou scannez un QR." :
+           'Compre um na Loja ou escaneie um QR.'}
+        </p>
       </div>
     );
   }
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    new Date(d).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <>
