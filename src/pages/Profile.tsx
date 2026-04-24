@@ -707,7 +707,7 @@ const Profile = () => {
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[280px]">
                 {LANGUAGES.map((l) => (
                   <SelectItem key={l.code} value={l.code}>
                     <div className="flex items-center gap-2">
