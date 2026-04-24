@@ -24,6 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { useLanguageStore } from '@/stores/languageStore';
 
 type Stats = {
   totals: {
