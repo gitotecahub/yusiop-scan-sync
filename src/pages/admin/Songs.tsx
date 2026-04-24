@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Play, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
+import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
 interface Collaborator {
   id: string;
@@ -27,6 +28,7 @@ interface Song {
   track_url: string | null;
   cover_url: string | null;
   created_at: string;
+  scheduled_release_at: string | null;
   artists?: { name: string };
   albums?: { title: string };
   song_collaborators?: Collaborator[];
