@@ -528,6 +528,63 @@ export type Database = {
         }
         Relationships: []
       }
+      song_plays: {
+        Row: {
+          duration_ms: number | null
+          id: string
+          ip_address: string | null
+          is_valid: boolean
+          played_at: string
+          session_id: string | null
+          song_id: string
+          user_id: string | null
+        }
+        Insert: {
+          duration_ms?: number | null
+          id?: string
+          ip_address?: string | null
+          is_valid?: boolean
+          played_at?: string
+          session_id?: string | null
+          song_id: string
+          user_id?: string | null
+        }
+        Update: {
+          duration_ms?: number | null
+          id?: string
+          ip_address?: string | null
+          is_valid?: boolean
+          played_at?: string
+          session_id?: string | null
+          song_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      song_shares: {
+        Row: {
+          channel: string | null
+          id: string
+          shared_at: string
+          song_id: string
+          user_id: string | null
+        }
+        Insert: {
+          channel?: string | null
+          id?: string
+          shared_at?: string
+          song_id: string
+          user_id?: string | null
+        }
+        Update: {
+          channel?: string | null
+          id?: string
+          shared_at?: string
+          song_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       song_submissions: {
         Row: {
           album_title: string | null
@@ -1239,6 +1296,22 @@ export type Database = {
           song_cover_url: string
           song_id: string
           song_title: string
+        }[]
+      }
+      get_popular_songs: {
+        Args: { p_genre?: string; p_limit?: number; p_period?: string }
+        Returns: {
+          artist_name: string
+          cover_url: string
+          downloads_count: number
+          favorites_count: number
+          genre: string
+          plays_count: number
+          popularity_score: number
+          redemptions_count: number
+          shares_count: number
+          song_id: string
+          title: string
         }[]
       }
       get_subscription_visibility: {
