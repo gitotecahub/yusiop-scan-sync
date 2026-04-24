@@ -49,6 +49,7 @@ interface MyCard {
 }
 
 const MyCards = () => {
+  const navigate = useNavigate();
   const [cards, setCards] = useState<MyCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
