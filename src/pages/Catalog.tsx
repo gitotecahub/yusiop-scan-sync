@@ -300,13 +300,14 @@ useEffect(() => {
       }
 
       // Update local state from authoritative server response
-      decrementCredits();
+      if (!isAdmin) {
+        decrementCredits();
+        if (data.credits_remaining <= 0) {
+          setUserCredits(null);
+        }
+      }
       setDownloadedSongs(prev => new Set([...prev, song.id]));
       toast.success(`"${song.title}" se descargó correctamente`);
-
-      if (data.credits_remaining <= 0) {
-        setUserCredits(null);
-      }
     } catch (error) {
       logger.error('Error downloading song');
       toast.error('Error al descargar la canción');
