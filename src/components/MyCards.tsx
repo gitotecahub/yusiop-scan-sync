@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { useLanguageStore } from '@/stores/languageStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ interface MyCard {
 
 const MyCards = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguageStore();
   const [cards, setCards] = useState<MyCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
@@ -173,14 +175,24 @@ const MyCards = () => {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Aún no tienes tarjetas.</p>
-        <p className="text-xs mt-1">Compra una en la Tienda o escanea un QR.</p>
+        <p className="text-sm">
+          {language === 'es' ? 'Aún no tienes tarjetas.' :
+           language === 'en' ? 'You have no cards yet.' :
+           language === 'fr' ? "Vous n'avez pas encore de cartes." :
+           'Você ainda não tem cartões.'}
+        </p>
+        <p className="text-xs mt-1">
+          {language === 'es' ? 'Compra una en la Tienda o escanea un QR.' :
+           language === 'en' ? 'Buy one in the Store or scan a QR.' :
+           language === 'fr' ? "Achetez-en une dans la Boutique ou scannez un QR." :
+           'Compre um na Loja ou escaneie um QR.'}
+        </p>
       </div>
     );
   }
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    new Date(d).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <>
@@ -216,18 +228,34 @@ const MyCards = () => {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        {language === 'es' ? '¿Eliminar esta tarjeta?' :
+                         language === 'en' ? 'Delete this card?' :
+                         language === 'fr' ? 'Supprimer cette carte ?' :
+                         'Excluir este cartão?'}
+                      </AlertDialogTitle>
                       <AlertDialogDescription>
-                        La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                        {language === 'es' ? 'La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.' :
+                         language === 'en' ? 'The depleted card will be removed from your library. This action cannot be undone.' :
+                         language === 'fr' ? 'La carte épuisée sera supprimée de votre bibliothèque. Cette action ne peut pas être annulée.' :
+                         'O cartão esgotado será removido da sua biblioteca. Esta ação não pode ser desfeita.'}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel>
+                        {language === 'es' ? 'Cancelar' :
+                         language === 'en' ? 'Cancel' :
+                         language === 'fr' ? 'Annuler' :
+                         'Cancelar'}
+                      </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => handleDelete(c.id)}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        Eliminar
+                        {language === 'es' ? 'Eliminar' :
+                         language === 'en' ? 'Delete' :
+                         language === 'fr' ? 'Supprimer' :
+                         'Excluir'}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -247,7 +275,7 @@ const MyCards = () => {
               ) : (
                 <Music className="h-5 w-5 text-primary" />
               )}
-              Tarjeta {selected?.card_type === 'premium' ? 'Premium' : 'Estándar'}
+              {selected?.card_type === 'premium' ? t('card.premium') : t('card.standard')}
             </DialogTitle>
           </DialogHeader>
 
@@ -271,28 +299,36 @@ const MyCards = () => {
                   className="flex-1 h-12 gap-2 font-semibold"
                 >
                   <ScanLine className="h-4 w-4" />
-                  Canjear
+                  {t('card.redeem')}
                 </Button>
                 <Button
                   onClick={() => handleCopy(selected.code)}
                   variant={copied ? 'secondary' : 'outline'}
                   size="icon"
                   className="h-12 w-12 shrink-0"
-                  aria-label="Copiar código manual"
-                  title="Copiar código manual"
+                  aria-label={t('card.copy')}
+                  title={t('card.copy')}
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground text-center -mt-1">
-                Pulsa "Canjear" para activar la tarjeta en el escáner
+                {language === 'es' ? 'Pulsa "Canjear" para activar la tarjeta en el escáner' : 
+                 language === 'en' ? 'Tap "Redeem" to activate the card in the scanner' :
+                 language === 'fr' ? 'Appuyez sur "Utiliser" pour activer la carte' :
+                 'Toque "Resgatar" para ativar o cartão'}
               </p>
 
               <div className="space-y-3 pt-2">
                 <div className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
-                    <span>Código</span>
+                    <span>
+                      {language === 'es' ? 'Código' :
+                       language === 'en' ? 'Code' :
+                       language === 'fr' ? 'Code' :
+                       'Código'}
+                    </span>
                   </div>
                   <span className="font-mono font-bold">{selected.code}</span>
                 </div>
@@ -300,7 +336,12 @@ const MyCards = () => {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CreditCard className="h-4 w-4" />
-                    <span>Descargas restantes</span>
+                    <span>
+                      {language === 'es' ? 'Descargas restantes' :
+                       language === 'en' ? 'Downloads remaining' :
+                       language === 'fr' ? 'Téléchargements restants' :
+                       'Downloads restantes'}
+                    </span>
                   </div>
                   <span className="font-bold text-primary text-lg tabular-nums">
                     {selected.download_credits}
@@ -310,18 +351,26 @@ const MyCards = () => {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>Activada</span>
+                    <span>
+                      {language === 'es' ? 'Activada' :
+                       language === 'en' ? 'Activated' :
+                       language === 'fr' ? 'Activée' :
+                       'Ativado'}
+                    </span>
                   </div>
                   <span>{formatDate(selected.created_at)}</span>
                 </div>
 
                 <div className="flex items-center gap-2 pt-2 flex-wrap">
                   <Badge variant="secondary" className="capitalize">
-                    {selected.origin === 'digital' ? 'Digital' : 'Física'}
+                    {selected.origin === 'digital' 
+                      ? (language === 'es' ? 'Digital' : language === 'en' ? 'Digital' : language === 'fr' ? 'Numérique' : 'Digital')
+                      : (language === 'es' ? 'Física' : language === 'en' ? 'Physical' : language === 'fr' ? 'Physique' : 'Física')}
                   </Badge>
                   {selected.is_gift && (
                     <Badge variant="outline" className="gap-1">
-                      <Gift className="h-3 w-3" /> Regalo
+                      <Gift className="h-3 w-3" /> 
+                      {language === 'es' ? 'Regalo' : language === 'en' ? 'Gift' : language === 'fr' ? 'Cadeau' : 'Presente'}
                     </Badge>
                   )}
                 </div>
@@ -333,7 +382,10 @@ const MyCards = () => {
                     className="w-full h-11 gap-2 mt-2 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
                   >
                     <Gift className="h-4 w-4" />
-                    Regalar esta tarjeta
+                    {language === 'es' ? 'Regalar esta tarjeta' :
+                     language === 'en' ? 'Gift this card' :
+                     language === 'fr' ? 'Offrir cette carte' :
+                     'Presentear este cartão'}
                   </Button>
                 )}
 
@@ -342,23 +394,42 @@ const MyCards = () => {
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" className="w-full h-11 gap-2 mt-2">
                         <Trash2 className="h-4 w-4" />
-                        Eliminar tarjeta agotada
+                        {language === 'es' ? 'Eliminar tarjeta agotada' :
+                         language === 'en' ? 'Delete depleted card' :
+                         language === 'fr' ? 'Supprimer carte épuisée' :
+                         'Excluir cartão esgotado'}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {language === 'es' ? '¿Eliminar esta tarjeta?' :
+                           language === 'en' ? 'Delete this card?' :
+                           language === 'fr' ? 'Supprimer cette carte ?' :
+                           'Excluir este cartão?'}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                          {language === 'es' ? 'La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.' :
+                           language === 'en' ? 'The depleted card will be removed from your library. This action cannot be undone.' :
+                           language === 'fr' ? 'La carte épuisée sera supprimée de votre bibliothèque. Cette action ne peut pas être annulée.' :
+                           'O cartão esgotado será removido da sua biblioteca. Esta ação não pode ser desfeita.'}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel>
+                          {language === 'es' ? 'Cancelar' :
+                           language === 'en' ? 'Cancel' :
+                           language === 'fr' ? 'Annuler' :
+                           'Cancelar'}
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(selected.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Eliminar
+                          {language === 'es' ? 'Eliminar' :
+                           language === 'en' ? 'Delete' :
+                           language === 'fr' ? 'Supprimer' :
+                           'Excluir'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -387,11 +458,16 @@ const MyCards = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Gift className="h-5 w-5 text-primary" />
-              Regalar tarjeta
+              {language === 'es' ? 'Regalar tarjeta' :
+               language === 'en' ? 'Gift card' :
+               language === 'fr' ? 'Offrir carte' :
+               'Presentear cartão'}
             </DialogTitle>
             <DialogDescription>
-              La tarjeta pasará a la biblioteca del destinatario y dejará de estar en la tuya.
-              Esta acción no se puede deshacer.
+              {language === 'es' ? 'La tarjeta pasará a la biblioteca del destinatario y dejará de estar en la tuya. Esta acción no se puede deshacer.' :
+               language === 'en' ? 'The card will move to the recipient\'s library and leave yours. This action cannot be undone.' :
+               language === 'fr' ? 'La carte passera à la bibliothèque du destinataire et quittera la vôtre. Cette action ne peut pas être annulée.' :
+               'O cartão passará para a biblioteca do destinatário e sairá da sua. Esta ação não pode ser desfeita.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -399,17 +475,32 @@ const MyCards = () => {
             <div className="space-y-4">
               <div className="rounded-lg bg-muted/40 p-3 text-sm space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tarjeta</span>
-                  <span className="font-semibold capitalize">{selected.card_type}</span>
+                  <span className="text-muted-foreground">
+                    {language === 'es' ? 'Tarjeta' :
+                     language === 'en' ? 'Card' :
+                     language === 'fr' ? 'Carte' :
+                     'Cartão'}
+                  </span>
+                  <span className="font-semibold capitalize">{selected.card_type === 'premium' ? t('card.premium') : t('card.standard')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Descargas</span>
+                  <span className="text-muted-foreground">
+                    {language === 'es' ? 'Descargas' :
+                     language === 'en' ? 'Downloads' :
+                     language === 'fr' ? 'Téléchargements' :
+                     'Downloads'}
+                  </span>
                   <span className="font-semibold text-primary">{selected.download_credits}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gift-username">Username del destinatario</Label>
+                <Label htmlFor="gift-username">
+                  {language === 'es' ? 'Username del destinatario' :
+                   language === 'en' ? 'Recipient username' :
+                   language === 'fr' ? 'Nom d\'utilisateur du destinataire' :
+                   'Username do destinatário'}
+                </Label>
                 <Input
                   id="gift-username"
                   placeholder="@username"
@@ -421,10 +512,15 @@ const MyCards = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gift-message">Mensaje (opcional)</Label>
+                <Label htmlFor="gift-message">
+                  {language === 'es' ? 'Mensaje (opcional)' :
+                   language === 'en' ? 'Message (optional)' :
+                   language === 'fr' ? 'Message (facultatif)' :
+                   'Mensagem (opcional)'}
+                </Label>
                 <Textarea
                   id="gift-message"
-                  placeholder="¡Para que disfrutes la música!"
+                  placeholder={language === 'es' ? '¡Para que disfrutes la música!' : language === 'en' ? 'Enjoy the music!' : language === 'fr' ? 'Pour que tu profites de la musique !' : 'Para que você aproveite a música!'}
                   value={giftMessage}
                   onChange={(e) => setGiftMessage(e.target.value.slice(0, 280))}
                   disabled={gifting}
@@ -443,18 +539,27 @@ const MyCards = () => {
               onClick={() => setGiftOpen(false)}
               disabled={gifting}
             >
-              Cancelar
+              {language === 'es' ? 'Cancelar' :
+               language === 'en' ? 'Cancel' :
+               language === 'fr' ? 'Annuler' :
+               'Cancelar'}
             </Button>
             <Button onClick={handleGift} disabled={gifting || !giftUsername.trim()} className="gap-2">
               {gifting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Enviando...
+                  {language === 'es' ? 'Enviando...' :
+                   language === 'en' ? 'Sending...' :
+                   language === 'fr' ? 'Envoi...' :
+                   'Enviando...'}
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  Confirmar regalo
+                  {language === 'es' ? 'Confirmar regalo' :
+                   language === 'en' ? 'Confirm gift' :
+                   language === 'fr' ? 'Confirmer le cadeau' :
+                   'Confirmar presente'}
                 </>
               )}
             </Button>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface SongCard {
   id: string;
@@ -24,6 +25,7 @@ const FEATURED_GRADIENTS = [
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, language } = useLanguageStore();
 
   const [popularSongs, setPopularSongs] = useState<SongCard[]>([]);
   const [recentSongs, setRecentSongs] = useState<SongCard[]>([]);
@@ -133,11 +135,16 @@ const Index = () => {
         />
         <div className="relative">
           <h1 className="display-xl text-[2.6rem] sm:text-5xl">
-            Tu música,<br />
-            <span className="vapor-text">en alta fidelidad</span>
+            {t('home.hero.title').split('\\n').map((line, i) => (
+              <span key={i}>
+                {line}
+                {i === 0 && <br />}
+              </span>
+            ))}
+            <span className="vapor-text">{language === 'es' ? 'en alta fidelidad' : language === 'en' ? 'in high fidelity' : language === 'fr' ? 'en haute fidélité' : 'em alta fidelidade'}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-4 max-w-xs leading-relaxed">
-            Escanea, descubre y colecciona. Una experiencia sonora pensada para ti.
+            {t('home.hero.subtitle')}
           </p>
 
           {/* CTAs */}
@@ -147,14 +154,14 @@ const Index = () => {
               className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 vapor-bg shadow-glow hover:shadow-vapor transition-all hover:-translate-y-0.5"
             >
               <QrCode className="h-5 w-5 text-primary-foreground" strokeWidth={2.2} />
-              <span className="font-display font-bold text-sm text-primary-foreground">Escanear tarjeta</span>
+              <span className="font-display font-bold text-sm text-primary-foreground">{t('home.hero.scan')}</span>
             </Link>
             <Link
               to="/catalog"
               className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-primary/40 bg-card/40 backdrop-blur-md hover:border-primary/70 hover:bg-card/70 transition-all hover:-translate-y-0.5"
             >
               <Music className="h-5 w-5 text-foreground" strokeWidth={2.2} />
-              <span className="font-display font-bold text-sm text-foreground">Explorar música</span>
+              <span className="font-display font-bold text-sm text-foreground">{t('home.hero.explore')}</span>
             </Link>
           </div>
         </div>
@@ -163,7 +170,7 @@ const Index = () => {
 
 
       {/* === LANZAMIENTOS DESTACADOS — carrusel horizontal === */}
-      <Section title="Lanzamientos destacados" link="/catalog">
+      <Section title={t('home.section.recent')} link="/catalog">
         {loading ? (
           <HScrollSkeleton variant="card" />
         ) : recentSongs.length > 0 ? (
@@ -187,7 +194,7 @@ const Index = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent pointer-events-none" />
                     {isNew && (
                       <span className="absolute top-1.5 left-1.5 chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
-                        <Sparkles className="h-2 w-2" /> NUEVO
+                        <Sparkles className="h-2 w-2" /> {language === 'es' ? 'NUEVO' : language === 'en' ? 'NEW' : language === 'fr' ? 'NOUVEAU' : 'NOVO'}
                       </span>
                     )}
                     <div className="hidden md:flex absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full vapor-bg items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
@@ -208,7 +215,7 @@ const Index = () => {
       </Section>
 
       {/* === TRENDING — lista numerada en grid 2 cols === */}
-      <Section title="Trending" eyebrow="Lo más sonado" link="/catalog">
+      <Section title={t('home.section.trending')} eyebrow={language === 'es' ? 'Lo más sonado' : language === 'en' ? 'Most played' : language === 'fr' ? 'Les plus écoutés' : 'Mais tocadas'} link="/catalog">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {[1, 2, 3, 4].map((i) => (
@@ -241,12 +248,12 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <EmptyState text="Aún sin trending" />
+          <EmptyState text={language === 'es' ? 'Aún sin trending' : language === 'en' ? 'No trending yet' : language === 'fr' ? 'Pas encore de tendances' : 'Sem tendências ainda'} />
         )}
       </Section>
 
       {/* === TARJETAS DESTACADAS — reales === */}
-      <Section title="Tarjetas destacadas" eyebrow="Colección" link="/store">
+      <Section title={t('home.section.cards')} eyebrow={language === 'es' ? 'Colección' : language === 'en' ? 'Collection' : language === 'fr' ? 'Collection' : 'Coleção'} link="/store">
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => navigate('/store')}
@@ -260,9 +267,9 @@ const Index = () => {
               compact
             />
             <div className="mt-2 px-0.5">
-              <p className="font-display font-bold text-xs leading-tight">Estándar</p>
+              <p className="font-display font-bold text-xs leading-tight">{t('card.standard')}</p>
               <div className="flex items-center justify-between mt-0.5">
-                <p className="text-[10px] text-muted-foreground">4 descargas</p>
+                <p className="text-[10px] text-muted-foreground">4 {t('card.downloads')}</p>
                 <span className="font-display font-bold text-xs vapor-text">5,00 €</span>
               </div>
             </div>
@@ -280,9 +287,9 @@ const Index = () => {
               compact
             />
             <div className="mt-2 px-0.5">
-              <p className="font-display font-bold text-xs leading-tight">Premium</p>
+              <p className="font-display font-bold text-xs leading-tight">{t('card.premium')}</p>
               <div className="flex items-center justify-between mt-0.5">
-                <p className="text-[10px] text-muted-foreground">10 descargas</p>
+                <p className="text-[10px] text-muted-foreground">10 {t('card.downloads')}</p>
                 <span className="font-display font-bold text-xs vapor-text">10,00 €</span>
               </div>
             </div>
@@ -291,34 +298,34 @@ const Index = () => {
       </Section>
 
       {/* === ACTIVIDAD EN LA COMUNIDAD === */}
-      <Section title="Actividad en la comunidad" eyebrow="Live">
+      <Section title={t('home.section.activity')} eyebrow="Live">
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory">
           <ActivityTile
             icon={<Send className="h-3.5 w-3.5" />}
-            title="Comparte música"
-            subtitle="Regala canciones a tus amigos"
-            time="Cualquier momento"
+            title={language === 'es' ? 'Comparte música' : language === 'en' ? 'Share music' : language === 'fr' ? 'Partagez musique' : 'Compartilhar música'}
+            subtitle={language === 'es' ? 'Regala canciones a tus amigos' : language === 'en' ? 'Gift songs to friends' : language === 'fr' ? 'Offrez des chansons' : 'Presenteie com músicas'}
+            time={language === 'es' ? 'Cualquier momento' : language === 'en' ? 'Anytime' : language === 'fr' ? 'À tout moment' : 'A qualquer momento'}
             onClick={() => navigate('/library')}
           />
           <ActivityTile
             icon={<TrendingUp className="h-3.5 w-3.5" />}
-            title="Top descargada"
-            subtitle={popularSongs[0]?.title || 'Descubre el ranking'}
+            title={language === 'es' ? 'Top descargada' : language === 'en' ? 'Top downloaded' : language === 'fr' ? 'Plus téléchargée' : 'Mais baixada'}
+            subtitle={popularSongs[0]?.title || (language === 'es' ? 'Descubre el ranking' : language === 'en' ? 'Discover the ranking' : language === 'fr' ? 'Découvrez le classement' : 'Descubra o ranking')}
             time={popularSongs[0]?.artist || 'En vivo'}
             onClick={() => navigate('/catalog')}
           />
           <ActivityTile
             icon={<Gift className="h-3.5 w-3.5" />}
-            title="Recibe regalos"
-            subtitle="Canjea códigos de tus amigos"
-            time="Gratis"
+            title={language === 'es' ? 'Recibe regalos' : language === 'en' ? 'Receive gifts' : language === 'fr' ? 'Recevez cadeaux' : 'Receba presentes'}
+            subtitle={language === 'es' ? 'Canjea códigos de tus amigos' : language === 'en' ? 'Redeem codes from friends' : language === 'fr' ? 'Utilisez codes amis' : 'Resgate códigos dos amigos'}
+            time={language === 'es' ? 'Gratis' : language === 'en' ? 'Free' : language === 'fr' ? 'Gratuit' : 'Grátis'}
             onClick={() => navigate('/qr')}
           />
         </div>
       </Section>
 
       {/* === PARA TI === */}
-      <Section title="Para ti" eyebrow="Recomendado" link="/catalog">
+      <Section title={t('home.section.foryou')} eyebrow={language === 'es' ? 'Recomendado' : language === 'en' ? 'Recommended' : language === 'fr' ? 'Recommandé' : 'Recomendado'} link="/catalog">
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
@@ -355,7 +362,7 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <EmptyState text="Pronto verás recomendaciones" />
+          <EmptyState text={language === 'es' ? 'Pronto verás recomendaciones' : language === 'en' ? 'Recommendations coming soon' : language === 'fr' ? 'Recommandations bientôt' : 'Recomendações em breve'} />
         )}
       </Section>
 
@@ -366,22 +373,22 @@ const Index = () => {
           style={{ background: 'var(--gradient-vapor)' }}
         />
         <div className="relative">
-          <p className="eyebrow mb-2">Tu sonido te espera</p>
+          <p className="eyebrow mb-2">{t('home.footer.cta')}</p>
           <h3 className="font-display text-2xl font-bold leading-tight mb-4">
-            Cada canción cuenta una <span className="vapor-text">historia</span>
+            {t('app.tagline').split(' ').slice(0, -1).join(' ')} <span className="vapor-text">{t('app.tagline').split(' ').pop()}</span>
           </h3>
           <Link
             to="/catalog"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-background text-foreground font-display font-bold text-sm hover:bg-foreground hover:text-background transition-colors"
           >
-            Explorar catálogo <ArrowRight className="h-4 w-4" />
+            {t('home.hero.explore')} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
 
       <div className="pt-2 flex justify-between items-center">
-        <span className="eyebrow">© Yusiop 2026</span>
-        <span className="eyebrow vapor-text">Made for sound</span>
+        <span className="eyebrow">{t('app.copyright')}</span>
+        <span className="eyebrow vapor-text">{t('app.madeForSound')}</span>
       </div>
     </div>
   );

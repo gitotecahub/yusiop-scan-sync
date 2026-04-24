@@ -1,16 +1,18 @@
 import { useLocation, Link } from 'react-router-dom';
 import { QrCode, Music, Library, User, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguageStore } from '@/stores/languageStore';
 
 const BottomNav = () => {
   const location = useLocation();
+  const { t } = useLanguageStore();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Inicio' },
-    { path: '/qr', icon: QrCode, label: 'QR' },
-    { path: '/catalog', icon: Music, label: 'Catálogo' },
-    { path: '/library', icon: Library, label: 'Biblioteca' },
-    { path: '/profile', icon: User, label: 'Perfil' }
+    { path: '/', icon: Home, label: t('nav.home') },
+    { path: '/qr', icon: QrCode, label: t('nav.qr') },
+    { path: '/catalog', icon: Music, label: t('nav.catalog') },
+    { path: '/library', icon: Library, label: t('nav.library') },
+    { path: '/profile', icon: User, label: t('nav.profile') }
   ];
 
   return (
