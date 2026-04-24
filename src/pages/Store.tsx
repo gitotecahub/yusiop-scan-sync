@@ -73,8 +73,9 @@ const Store = () => {
                 toast.success('🎁 ¡Regalo enviado con éxito!', { duration: 3000 });
                 navigate('/library', { replace: true });
               } else {
-                toast.success('🎉 ¡Felicidades! Tu tarjeta está lista. Explora el catálogo y empieza a descargar.', { duration: 3500 });
-                navigate('/catalog', { replace: true });
+                const code = data?.card?.code ?? data?.code ?? null;
+                toast.success('🎉 ¡Compra completada! Activa tu tarjeta para empezar.', { duration: 3500 });
+                navigate('/qr', { replace: true, state: code ? { prefillCode: code } : undefined });
               }
               return;
             } else if (data?.payment_status && data.payment_status !== 'paid') {
@@ -156,8 +157,8 @@ const Store = () => {
         toast.success('🎁 Regalo creado. Link de canje copiado al portapapeles.', { duration: 2500 });
         navigate('/library', { replace: true });
       } else {
-        toast.success('🎉 ¡Felicidades! Tu tarjeta está lista. Explora el catálogo y empieza a descargar.', { duration: 3500 });
-        navigate('/catalog', { replace: true });
+        toast.success('🎉 ¡Compra completada! Activa tu tarjeta para empezar.', { duration: 3500 });
+        navigate('/qr', { replace: true, state: data.code ? { prefillCode: data.code } : undefined });
       }
     } catch (e: any) {
       console.error(e);
