@@ -268,6 +268,12 @@ const Songs = () => {
                       {song.track_url && (
                         <Badge variant="secondary">Full Track</Badge>
                       )}
+                      {song.scheduled_release_at && new Date(song.scheduled_release_at) > new Date() && (
+                        <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 hover:bg-amber-500/20 gap-1">
+                          <Clock className="h-3 w-3" />
+                          Programado · {formatMadrid(song.scheduled_release_at)} · {timeUntil(song.scheduled_release_at)}
+                        </Badge>
+                      )}
                     </div>
                     {song.song_collaborators && song.song_collaborators.length > 0 && (
                       <div className="mt-2">
