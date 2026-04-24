@@ -45,6 +45,9 @@ const ApproveSubmissionDialog = ({
   defaultReleaseDate,
   songTitle,
   onConfirm,
+  copyrightStatus,
+  copyrightScore,
+  copyrightMatches,
 }: Props) => {
   const [mode, setMode] = useState<'now' | 'scheduled'>('now');
   const [date, setDate] = useState('');
