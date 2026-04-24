@@ -352,10 +352,10 @@ useEffect(() => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Catálogo<span className="vapor-text"></span>
+          {t('catalog.title')}<span className="vapor-text"></span>
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Descubre y descarga tu música favorita.
+          {t('catalog.subtitle')}
         </p>
       </div>
 
@@ -363,7 +363,7 @@ useEffect(() => {
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" strokeWidth={1.6} />
         <Input
-          placeholder="Buscar título, artista o álbum…"
+          placeholder={t('catalog.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="rounded-2xl border-border bg-input pl-11 h-12 text-sm focus-visible:ring-2 focus-visible:ring-primary/40"
@@ -374,21 +374,21 @@ useEffect(() => {
       <div className="blob-card p-5">
         <div className="flex items-end justify-between gap-4">
           <div className="min-w-0">
-            <p className="eyebrow mb-1.5">Tu balance</p>
+            <p className="eyebrow mb-1.5">{t('catalog.balance')}</p>
             <p className="display-xl text-5xl vapor-text leading-none">
               {String(userCredits?.credits_remaining ?? 0).padStart(2, '0')}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               {userCredits && userCredits.credits_remaining > 0
-                ? `descargas · tarjeta ${userCredits.card_type}`
-                : 'Sin créditos disponibles'}
+                ? `${t('catalog.downloadsCardLabel')} ${userCredits.card_type}`
+                : t('catalog.noCredits')}
             </p>
           </div>
           <Button
             onClick={() => navigate('/store')}
             className="rounded-full vapor-bg text-primary-foreground hover:opacity-90 shadow-glow shrink-0"
           >
-            Comprar tarjeta
+            {t('catalog.buyCard')}
           </Button>
         </div>
       </div>
