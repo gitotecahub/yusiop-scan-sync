@@ -35,6 +35,8 @@ interface SubmissionRow {
   copyright_status: CopyrightStatus;
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
+  express_tier: '72h' | '48h' | '24h' | null;
+  express_price_xaf: number | null;
 }
 
 const MySubmissions = () => {
