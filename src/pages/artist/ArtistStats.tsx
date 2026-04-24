@@ -91,7 +91,7 @@ const ArtistStats = () => {
           .maybeSingle();
         const name = req?.artist_name;
         if (!name) {
-          setError('No se encontró tu perfil de artista aprobado.');
+          setError(t('artist.profileNotFound'));
           setLoading(false);
           return;
         }
