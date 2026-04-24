@@ -399,7 +399,7 @@ useEffect(() => {
           <div className="flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />
             <h2 className="font-display text-sm font-bold uppercase tracking-wider">
-              Próximos lanzamientos
+              {t('catalog.upcomingTitle')}
             </h2>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
@@ -419,7 +419,7 @@ useEffect(() => {
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
                   <div className="absolute bottom-2 left-2 right-2">
                     <span className="inline-block rounded-full bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
-                      Próximamente
+                      {t('catalog.comingSoonBadge')}
                     </span>
                   </div>
                 </div>
