@@ -374,6 +374,8 @@ const Users = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los usuarios</SelectItem>
+                <SelectItem value="artists">🎤 Artistas</SelectItem>
+                <SelectItem value="listeners">👤 Oyentes (no artistas)</SelectItem>
                 <SelectItem value="vip">⭐ VIP (≥50 descargas)</SelectItem>
                 <SelectItem value="customers">Clientes (≥1 compra)</SelectItem>
                 <SelectItem value="gift_redeemers">🎁 Canjearon regalo</SelectItem>
