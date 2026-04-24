@@ -537,6 +537,9 @@ const SongSubmissions = () => {
         defaultReleaseDate={approveTarget?.release_date ?? null}
         songTitle={approveTarget?.title ?? ''}
         onConfirm={confirmApprove}
+        copyrightStatus={approveTarget?.copyright_status}
+        copyrightScore={approveTarget?.copyright_score}
+        copyrightMatches={approveTarget?.copyright_matches}
       />
     </div>
   );
