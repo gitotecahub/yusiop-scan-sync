@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { listOfflineSongs, deleteOfflineSong } from '@/lib/offlineStorage';
 
 interface DownloadedSong {
   id: string;
@@ -57,12 +58,49 @@ const Library = () => {
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause, stop } = usePlayerStore();
 
-  // Cargar canciones descargadas desde Supabase
+  // Cargar canciones descargadas (online: BD; offline: IndexedDB)
   useEffect(() => {
+    const objectUrls: string[] = [];
+
+    const loadFromOffline = async (): Promise<DownloadedSong[]> => {
+      const offline = await listOfflineSongs();
+      return offline.map((rec) => {
+        let cover_url: string | undefined;
+        if (rec.cover_blob) {
+          const url = URL.createObjectURL(rec.cover_blob);
+          objectUrls.push(url);
+          cover_url = url;
+        }
+        return {
+          id: rec.id,
+          title: rec.title,
+          artist: rec.artist,
+          duration_seconds: rec.duration_seconds,
+          cover_url: cover_url || 'https://picsum.photos/300/300?random=1',
+          downloaded_at: rec.downloaded_at,
+          is_favorite: false,
+          track_url: undefined,
+          preview_url: undefined,
+        } as DownloadedSong;
+      });
+    };
+
     const loadDownloadedSongs = async () => {
       try {
+        // Si estamos offline, cargar directamente de IndexedDB
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+          const offlineSongs = await loadFromOffline();
+          setDownloads(offlineSongs);
+          setFavorites([]);
+          setLoading(false);
+          return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
+          // Sin sesión, intentar mostrar al menos lo guardado offline
+          const offlineSongs = await loadFromOffline();
+          setDownloads(offlineSongs);
           setLoading(false);
           return;
         }
@@ -89,6 +127,9 @@ const Library = () => {
 
         if (error) {
           console.error('Error loading downloads:', error);
+          // Fallback a offline si la red falla
+          const offlineSongs = await loadFromOffline();
+          setDownloads(offlineSongs);
           setLoading(false);
           return;
         }
@@ -109,12 +150,23 @@ const Library = () => {
         setFavorites(formattedSongs.filter(song => song.is_favorite));
       } catch (error) {
         console.error('Error:', error);
+        // Último recurso: offline
+        try {
+          const offlineSongs = await loadFromOffline();
+          setDownloads(offlineSongs);
+        } catch {
+          // noop
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadDownloadedSongs();
+
+    return () => {
+      objectUrls.forEach((u) => URL.revokeObjectURL(u));
+    };
   }, []);
 
   const formatDuration = (seconds: number) => {
