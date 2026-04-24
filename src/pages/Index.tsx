@@ -298,7 +298,7 @@ const Index = () => {
       </Section>
 
       {/* === ACTIVIDAD EN LA COMUNIDAD === */}
-      <Section title="Actividad en la comunidad" eyebrow="Live">
+      <Section title={t('home.section.activity')} eyebrow="Live">
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory">
           <ActivityTile
             icon={<Send className="h-3.5 w-3.5" />}
@@ -325,7 +325,7 @@ const Index = () => {
       </Section>
 
       {/* === PARA TI === */}
-      <Section title="Para ti" eyebrow="Recomendado" link="/catalog">
+      <Section title={t('home.section.foryou')} eyebrow={language === 'es' ? 'Recomendado' : language === 'en' ? 'Recommended' : language === 'fr' ? 'Recommandé' : 'Recomendado'} link="/catalog">
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((i) => (
@@ -362,7 +362,7 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <EmptyState text="Pronto verás recomendaciones" />
+          <EmptyState text={language === 'es' ? 'Pronto verás recomendaciones' : language === 'en' ? 'Recommendations coming soon' : language === 'fr' ? 'Recommandations bientôt' : 'Recomendações em breve'} />
         )}
       </Section>
 
