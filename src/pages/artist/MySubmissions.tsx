@@ -144,18 +144,18 @@ const MySubmissions = () => {
     <div className="min-h-screen p-6 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Panel artista
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.panelLabel')}
         </Button>
         <Button onClick={handleNew}>
-          <Plus className="h-4 w-4 mr-2" /> Subir música
+          <Plus className="h-4 w-4 mr-2" /> {t('artist.uploadMusic')}
         </Button>
       </div>
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Mis envíos</p>
-        <h1 className="display-xl text-3xl">Canciones enviadas</h1>
+        <p className="eyebrow mb-1">{t('artist.subsEyebrow')}</p>
+        <h1 className="display-xl text-3xl">{t('artist.subsTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Sigue el estado de revisión de tus envíos al catálogo.
+          {t('artist.subsSubtitle')}
         </p>
       </div>
 
