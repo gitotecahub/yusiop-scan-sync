@@ -196,6 +196,8 @@ const PlaybackControls = () => {
       toast.error('No se pudo conectar con un dispositivo');
     }
   };
+
+  const clampedPos = Math.min(Math.max(displayPosition, 0), duration || 0);
   const remaining = Math.max(duration - clampedPos, 0);
   const progressPct = duration > 0 ? (clampedPos / duration) * 100 : 0;
 
