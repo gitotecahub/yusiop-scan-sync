@@ -170,7 +170,7 @@ const Index = () => {
 
 
       {/* === LANZAMIENTOS DESTACADOS — carrusel horizontal === */}
-      <Section title="Lanzamientos destacados" link="/catalog">
+      <Section title={t('home.section.recent')} link="/catalog">
         {loading ? (
           <HScrollSkeleton variant="card" />
         ) : recentSongs.length > 0 ? (
