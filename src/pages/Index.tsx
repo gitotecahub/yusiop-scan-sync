@@ -194,7 +194,7 @@ const Index = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent pointer-events-none" />
                     {isNew && (
                       <span className="absolute top-1.5 left-1.5 chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
-                        <Sparkles className="h-2 w-2" /> NUEVO
+                        <Sparkles className="h-2 w-2" /> {language === 'es' ? 'NUEVO' : language === 'en' ? 'NEW' : language === 'fr' ? 'NOUVEAU' : 'NOVO'}
                       </span>
                     )}
                     <div className="hidden md:flex absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full vapor-bg items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
