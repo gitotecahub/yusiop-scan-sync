@@ -4,15 +4,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Settings as SettingsIcon, Save, Database, Shield, Bell } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Settings as SettingsIcon, Save, Database, Shield, Bell, Globe } from 'lucide-react';
+import { useLanguageStore, LANGUAGES } from '@/stores/languageStore';
 
 const Settings = () => {
+  const { language, setLanguage, t } = useLanguageStore();
+
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Configuración del Sistema</h1>
+        <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
         <p className="text-muted-foreground">
-          Configura los parámetros generales de la plataforma
+          {language === 'es' ? 'Configura los parámetros generales de la plataforma' :
+           language === 'en' ? 'Configure general platform settings' :
+           language === 'fr' ? 'Configurez les paramètres généraux de la plateforme' :
+           'Configure as configurações gerais da plataforma'}
         </p>
       </div>
 
