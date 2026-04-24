@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar, Zap } from 'lucide-react';
 import { madridLocalToUtcIso, formatMadrid } from '@/lib/madridTime';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import type { CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 
 interface Props {
   open: boolean;
@@ -22,6 +24,10 @@ interface Props {
   songTitle: string;
   /** Llamado con `null` para publicar ya o ISO UTC para programar */
   onConfirm: (releaseAtIso: string | null) => Promise<void> | void;
+  /** Estado del análisis de copyright para mostrar advertencia */
+  copyrightStatus?: CopyrightStatus;
+  copyrightScore?: number;
+  copyrightMatches?: CopyrightMatch[] | null;
 }
 
 const todayYmd = () => {
