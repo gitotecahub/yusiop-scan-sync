@@ -8,6 +8,15 @@ import { Search, Plus, Play, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
 
+interface Collaborator {
+  id: string;
+  artist_name: string;
+  role: string;
+  share_percent: number;
+  is_primary: boolean;
+  claimed_by_user_id: string | null;
+}
+
 interface Song {
   id: string;
   title: string;
@@ -20,6 +29,7 @@ interface Song {
   created_at: string;
   artists?: { name: string };
   albums?: { title: string };
+  song_collaborators?: Collaborator[];
 }
 
 interface Artist {
