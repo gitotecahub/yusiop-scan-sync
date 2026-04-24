@@ -47,6 +47,25 @@ serve(async (req) => {
       )
     }
 
+    // Bloquear que admins/moderadores activen tarjetas
+    const { data: adminRoles } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'moderator'])
+
+    if (adminRoles && adminRoles.length > 0) {
+      return new Response(
+        JSON.stringify({
+          error: 'Los administradores no pueden activar tarjetas QR. Usa una cuenta de usuario para descargar música.',
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
     console.log(`Activating QR for user id: ${user.id}`)
 
     // 1. Buscar la tarjeta QR por código
