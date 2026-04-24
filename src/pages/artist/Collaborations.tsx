@@ -165,7 +165,7 @@ const Collaborations = () => {
                     <Badge variant="secondary">{p.share_percent}%</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Como <strong>{p.artist_name}</strong> · {p.downloads} descargas · estimado: {formatEurosWithXaf(p.estimated_revenue_cents)}
+                    {t('artist.as')} <strong>{p.artist_name}</strong> · {p.downloads} {t('artist.downloadsWord')} · {t('artist.estimated')}: {formatEurosWithXaf(p.estimated_revenue_cents)}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
@@ -174,7 +174,7 @@ const Collaborations = () => {
                     onClick={() => claim(p.collaborator_id)}
                     disabled={p.has_pending_claim}
                   >
-                    {p.has_pending_claim ? 'Reclamada' : 'Reclamar'}
+                    {p.has_pending_claim ? t('artist.claimed') : t('artist.claim')}
                   </Button>
                 </div>
               </CardContent>
