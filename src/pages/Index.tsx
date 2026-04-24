@@ -174,22 +174,23 @@ const Index = () => {
                 <button
                   key={song.id}
                   onClick={() => goSong(song.id)}
-                  className="snap-start group relative shrink-0 w-32 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-vapor text-left"
+                  className="snap-start group relative shrink-0 w-32 rounded-2xl overflow-hidden border border-border md:hover:border-primary/50 transition-colors md:transition-all md:hover:-translate-y-1 md:hover:shadow-vapor text-left"
                 >
                   <div className="aspect-square relative overflow-hidden">
                     <img
                       src={song.cover_url}
                       alt={song.title}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="absolute inset-0 w-full h-full object-cover md:group-hover:scale-110 md:transition-transform md:duration-700"
                       loading="lazy"
+                      draggable={false}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent pointer-events-none" />
                     {isNew && (
                       <span className="absolute top-1.5 left-1.5 chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
                         <Sparkles className="h-2 w-2" /> NUEVO
                       </span>
                     )}
-                    <div className="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full vapor-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
+                    <div className="hidden md:flex absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full vapor-bg items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
                       <Play className="h-3 w-3 text-primary-foreground ml-0.5" />
                     </div>
                   </div>
