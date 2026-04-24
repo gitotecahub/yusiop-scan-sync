@@ -243,6 +243,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      // Express previo (si lo tenía)
+      if (editing.express_tier) {
+        setExpressEnabled(true);
+        setExpressTier(editing.express_tier);
+        setExpressAck(true);
+      } else {
+        setExpressEnabled(false);
+        setExpressTier(null);
+        setExpressAck(false);
+      }
       // Cargar colaboradores existentes del envío
       (async () => {
         const { data } = await supabase
@@ -279,6 +289,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioUrl(null);
       setHasCollabs(false);
       setCollaborators([]);
+      setExpressEnabled(false);
+      setExpressTier(null);
+      setExpressAck(false);
     }
     setTrackFile(null);
     setCoverFile(null);
