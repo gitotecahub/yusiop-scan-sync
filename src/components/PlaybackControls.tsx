@@ -210,11 +210,31 @@ const PlaybackControls = () => {
           {/* Info */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="min-w-0 flex-1">
-              <h2 className="font-display font-bold text-xl text-foreground truncate leading-tight">
-                {currentSong.title}
+              <h2 className="font-display font-bold text-3xl text-foreground truncate leading-[1.05] tracking-tight">
+                {(() => {
+                  const parts = currentSong.title.trim().split(/\s+/);
+                  if (parts.length === 1) {
+                    return <span className="vapor-text">{parts[0]}</span>;
+                  }
+                  const first = parts[0];
+                  const rest = parts.slice(1).join(' ');
+                  return (
+                    <>
+                      {first} <span className="vapor-text">{rest}</span>
+                    </>
+                  );
+                })()}
               </h2>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                {currentSong.artist}
+              <p className="text-sm text-muted-foreground truncate mt-1 flex items-center gap-1.5">
+                <span className="truncate">{currentSong.artist}</span>
+                <span
+                  className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full vapor-bg shrink-0"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 12 12" className="w-2 h-2 text-primary-foreground" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="2.5,6.5 5,9 9.5,3.5" />
+                  </svg>
+                </span>
               </p>
             </div>
             <Button

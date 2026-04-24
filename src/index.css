@@ -253,34 +253,34 @@
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-vapor { box-shadow: var(--shadow-vapor); }
 
-  /* === Yusiop Slider — vapor track + glow thumb === */
+  /* === Yusiop Slider — fina vapor + thumb tipo punto === */
   .yusiop-slider [data-orientation="horizontal"] {
-    height: 6px;
+    height: 3px;
   }
   .yusiop-slider [role="slider"] {
-    @apply h-3.5 w-3.5 border-0 bg-background;
+    @apply h-3 w-3 border-0 rounded-full;
+    background: hsl(var(--vapor-cyan));
     box-shadow:
-      0 0 0 2px hsl(var(--primary)),
-      0 0 14px hsl(var(--primary) / 0.55),
-      0 4px 12px hsl(var(--primary) / 0.35);
+      0 0 0 3px hsl(var(--background)),
+      0 0 12px hsl(var(--vapor-cyan) / 0.7);
     transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s;
   }
   .yusiop-slider [role="slider"]:hover,
   .yusiop-slider [role="slider"]:focus-visible {
-    transform: scale(1.25);
+    transform: scale(1.2);
     box-shadow:
-      0 0 0 2px hsl(var(--primary)),
-      0 0 22px hsl(var(--primary) / 0.75),
-      0 4px 18px hsl(var(--primary) / 0.5);
+      0 0 0 3px hsl(var(--background)),
+      0 0 18px hsl(var(--vapor-cyan) / 0.9);
   }
   .yusiop-slider .bg-secondary {
-    background: hsl(var(--muted) / 0.6);
+    background: hsl(var(--muted) / 0.45);
     border-radius: 9999px;
     overflow: hidden;
+    height: 3px;
   }
   .yusiop-slider .bg-primary {
     background: var(--gradient-vapor);
-    box-shadow: 0 0 12px hsl(var(--primary) / 0.5);
+    height: 3px;
   }
 }
 
