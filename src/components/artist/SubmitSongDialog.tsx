@@ -670,6 +670,22 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                         <span className="text-sm text-muted-foreground">%</span>
                       </div>
                     </div>
+
+                    {!c.is_primary && (
+                      <div className="space-y-1">
+                        <Input
+                          type="email"
+                          placeholder="Email del colaborador *"
+                          value={c.contact_email}
+                          onChange={(e) => updateCollab(i, { contact_email: e.target.value })}
+                          maxLength={255}
+                          autoComplete="off"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          Le avisaremos por email cuando se publique la canción para que pueda reclamar su parte. Si aún no tiene cuenta, le invitaremos a registrarse.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
 
