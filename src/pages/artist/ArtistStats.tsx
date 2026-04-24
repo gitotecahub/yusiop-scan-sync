@@ -226,10 +226,10 @@ const ArtistStats = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Gift className="h-4 w-4 text-accent-foreground" />
-                  <p className="text-xs text-muted-foreground">Promocionales</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.promo')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.promotional_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Tu propia música</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.promoDesc')}</p>
               </CardContent>
             </Card>
             <Card>
