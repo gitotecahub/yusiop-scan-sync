@@ -253,7 +253,10 @@ const Library = () => {
         stop();
       }
 
-      // 3. Actualizar UI local
+      // 3. Borrar también el blob offline
+      await deleteOfflineSong(songToDelete.id);
+
+      // 4. Actualizar UI local
       setDownloads(prev => prev.filter(s => s.id !== songToDelete.id));
       setFavorites(prev => prev.filter(s => s.id !== songToDelete.id));
       toast.success(`"${songToDelete.title}" eliminada de tu biblioteca`);
@@ -324,6 +327,9 @@ const Library = () => {
       }
 
       if (currentSong && ids.includes(currentSong.id)) stop();
+
+      // Borrar blobs offline en paralelo
+      await Promise.all(ids.map((id) => deleteOfflineSong(id)));
 
       setDownloads((prev) => prev.filter((s) => !selectedIds.has(s.id)));
       setFavorites((prev) => prev.filter((s) => !selectedIds.has(s.id)));
