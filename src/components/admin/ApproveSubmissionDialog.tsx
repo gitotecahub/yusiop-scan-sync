@@ -93,6 +93,14 @@ const ApproveSubmissionDialog = ({
           </DialogDescription>
         </DialogHeader>
 
+        {copyrightStatus && (copyrightStatus === 'review' || copyrightStatus === 'blocked') && (
+          <CopyrightDetails
+            status={copyrightStatus}
+            score={copyrightScore}
+            matches={copyrightMatches}
+          />
+        )}
+
         <RadioGroup value={mode} onValueChange={(v) => setMode(v as 'now' | 'scheduled')} className="space-y-3">
           <label className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/40">
             <RadioGroupItem value="now" id="mode-now" className="mt-1" />
