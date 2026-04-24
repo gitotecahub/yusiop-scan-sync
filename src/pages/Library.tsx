@@ -458,9 +458,9 @@ const Library = () => {
                   <Button
                     size="sm"
                     onClick={(e) => { e.stopPropagation(); handlePlay(song, songs); }}
-                    className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+                    className="absolute inset-0 m-auto h-9 w-9 rounded-full bg-black/35 hover:bg-black/50 active:bg-black/55 backdrop-blur-[2px] text-white border-0 p-0 shadow-none ring-1 ring-white/20"
                   >
-                    {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}
+                    {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5 fill-current" />}
                   </Button>
                 )}
               </div>
