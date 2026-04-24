@@ -174,7 +174,7 @@ const PlaybackControls = () => {
             aria-label="Abrir reproductor"
           >
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted/40">
-              <div className="h-full vapor-bg transition-all" style={{ width: `${progressPct}%` }} />
+              <div className="h-full vapor-bg" style={{ width: `${progressPct}%`, transition: 'width 0.1s linear' }} />
             </div>
 
             <div className="flex items-center gap-3">
@@ -293,14 +293,14 @@ const PlaybackControls = () => {
           {/* Slider Yusiop */}
           <div className="space-y-1.5 mb-5">
             <Slider
-              value={[position]}
+              value={[clampedPos]}
               max={duration || 1}
-              step={1}
+              step={0.01}
               onValueChange={handleSeek}
               className="yusiop-slider w-full"
             />
             <div className="flex justify-between text-[10px] text-muted-foreground tabular-nums tracking-[0.15em] uppercase">
-              <span>{formatTime(position)}</span>
+              <span>{formatTime(clampedPos)}</span>
               <span>-{formatTime(remaining)}</span>
             </div>
           </div>

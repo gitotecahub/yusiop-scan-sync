@@ -732,6 +732,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                       stopPreview();
                       setPreviewStart(v[0]);
                     }}
+                    className="yusiop-slider"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Inicio: <strong className="text-foreground">{formatTime(previewStart)}</strong></span>
