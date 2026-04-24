@@ -60,10 +60,19 @@ const ArtistStats = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist } = useModeStore();
+  const { t } = useLanguageStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [artistName, setArtistName] = useState<string>('');
   const [stats, setStats] = useState<Stats | null>(null);
+
+  const GENDER_LABEL: Record<string, string> = {
+    male: t('artist.genderM'),
+    female: t('artist.genderF'),
+    non_binary: t('artist.genderNB'),
+    prefer_not_to_say: t('artist.genderPNS'),
+    unknown: t('artist.genderUnknown'),
+  };
 
   useEffect(() => {
     const load = async () => {
