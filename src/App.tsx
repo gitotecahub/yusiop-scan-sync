@@ -40,6 +40,8 @@ import Monetization from '@/pages/admin/Monetization';
 import SalesSimulator from '@/pages/admin/SalesSimulator';
 import Settings from '@/pages/admin/Settings';
 import ArtistRequests from '@/pages/admin/ArtistRequests';
+import AdminSubscriptions from '@/pages/admin/Subscriptions';
+import Subscriptions from '@/pages/Subscriptions';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -95,6 +97,7 @@ const AppContent = () => {
         <Route path="artist-requests" element={<RequireStaffArea area="artist_requests"><ArtistRequests /></RequireStaffArea>} />
         <Route path="song-submissions" element={<RequireStaffArea area="catalog"><SongSubmissions /></RequireStaffArea>} />
         <Route path="collab-claims" element={<RequireStaffArea area="catalog"><CollaborationClaims /></RequireStaffArea>} />
+        <Route path="subscriptions" element={<RequireStaffArea area="monetization"><AdminSubscriptions /></RequireStaffArea>} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -139,6 +142,7 @@ const AppContent = () => {
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/library" element={<Library />} />
               <Route path="/store" element={<Store />} />
+              <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/artist/request" element={<ArtistRequest />} />
               <Route path="*" element={<Navigate to="/" replace />} />

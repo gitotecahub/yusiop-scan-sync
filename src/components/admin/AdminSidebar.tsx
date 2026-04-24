@@ -15,6 +15,7 @@ import {
   UserCheck,
   Upload,
   Users2,
+  Sparkles,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -50,6 +51,7 @@ const menuItems: MenuItem[] = [
   { title: 'Descargas', url: '/admin/downloads', icon: Download, area: 'monetization' },
   { title: 'Monetización', url: '/admin/monetization', icon: Coins, area: 'monetization' },
   { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator, area: 'monetization' },
+  { title: 'Suscripciones', url: '/admin/subscriptions', icon: Sparkles, area: 'monetization' },
   { title: 'Configuración', url: '/admin/settings', icon: Settings, area: 'settings' },
 ];
 

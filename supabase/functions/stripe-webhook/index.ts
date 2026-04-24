@@ -1,7 +1,9 @@
 // Edge function: stripe-webhook
-// Recibe eventos de Stripe (checkout.session.completed) y genera la tarjeta digital.
-// Si es regalo: crea una qr_card con redemption_token y la asocia al destinatario por email.
-// Si es compra normal: crea la qr_card asignada al comprador y la marca como activada.
+// Recibe eventos de Stripe:
+//  - checkout.session.completed (mode=payment) → crea qr_card (compra de tarjeta).
+//  - checkout.session.completed (mode=subscription) → crea/activa user_subscription.
+//  - customer.subscription.updated/deleted → actualiza estado.
+//  - invoice.payment_succeeded → renueva créditos del mes y actualiza periodo.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=denonext";
 import { notifyGiftRecipient } from "../_shared/notify-gift.ts";
@@ -58,7 +60,6 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Service role para escribir en tablas independientemente de RLS
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -66,10 +67,74 @@ Deno.serve(async (req) => {
   );
 
   try {
+    // ===== Compras de tarjetas =====
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const meta = session.metadata ?? {};
 
+      // ----- Modo subscription -----
+      if (session.mode === "subscription") {
+        const meta = session.metadata ?? {};
+        const userId = meta.user_id;
+        const planId = meta.plan_id;
+        const monthlyDownloads = parseInt(meta.monthly_downloads ?? "0", 10);
+
+        if (!userId || !planId) {
+          console.warn("subscription session sin metadata válida");
+          return new Response(JSON.stringify({ received: true }), {
+            status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const stripeSubId = session.subscription as string;
+        let periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        let customerId: string | null = null;
+        try {
+          const sub = await stripe.subscriptions.retrieve(stripeSubId);
+          if (sub.current_period_end) {
+            periodEnd = new Date(sub.current_period_end * 1000).toISOString();
+          }
+          customerId = (sub.customer as string) ?? null;
+        } catch (e) {
+          console.error("retrieve sub failed", e);
+        }
+
+        // Upsert por stripe_subscription_id
+        const { data: existing } = await supabase
+          .from("user_subscriptions")
+          .select("id")
+          .eq("stripe_subscription_id", stripeSubId)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from("user_subscriptions").insert({
+            user_id: userId,
+            plan_id: planId,
+            status: "active",
+            current_period_start: new Date().toISOString(),
+            current_period_end: periodEnd,
+            renewal_date: periodEnd,
+            downloads_remaining: monthlyDownloads,
+            monthly_downloads: monthlyDownloads,
+            stripe_subscription_id: stripeSubId,
+            stripe_customer_id: customerId,
+          });
+        } else {
+          await supabase.from("user_subscriptions").update({
+            status: "active",
+            current_period_end: periodEnd,
+            renewal_date: periodEnd,
+            downloads_remaining: monthlyDownloads,
+          }).eq("id", existing.id);
+        }
+
+        console.log(`Suscripción activada user=${userId} plan=${meta.plan_code}`);
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // ----- Modo payment (tarjetas) -----
+      const meta = session.metadata ?? {};
       const buyerUserId = meta.buyer_user_id;
       const buyerEmail = meta.buyer_email ?? session.customer_email ?? "";
       const cardType = (meta.card_type ?? "standard") as "standard" | "premium";
@@ -86,7 +151,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // 1) Registrar la compra
       const { data: purchase, error: pErr } = await supabase
         .from("card_purchases")
         .insert({
@@ -106,12 +170,8 @@ Deno.serve(async (req) => {
         .select()
         .single();
 
-      if (pErr) {
-        console.error("Error insertando card_purchases", pErr);
-        throw pErr;
-      }
+      if (pErr) throw pErr;
 
-      // 2) Crear la qr_card digital
       const code = genCode(cardType === "premium" ? "PREM" : "STD");
       const redemptionToken = isGift
         ? crypto.randomUUID().replace(/-/g, "")
@@ -129,7 +189,6 @@ Deno.serve(async (req) => {
         gift_recipient_email: giftEmail,
         gift_message: giftMessage,
         redemption_token: redemptionToken,
-        // Si es regalo: queda sin owner hasta canjearse
         owner_user_id: isGift ? null : buyerUserId,
         activated_by: isGift ? null : buyerUserId,
         is_activated: !isGift,
@@ -142,22 +201,13 @@ Deno.serve(async (req) => {
         .select()
         .single();
 
-      if (cErr) {
-        console.error("Error insertando qr_cards", cErr);
-        throw cErr;
-      }
+      if (cErr) throw cErr;
 
-      // 3) Vincular la card a la compra
       await supabase
         .from("card_purchases")
         .update({ qr_card_id: card.id })
         .eq("id", purchase.id);
 
-      console.log(
-        `Tarjeta creada ${card.code} (${cardType}) - gift=${isGift} token=${redemptionToken}`,
-      );
-
-      // Notificar al destinatario si es regalo
       if (isGift && giftEmail && redemptionToken) {
         const origin = req.headers.get("origin") ?? "https://yusiop.com";
         await notifyGiftRecipient({
@@ -172,6 +222,61 @@ Deno.serve(async (req) => {
           origin,
         });
       }
+    }
+
+    // ===== Renovación / pagos recurrentes =====
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subId = invoice.subscription as string | null;
+      if (subId) {
+        const sub = await stripe.subscriptions.retrieve(subId);
+        const periodEnd = sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const meta = sub.metadata ?? {};
+        const monthlyDownloads = parseInt(meta.monthly_downloads ?? "0", 10);
+
+        const { data: row } = await supabase
+          .from("user_subscriptions")
+          .select("id, monthly_downloads")
+          .eq("stripe_subscription_id", subId)
+          .maybeSingle();
+
+        if (row) {
+          const credits = monthlyDownloads || row.monthly_downloads || 0;
+          await supabase.from("user_subscriptions").update({
+            status: "active",
+            current_period_start: new Date().toISOString(),
+            current_period_end: periodEnd,
+            renewal_date: periodEnd,
+            downloads_remaining: credits,
+            last_event_at: new Date().toISOString(),
+          }).eq("id", row.id);
+          console.log(`Renovación OK sub=${subId}`);
+        }
+      }
+    }
+
+    if (event.type === "customer.subscription.updated") {
+      const sub = event.data.object as Stripe.Subscription;
+      await supabase.from("user_subscriptions").update({
+        cancel_at_period_end: sub.cancel_at_period_end,
+        status: sub.status === "active" ? "active"
+          : sub.status === "canceled" ? "cancelled"
+          : sub.status === "past_due" ? "past_due"
+          : "active",
+        current_period_end: sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : undefined,
+      }).eq("stripe_subscription_id", sub.id);
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const sub = event.data.object as Stripe.Subscription;
+      await supabase.from("user_subscriptions").update({
+        status: "cancelled",
+        cancelled_at: new Date().toISOString(),
+      }).eq("stripe_subscription_id", sub.id);
     }
 
     return new Response(JSON.stringify({ received: true }), {
