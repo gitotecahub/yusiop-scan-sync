@@ -201,6 +201,7 @@ const MySubmissions = () => {
                           <Ban className="h-3 w-3 mr-1" />Eliminada
                         </Badge>
                       )}
+                      <CopyrightBadge status={r.copyright_status} score={r.copyright_score} />
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {r.artist_name}
