@@ -277,7 +277,7 @@ useEffect(() => {
   };
 
   const handleDownload = async (song: Song) => {
-    if (!isAdmin && (!userCredits || userCredits.credits_remaining <= 0)) {
+    if (!userCredits || userCredits.credits_remaining <= 0) {
       toast.error('No tienes créditos disponibles. Escanea una tarjeta QR para obtener más.');
       return;
     }
@@ -300,14 +300,13 @@ useEffect(() => {
       }
 
       // Update local state from authoritative server response
-      if (!isAdmin) {
-        decrementCredits();
-        if (data.credits_remaining <= 0) {
-          setUserCredits(null);
-        }
-      }
+      decrementCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
       toast.success(`"${song.title}" se descargó correctamente`);
+
+      if (data.credits_remaining <= 0) {
+        setUserCredits(null);
+      }
     } catch (error) {
       logger.error('Error downloading song');
       toast.error('Error al descargar la canción');
