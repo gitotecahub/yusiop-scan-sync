@@ -13,7 +13,7 @@ import { useLanguageStore } from '@/stores/languageStore';
 import DigitalCard from '@/components/DigitalCard';
 
 const QRScanner = () => {
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const location = useLocation();
   const prefillCode = (location.state as { prefillCode?: string } | null)?.prefillCode ?? '';
   const [manualCode, setManualCode] = useState(prefillCode);
