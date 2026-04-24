@@ -236,10 +236,10 @@ const ArtistStats = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <ShieldAlert className="h-4 w-4 text-destructive" />
-                  <p className="text-xs text-muted-foreground">Sospechosas</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.suspicious')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.suspicious_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Excluidas de ingresos</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.suspiciousDesc')}</p>
               </CardContent>
             </Card>
           </div>
