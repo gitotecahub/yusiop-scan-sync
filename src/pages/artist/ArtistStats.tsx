@@ -136,7 +136,7 @@ const ArtistStats = () => {
   if (!isArtist) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <Card><CardContent className="p-6">No tienes acceso al panel de artista.</CardContent></Card>
+        <Card><CardContent className="p-6">{t('artist.noAccess')}</CardContent></Card>
       </div>
     );
   }
