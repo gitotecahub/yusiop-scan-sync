@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
@@ -29,6 +29,7 @@ const Index = () => {
   const [recentSongs, setRecentSongs] = useState<SongCard[]>([]);
   const [forYou, setForYou] = useState<SongCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Mensaje de felicitación tras volver de Stripe Checkout
   useEffect(() => {
@@ -100,6 +101,8 @@ const Index = () => {
   useEffect(() => {
     if (recentSongs.length < 2) return;
     const id = setInterval(() => {
+      // Vuelve al inicio con scroll suave antes de rotar
+      carouselRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
       setRecentSongs((prev) => {
         if (prev.length < 2) return prev;
         const [first, ...rest] = prev;
@@ -158,8 +161,7 @@ const Index = () => {
         {loading ? (
           <HScrollSkeleton variant="card" />
         ) : recentSongs.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
-            <div key={recentSongs[0]?.id} className="contents animate-fade-in" />
+          <div ref={carouselRef} className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
             {recentSongs.map((song, idx) => {
               const isNew = song.created_at && (Date.now() - new Date(song.created_at).getTime()) < 1000 * 60 * 60 * 24 * 30;
               return (
