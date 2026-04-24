@@ -477,6 +477,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       // Asegurar que previewStart no exceda la duración
       const safePreviewStart = Math.max(0, Math.min(previewStart, Math.max(0, duration - PREVIEW_LENGTH)));
 
+      // Datos del Lanzamiento Express (si está activo)
+      const expressOpt = expressEnabled && expressTier
+        ? EXPRESS_OPTIONS.find(o => o.tier === expressTier) ?? null
+        : null;
+      const nowIso = new Date().toISOString();
+
       if (isEdit && editing) {
         const update: Record<string, any> = {
           title: formData.title.trim(),
@@ -488,6 +494,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
+          express_tier: expressOpt?.tier ?? null,
+          express_price_xaf: expressOpt?.priceXaf ?? null,
+          // Si ya tenía express previo no resetear paid/requested; si lo activa ahora, marcarlo
+          ...(expressOpt && !editing.express_tier
+            ? { express_requested_at: nowIso, express_paid_at: nowIso }
+            : {}),
         };
         if (trackUp) {
           update.track_url = trackUp.url;
@@ -504,7 +516,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (dbError) throw dbError;
         await persistCollaborators(editing.id);
         setProgress(100);
-        toast.success('Envío actualizado y reenviado a revisión');
+        toast.success(expressOpt
+          ? `Envío actualizado · Revisión prioritaria ${expressOpt.tier} activada`
+          : 'Envío actualizado y reenviado a revisión');
         // Lanzar análisis de copyright en background (no bloqueante)
         supabase.functions
           .invoke('analyze-copyright', { body: { submission_id: editing.id } })
@@ -525,6 +539,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
+          express_tier: expressOpt?.tier ?? null,
+          express_price_xaf: expressOpt?.priceXaf ?? null,
+          express_requested_at: expressOpt ? nowIso : null,
+          express_paid_at: expressOpt ? nowIso : null,
         } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) {
@@ -535,7 +553,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             .catch((e) => console.warn('Copyright check failed (background):', e));
         }
         setProgress(100);
-        toast.success('Canción enviada a revisión. Analizando copyright…');
+        toast.success(expressOpt
+          ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
+          : 'Canción enviada a revisión. Analizando copyright…');
       }
 
       onOpenChange(false);
