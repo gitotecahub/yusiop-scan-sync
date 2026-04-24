@@ -150,6 +150,9 @@ Deno.serve(async (req) => {
       ? crypto.randomUUID().replace(/-/g, "")
       : null;
 
+    // NOTA: Las tarjetas digitales (incluso compradas para uno mismo) se crean
+    // SIN activar. El comprador debe introducir el código manualmente para
+    // activarla y obtener los créditos, igual que con las físicas.
     const { data: card, error: cErr } = await supabase
       .from("qr_cards")
       .insert({
@@ -164,10 +167,10 @@ Deno.serve(async (req) => {
         gift_recipient_email: giftEmail,
         gift_message: giftMessage,
         redemption_token: redemptionToken,
-        owner_user_id: isGift ? null : buyerUserId,
-        activated_by: isGift ? null : buyerUserId,
-        is_activated: !isGift,
-        activated_at: isGift ? null : new Date().toISOString(),
+        owner_user_id: null,
+        activated_by: null,
+        is_activated: false,
+        activated_at: null,
       })
       .select()
       .single();
