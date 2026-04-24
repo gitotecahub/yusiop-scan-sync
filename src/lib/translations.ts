@@ -104,7 +104,71 @@ export type TranslationKey =
   | 'app.tagline' | 'app.copyright' | 'app.madeForSound'
   | 'common.yes' | 'common.no' | 'common.all' | 'common.none'
   | 'common.from' | 'common.to' | 'common.date' | 'common.time'
-  | 'common.optional' | 'common.required';
+  | 'common.optional' | 'common.required'
+  // Extras Index
+  | 'home.heroHighlight' | 'home.viewAll' | 'home.new' | 'home.mostPlayed'
+  | 'home.collection' | 'home.recommended' | 'home.shareMusic' | 'home.shareMusicDesc'
+  | 'home.anytime' | 'home.topDownloaded' | 'home.discoverRanking' | 'home.live'
+  | 'home.receiveGifts' | 'home.receiveGiftsDesc' | 'home.free' | 'home.upcomingReleases'
+  | 'home.recsSoon' | 'home.releasesSoon' | 'home.noTrending'
+  // Catalog extras
+  | 'catalog.searchPlaceholder' | 'catalog.balance' | 'catalog.downloadsCardLabel'
+  | 'catalog.noCredits' | 'catalog.buyCard' | 'catalog.upcomingTitle' | 'catalog.comingSoonBadge'
+  | 'catalog.purchaseSuccess' | 'catalog.noResultsFor' | 'catalog.subtitle' | 'catalog.errorNoCredits'
+  | 'catalog.errorMustLogin' | 'catalog.errorDownload' | 'catalog.downloadOk'
+  // Store extras
+  | 'store.subtitle' | 'store.giftBuy' | 'store.recipientPlaceholder'
+  | 'store.messagePlaceholder' | 'store.payButton' | 'store.payAsGift'
+  | 'store.simulate' | 'store.simulateNote' | 'store.standardLabel' | 'store.premiumLabel'
+  | 'store.confirmingTitle' | 'store.confirmingDesc' | 'store.invalidEmail'
+  | 'store.errorStartPay' | 'store.errorSimulate' | 'store.giftLinkCopied'
+  // MyCards extras
+  | 'cards.viewDetails' | 'cards.depleted' | 'cards.deleteDepleted'
+  | 'cards.giftCardTitle' | 'cards.giftCardDesc' | 'cards.recipientUsername'
+  | 'cards.giftPlaceholder' | 'cards.giftThis' | 'cards.cardLabel'
+  | 'cards.downloadsLabel' | 'cards.activatedLabel' | 'cards.digital' | 'cards.physical'
+  | 'cards.giftBadge' | 'cards.codeCopied' | 'cards.copyError' | 'cards.removedFromLibrary'
+  | 'cards.enterUsername' | 'cards.giftError' | 'cards.giftSuccess' | 'cards.sending'
+  | 'cards.confirmGift' | 'cards.cardActivatedDate' | 'cards.downloadsRemaining'
+  | 'cards.tapRedeem'
+  // Notifications extras
+  | 'notif.markRead' | 'notif.empty2'
+  // Player extras
+  | 'player.nowPlaying' | 'player.playing' | 'player.minimize' | 'player.share'
+  | 'player.cast' | 'player.castConnected' | 'player.castAvailable' | 'player.castConnecting'
+  | 'player.castSearch' | 'player.shuffle' | 'player.previous' | 'player.next' | 'player.repeat'
+  | 'player.play' | 'player.pause' | 'player.fav' | 'player.unfav'
+  | 'player.linkCopied' | 'player.shareError' | 'player.castNoDevices' | 'player.castOpenError'
+  | 'player.disconnectedFrom' | 'player.localRestored' | 'player.shareText'
+  | 'player.favAdded' | 'player.favRemoved' | 'player.favError' | 'player.loginToFav'
+  | 'player.errorPlayback' | 'player.noAudio' | 'player.errorStart' | 'player.errorPause'
+  // Artist extras
+  | 'artist.userMode' | 'artist.welcomeEyebrow' | 'artist.dashboardSubtitle'
+  | 'artist.uploadMusic' | 'artist.viewSubmissions' | 'artist.inReview'
+  | 'artist.songsCardDesc' | 'artist.albumsTitle' | 'artist.albumsDesc'
+  | 'artist.statsCardTitle' | 'artist.statsCardDesc' | 'artist.collabsCardDesc'
+  | 'artist.noAccess' | 'artist.requestProfile'
+  | 'artist.panelLabel' | 'artist.statsLabel' | 'artist.audienceEyebrow'
+  | 'artist.audienceSubtitle' | 'artist.totalDownloadsLabel' | 'artist.uniqueListeners'
+  | 'artist.estIncome' | 'artist.real' | 'artist.realDesc' | 'artist.promo' | 'artist.promoDesc'
+  | 'artist.suspicious' | 'artist.suspiciousDesc' | 'artist.poolPending' | 'artist.poolDesc'
+  | 'artist.poolGoClaim' | 'artist.last30Days' | 'artist.noDownloads30'
+  | 'artist.topSongs' | 'artist.noDownloadsYet' | 'artist.countries' | 'artist.top'
+  | 'artist.noGeo' | 'artist.geoNote' | 'artist.age' | 'artist.gender' | 'artist.noData'
+  | 'artist.profileNotFound'
+  | 'artist.collabsTitle' | 'artist.collabsEyebrow' | 'artist.collabsSubtitle'
+  | 'artist.totalEstPending' | 'artist.noPendingCollabs' | 'artist.claimed' | 'artist.claim'
+  | 'artist.mySubmissionsRequests' | 'artist.as' | 'artist.downloadsWord'
+  | 'artist.estimated' | 'artist.errorLoadingPool'
+  | 'artist.subsTitle' | 'artist.subsEyebrow' | 'artist.subsSubtitle' | 'artist.loading'
+  | 'artist.noSongsSent' | 'artist.inReviewBadge' | 'artist.scheduledBadge'
+  | 'artist.publishedBadge' | 'artist.rejectedBadge' | 'artist.removedBadge'
+  | 'artist.editAndResend' | 'artist.rejectionReasonsTitle' | 'artist.removedTitle'
+  | 'artist.removedDesc' | 'artist.scheduledTitle' | 'artist.scheduledDesc'
+  // Admin sidebar extras
+  | 'admin.management' | 'admin.backToApp' | 'admin.signOut'
+  | 'admin.signOutLabel'
+  // BottomNav already covered
 
 type Dict = Record<TranslationKey, string>;
 
