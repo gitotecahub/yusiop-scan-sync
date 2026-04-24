@@ -164,38 +164,27 @@ const PlaybackControls = () => {
   const handleCast = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!currentSong) return;
-    // Intenta usar la API Remote Playback (vídeo/audio en TV / Chromecast / AirPlay vía navegador)
-    try {
-      const audioEl = document.querySelector('audio') as (HTMLAudioElement & {
-        remote?: { prompt: () => Promise<void>; state: string };
-        webkitShowPlaybackTargetPicker?: () => void;
-      }) | null;
 
-      // Safari / iOS — AirPlay
-      if (audioEl?.webkitShowPlaybackTargetPicker) {
-        audioEl.webkitShowPlaybackTargetPicker();
-        return;
+    // Si ya hay una sesión conectada, ofrecer desconectar
+    if (cast.state === 'connected') {
+      cast.endSession();
+      toast.success(cast.deviceName ? `Desconectado de ${cast.deviceName}` : 'Reproducción local restaurada');
+      return;
+    }
+
+    const mediaUrl = currentSong.track_url || currentSong.preview_url || `${window.location.origin}/catalog?song=${currentSong.id}`;
+    const ok = await cast.requestSession(mediaUrl, {
+      title: currentSong.title,
+      artist: currentSong.artist,
+      cover: currentSong.cover_url,
+    });
+
+    if (!ok) {
+      if (cast.state === 'unavailable') {
+        toast.info('No se han detectado dispositivos. Asegúrate de estar en la misma red Wi-Fi que tu TV o Chromecast.');
+      } else {
+        toast.error('No se pudo abrir el selector de dispositivos');
       }
-
-      // Chrome / Edge — Remote Playback API
-      if (audioEl?.remote && typeof audioEl.remote.prompt === 'function') {
-        await audioEl.remote.prompt();
-        return;
-      }
-
-      // Presentation API genérica (segundas pantallas)
-      const w = window as unknown as { PresentationRequest?: new (urls: string[]) => { start: () => Promise<unknown> } };
-      if (w.PresentationRequest) {
-        const url = `${window.location.origin}/catalog?song=${currentSong.id}`;
-        const req = new w.PresentationRequest([url]);
-        await req.start();
-        return;
-      }
-
-      toast.info('Tu navegador no permite enviar a TV. Prueba desde Chrome (Cast) o Safari (AirPlay).');
-    } catch (err: any) {
-      if (err?.name === 'AbortError' || err?.name === 'NotAllowedError') return;
-      toast.error('No se pudo conectar con un dispositivo');
     }
   };
 
