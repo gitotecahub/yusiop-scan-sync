@@ -38,6 +38,7 @@ import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { useModeStore } from '@/stores/modeStore';
 import ModeSwitcher from '@/components/ModeSwitcher';
+import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
 
 interface ScannedCard {
   id: string;
@@ -483,7 +484,10 @@ const Profile = () => {
 
           <div className="flex-1 min-w-0">
             <p className="eyebrow mb-1">{t('profile.username')}</p>
-            <h2 className="font-display text-2xl font-bold leading-tight truncate">{profile.fullName}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-2xl font-bold leading-tight truncate">{profile.fullName}</h2>
+              <SubscriptionLevelBadge size="md" />
+            </div>
             <p className="text-xs text-muted-foreground mt-1">@{profile.username}</p>
             <Button
               size="sm"
