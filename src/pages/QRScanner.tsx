@@ -162,22 +162,33 @@ const QRScanner = () => {
           return;
         }
 
-        // 2) Pre-solicitar permisos y detectar cámara trasera si existe
+        // 2) Pre-solicitar permisos y forzar SIEMPRE cámara trasera (nunca selfie/frontal)
         let preferredDeviceId: string | undefined;
         try {
+          // Pedimos primero permiso usando facingMode environment (cámara trasera)
+          const preflightStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' } },
+          });
+          preflightStream.getTracks().forEach((t) => t.stop());
+
+          // Ahora que ya tenemos permiso, los labels están disponibles
           const devices = await navigator.mediaDevices.enumerateDevices();
           const videoInputs = devices.filter((d) => d.kind === 'videoinput');
-          const back = videoInputs.find((d) => /back|rear|environment/i.test(d.label));
-          preferredDeviceId = (back ?? videoInputs[0])?.deviceId;
 
-          const constraints: MediaStreamConstraints = {
-            video: preferredDeviceId
-              ? { deviceId: { exact: preferredDeviceId } }
-              : { facingMode: { ideal: 'environment' } },
-          };
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          // Cerrar stream de preflight
-          stream.getTracks().forEach((t) => t.stop());
+          // Buscar explícitamente cámara trasera por etiqueta
+          const back = videoInputs.find((d) => /back|rear|environment|trasera|posterior/i.test(d.label));
+
+          // Si NO encontramos trasera por label pero hay varias cámaras,
+          // descartar cualquiera que se identifique como frontal/selfie/user
+          if (back) {
+            preferredDeviceId = back.deviceId;
+          } else if (videoInputs.length > 1) {
+            const notFront = videoInputs.find(
+              (d) => !/front|user|selfie|frontal/i.test(d.label),
+            );
+            preferredDeviceId = notFront?.deviceId;
+          }
+          // Si solo hay una cámara, dejamos que facingMode environment haga el trabajo
         } catch (permissionError) {
           console.error('Error de permisos:', permissionError);
           toast.error('Permisos de cámara denegados. Por favor permite el acceso a la cámara.');
@@ -187,7 +198,7 @@ const QRScanner = () => {
 
         if (cancelled) return;
 
-        // 3) Inicializar QrScanner
+        // 3) Inicializar QrScanner forzando cámara trasera
         qrScannerRef.current = new QrScanner(
           videoRef.current!,
           (result) => {
@@ -209,12 +220,20 @@ const QRScanner = () => {
 
         await qrScannerRef.current.start();
 
-        // Si detectamos deviceId de la cámara trasera, intentamos fijarla
-        if (preferredDeviceId) {
-          try {
+        // Forzar la cámara trasera tras arrancar:
+        // 1º intentamos por deviceId concreto, 2º por facingMode 'environment'
+        try {
+          if (preferredDeviceId) {
             await qrScannerRef.current.setCamera(preferredDeviceId);
-          } catch (e) {
-            console.warn('No se pudo fijar la cámara preferida, usando por defecto.', e);
+          } else {
+            await qrScannerRef.current.setCamera('environment');
+          }
+        } catch (e) {
+          console.warn('No se pudo fijar la cámara trasera, intentando environment.', e);
+          try {
+            await qrScannerRef.current.setCamera('environment');
+          } catch (err) {
+            console.warn('Tampoco se pudo aplicar environment.', err);
           }
         }
 
