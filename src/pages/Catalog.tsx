@@ -280,14 +280,14 @@ useEffect(() => {
 
   const handleDownload = async (song: Song) => {
     if (!userCredits || userCredits.credits_remaining <= 0) {
-      toast.error('No tienes créditos disponibles. Escanea una tarjeta QR para obtener más.');
+      toast.error(t('catalog.errorNoCredits'));
       return;
     }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.error('Debes iniciar sesión para descargar canciones');
+        toast.error(t('catalog.errorMustLogin'));
         return;
       }
 
@@ -297,7 +297,7 @@ useEffect(() => {
       });
 
       if (error || !data?.success) {
-        toast.error(data?.error || 'Error al descargar la canción');
+        toast.error(data?.error || t('catalog.errorDownload'));
         return;
       }
 
@@ -323,10 +323,10 @@ useEffect(() => {
         }
       }
 
-      toast.success(`"${song.title}" se descargó correctamente`);
+      toast.success(`"${song.title}" ${t('catalog.downloadOk')}`);
     } catch (error) {
       logger.error('Error downloading song');
-      toast.error('Error al descargar la canción');
+      toast.error(t('catalog.errorDownload'));
     }
   };
 
