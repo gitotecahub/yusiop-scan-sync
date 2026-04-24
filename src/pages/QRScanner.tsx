@@ -329,10 +329,14 @@ const QRScanner = () => {
             <div>
               <p className="eyebrow mb-2">Código manual</p>
               <Input
-                placeholder="CÓDIGO DE TARJETA"
+                placeholder="Código de tarjeta"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                className="rounded-2xl border-border bg-input text-center tracking-[0.3em] uppercase font-mono h-12"
+                maxLength={6}
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className="rounded-2xl border-border bg-input text-center tracking-[0.25em] font-mono h-12"
               />
             </div>
             <Button
