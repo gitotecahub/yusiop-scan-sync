@@ -96,6 +96,33 @@ const PlaybackControls = () => {
     isPlaying ? pause() : play();
   };
 
+  const handleShare = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!currentSong) return;
+    const shareUrl = `${window.location.origin}/catalog?song=${currentSong.id}`;
+    const shareData = {
+      title: currentSong.title,
+      text: `🎵 Escucha "${currentSong.title}" de ${currentSong.artist} en Yusiop`,
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share && typeof navigator.canShare === 'function' ? navigator.canShare(shareData) : !!navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(`${shareData.text} ${shareUrl}`);
+      toast.success('Enlace copiado al portapapeles');
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return;
+      try {
+        await navigator.clipboard.writeText(`${shareData.text} ${shareUrl}`);
+        toast.success('Enlace copiado al portapapeles');
+      } catch {
+        toast.error('No se pudo compartir');
+      }
+    }
+  };
+
   const remaining = Math.max(duration - position, 0);
   const progressPct = duration > 0 ? (position / duration) * 100 : 0;
 
@@ -160,6 +187,7 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
+              onClick={handleShare}
               className="h-9 w-9 rounded-full hover:bg-muted/40"
               aria-label="Compartir"
             >
