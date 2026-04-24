@@ -5,11 +5,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles, Zap, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { formatXAFFixed } from '@/lib/currency';
+
+type ExpressTier = '72h' | '48h' | '24h';
+
+const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
+  { tier: '72h', priceXaf: 5000, label: 'Express 72h', sub: 'Revisión prioritaria en 3 días' },
+  { tier: '48h', priceXaf: 10000, label: 'Express 48h', sub: 'Revisión prioritaria en 2 días' },
+  { tier: '24h', priceXaf: 15000, label: 'Express urgente 24h', sub: 'Máxima prioridad, en 1 día' },
+];
+
+// Días mínimos de antelación para lanzamiento estándar
+const STANDARD_MIN_DAYS = 7;
+const STANDARD_MAX_DAYS = 14;
+
+const addDaysISO = (days: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+};
 
 type CollabRole = 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
 
