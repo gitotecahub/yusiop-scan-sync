@@ -98,7 +98,7 @@ const Collaborations = () => {
       toast.success(r.message);
       load();
     } else {
-      toast.error(r?.message ?? 'Error');
+      toast.error(r?.message ?? t('common.error'));
     }
   };
 
