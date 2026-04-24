@@ -336,7 +336,7 @@ useEffect(() => {
       <div className="space-y-6">
         <div>
           <p className="eyebrow mb-2">Sección 02</p>
-          <h1 className="display-xl text-4xl">Catálogo</h1>
+          <h1 className="display-xl text-4xl">{t('catalog.title')}</h1>
         </div>
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
