@@ -120,7 +120,7 @@ const ArtistStats = () => {
         if (rpcErr) throw rpcErr;
         setStats(data as unknown as Stats);
       } catch (e: any) {
-        setError(e?.message || 'Error cargando estadísticas');
+        setError(e?.message || t('artist.errorLoadingStats'));
       } finally {
         setLoading(false);
       }
