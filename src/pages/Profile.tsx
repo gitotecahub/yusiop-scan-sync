@@ -691,7 +691,35 @@ const Profile = () => {
 
           <div className="flex items-center justify-between py-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <Download className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <Languages className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">Idioma</p>
+                <p className="text-xs text-muted-foreground">Selecciona el idioma de la app</p>
+              </div>
+            </div>
+            <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    <span>{currentLang.flag}</span>
+                    <span className="text-xs">{currentLang.label}</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    <div className="flex items-center gap-2">
+                      <span>{l.flag}</span>
+                      <span>{l.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-between py-4 border-b border-border">
               <div>
                 <p className="font-display font-semibold text-sm">Notificaciones</p>
                 <p className="text-xs text-muted-foreground">Avisos de descargas</p>
