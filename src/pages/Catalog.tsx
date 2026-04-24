@@ -91,7 +91,8 @@ const Catalog = () => {
         const { data: downloadsData } = await supabase
           .from('user_downloads')
           .select('song_id')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .eq('hidden_from_library', false);
         
         if (downloadsData) {
           setDownloadedSongs(new Set(downloadsData.map(d => d.song_id)));
