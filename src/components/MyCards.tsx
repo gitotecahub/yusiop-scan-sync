@@ -273,21 +273,24 @@ const MyCards = () => {
                   className="flex-1 h-12 gap-2 font-semibold"
                 >
                   <ScanLine className="h-4 w-4" />
-                  Canjear
+                  {t('card.redeem')}
                 </Button>
                 <Button
                   onClick={() => handleCopy(selected.code)}
                   variant={copied ? 'secondary' : 'outline'}
                   size="icon"
                   className="h-12 w-12 shrink-0"
-                  aria-label="Copiar código manual"
-                  title="Copiar código manual"
+                  aria-label={t('card.copy')}
+                  title={t('card.copy')}
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground text-center -mt-1">
-                Pulsa "Canjear" para activar la tarjeta en el escáner
+                {language === 'es' ? 'Pulsa "Canjear" para activar la tarjeta en el escáner' : 
+                 language === 'en' ? 'Tap "Redeem" to activate the card in the scanner' :
+                 language === 'fr' ? 'Appuyez sur "Utiliser" pour activer la carte' :
+                 'Toque "Resgatar" para ativar o cartão'}
               </p>
 
               <div className="space-y-3 pt-2">
