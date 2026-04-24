@@ -537,9 +537,18 @@ const Monetization = () => {
                   <p className="text-xs text-muted-foreground">Yusiop (50%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.platform)}</p>
                 </div>
-                <div className="rounded-md border p-3 col-span-2">
+                <div className="rounded-md border p-3">
                   <p className="text-xs text-muted-foreground">Inversor (10%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.investor)}</p>
+                </div>
+                <div className="rounded-md border p-3 bg-yusiop-primary/5">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" />
+                    Tarjetas activadas
+                  </p>
+                  <p className="text-xl font-semibold text-yusiop-primary">
+                    {card.data.cards.toLocaleString('es-ES')}
+                  </p>
                 </div>
               </div>
             </CardContent>
