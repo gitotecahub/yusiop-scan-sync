@@ -26,8 +26,15 @@ import {
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Stats = {
-  totals: { total_downloads: number; unique_listeners: number; total_revenue_cents: number };
-  by_song: { song_id: string; song_title: string; downloads: number; revenue_cents: number }[];
+  totals: {
+    total_downloads: number;
+    real_downloads?: number;
+    promotional_downloads?: number;
+    suspicious_downloads?: number;
+    unique_listeners: number;
+    total_revenue_cents: number;
+  };
+  by_song: { song_id: string; song_title: string; downloads: number; real_downloads?: number; revenue_cents: number }[];
   by_country: { country_code: string; country_name: string; downloads: number }[];
   by_age: { bucket: string; downloads: number }[];
   by_gender: { gender: string; downloads: number }[];
