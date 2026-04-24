@@ -363,11 +363,14 @@ const MyCards = () => {
 
                 <div className="flex items-center gap-2 pt-2 flex-wrap">
                   <Badge variant="secondary" className="capitalize">
-                    {selected.origin === 'digital' ? 'Digital' : 'Física'}
+                    {selected.origin === 'digital' 
+                      ? (language === 'es' ? 'Digital' : language === 'en' ? 'Digital' : language === 'fr' ? 'Numérique' : 'Digital')
+                      : (language === 'es' ? 'Física' : language === 'en' ? 'Physical' : language === 'fr' ? 'Physique' : 'Física')}
                   </Badge>
                   {selected.is_gift && (
                     <Badge variant="outline" className="gap-1">
-                      <Gift className="h-3 w-3" /> Regalo
+                      <Gift className="h-3 w-3" /> 
+                      {language === 'es' ? 'Regalo' : language === 'en' ? 'Gift' : language === 'fr' ? 'Cadeau' : 'Presente'}
                     </Badge>
                   )}
                 </div>
@@ -379,7 +382,10 @@ const MyCards = () => {
                     className="w-full h-11 gap-2 mt-2 border-primary/40 text-primary hover:bg-primary/10 hover:text-primary"
                   >
                     <Gift className="h-4 w-4" />
-                    Regalar esta tarjeta
+                    {language === 'es' ? 'Regalar esta tarjeta' :
+                     language === 'en' ? 'Gift this card' :
+                     language === 'fr' ? 'Offrir cette carte' :
+                     'Presentear este cartão'}
                   </Button>
                 )}
 
