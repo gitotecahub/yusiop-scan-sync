@@ -18,6 +18,7 @@ const PlaybackControls = () => {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const cast = useCastDevices();
 
   // Posición visual interpolada con requestAnimationFrame para un avance fluido
   const [displayPosition, setDisplayPosition] = useState(0);
