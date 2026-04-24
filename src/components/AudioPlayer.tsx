@@ -176,6 +176,16 @@ const AudioPlayer = () => {
     }
   }, [isPlaying, currentSong?.id, pause]);
 
+  // Limpiar object URL al desmontar
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <audio
       ref={audioRef}
