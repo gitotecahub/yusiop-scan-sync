@@ -216,6 +216,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       if (badEmail) return `Email inválido: ${badEmail.contact_email}`;
       if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
     }
+    if (expressEnabled) {
+      if (!expressTier) return 'Selecciona un nivel de Lanzamiento Express';
+      if (!expressAck) return 'Debes confirmar el aviso del Lanzamiento Express';
+    } else if (formData.release_date) {
+      if (formData.release_date < standardMinDate) {
+        return `La fecha estándar requiere mínimo ${STANDARD_MIN_DAYS} días desde hoy. Activa "Lanzamiento Express" para acelerar.`;
+      }
+    }
     return null;
   };
   const disabledReason = getDisabledReason();
