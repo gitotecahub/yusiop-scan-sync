@@ -269,7 +269,7 @@ const Songs = () => {
                         <Badge variant="secondary">Full Track</Badge>
                       )}
                       {song.scheduled_release_at && new Date(song.scheduled_release_at) > new Date() && (
-                        <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 hover:bg-amber-500/20 gap-1">
+                        <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 gap-1">
                           <Clock className="h-3 w-3" />
                           Programado · {formatMadrid(song.scheduled_release_at)} · {timeUntil(song.scheduled_release_at)}
                         </Badge>
