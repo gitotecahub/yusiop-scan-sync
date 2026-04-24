@@ -60,6 +60,8 @@ interface UserProfile {
   downloads_remaining: number | null;
   created_at: string;
   role: 'admin' | 'user';
+  isArtist: boolean;
+  artistNames: string[];
   purchaseCount: number;
   totalSpentCents: number;
   cardCount: number;
@@ -67,7 +69,7 @@ interface UserProfile {
   downloadCount: number;
 }
 
-type SegmentFilter = 'all' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purchases' | 'admins';
+type SegmentFilter = 'all' | 'artists' | 'listeners' | 'vip' | 'customers' | 'gift_redeemers' | 'no_purchases' | 'admins';
 
 const Users = () => {
   const navigate = useNavigate();
