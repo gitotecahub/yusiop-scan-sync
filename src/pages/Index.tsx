@@ -97,17 +97,23 @@ const Index = () => {
     fetchData();
   }, []);
 
-  // Rotación circular del carrusel cada 15s — la primera pasa al final
+  // Desplazamiento automático suave de derecha a izquierda cada 15s
   useEffect(() => {
     if (recentSongs.length < 2) return;
+    const container = carouselRef.current;
+    if (!container) return;
+    
     const id = setInterval(() => {
-      // Vuelve al inicio con scroll suave antes de rotar
-      carouselRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
-      setRecentSongs((prev) => {
-        if (prev.length < 2) return prev;
-        const [first, ...rest] = prev;
-        return [...rest, first];
-      });
+      const scrollAmount = container.clientWidth * 0.8; // Scroll ~80% del ancho visible
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      
+      if (container.scrollLeft >= maxScroll - 10) {
+        // Si llegó al final, vuelve al inicio suavemente
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        // Scroll hacia la derecha (muestra elementos de la derecha = izquierda en vista)
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
     }, 15000);
     return () => clearInterval(id);
   }, [recentSongs.length]);
