@@ -232,19 +232,60 @@ serve(async (req) => {
         );
       }
 
-      // Enriquecer la última descarga con datos geo (consume_card_credit la insertó sin geo)
+      // Enriquecer la última descarga con datos geo y reevaluar regla anti-fraude por IP
+      // (consume_card_credit no tiene la IP del request actual)
       try {
         const { data: lastDl } = await supabase
           .from("user_downloads")
-          .select("id")
+          .select("id, download_type, fraud_score")
           .eq("user_id", user.id)
           .eq("song_id", song.id)
           .eq("qr_card_id", ownedCard.id)
           .order("downloaded_at", { ascending: false })
           .limit(1)
           .maybeSingle();
+
         if (lastDl?.id) {
-          await supabase.from("user_downloads").update(geo).eq("id", lastDl.id);
+          const updatePayload: Record<string, unknown> = { ...geo };
+
+          // Si la descarga ya fue marcada como sospechosa por velocidad de usuario,
+          // no degradamos el tipo. Solo añadimos geo.
+          if (rawIp && lastDl.download_type === "real") {
+            const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+            const { count: ipCount } = await supabase
+              .from("user_downloads")
+              .select("id", { count: "exact", head: true })
+              .eq("ip_address", rawIp)
+              .gte("downloaded_at", tenMinAgo);
+
+            if ((ipCount ?? 0) >= 5) {
+              updatePayload.download_type = "suspicious";
+              updatePayload.fraud_score = (lastDl.fraud_score ?? 0) + 10;
+
+              // Acumular puntuación antifraude del usuario
+              const { data: existingScore } = await supabase
+                .from("user_fraud_score")
+                .select("score")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+              const newScore = (existingScore?.score ?? 0) + 10;
+              const isSuspicious = newScore >= 50;
+
+              await supabase
+                .from("user_fraud_score")
+                .upsert({
+                  user_id: user.id,
+                  score: newScore,
+                  is_suspicious: isSuspicious,
+                  flagged_at: isSuspicious ? new Date().toISOString() : null,
+                  last_event_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }, { onConflict: "user_id" });
+            }
+          }
+
+          await supabase.from("user_downloads").update(updatePayload).eq("id", lastDl.id);
         }
       } catch (_e) { /* no bloquear */ }
 
