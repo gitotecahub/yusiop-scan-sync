@@ -335,17 +335,17 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" /> Países
+                <MapPin className="h-4 w-4 text-primary" /> {t('artist.countries')}
                 {topCountry && (
                   <span className="ml-auto text-xs text-muted-foreground font-normal">
-                    Top: {flagEmoji(topCountry.country_code)} {topCountry.country_name}
+                    {t('artist.top')}: {flagEmoji(topCountry.country_code)} {topCountry.country_name}
                   </span>
                 )}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_country.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sin datos geográficos todavía.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noGeo')}</p>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                   {stats.by_country.slice(0, 12).map((c) => {
