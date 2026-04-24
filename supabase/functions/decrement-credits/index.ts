@@ -54,6 +54,26 @@ serve(async (req) => {
       );
     }
 
+    // Bloquear descargas de admins/moderadores: deben usar otra cuenta
+    const { data: adminRoles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .in("role", ["admin", "moderator"]);
+
+    if (adminRoles && adminRoles.length > 0) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "Los administradores no pueden descargar música. Usa una cuenta de usuario con tarjeta para descargar.",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     const getRemainingCredits = async () => {
       const [{ data: ownedCards }, { data: creditsRows }] = await Promise.all([
         supabase
