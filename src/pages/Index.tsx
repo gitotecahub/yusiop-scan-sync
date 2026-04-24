@@ -1,8 +1,9 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
+import { Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import DigitalCard from '@/components/DigitalCard';
 
 interface SongCard {
   id: string;
@@ -221,23 +222,48 @@ const Index = () => {
         )}
       </Section>
 
-      {/* === TARJETAS DESTACADAS === */}
-      <Section title="Tarjetas destacadas" link="/store">
-        <div className="grid grid-cols-2 gap-3">
-          <CardTile
-            label="Estándar"
-            sub="4 descargas"
-            price="5,00 €"
-            gradient="linear-gradient(135deg, #0a1d4a 0%, #1a4a8a 50%, #2dd4d4 100%)"
+      {/* === TARJETAS DESTACADAS — reales === */}
+      <Section title="Tarjetas destacadas" eyebrow="Colección" link="/store">
+        <div className="grid grid-cols-1 gap-4">
+          <button
             onClick={() => navigate('/store')}
-          />
-          <CardTile
-            label="Premium"
-            sub="10 descargas"
-            price="10,00 €"
-            gradient="linear-gradient(135deg, #1a0a3e 0%, #4c1d95 50%, #a78bfa 100%)"
+            className="group text-left transition-all hover:-translate-y-1"
+            aria-label="Ver tarjeta Estándar en la tienda"
+          >
+            <DigitalCard
+              code="YUSIOP-DEMO-A7K9X2"
+              cardType="standard"
+              downloadCredits={4}
+              compact
+            />
+            <div className="flex items-center justify-between mt-2 px-1">
+              <div>
+                <p className="font-display font-bold text-sm">Tarjeta Estándar</p>
+                <p className="text-[11px] text-muted-foreground">4 descargas · Para descubrir</p>
+              </div>
+              <span className="font-display font-bold text-base vapor-text">5,00 €</span>
+            </div>
+          </button>
+
+          <button
             onClick={() => navigate('/store')}
-          />
+            className="group text-left transition-all hover:-translate-y-1"
+            aria-label="Ver tarjeta Premium en la tienda"
+          >
+            <DigitalCard
+              code="YUSIOP-DEMO-B3R7D9"
+              cardType="premium"
+              downloadCredits={10}
+              compact
+            />
+            <div className="flex items-center justify-between mt-2 px-1">
+              <div>
+                <p className="font-display font-bold text-sm">Tarjeta Premium</p>
+                <p className="text-[11px] text-muted-foreground">10 descargas · Para fanáticos</p>
+              </div>
+              <span className="font-display font-bold text-base vapor-text">10,00 €</span>
+            </div>
+          </button>
         </div>
       </Section>
 
