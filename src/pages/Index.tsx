@@ -302,23 +302,23 @@ const Index = () => {
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory">
           <ActivityTile
             icon={<Send className="h-3.5 w-3.5" />}
-            title="Comparte música"
-            subtitle="Regala canciones a tus amigos"
-            time="Cualquier momento"
+            title={language === 'es' ? 'Comparte música' : language === 'en' ? 'Share music' : language === 'fr' ? 'Partagez musique' : 'Compartilhar música'}
+            subtitle={language === 'es' ? 'Regala canciones a tus amigos' : language === 'en' ? 'Gift songs to friends' : language === 'fr' ? 'Offrez des chansons' : 'Presenteie com músicas'}
+            time={language === 'es' ? 'Cualquier momento' : language === 'en' ? 'Anytime' : language === 'fr' ? 'À tout moment' : 'A qualquer momento'}
             onClick={() => navigate('/library')}
           />
           <ActivityTile
             icon={<TrendingUp className="h-3.5 w-3.5" />}
-            title="Top descargada"
-            subtitle={popularSongs[0]?.title || 'Descubre el ranking'}
+            title={language === 'es' ? 'Top descargada' : language === 'en' ? 'Top downloaded' : language === 'fr' ? 'Plus téléchargée' : 'Mais baixada'}
+            subtitle={popularSongs[0]?.title || (language === 'es' ? 'Descubre el ranking' : language === 'en' ? 'Discover the ranking' : language === 'fr' ? 'Découvrez le classement' : 'Descubra o ranking')}
             time={popularSongs[0]?.artist || 'En vivo'}
             onClick={() => navigate('/catalog')}
           />
           <ActivityTile
             icon={<Gift className="h-3.5 w-3.5" />}
-            title="Recibe regalos"
-            subtitle="Canjea códigos de tus amigos"
-            time="Gratis"
+            title={language === 'es' ? 'Recibe regalos' : language === 'en' ? 'Receive gifts' : language === 'fr' ? 'Recevez cadeaux' : 'Receba presentes'}
+            subtitle={language === 'es' ? 'Canjea códigos de tus amigos' : language === 'en' ? 'Redeem codes from friends' : language === 'fr' ? 'Utilisez codes amis' : 'Resgate códigos dos amigos'}
+            time={language === 'es' ? 'Gratis' : language === 'en' ? 'Free' : language === 'fr' ? 'Gratuit' : 'Grátis'}
             onClick={() => navigate('/qr')}
           />
         </div>
