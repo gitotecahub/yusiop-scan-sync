@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
 import SubscriptionBanner from '@/components/SubscriptionBanner';
+import PopularSection from '@/components/PopularSection';
 import { useLanguageStore } from '@/stores/languageStore';
 
 interface SongCard {
