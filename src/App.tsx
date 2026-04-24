@@ -42,6 +42,7 @@ import Settings from '@/pages/admin/Settings';
 import ArtistRequests from '@/pages/admin/ArtistRequests';
 import AdminSubscriptions from '@/pages/admin/Subscriptions';
 import Subscriptions from '@/pages/Subscriptions';
+import Popular from '@/pages/Popular';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -143,6 +144,7 @@ const AppContent = () => {
               <Route path="/library" element={<Library />} />
               <Route path="/store" element={<Store />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/popular" element={<Popular />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/artist/request" element={<ArtistRequest />} />
               <Route path="*" element={<Navigate to="/" replace />} />
