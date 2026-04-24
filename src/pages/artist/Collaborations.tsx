@@ -58,7 +58,7 @@ const Collaborations = () => {
         .eq('claimant_user_id', user.id)
         .order('created_at', { ascending: false }),
     ]);
-    if (poolErr) toast.error('Error cargando pozo común');
+    if (poolErr) toast.error(t('artist.errorLoadingPool'));
     setPending((pool ?? []) as PendingCollab[]);
     setMyClaims((claims ?? []) as MyClaim[]);
     setLoading(false);
