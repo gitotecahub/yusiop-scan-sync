@@ -160,11 +160,11 @@ const MySubmissions = () => {
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Cargando…</p>
+        <p className="text-muted-foreground">{t('artist.loading')}</p>
       ) : rows.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Aún no has enviado ninguna canción. Pulsa "Subir música" para empezar.
+            {t('artist.noSongsSent')}
           </CardContent>
         </Card>
       ) : (
