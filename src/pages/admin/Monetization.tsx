@@ -437,6 +437,11 @@ const Monetization = () => {
               <Coins className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalGross)}
             </CardTitle>
+            <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
+              Descargas: {formatEURNumber(totals.downloadsGross)}
+              <br />
+              Tarjetas físicas: {formatEURNumber(totals.physicalSalesEur)}
+            </p>
           </CardHeader>
         </Card>
         <Card>
