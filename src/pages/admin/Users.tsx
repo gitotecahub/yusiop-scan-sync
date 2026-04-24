@@ -44,6 +44,7 @@ import {
   Gift,
   ShoppingBag,
   KeyRound,
+  Mic2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
