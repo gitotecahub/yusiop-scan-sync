@@ -1,6 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, Settings, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,7 +21,6 @@ const FEATURED_GRADIENTS = [
 ];
 
 const Index = () => {
-  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
