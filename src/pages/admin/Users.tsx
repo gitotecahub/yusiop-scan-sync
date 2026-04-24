@@ -93,7 +93,7 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const [profilesRes, rolesRes, purchasesRes, cardsRes, downloadsRes] = await Promise.all([
+      const [profilesRes, rolesRes, purchasesRes, cardsRes, downloadsRes, artistReqRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('user_roles').select('user_id, role'),
         supabase
@@ -101,6 +101,7 @@ const Users = () => {
           .select('buyer_user_id, amount_cents, status'),
         supabase.from('qr_cards').select('owner_user_id, activated_by, is_gift, gift_redeemed'),
         supabase.from('user_downloads').select('user_id'),
+        supabase.from('artist_requests').select('user_id, artist_name, status').eq('status', 'approved'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -108,6 +109,18 @@ const Users = () => {
       const adminIds = new Set(
         (rolesRes.data ?? []).filter((r) => r.role === 'admin').map((r) => r.user_id),
       );
+      const artistIds = new Set(
+        (rolesRes.data ?? []).filter((r) => r.role === 'artist').map((r) => r.user_id),
+      );
+
+      // Map of approved artist names per user
+      const artistNamesByUser = new Map<string, string[]>();
+      (artistReqRes.data ?? []).forEach((r) => {
+        if (!r.user_id || !r.artist_name) return;
+        const list = artistNamesByUser.get(r.user_id) ?? [];
+        if (!list.includes(r.artist_name)) list.push(r.artist_name);
+        artistNamesByUser.set(r.user_id, list);
+      });
 
       // Aggregate purchases
       const purchaseStats = new Map<string, { count: number; total: number }>();
@@ -141,6 +154,7 @@ const Users = () => {
       const merged: UserProfile[] = (profilesRes.data ?? []).map((p) => {
         const purch = purchaseStats.get(p.user_id);
         const card = cardStats.get(p.user_id);
+        const names = artistNamesByUser.get(p.user_id) ?? [];
         return {
           id: p.id,
           user_id: p.user_id,
@@ -150,6 +164,8 @@ const Users = () => {
           downloads_remaining: p.downloads_remaining,
           created_at: p.created_at,
           role: adminIds.has(p.user_id) ? 'admin' : 'user',
+          isArtist: artistIds.has(p.user_id) || names.length > 0,
+          artistNames: names,
           purchaseCount: purch?.count ?? 0,
           totalSpentCents: purch?.total ?? 0,
           cardCount: card?.count ?? 0,
