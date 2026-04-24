@@ -9,9 +9,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCreditsStore } from '@/stores/creditsStore';
 import { qrCodeSchema } from '@/lib/validation';
+import { useLanguageStore } from '@/stores/languageStore';
 import DigitalCard from '@/components/DigitalCard';
 
 const QRScanner = () => {
+  const { t } = useLanguageStore();
   const location = useLocation();
   const prefillCode = (location.state as { prefillCode?: string } | null)?.prefillCode ?? '';
   const [manualCode, setManualCode] = useState(prefillCode);
@@ -32,7 +34,7 @@ const QRScanner = () => {
       // Obtener el usuario actual y su token de sesión
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !session?.user?.email) {
-        toast.error('Debes iniciar sesión para activar una tarjeta QR');
+        toast.error(t('qr.mustLogin'));
         return;
       }
 
@@ -49,12 +51,12 @@ const QRScanner = () => {
 
       if (error) {
         console.error('Edge function error:', error);
-        toast.error(error.message || 'Error al activar el QR');
+        toast.error(error.message || t('qr.error'));
         return;
       }
 
       if (!data?.success) {
-        toast.error(data?.error || 'Error al activar el QR');
+        toast.error(data?.error || t('qr.error'));
         return;
       }
 
@@ -64,7 +66,7 @@ const QRScanner = () => {
       }
 
       // Éxito - mostrar mensaje
-      toast.success(`¡${data.message}! ${data.credits} créditos disponibles`);
+      toast.success(`${t('qr.success')} ${data.credits} ${t('qr.creditsAvailable')}`);
       stopScanning();
 
       // Recargar créditos REALES desde la base de datos (suma user_credits + qr_cards)
@@ -111,7 +113,7 @@ const QRScanner = () => {
 
     } catch (error: any) {
       console.error('Error activating QR:', error);
-      toast.error('Error al activar el QR');
+      toast.error(t('qr.error'));
     } finally {
       setActivating(false);
       processingRef.current = false;
@@ -157,7 +159,7 @@ const QRScanner = () => {
         // 1) Verificar cámara disponible
         const hasCamera = await QrScanner.hasCamera();
         if (!hasCamera) {
-          toast.error('No se detectó ninguna cámara en este dispositivo');
+          toast.error(t('qr.cameraError'));
           setScanning(false);
           return;
         }
@@ -191,7 +193,7 @@ const QRScanner = () => {
           // Si solo hay una cámara, dejamos que facingMode environment haga el trabajo
         } catch (permissionError) {
           console.error('Error de permisos:', permissionError);
-          toast.error('Permisos de cámara denegados. Por favor permite el acceso a la cámara.');
+          toast.error(t('qr.cameraError'));
           setScanning(false);
           return;
         }
@@ -237,15 +239,10 @@ const QRScanner = () => {
           }
         }
 
-        toast.success('Cámara activada. Apunta al código QR');
+        toast.success(t('qr.scan.instruction'));
       } catch (error: any) {
         console.error('Error al iniciar el scanner:', error);
-        let msg = 'Error desconocido al acceder a la cámara';
-        if (error?.name === 'NotAllowedError') msg = 'Permisos de cámara denegados.';
-        else if (error?.name === 'NotFoundError') msg = 'No se encontró ninguna cámara.';
-        else if (error?.name === 'NotReadableError') msg = 'La cámara está en uso por otra app.';
-        else if (error?.message) msg = `Error: ${error.message}`;
-        toast.error(msg);
+        toast.error(t('qr.cameraError'));
         setScanning(false);
       }
     };
@@ -270,10 +267,10 @@ const QRScanner = () => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Escanea<br /><span className="vapor-text">tu QR</span>
+          {t('qr.scan.title')}
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Apunta a una tarjeta o introduce el código manualmente.
+          {t('qr.scan.instruction')}
         </p>
       </div>
 
@@ -281,8 +278,8 @@ const QRScanner = () => {
       <div className="blob-card p-6">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="eyebrow mb-1.5">Activar Tarjeta</p>
-            <h2 className="font-display text-xl font-bold leading-tight">Método rápido</h2>
+            <p className="eyebrow mb-1.5">{t('qr.activate')}</p>
+            <h2 className="font-display text-xl font-bold leading-tight">{t('action.scan')}</h2>
           </div>
           <div className="w-11 h-11 rounded-2xl vapor-bg flex items-center justify-center shadow-glow">
             <QrCode className="h-5 w-5 text-primary-foreground" strokeWidth={1.8} />
@@ -309,27 +306,27 @@ const QRScanner = () => {
               </div>
               <Button onClick={stopScanning} variant="outline" className="w-full rounded-full border-border hover:bg-muted gap-2 h-11">
                 <X className="h-4 w-4" />
-                Detener
+                {t('qr.stopCamera')}
               </Button>
             </div>
           ) : (
             <Button onClick={startScanning} className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 gap-2 font-bold shadow-glow">
               <Camera className="h-4 w-4" />
-              Usar Cámara
+              {t('qr.startCamera')}
             </Button>
           )}
 
           <div className="flex items-center gap-3">
             <span className="flex-1 h-px bg-border" />
-            <span className="eyebrow">o</span>
+            <span className="eyebrow">{language === 'en' ? 'or' : language === 'fr' ? 'ou' : language === 'pt' ? 'ou' : 'o'}</span>
             <span className="flex-1 h-px bg-border" />
           </div>
 
           <form onSubmit={handleManualSubmit} className="space-y-3">
             <div>
-              <p className="eyebrow mb-2">Código manual</p>
+              <p className="eyebrow mb-2">{t('qr.manual.title')}</p>
               <Input
-                placeholder="Código de tarjeta"
+                placeholder={t('qr.manual.placeholder')}
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 maxLength={6}
@@ -345,7 +342,7 @@ const QRScanner = () => {
               className="w-full h-11 rounded-full border-primary/40 bg-transparent text-foreground hover:bg-primary/10 font-semibold"
               disabled={!manualCode.trim() || activating}
             >
-              {activating ? 'Activando…' : 'Activar Tarjeta'}
+              {activating ? t('qr.activating') : t('qr.activate')}
             </Button>
           </form>
         </div>
@@ -353,7 +350,7 @@ const QRScanner = () => {
 
       {/* Card types — tarjetas reales de muestra */}
       <div>
-        <p className="eyebrow mb-3">Tipos de tarjeta</p>
+        <p className="eyebrow mb-3">{t('card.standard')} / {t('card.premium')}</p>
         <div className="grid grid-cols-2 gap-3">
           <DigitalCard
             code="YUSIOP-DEMO-A7K9X2"
