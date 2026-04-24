@@ -247,18 +247,34 @@ const Settings = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Bell className="h-5 w-5" />
-              <span>Notificaciones</span>
+              <span>
+                {language === 'es' ? 'Notificaciones' :
+                 language === 'en' ? 'Notifications' :
+                 language === 'fr' ? 'Notifications' :
+                 'Notificações'}
+              </span>
             </CardTitle>
             <CardDescription>
-              Configurar notificaciones del sistema
+              {language === 'es' ? 'Configurar notificaciones del sistema' :
+               language === 'en' ? 'Configure system notifications' :
+               language === 'fr' ? 'Configurer les notifications du système' :
+               'Configurar notificações do sistema'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Nuevos Usuarios</Label>
+                <Label>
+                  {language === 'es' ? 'Nuevos Usuarios' :
+                   language === 'en' ? 'New Users' :
+                   language === 'fr' ? 'Nouveaux Utilisateurs' :
+                   'Novos Usuários'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Notificar cuando se registre un nuevo usuario
+                  {language === 'es' ? 'Notificar cuando se registre un nuevo usuario' :
+                   language === 'en' ? 'Notify when a new user registers' :
+                   language === 'fr' ? 'Notifier lorsqu\'un nouvel utilisateur s\'inscrit' :
+                   'Notificar quando um novo usuário se registrar'}
                 </p>
               </div>
               <Switch defaultChecked />
@@ -266,9 +282,17 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Errores del Sistema</Label>
+                <Label>
+                  {language === 'es' ? 'Errores del Sistema' :
+                   language === 'en' ? 'System Errors' :
+                   language === 'fr' ? 'Erreurs du Système' :
+                   'Erros do Sistema'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Notificar errores críticos del sistema
+                  {language === 'es' ? 'Notificar errores críticos del sistema' :
+                   language === 'en' ? 'Notify critical system errors' :
+                   language === 'fr' ? 'Notifier les erreurs critiques du système' :
+                   'Notificar erros críticos do sistema'}
                 </p>
               </div>
               <Switch defaultChecked />
@@ -276,9 +300,17 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Actividad Sospechosa</Label>
+                <Label>
+                  {language === 'es' ? 'Actividad Sospechosa' :
+                   language === 'en' ? 'Suspicious Activity' :
+                   language === 'fr' ? 'Activité Suspecte' :
+                   'Atividade Suspeita'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Alertar sobre actividad inusual
+                  {language === 'es' ? 'Alertar sobre actividad inusual' :
+                   language === 'en' ? 'Alert on unusual activity' :
+                   language === 'fr' ? 'Alerter sur toute activité inhabituelle' :
+                   'Alertar sobre atividade incomum'}
                 </p>
               </div>
               <Switch defaultChecked />
@@ -291,7 +323,10 @@ const Settings = () => {
           <CardContent className="p-6">
             <Button className="w-full">
               <Save className="h-4 w-4 mr-2" />
-              Guardar Configuración
+              {language === 'es' ? 'Guardar Configuración' :
+               language === 'en' ? 'Save Settings' :
+               language === 'fr' ? 'Enregistrer les Paramètres' :
+               'Salvar Configurações'}
             </Button>
           </CardContent>
         </Card>
