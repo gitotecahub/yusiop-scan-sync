@@ -213,7 +213,7 @@ const ArtistStats = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                   <p className="text-xs text-muted-foreground">Reales</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.real_downloads ?? 0}</p>
@@ -223,7 +223,7 @@ const ArtistStats = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <Gift className="h-4 w-4 text-blue-500" />
+                  <Gift className="h-4 w-4 text-accent-foreground" />
                   <p className="text-xs text-muted-foreground">Promocionales</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.promotional_downloads ?? 0}</p>
@@ -233,7 +233,7 @@ const ArtistStats = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  <ShieldAlert className="h-4 w-4 text-destructive" />
                   <p className="text-xs text-muted-foreground">Sospechosas</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.suspicious_downloads ?? 0}</p>
