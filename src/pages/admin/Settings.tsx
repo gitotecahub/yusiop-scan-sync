@@ -24,33 +24,93 @@ const Settings = () => {
       </div>
 
       <div className="grid gap-6">
+        {/* Language Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Globe className="h-5 w-5" />
+              <span>{t('settings.language')}</span>
+            </CardTitle>
+            <CardDescription>
+              {language === 'es' ? 'Selecciona el idioma de la interfaz' :
+               language === 'en' ? 'Select the interface language' :
+               language === 'fr' ? 'Sélectionnez la langue de l\'interface' :
+               'Selecione o idioma da interface'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label>{t('settings.languageLabel')}</Label>
+              <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      <span className="mr-2">{lang.flag}</span>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* General Settings */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <SettingsIcon className="h-5 w-5" />
-              <span>Configuración General</span>
+              <span>
+                {language === 'es' ? 'Configuración General' :
+                 language === 'en' ? 'General Settings' :
+                 language === 'fr' ? 'Paramètres Généraux' :
+                 'Configurações Gerais'}
+              </span>
             </CardTitle>
             <CardDescription>
-              Configuraciones básicas de la plataforma
+              {language === 'es' ? 'Configuraciones básicas de la plataforma' :
+               language === 'en' ? 'Basic platform settings' :
+               language === 'fr' ? 'Paramètres de base de la plateforme' :
+               'Configurações básicas da plataforma'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="platform-name">Nombre de la Plataforma</Label>
+              <Label htmlFor="platform-name">
+                {language === 'es' ? 'Nombre de la Plataforma' :
+                 language === 'en' ? 'Platform Name' :
+                 language === 'fr' ? 'Nom de la Plateforme' :
+                 'Nome da Plataforma'}
+              </Label>
               <Input id="platform-name" defaultValue="YUSIOP" />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="contact-email">Email de Contacto</Label>
+              <Label htmlFor="contact-email">
+                {language === 'es' ? 'Email de Contacto' :
+                 language === 'en' ? 'Contact Email' :
+                 language === 'fr' ? 'Email de Contact' :
+                 'Email de Contato'}
+              </Label>
               <Input id="contact-email" type="email" placeholder="admin@yusiop.com" />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Registros Públicos</Label>
+                <Label>
+                  {language === 'es' ? 'Registros Públicos' :
+                   language === 'en' ? 'Public Registration' :
+                   language === 'fr' ? 'Inscriptions Publiques' :
+                   'Registros Públicos'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Permitir registro de nuevos usuarios
+                  {language === 'es' ? 'Permitir registro de nuevos usuarios' :
+                   language === 'en' ? 'Allow new user registration' :
+                   language === 'fr' ? 'Autoriser l\'inscription de nouveaux utilisateurs' :
+                   'Permitir registro de novos usuários'}
                 </p>
               </div>
               <Switch defaultChecked />
@@ -58,9 +118,17 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Modo Mantenimiento</Label>
+                <Label>
+                  {language === 'es' ? 'Modo Mantenimiento' :
+                   language === 'en' ? 'Maintenance Mode' :
+                   language === 'fr' ? 'Mode Maintenance' :
+                   'Modo Manutenção'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Activar modo mantenimiento para la plataforma
+                  {language === 'es' ? 'Activar modo mantenimiento para la plataforma' :
+                   language === 'en' ? 'Enable maintenance mode for the platform' :
+                   language === 'fr' ? 'Activer le mode maintenance pour la plateforme' :
+                   'Ativar modo de manutenção para a plataforma'}
                 </p>
               </div>
               <Switch />
