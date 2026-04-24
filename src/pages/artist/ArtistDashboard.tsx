@@ -74,8 +74,8 @@ const ArtistDashboard = () => {
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card>
           <CardContent className="p-6 text-center space-y-3">
-            <p>No tienes acceso al panel de artista.</p>
-            <Button onClick={() => navigate('/artist/request')}>Solicitar perfil de artista</Button>
+            <p>{t('artist.noAccess')}</p>
+            <Button onClick={() => navigate('/artist/request')}>{t('artist.requestProfile')}</Button>
           </CardContent>
         </Card>
       </div>
