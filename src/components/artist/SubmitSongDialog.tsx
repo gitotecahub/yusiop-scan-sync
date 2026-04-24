@@ -184,6 +184,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [hasCollabs, setHasCollabs] = useState(false);
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
 
+  // Lanzamiento Express
+  const [expressEnabled, setExpressEnabled] = useState(false);
+  const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
+  const [expressAck, setExpressAck] = useState(false);
+
+  const standardMinDate = addDaysISO(STANDARD_MIN_DAYS);
+  const standardMaxDate = addDaysISO(STANDARD_MAX_DAYS);
+
   const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
   const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   const collabValid = !hasCollabs || (
