@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase, LineChart } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -784,6 +784,17 @@ const SalesSimulator = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* === PROYECCIÓN A 5 AÑOS === */}
+      <FiveYearProjection
+        baseGrossXAF={totals.totalGross}
+        baseUnits={totals.totalUnits}
+        baseArtistXAF={totals.totalArtist}
+        baseInvestorXAF={totals.totalInvestor}
+        basePlatformXAF={totals.totalPlatform}
+        baseNetXAF={totals.platformNet}
+        baseCostsXAF={totals.totalCosts}
+      />
     </div>
   );
 };
