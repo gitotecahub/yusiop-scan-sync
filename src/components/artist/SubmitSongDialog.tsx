@@ -83,7 +83,43 @@ interface FormState {
   album_title: string;
   genre: string;
   release_date: string;
+  nationality: string;
 }
+
+// Lista compacta de nacionalidades frecuentes (ISO 3166-1 alpha-2).
+// "Otro" permite dejarlo vacío si no aplica.
+const NATIONALITIES: { code: string; label: string }[] = [
+  { code: 'ES', label: '🇪🇸 España' },
+  { code: 'MX', label: '🇲🇽 México' },
+  { code: 'AR', label: '🇦🇷 Argentina' },
+  { code: 'CO', label: '🇨🇴 Colombia' },
+  { code: 'CL', label: '🇨🇱 Chile' },
+  { code: 'PE', label: '🇵🇪 Perú' },
+  { code: 'VE', label: '🇻🇪 Venezuela' },
+  { code: 'EC', label: '🇪🇨 Ecuador' },
+  { code: 'UY', label: '🇺🇾 Uruguay' },
+  { code: 'PY', label: '🇵🇾 Paraguay' },
+  { code: 'BO', label: '🇧🇴 Bolivia' },
+  { code: 'CR', label: '🇨🇷 Costa Rica' },
+  { code: 'PA', label: '🇵🇦 Panamá' },
+  { code: 'DO', label: '🇩🇴 R. Dominicana' },
+  { code: 'CU', label: '🇨🇺 Cuba' },
+  { code: 'PR', label: '🇵🇷 Puerto Rico' },
+  { code: 'GT', label: '🇬🇹 Guatemala' },
+  { code: 'HN', label: '🇭🇳 Honduras' },
+  { code: 'SV', label: '🇸🇻 El Salvador' },
+  { code: 'NI', label: '🇳🇮 Nicaragua' },
+  { code: 'GQ', label: '🇬🇶 Guinea Ecuatorial' },
+  { code: 'US', label: '🇺🇸 Estados Unidos' },
+  { code: 'BR', label: '🇧🇷 Brasil' },
+  { code: 'PT', label: '🇵🇹 Portugal' },
+  { code: 'FR', label: '🇫🇷 Francia' },
+  { code: 'IT', label: '🇮🇹 Italia' },
+  { code: 'DE', label: '🇩🇪 Alemania' },
+  { code: 'GB', label: '🇬🇧 Reino Unido' },
+  { code: 'MA', label: '🇲🇦 Marruecos' },
+  { code: 'OTHER', label: '🌍 Otro' },
+];
 
 const PREVIEW_LENGTH = 20;
 
@@ -103,6 +139,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     album_title: '',
     genre: '',
     release_date: '',
+    nationality: '',
   });
 
   const [trackFile, setTrackFile] = useState<File | null>(null);
@@ -163,6 +200,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         album_title: editing.album_title ?? '',
         genre: editing.genre ?? '',
         release_date: editing.release_date ?? '',
+        nationality: (editing as any).nationality ?? '',
       });
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
@@ -196,6 +234,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         album_title: '',
         genre: '',
         release_date: '',
+        nationality: '',
       });
       setAudioDuration(0);
       setPreviewStart(0);
@@ -394,9 +433,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           album_title: formData.album_title.trim() || null,
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
-          duration_seconds: duration,
-          preview_start_seconds: safePreviewStart,
-          status: 'pending',
+          nationality: formData.nationality || null,
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
@@ -426,13 +463,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           album_title: formData.album_title.trim() || null,
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
+          nationality: formData.nationality || null,
           duration_seconds: duration,
           preview_start_seconds: safePreviewStart,
           track_url: trackUp.url,
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
-        }).select('id').single();
+        } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) await persistCollaborators(inserted.id);
         setProgress(100);
@@ -516,6 +554,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                 onChange={(e) => setFormData((p) => ({ ...p, release_date: e.target.value }))}
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="nationality">Nacionalidad del artista</Label>
+            <Select
+              value={formData.nationality || undefined}
+              onValueChange={(v) => setFormData((p) => ({ ...p, nationality: v }))}
+            >
+              <SelectTrigger id="nationality">
+                <SelectValue placeholder="Selecciona un país (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {NATIONALITIES.map((n) => (
+                  <SelectItem key={n.code} value={n.code}>{n.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Nos ayuda a destacar tu música en secciones por país y para promociones en TV.
+            </p>
           </div>
 
           <div>

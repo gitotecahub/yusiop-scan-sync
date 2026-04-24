@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { Slider } from '@/components/ui/slider';
-import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2 } from 'lucide-react';
+import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2, Cast } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
@@ -159,6 +159,44 @@ const PlaybackControls = () => {
     }
   };
 
+  const handleCast = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!currentSong) return;
+    // Intenta usar la API Remote Playback (vídeo/audio en TV / Chromecast / AirPlay vía navegador)
+    try {
+      const audioEl = document.querySelector('audio') as (HTMLAudioElement & {
+        remote?: { prompt: () => Promise<void>; state: string };
+        webkitShowPlaybackTargetPicker?: () => void;
+      }) | null;
+
+      // Safari / iOS — AirPlay
+      if (audioEl?.webkitShowPlaybackTargetPicker) {
+        audioEl.webkitShowPlaybackTargetPicker();
+        return;
+      }
+
+      // Chrome / Edge — Remote Playback API
+      if (audioEl?.remote && typeof audioEl.remote.prompt === 'function') {
+        await audioEl.remote.prompt();
+        return;
+      }
+
+      // Presentation API genérica (segundas pantallas)
+      const w = window as unknown as { PresentationRequest?: new (urls: string[]) => { start: () => Promise<unknown> } };
+      if (w.PresentationRequest) {
+        const url = `${window.location.origin}/catalog?song=${currentSong.id}`;
+        const req = new w.PresentationRequest([url]);
+        await req.start();
+        return;
+      }
+
+      toast.info('Tu navegador no permite enviar a TV. Prueba desde Chrome (Cast) o Safari (AirPlay).');
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.name === 'NotAllowedError') return;
+      toast.error('No se pudo conectar con un dispositivo');
+    }
+  };
+
   const clampedPos = Math.min(Math.max(displayPosition, 0), duration || 0);
   const remaining = Math.max(duration - clampedPos, 0);
   const progressPct = duration > 0 ? (clampedPos / duration) * 100 : 0;
@@ -221,15 +259,28 @@ const PlaybackControls = () => {
             <div className="text-center">
               <p className="eyebrow vapor-text">Reproduciendo</p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="h-9 w-9 rounded-full hover:bg-muted/40"
-              aria-label="Compartir"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCast}
+                className="h-9 w-9 rounded-full hover:bg-muted/40"
+                aria-label="Enviar a TV o dispositivo"
+                title="Enviar a TV o dispositivo"
+              >
+                <Cast className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleShare}
+                className="h-9 w-9 rounded-full hover:bg-muted/40"
+                aria-label="Compartir"
+                title="Compartir"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Carátula */}

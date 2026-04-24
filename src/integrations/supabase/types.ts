@@ -511,6 +511,7 @@ export type Database = {
           duration_seconds: number
           genre: string | null
           id: string
+          nationality: string | null
           preview_path: string | null
           preview_start_seconds: number
           preview_url: string | null
@@ -536,6 +537,7 @@ export type Database = {
           duration_seconds?: number
           genre?: string | null
           id?: string
+          nationality?: string | null
           preview_path?: string | null
           preview_start_seconds?: number
           preview_url?: string | null
@@ -561,6 +563,7 @@ export type Database = {
           duration_seconds?: number
           genre?: string | null
           id?: string
+          nationality?: string | null
           preview_path?: string | null
           preview_start_seconds?: number
           preview_url?: string | null
