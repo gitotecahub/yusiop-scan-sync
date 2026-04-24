@@ -216,10 +216,10 @@ const ArtistStats = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <p className="text-xs text-muted-foreground">Reales</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.real')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.real_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Generan ingresos</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.realDesc')}</p>
               </CardContent>
             </Card>
             <Card>
