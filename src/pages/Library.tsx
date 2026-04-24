@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { listOfflineSongs, deleteOfflineSong } from '@/lib/offlineStorage';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface DownloadedSong {
   id: string;
@@ -38,6 +39,7 @@ interface DownloadedSong {
 }
 
 const Library = () => {
+  const { t } = useLanguageStore();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const initialTab =
