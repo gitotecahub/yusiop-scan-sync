@@ -1,10 +1,26 @@
-export type Language = 'es' | 'en' | 'fr' | 'pt';
+export type Language = 'es' | 'en' | 'fr' | 'pt' | 'de' | 'it' | 'nl' | 'pl' | 'ru' | 'zh' | 'ja' | 'ko' | 'ar' | 'hi' | 'tr' | 'sv' | 'da' | 'no' | 'fi' | 'el';
 
 export const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: 'es', label: 'Español', flag: '🇪🇸' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
   { code: 'pt', label: 'Português', flag: '🇵🇹' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'ko', label: '한국어', flag: '🇰🇷' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'sv', label: 'Svenska', flag: '🇸🇪' },
+  { code: 'da', label: 'Dansk', flag: '🇩🇰' },
+  { code: 'no', label: 'Norsk', flag: '🇳🇴' },
+  { code: 'fi', label: 'Suomi', flag: '🇫🇮' },
+  { code: 'el', label: 'Ελληνικά', flag: '🇬🇷' },
 ];
 
 export type TranslationKey =
