@@ -165,6 +165,9 @@ export type TranslationKey =
   | 'artist.publishedBadge' | 'artist.rejectedBadge' | 'artist.removedBadge'
   | 'artist.editAndResend' | 'artist.rejectionReasonsTitle' | 'artist.removedTitle'
   | 'artist.removedDesc' | 'artist.scheduledTitle' | 'artist.scheduledDesc'
+  | 'artist.genderM' | 'artist.genderF' | 'artist.genderNB' | 'artist.genderPNS' | 'artist.genderUnknown'
+  | 'artist.demographicsNote' | 'artist.errorLoadingStats' | 'artist.downloadsLegend'
+  | 'artist.collabsBackLabel' | 'artist.statsBackLabel'
   // Admin sidebar extras
   | 'admin.management' | 'admin.backToApp' | 'admin.signOut'
   | 'admin.signOutLabel'
