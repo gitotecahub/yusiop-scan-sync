@@ -558,6 +558,26 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           </div>
 
           <div>
+            <Label htmlFor="nationality">Nacionalidad del artista</Label>
+            <Select
+              value={formData.nationality || undefined}
+              onValueChange={(v) => setFormData((p) => ({ ...p, nationality: v }))}
+            >
+              <SelectTrigger id="nationality">
+                <SelectValue placeholder="Selecciona un país (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {NATIONALITIES.map((n) => (
+                  <SelectItem key={n.code} value={n.code}>{n.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Nos ayuda a destacar tu música en secciones por país y para promociones en TV.
+            </p>
+          </div>
+
+          <div>
             <Label htmlFor="album">Álbum (opcional)</Label>
             <Input
               id="album"
