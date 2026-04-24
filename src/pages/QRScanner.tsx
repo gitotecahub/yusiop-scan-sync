@@ -6,13 +6,15 @@ import { QrCode, Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import QrScanner from 'qr-scanner';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCreditsStore } from '@/stores/creditsStore';
 import { qrCodeSchema } from '@/lib/validation';
 import DigitalCard from '@/components/DigitalCard';
 
 const QRScanner = () => {
-  const [manualCode, setManualCode] = useState('');
+  const location = useLocation();
+  const prefillCode = (location.state as { prefillCode?: string } | null)?.prefillCode ?? '';
+  const [manualCode, setManualCode] = useState(prefillCode);
   const [scanning, setScanning] = useState(false);
   const [activating, setActivating] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
