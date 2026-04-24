@@ -159,7 +159,43 @@ const PlaybackControls = () => {
     }
   };
 
-  const clampedPos = Math.min(Math.max(displayPosition, 0), duration || 0);
+  const handleCast = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!currentSong) return;
+    // Intenta usar la API Remote Playback (vídeo/audio en TV / Chromecast / AirPlay vía navegador)
+    try {
+      const audioEl = document.querySelector('audio') as (HTMLAudioElement & {
+        remote?: { prompt: () => Promise<void>; state: string };
+        webkitShowPlaybackTargetPicker?: () => void;
+      }) | null;
+
+      // Safari / iOS — AirPlay
+      if (audioEl?.webkitShowPlaybackTargetPicker) {
+        audioEl.webkitShowPlaybackTargetPicker();
+        return;
+      }
+
+      // Chrome / Edge — Remote Playback API
+      if (audioEl?.remote && typeof audioEl.remote.prompt === 'function') {
+        await audioEl.remote.prompt();
+        return;
+      }
+
+      // Presentation API genérica (segundas pantallas)
+      const w = window as unknown as { PresentationRequest?: new (urls: string[]) => { start: () => Promise<unknown> } };
+      if (w.PresentationRequest) {
+        const url = `${window.location.origin}/catalog?song=${currentSong.id}`;
+        const req = new w.PresentationRequest([url]);
+        await req.start();
+        return;
+      }
+
+      toast.info('Tu navegador no permite enviar a TV. Prueba desde Chrome (Cast) o Safari (AirPlay).');
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.name === 'NotAllowedError') return;
+      toast.error('No se pudo conectar con un dispositivo');
+    }
+  };
   const remaining = Math.max(duration - clampedPos, 0);
   const progressPct = duration > 0 ? (clampedPos / duration) * 100 : 0;
 
