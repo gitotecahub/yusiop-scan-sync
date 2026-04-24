@@ -463,13 +463,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           album_title: formData.album_title.trim() || null,
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
+          nationality: formData.nationality || null,
           duration_seconds: duration,
           preview_start_seconds: safePreviewStart,
           track_url: trackUp.url,
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
-        }).select('id').single();
+        } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) await persistCollaborators(inserted.id);
         setProgress(100);
