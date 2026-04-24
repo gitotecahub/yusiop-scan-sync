@@ -116,6 +116,18 @@ const SongSubmissions = () => {
     if (result?.success) {
       toast.success(result.message);
       sendEmailNotification('approved', approveTarget);
+      // Notificar a los colaboradores no principales (si tienen email)
+      try {
+        await supabase.functions.invoke('notify-collaborators', {
+          body: {
+            submission_id: approveTarget.id,
+            song_id: result.song_id ?? null,
+            app_url: window.location.origin,
+          },
+        });
+      } catch (e) {
+        console.error('Error notificando colaboradores', e);
+      }
       setApproveOpen(false);
       load();
       window.dispatchEvent(new CustomEvent('song-submissions-changed'));
