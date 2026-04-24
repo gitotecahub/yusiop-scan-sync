@@ -12,11 +12,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldSearch } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import ApproveSubmissionDialog from '@/components/admin/ApproveSubmissionDialog';
 import { formatMadrid } from '@/lib/madridTime';
+import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
 
 interface SubmissionRow {
   id: string;
