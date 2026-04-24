@@ -201,7 +201,7 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Ingresos estimados (tu parte)</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.estIncome')}</p>
                     <p className="text-2xl font-bold leading-tight">{formatEuros(stats.totals.total_revenue_cents)}</p>
                     <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.totals.total_revenue_cents)}</p>
                   </div>
