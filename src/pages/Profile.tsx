@@ -710,7 +710,7 @@ const Profile = () => {
               <SelectContent className="max-h-[280px]">
                 {LANGUAGES.map((l) => (
                   <SelectItem key={l.code} value={l.code}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 whitespace-nowrap">
                       <span>{l.flag}</span>
                       <span>{l.label}</span>
                     </div>
