@@ -83,7 +83,43 @@ interface FormState {
   album_title: string;
   genre: string;
   release_date: string;
+  nationality: string;
 }
+
+// Lista compacta de nacionalidades frecuentes (ISO 3166-1 alpha-2).
+// "Otro" permite dejarlo vacío si no aplica.
+const NATIONALITIES: { code: string; label: string }[] = [
+  { code: 'ES', label: '🇪🇸 España' },
+  { code: 'MX', label: '🇲🇽 México' },
+  { code: 'AR', label: '🇦🇷 Argentina' },
+  { code: 'CO', label: '🇨🇴 Colombia' },
+  { code: 'CL', label: '🇨🇱 Chile' },
+  { code: 'PE', label: '🇵🇪 Perú' },
+  { code: 'VE', label: '🇻🇪 Venezuela' },
+  { code: 'EC', label: '🇪🇨 Ecuador' },
+  { code: 'UY', label: '🇺🇾 Uruguay' },
+  { code: 'PY', label: '🇵🇾 Paraguay' },
+  { code: 'BO', label: '🇧🇴 Bolivia' },
+  { code: 'CR', label: '🇨🇷 Costa Rica' },
+  { code: 'PA', label: '🇵🇦 Panamá' },
+  { code: 'DO', label: '🇩🇴 R. Dominicana' },
+  { code: 'CU', label: '🇨🇺 Cuba' },
+  { code: 'PR', label: '🇵🇷 Puerto Rico' },
+  { code: 'GT', label: '🇬🇹 Guatemala' },
+  { code: 'HN', label: '🇭🇳 Honduras' },
+  { code: 'SV', label: '🇸🇻 El Salvador' },
+  { code: 'NI', label: '🇳🇮 Nicaragua' },
+  { code: 'GQ', label: '🇬🇶 Guinea Ecuatorial' },
+  { code: 'US', label: '🇺🇸 Estados Unidos' },
+  { code: 'BR', label: '🇧🇷 Brasil' },
+  { code: 'PT', label: '🇵🇹 Portugal' },
+  { code: 'FR', label: '🇫🇷 Francia' },
+  { code: 'IT', label: '🇮🇹 Italia' },
+  { code: 'DE', label: '🇩🇪 Alemania' },
+  { code: 'GB', label: '🇬🇧 Reino Unido' },
+  { code: 'MA', label: '🇲🇦 Marruecos' },
+  { code: 'OTHER', label: '🌍 Otro' },
+];
 
 const PREVIEW_LENGTH = 20;
 
