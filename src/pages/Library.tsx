@@ -55,7 +55,7 @@ const Library = () => {
   const [bulkShareOpen, setBulkShareOpen] = useState(false);
   const [bulkRecipient, setBulkRecipient] = useState('');
   const [bulkProcessing, setBulkProcessing] = useState(false);
-  const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause, stop } = usePlayerStore();
+  const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas desde Supabase
   useEffect(() => {
@@ -131,7 +131,7 @@ const Library = () => {
     });
   };
 
-  const handlePlay = (song: DownloadedSong) => {
+  const handlePlay = (song: DownloadedSong, list?: DownloadedSong[]) => {
     if (currentSong?.id === song.id && !isPreview) {
       if (isPlaying) {
         pause();
@@ -139,8 +139,11 @@ const Library = () => {
         play();
       }
     } else {
-      setCurrentSong(song, false); // false = full track, not preview
-      play(); // Siempre reproducir la nueva canción
+      // Establecer cola con la lista visible para habilitar prev/next/shuffle
+      const queueList = list && list.length > 0 ? list : [song];
+      const startIdx = queueList.findIndex((s) => s.id === song.id);
+      setQueue(queueList, startIdx >= 0 ? startIdx : 0, false);
+      play();
     }
   };
 
@@ -454,7 +457,7 @@ const Library = () => {
                 {!selectionMode && (
                   <Button
                     size="sm"
-                    onClick={(e) => { e.stopPropagation(); handlePlay(song); }}
+                    onClick={(e) => { e.stopPropagation(); handlePlay(song, songs); }}
                     className="absolute inset-0 w-full h-full bg-transparent hover:bg-transparent active:bg-transparent text-white border-0 rounded-xl p-0 shadow-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
                   >
                     {isCurrentlyPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5 fill-current" />}

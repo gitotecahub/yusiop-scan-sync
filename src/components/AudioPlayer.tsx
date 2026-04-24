@@ -7,7 +7,7 @@ const AudioPlayer = () => {
   const loadedPlaybackRef = useRef<string | null>(null);
   const shouldAutoPlayRef = useRef<boolean>(false);
 
-  const { currentSong, isPlaying, isPreview, setPosition, setDuration, pause } =
+  const { currentSong, isPlaying, isPreview, setPosition, setDuration, pause, next, repeat, queue } =
     usePlayerStore();
 
   // Listeners de audio
@@ -49,6 +49,16 @@ const AudioPlayer = () => {
     };
 
     const handleEnded = () => {
+      // Auto-avance cuando termina la canción (sólo en modo completo y con cola)
+      if (!isPreview && queue.length > 0) {
+        if (repeat === 'one') {
+          try { audio.currentTime = 0; } catch {}
+          audio.play().catch(() => pause());
+          return;
+        }
+        next();
+        return;
+      }
       pause();
       setPosition(0);
     };
@@ -72,7 +82,7 @@ const AudioPlayer = () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause]);
+  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause, next, repeat, queue.length]);
 
   // Cargar nueva canción cuando cambia el ID
   useEffect(() => {

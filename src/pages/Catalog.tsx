@@ -33,7 +33,7 @@ const Catalog = () => {
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
-  const { currentSong, isPlaying, isPreview, setCurrentSong, play, pause } = usePlayerStore();
+  const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
@@ -258,7 +258,19 @@ useEffect(() => {
       return;
     }
 
-    setCurrentSong(song, shouldUsePreview);
+    if (shouldUsePreview) {
+      // Modo preview: una sola canción, sin cola
+      setCurrentSong(song, true);
+    } else {
+      // Modo completo: cargar cola con las canciones descargadas visibles
+      const playable = filteredSongs.filter((s) => downloadedSongs.has(s.id));
+      const startIdx = playable.findIndex((s) => s.id === song.id);
+      if (playable.length > 0 && startIdx >= 0) {
+        setQueue(playable as any, startIdx, false);
+      } else {
+        setCurrentSong(song, false);
+      }
+    }
     play();
   };
 
