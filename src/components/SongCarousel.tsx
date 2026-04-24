@@ -1,13 +1,6 @@
-import { Play, Sparkles } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ReactNode } from 'react';
-
-const HERO_GRADIENTS = [
-  'linear-gradient(135deg, hsl(250 95% 35%), hsl(280 85% 45%))',
-  'linear-gradient(135deg, hsl(232 90% 35%), hsl(188 85% 40%))',
-  'linear-gradient(135deg, hsl(280 85% 35%), hsl(320 85% 45%))',
-  'linear-gradient(135deg, hsl(188 85% 35%), hsl(160 80% 40%))',
-];
 
 export interface CarouselSong {
   id: string;
