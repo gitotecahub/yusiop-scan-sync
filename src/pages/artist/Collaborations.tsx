@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { toast } from 'sonner';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface PendingCollab {
   collaborator_id: string;
