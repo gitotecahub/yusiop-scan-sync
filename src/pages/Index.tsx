@@ -158,7 +158,8 @@ const Index = () => {
         {loading ? (
           <HScrollSkeleton variant="card" />
         ) : recentSongs.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
+            <div key={recentSongs[0]?.id} className="contents animate-fade-in" />
             {recentSongs.map((song, idx) => {
               const isNew = song.created_at && (Date.now() - new Date(song.created_at).getTime()) < 1000 * 60 * 60 * 24 * 30;
               return (
