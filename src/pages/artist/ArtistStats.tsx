@@ -398,10 +398,10 @@ const ArtistStats = () => {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle className="text-base">Género</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('artist.gender')}</CardTitle></CardHeader>
               <CardContent>
                 {stats.by_gender.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Sin datos.</p>
+                  <p className="text-sm text-muted-foreground">{t('artist.noData')}</p>
                 ) : (
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
