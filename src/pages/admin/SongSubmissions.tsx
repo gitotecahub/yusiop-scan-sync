@@ -64,7 +64,25 @@ const SongSubmissions = () => {
   const [approveTarget, setApproveTarget] = useState<SubmissionRow | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
+  const [reanalyzing, setReanalyzing] = useState<Record<string, boolean>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
+
+  const reanalyzeCopyright = async (row: SubmissionRow) => {
+    setReanalyzing((s) => ({ ...s, [row.id]: true }));
+    try {
+      const { error } = await supabase.functions.invoke('analyze-copyright', {
+        body: { submission_id: row.id },
+      });
+      if (error) {
+        toast.error('Error al re-analizar: ' + error.message);
+      } else {
+        toast.success('Análisis de copyright reiniciado');
+        setTimeout(load, 1500);
+      }
+    } finally {
+      setReanalyzing((s) => ({ ...s, [row.id]: false }));
+    }
+  };
 
   const openDetails = (row: SubmissionRow) => {
     setDetailsTarget(row);
