@@ -190,7 +190,14 @@ const MySubmissions = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
-                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
+                        r.express_tier ? (
+                          <Badge className="bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white border-0 shadow-[0_0_12px_hsl(265_85%_60%/0.55)]">
+                            <Zap className="h-3 w-3 mr-1" />
+                            En revisión prioritaria · {r.express_tier}
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
+                        )
                       )}
                       {r.status === 'approved' && (
                         r.scheduled_release_at ? (
