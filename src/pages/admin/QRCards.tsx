@@ -41,6 +41,37 @@ const QRCards = () => {
 
   useEffect(() => {
     fetchQRCards();
+
+    // Suscripción en tiempo real: refleja al instante activaciones, creaciones y borrados
+    const channel = supabase
+      .channel('admin-qr-cards-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'qr_cards' },
+        (payload) => {
+          setQrCards((prev) => {
+            if (payload.eventType === 'INSERT') {
+              const row = payload.new as QRCard;
+              if (prev.some((c) => c.id === row.id)) return prev;
+              return [row, ...prev];
+            }
+            if (payload.eventType === 'UPDATE') {
+              const row = payload.new as QRCard;
+              return prev.map((c) => (c.id === row.id ? { ...c, ...row } : c));
+            }
+            if (payload.eventType === 'DELETE') {
+              const oldRow = payload.old as { id: string };
+              return prev.filter((c) => c.id !== oldRow.id);
+            }
+            return prev;
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchQRCards = async () => {
