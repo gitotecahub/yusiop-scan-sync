@@ -249,11 +249,10 @@ const MySubmissions = () => {
                       <Ban className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                       <div className="text-sm flex-1">
                         <p className="font-semibold text-destructive">
-                          Tu canción ha sido eliminada del catálogo de Yusiop
+                          {t('artist.removedTitle')}
                         </p>
                         <p className="text-foreground/80 mt-1">
-                          El equipo de administración ha retirado "{r.title}" del catálogo.
-                          Si necesitas más información, ponte en contacto con soporte.
+                          {t('artist.removedDesc')}
                         </p>
                       </div>
                     </div>
