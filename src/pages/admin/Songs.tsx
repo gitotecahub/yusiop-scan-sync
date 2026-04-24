@@ -65,7 +65,8 @@ const Songs = () => {
         .select(`
           *,
           artists(name),
-          albums(title)
+          albums(title),
+          song_collaborators(id, artist_name, role, share_percent, is_primary, claimed_by_user_id)
         `)
         .order('created_at', { ascending: false });
 
