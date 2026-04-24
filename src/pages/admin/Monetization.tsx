@@ -95,27 +95,40 @@ const Monetization = () => {
   const [search, setSearch] = useState('');
   const [poolSearch, setPoolSearch] = useState('');
 
+  const fetchAll = async () => {
+    const [{ data: dls }, { data: sgs }, { data: qrs }, { data: collabs }] = await Promise.all([
+      supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
+      supabase.from('songs').select('id, title, artist_id, cover_url, artists(name)').order('title'),
+      supabase.from('qr_cards').select('id, card_type, download_credits, origin, is_activated'),
+      supabase
+        .from('song_collaborators')
+        .select('id, song_id, artist_name, share_percent, claimed_by_user_id')
+        .not('song_id', 'is', null),
+    ]);
+    setDownloads((dls as any) ?? []);
+    setSongs((sgs as any) ?? []);
+    const map = new Map<string, QrCardRow>();
+    (qrs ?? []).forEach((q: any) => map.set(q.id, q));
+    setQrCards(map);
+    setCollaborators((collabs as any) ?? []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      const [{ data: dls }, { data: sgs }, { data: qrs }, { data: collabs }] = await Promise.all([
-        supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
-        supabase.from('songs').select('id, title, artist_id, cover_url, artists(name)').order('title'),
-        supabase.from('qr_cards').select('id, card_type, download_credits, origin'),
-        supabase
-          .from('song_collaborators')
-          .select('id, song_id, artist_name, share_percent, claimed_by_user_id')
-          .not('song_id', 'is', null),
-      ]);
-      setDownloads((dls as any) ?? []);
-      setSongs((sgs as any) ?? []);
-      const map = new Map<string, QrCardRow>();
-      (qrs ?? []).forEach((q: any) => map.set(q.id, q));
-      setQrCards(map);
-      setCollaborators((collabs as any) ?? []);
-      setLoading(false);
-    };
+    setLoading(true);
     fetchAll();
+
+    // Refrescar en tiempo real cuando se activan/crean tarjetas o se registran descargas
+    const channel = supabase
+      .channel('monetization-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'qr_cards' }, () => fetchAll())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_downloads' }, () => fetchAll())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Compute revenue per download row based on the QR card it came from
