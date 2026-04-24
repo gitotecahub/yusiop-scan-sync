@@ -1,6 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, Settings, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,7 +21,6 @@ const FEATURED_GRADIENTS = [
 ];
 
 const Index = () => {
-  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -139,21 +137,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* === Admin shortcut === */}
-      {isAdmin && (
-        <Link to="/admin" className="block">
-          <div className="vapor-card p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl vapor-bg flex items-center justify-center shadow-glow">
-              <Settings className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <div className="flex-1">
-              <p className="eyebrow vapor-text mb-0.5">Restringido</p>
-              <h3 className="font-display font-bold text-sm">Panel de Administración</h3>
-            </div>
-            <ArrowRight className="h-4 w-4 text-primary" />
-          </div>
-        </Link>
-      )}
+
 
       {/* === LANZAMIENTOS DESTACADOS — carrusel horizontal === */}
       <Section title="Lanzamientos destacados" link="/catalog">
