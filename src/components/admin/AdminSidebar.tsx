@@ -62,6 +62,7 @@ export function AdminSidebar() {
   const currentPath = location.pathname;
   const [pendingArtistCount, setPendingArtistCount] = useState(0);
   const [pendingSongCount, setPendingSongCount] = useState(0);
+  const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
 
   const visibleItems = menuItems.filter((item) => item.area === null || has(item.area));
 
@@ -81,9 +82,18 @@ export function AdminSidebar() {
     setPendingSongCount(count ?? 0);
   };
 
+  const loadPendingClaims = async () => {
+    const { count } = await supabase
+      .from('collaboration_claims')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    setPendingClaimsCount(count ?? 0);
+  };
+
   useEffect(() => {
     loadPendingCount();
     loadPendingSongs();
+    loadPendingClaims();
 
     const channel = supabase
       .channel('admin-sidebar-counts')
@@ -97,17 +107,25 @@ export function AdminSidebar() {
         { event: '*', schema: 'public', table: 'song_submissions' },
         () => loadPendingSongs()
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'collaboration_claims' },
+        () => loadPendingClaims()
+      )
       .subscribe();
 
     const handleSongsChanged = () => loadPendingSongs();
     const handleArtistsChanged = () => loadPendingCount();
+    const handleClaimsChanged = () => loadPendingClaims();
     window.addEventListener('song-submissions-changed', handleSongsChanged);
     window.addEventListener('artist-requests-changed', handleArtistsChanged);
+    window.addEventListener('collab-claims-changed', handleClaimsChanged);
 
     return () => {
       supabase.removeChannel(channel);
       window.removeEventListener('song-submissions-changed', handleSongsChanged);
       window.removeEventListener('artist-requests-changed', handleArtistsChanged);
+      window.removeEventListener('collab-claims-changed', handleClaimsChanged);
     };
   }, []);
 
@@ -118,6 +136,9 @@ export function AdminSidebar() {
     }
     if (currentPath.startsWith('/admin/song-submissions')) {
       loadPendingSongs();
+    }
+    if (currentPath.startsWith('/admin/collab-claims')) {
+      loadPendingClaims();
     }
   }, [currentPath]);
 
@@ -153,11 +174,14 @@ export function AdminSidebar() {
               {visibleItems.map((item) => {
                 const isArtistRequests = item.url === '/admin/artist-requests';
                 const isSongSubmissions = item.url === '/admin/song-submissions';
+                const isCollabClaims = item.url === '/admin/collab-claims';
                 const badgeCount = isArtistRequests
                   ? pendingArtistCount
                   : isSongSubmissions
                     ? pendingSongCount
-                    : 0;
+                    : isCollabClaims
+                      ? pendingClaimsCount
+                      : 0;
                 const showBadge = badgeCount > 0;
                 return (
                   <SidebarMenuItem key={item.title}>
