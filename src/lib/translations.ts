@@ -165,6 +165,9 @@ export type TranslationKey =
   | 'artist.publishedBadge' | 'artist.rejectedBadge' | 'artist.removedBadge'
   | 'artist.editAndResend' | 'artist.rejectionReasonsTitle' | 'artist.removedTitle'
   | 'artist.removedDesc' | 'artist.scheduledTitle' | 'artist.scheduledDesc'
+  | 'artist.genderM' | 'artist.genderF' | 'artist.genderNB' | 'artist.genderPNS' | 'artist.genderUnknown'
+  | 'artist.demographicsNote' | 'artist.errorLoadingStats' | 'artist.downloadsLegend'
+  | 'artist.collabsBackLabel' | 'artist.statsBackLabel'
   // Admin sidebar extras
   | 'admin.management' | 'admin.backToApp' | 'admin.signOut'
   | 'admin.signOutLabel'
@@ -447,6 +450,13 @@ const es: Dict = {
   'artist.age': 'Edad', 'artist.gender': 'Género',
   'artist.noData': 'Sin datos.',
   'artist.profileNotFound': 'No se encontró tu perfil de artista aprobado.',
+  'artist.genderM': 'Hombre', 'artist.genderF': 'Mujer', 'artist.genderNB': 'No binario',
+  'artist.genderPNS': 'Prefiere no decirlo', 'artist.genderUnknown': 'Desconocido',
+  'artist.demographicsNote': 'Los datos demográficos se basan en los oyentes que han rellenado su edad y género en el perfil.',
+  'artist.errorLoadingStats': 'Error cargando estadísticas',
+  'artist.downloadsLegend': 'Descargas',
+  'artist.collabsBackLabel': 'Colaboraciones',
+  'artist.statsBackLabel': 'Estadísticas',
   'artist.collabsTitle': 'Pozo común de colaboraciones',
   'artist.collabsEyebrow': 'Reclama tus splits',
   'artist.collabsSubtitle': 'Aquí aparecen las canciones donde otro artista te ha incluido como colaborador. Reclama tu parte y un administrador la revisará.',
@@ -726,6 +736,13 @@ const en: Dict = {
   'artist.age': 'Age', 'artist.gender': 'Gender',
   'artist.noData': 'No data.',
   'artist.profileNotFound': 'No approved artist profile found.',
+  'artist.genderM': 'Male', 'artist.genderF': 'Female', 'artist.genderNB': 'Non-binary',
+  'artist.genderPNS': 'Prefer not to say', 'artist.genderUnknown': 'Unknown',
+  'artist.demographicsNote': 'Demographic data is based on listeners who completed age and gender in their profile.',
+  'artist.errorLoadingStats': 'Error loading stats',
+  'artist.downloadsLegend': 'Downloads',
+  'artist.collabsBackLabel': 'Collaborations',
+  'artist.statsBackLabel': 'Stats',
   'artist.collabsTitle': 'Collaboration shared pool',
   'artist.collabsEyebrow': 'Claim your splits',
   'artist.collabsSubtitle': 'These are songs where another artist included you as a collaborator. Claim your share and an admin will review it.',
@@ -1004,6 +1021,13 @@ const fr: Dict = {
   'artist.age': 'Âge', 'artist.gender': 'Genre',
   'artist.noData': 'Aucune donnée.',
   'artist.profileNotFound': "Aucun profil d'artiste approuvé trouvé.",
+  'artist.genderM': 'Homme', 'artist.genderF': 'Femme', 'artist.genderNB': 'Non binaire',
+  'artist.genderPNS': 'Préfère ne pas dire', 'artist.genderUnknown': 'Inconnu',
+  'artist.demographicsNote': 'Les données démographiques sont basées sur les auditeurs qui ont rempli leur âge et genre dans le profil.',
+  'artist.errorLoadingStats': 'Erreur de chargement des statistiques',
+  'artist.downloadsLegend': 'Téléchargements',
+  'artist.collabsBackLabel': 'Collaborations',
+  'artist.statsBackLabel': 'Statistiques',
   'artist.collabsTitle': 'Pot commun de collaborations',
   'artist.collabsEyebrow': 'Réclamez vos parts',
   'artist.collabsSubtitle': 'Voici les chansons où un autre artiste vous a inclus comme collaborateur. Réclamez votre part et un admin l\'examinera.',
@@ -1282,6 +1306,13 @@ const pt: Dict = {
   'artist.age': 'Idade', 'artist.gender': 'Gênero',
   'artist.noData': 'Sem dados.',
   'artist.profileNotFound': 'Perfil de artista aprovado não encontrado.',
+  'artist.genderM': 'Homem', 'artist.genderF': 'Mulher', 'artist.genderNB': 'Não binário',
+  'artist.genderPNS': 'Prefere não dizer', 'artist.genderUnknown': 'Desconhecido',
+  'artist.demographicsNote': 'Os dados demográficos baseiam-se nos ouvintes que preencheram idade e género no perfil.',
+  'artist.errorLoadingStats': 'Erro ao carregar estatísticas',
+  'artist.downloadsLegend': 'Downloads',
+  'artist.collabsBackLabel': 'Colaborações',
+  'artist.statsBackLabel': 'Estatísticas',
   'artist.collabsTitle': 'Fundo comum de colaborações',
   'artist.collabsEyebrow': 'Reivindique seus splits',
   'artist.collabsSubtitle': 'Aqui aparecem as músicas em que outro artista te incluiu como colaborador. Reivindique sua parte e um admin revisará.',

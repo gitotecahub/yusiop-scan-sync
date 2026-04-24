@@ -24,6 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { useLanguageStore } from '@/stores/languageStore';
 
 type Stats = {
   totals: {
@@ -40,14 +41,6 @@ type Stats = {
   by_gender: { gender: string; downloads: number }[];
   by_day: { day: string; downloads: number; revenue_cents: number }[];
   pool_pending?: { pending_revenue_cents: number; pending_downloads: number } | null;
-};
-
-const GENDER_LABEL: Record<string, string> = {
-  male: 'Hombre',
-  female: 'Mujer',
-  non_binary: 'No binario',
-  prefer_not_to_say: 'Prefiere no decirlo',
-  unknown: 'Desconocido',
 };
 
 const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#f59e0b', '#10b981', '#ef4444', '#94a3b8'];
@@ -67,10 +60,19 @@ const ArtistStats = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist } = useModeStore();
+  const { t } = useLanguageStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [artistName, setArtistName] = useState<string>('');
   const [stats, setStats] = useState<Stats | null>(null);
+
+  const GENDER_LABEL: Record<string, string> = {
+    male: t('artist.genderM'),
+    female: t('artist.genderF'),
+    non_binary: t('artist.genderNB'),
+    prefer_not_to_say: t('artist.genderPNS'),
+    unknown: t('artist.genderUnknown'),
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -89,7 +91,7 @@ const ArtistStats = () => {
           .maybeSingle();
         const name = req?.artist_name;
         if (!name) {
-          setError('No se encontró tu perfil de artista aprobado.');
+          setError(t('artist.profileNotFound'));
           setLoading(false);
           return;
         }
@@ -118,7 +120,7 @@ const ArtistStats = () => {
         if (rpcErr) throw rpcErr;
         setStats(data as unknown as Stats);
       } catch (e: any) {
-        setError(e?.message || 'Error cargando estadísticas');
+        setError(e?.message || t('artist.errorLoadingStats'));
       } finally {
         setLoading(false);
       }
@@ -134,7 +136,7 @@ const ArtistStats = () => {
   if (!isArtist) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <Card><CardContent className="p-6">No tienes acceso al panel de artista.</CardContent></Card>
+        <Card><CardContent className="p-6">{t('artist.noAccess')}</CardContent></Card>
       </div>
     );
   }
@@ -143,16 +145,16 @@ const ArtistStats = () => {
     <div className="min-h-screen p-6 max-w-5xl mx-auto pb-24">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Panel de artista
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.panelLabel')}
         </Button>
-        <span className="text-xs text-muted-foreground">Estadísticas</span>
+        <span className="text-xs text-muted-foreground">{t('artist.statsLabel')}</span>
       </div>
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Tu audiencia</p>
+        <p className="eyebrow mb-1">{t('artist.audienceEyebrow')}</p>
         <h1 className="display-xl text-3xl">{artistName || 'Artista'}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Descargas, ingresos estimados y desde dónde te escuchan.
+          {t('artist.audienceSubtitle')}
         </p>
       </div>
 
@@ -177,7 +179,7 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Download className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Descargas totales</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.totalDownloadsLabel')}</p>
                     <p className="text-2xl font-bold">{stats.totals.total_downloads}</p>
                   </div>
                 </div>
@@ -188,7 +190,7 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Users className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Oyentes únicos</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.uniqueListeners')}</p>
                     <p className="text-2xl font-bold">{stats.totals.unique_listeners}</p>
                   </div>
                 </div>
@@ -199,7 +201,7 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Euro className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Ingresos estimados (tu parte)</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.estIncome')}</p>
                     <p className="text-2xl font-bold leading-tight">{formatEuros(stats.totals.total_revenue_cents)}</p>
                     <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.totals.total_revenue_cents)}</p>
                   </div>
@@ -214,30 +216,30 @@ const ArtistStats = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <p className="text-xs text-muted-foreground">Reales</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.real')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.real_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Generan ingresos</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.realDesc')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Gift className="h-4 w-4 text-accent-foreground" />
-                  <p className="text-xs text-muted-foreground">Promocionales</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.promo')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.promotional_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Tu propia música</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.promoDesc')}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <ShieldAlert className="h-4 w-4 text-destructive" />
-                  <p className="text-xs text-muted-foreground">Sospechosas</p>
+                  <p className="text-xs text-muted-foreground">{t('artist.suspicious')}</p>
                 </div>
                 <p className="text-xl font-bold">{stats.totals.suspicious_downloads ?? 0}</p>
-                <p className="text-[10px] text-muted-foreground">Excluidas de ingresos</p>
+                <p className="text-[10px] text-muted-foreground">{t('artist.suspiciousDesc')}</p>
               </CardContent>
             </Card>
           </div>
@@ -249,14 +251,14 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Pendiente en pozo común (sin reclamar)</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.poolPending')}</p>
                     <p className="text-xl font-bold leading-tight">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
                     <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.pool_pending.pending_revenue_cents)}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} descargas afectadas</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} {t('artist.poolDesc')}</p>
                   </div>
                 </div>
                 <Button size="sm" onClick={() => navigate('/artist/collaborations')}>
-                  Ir a reclamar
+                  {t('artist.poolGoClaim')}
                 </Button>
               </CardContent>
             </Card>
@@ -266,12 +268,12 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" /> Últimos 30 días
+                <TrendingUp className="h-4 w-4 text-primary" /> {t('artist.last30Days')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_day.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sin descargas en los últimos 30 días.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noDownloads30')}</p>
               ) : (
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -280,7 +282,7 @@ const ArtistStats = () => {
                       <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
-                      <Line type="monotone" dataKey="downloads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Descargas" />
+                      <Line type="monotone" dataKey="downloads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name={t('artist.downloadsLegend')} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -292,12 +294,12 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" /> Top canciones
+                <BarChart3 className="h-4 w-4 text-primary" /> {t('artist.topSongs')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_song.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aún no tienes descargas.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noDownloadsYet')}</p>
               ) : (
                 <div className="space-y-2">
                   {stats.by_song.map((s, i) => {
@@ -333,17 +335,17 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" /> Países
+                <MapPin className="h-4 w-4 text-primary" /> {t('artist.countries')}
                 {topCountry && (
                   <span className="ml-auto text-xs text-muted-foreground font-normal">
-                    Top: {flagEmoji(topCountry.country_code)} {topCountry.country_name}
+                    {t('artist.top')}: {flagEmoji(topCountry.country_code)} {topCountry.country_name}
                   </span>
                 )}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_country.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sin datos geográficos todavía.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noGeo')}</p>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
                   {stats.by_country.slice(0, 12).map((c) => {
@@ -367,7 +369,7 @@ const ArtistStats = () => {
                 </div>
               )}
               <p className="mt-4 text-xs text-muted-foreground">
-                La ubicación se obtiene de la IP en el momento de la descarga (aproximada).
+                {t('artist.geoNote')}
               </p>
             </CardContent>
           </Card>
@@ -375,10 +377,10 @@ const ArtistStats = () => {
           {/* Demografía */}
           <div className="grid sm:grid-cols-2 gap-4">
             <Card>
-              <CardHeader><CardTitle className="text-base">Edad</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('artist.age')}</CardTitle></CardHeader>
               <CardContent>
                 {stats.by_age.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Sin datos.</p>
+                  <p className="text-sm text-muted-foreground">{t('artist.noData')}</p>
                 ) : (
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
@@ -396,10 +398,10 @@ const ArtistStats = () => {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle className="text-base">Género</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t('artist.gender')}</CardTitle></CardHeader>
               <CardContent>
                 {stats.by_gender.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Sin datos.</p>
+                  <p className="text-sm text-muted-foreground">{t('artist.noData')}</p>
                 ) : (
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%">
@@ -427,7 +429,7 @@ const ArtistStats = () => {
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground text-center">
-            Los datos demográficos se basan en los oyentes que han rellenado su edad y género en el perfil.
+            {t('artist.demographicsNote')}
           </p>
         </>
       )}

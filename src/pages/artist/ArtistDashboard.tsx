@@ -8,11 +8,13 @@ import { useModeStore } from '@/stores/modeStore';
 import { supabase } from '@/integrations/supabase/client';
 import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
 import DesktopUploadNotice from '@/components/artist/DesktopUploadNotice';
+import { useLanguageStore } from '@/stores/languageStore';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist, setMode } = useModeStore();
+  const { t } = useLanguageStore();
   const [artistName, setArtistName] = useState<string>('');
   const [submitOpen, setSubmitOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -72,8 +74,8 @@ const ArtistDashboard = () => {
       <div className="min-h-screen flex items-center justify-center p-6">
         <Card>
           <CardContent className="p-6 text-center space-y-3">
-            <p>No tienes acceso al panel de artista.</p>
-            <Button onClick={() => navigate('/artist/request')}>Solicitar perfil de artista</Button>
+            <p>{t('artist.noAccess')}</p>
+            <Button onClick={() => navigate('/artist/request')}>{t('artist.requestProfile')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -90,7 +92,7 @@ const ArtistDashboard = () => {
     <div className="min-h-screen p-6 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={switchToUser} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Modo Usuario
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.userMode')}
         </Button>
         <span className="text-xs text-muted-foreground">Yusiop Artist</span>
       </div>
@@ -98,17 +100,17 @@ const ArtistDashboard = () => {
       <DesktopUploadNotice />
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Bienvenido</p>
+        <p className="eyebrow mb-1">{t('artist.welcomeEyebrow')}</p>
         <h1 className="display-xl text-3xl">{artistName || 'Artista'}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Gestiona tu catálogo, sube música y revisa estadísticas.
+          {t('artist.dashboardSubtitle')}
         </p>
         <div className="mt-4 flex gap-2 flex-wrap">
           <Button onClick={() => setSubmitOpen(true)}>
-            <Upload className="h-4 w-4 mr-2" /> Subir música
+            <Upload className="h-4 w-4 mr-2" /> {t('artist.uploadMusic')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/artist/submissions')}>
-            Mis envíos{pendingCount > 0 ? ` (${pendingCount} en revisión)` : ''}
+            {t('artist.viewSubmissions')}{pendingCount > 0 ? ` (${pendingCount} ${t('artist.inReview')})` : ''}
           </Button>
         </div>
       </div>
@@ -117,34 +119,34 @@ const ArtistDashboard = () => {
         <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/submissions')}>
           <CardContent className="p-6">
             <Music className="h-8 w-8 text-primary mb-3" />
-            <h3 className="font-display font-bold text-lg">Mis canciones</h3>
+            <h3 className="font-display font-bold text-lg">{t('artist.mySongs')}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Sube nuevas canciones y consulta el estado de tus envíos.
+              {t('artist.songsCardDesc')}
             </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => {}}>
           <CardContent className="p-6">
             <Disc3 className="h-8 w-8 text-primary mb-3" />
-            <h3 className="font-display font-bold text-lg">Mis álbumes</h3>
-            <p className="text-xs text-muted-foreground mt-1">Crear álbumes y EPs. Próximamente.</p>
+            <h3 className="font-display font-bold text-lg">{t('artist.albumsTitle')}</h3>
+            <p className="text-xs text-muted-foreground mt-1">{t('artist.albumsDesc')}</p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/stats')}>
           <CardContent className="p-6">
             <BarChart3 className="h-8 w-8 text-primary mb-3" />
-            <h3 className="font-display font-bold text-lg">Estadísticas</h3>
+            <h3 className="font-display font-bold text-lg">{t('artist.statsCardTitle')}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Descargas, ingresos, países y demografía de tu audiencia.
+              {t('artist.statsCardDesc')}
             </p>
           </CardContent>
         </Card>
         <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/collaborations')}>
           <CardContent className="p-6">
             <Users className="h-8 w-8 text-primary mb-3" />
-            <h3 className="font-display font-bold text-lg">Colaboraciones</h3>
+            <h3 className="font-display font-bold text-lg">{t('artist.collaborations')}</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Reclama tu parte de monetización en canciones donde apareces como colaborador.
+              {t('artist.collabsCardDesc')}
             </p>
           </CardContent>
         </Card>

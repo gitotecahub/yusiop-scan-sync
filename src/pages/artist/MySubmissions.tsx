@@ -11,6 +11,7 @@ import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface SubmissionRow {
   id: string;
@@ -39,12 +40,15 @@ interface SubmissionRow {
 const MySubmissions = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { t, language } = useLanguageStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [defaultName, setDefaultName] = useState('');
   const [editing, setEditing] = useState<EditingSubmission | null>(null);
+
+  const dateLocale = language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US';
 
   const load = async () => {
     if (!user) return;
@@ -140,27 +144,27 @@ const MySubmissions = () => {
     <div className="min-h-screen p-6 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Panel artista
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.panelLabel')}
         </Button>
         <Button onClick={handleNew}>
-          <Plus className="h-4 w-4 mr-2" /> Subir música
+          <Plus className="h-4 w-4 mr-2" /> {t('artist.uploadMusic')}
         </Button>
       </div>
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Mis envíos</p>
-        <h1 className="display-xl text-3xl">Canciones enviadas</h1>
+        <p className="eyebrow mb-1">{t('artist.subsEyebrow')}</p>
+        <h1 className="display-xl text-3xl">{t('artist.subsTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Sigue el estado de revisión de tus envíos al catálogo.
+          {t('artist.subsSubtitle')}
         </p>
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Cargando…</p>
+        <p className="text-muted-foreground">{t('artist.loading')}</p>
       ) : rows.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Aún no has enviado ninguna canción. Pulsa "Subir música" para empezar.
+            {t('artist.noSongsSent')}
           </CardContent>
         </Card>
       ) : (
@@ -182,23 +186,23 @@ const MySubmissions = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
-                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
+                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
                       )}
                       {r.status === 'approved' && (
                         r.scheduled_release_at ? (
                           <Badge variant="secondary" className="border border-primary/30">
-                            <CalendarClock className="h-3 w-3 mr-1" />Programada
+                            <CalendarClock className="h-3 w-3 mr-1" />{t('artist.scheduledBadge')}
                           </Badge>
                         ) : (
-                          <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                          <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />{t('artist.publishedBadge')}</Badge>
                         )
                       )}
                       {r.status === 'rejected' && (
-                        <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
+                        <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{t('artist.rejectedBadge')}</Badge>
                       )}
                       {r.status === 'removed' && (
                         <Badge variant="outline" className="border-destructive/50 text-destructive">
-                          <Ban className="h-3 w-3 mr-1" />Eliminada
+                          <Ban className="h-3 w-3 mr-1" />{t('artist.removedBadge')}
                         </Badge>
                       )}
                       <CopyrightBadge status={r.copyright_status} score={r.copyright_score} />
@@ -208,12 +212,12 @@ const MySubmissions = () => {
                       {r.album_title ? ` · ${r.album_title}` : ''}
                       {r.genre ? ` · ${r.genre}` : ''}
                       {' · '}
-                      {new Date(r.created_at).toLocaleString('es-ES')}
+                      {new Date(r.created_at).toLocaleString(dateLocale)}
                     </p>
                   </div>
                   {r.status === 'rejected' && (
                     <Button size="sm" onClick={() => handleEdit(r)} className="flex-shrink-0">
-                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> Editar y reenviar
+                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> {t('artist.editAndResend')}
                     </Button>
                   )}
                 </div>
@@ -226,7 +230,7 @@ const MySubmissions = () => {
                         <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                         <div className="text-sm flex-1">
                           <p className="font-semibold text-destructive">
-                            Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
+                            {t('artist.rejectionReasonsTitle')}
                           </p>
                           <ul className="list-disc pl-5 mt-1.5 space-y-1 text-foreground/80 marker:text-destructive">
                             {(items.length > 0 ? items : [r.rejection_reason!]).map((it, i) => (
@@ -245,11 +249,10 @@ const MySubmissions = () => {
                       <Ban className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                       <div className="text-sm flex-1">
                         <p className="font-semibold text-destructive">
-                          Tu canción ha sido eliminada del catálogo de Yusiop
+                          {t('artist.removedTitle')}
                         </p>
                         <p className="text-foreground/80 mt-1">
-                          El equipo de administración ha retirado "{r.title}" del catálogo.
-                          Si necesitas más información, ponte en contacto con soporte.
+                          {t('artist.removedDesc')}
                         </p>
                       </div>
                     </div>
@@ -262,10 +265,10 @@ const MySubmissions = () => {
                       <CalendarClock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <div className="text-sm flex-1">
                         <p className="font-semibold text-primary">
-                          Lanzamiento programado
+                          {t('artist.scheduledTitle')}
                         </p>
                         <p className="text-foreground/80 mt-1">
-                          "{r.title}" se publicará automáticamente el{' '}
+                          "{r.title}" {t('artist.scheduledDesc')}{' '}
                           <strong>{formatMadrid(r.scheduled_release_at)}</strong> (Europa/Madrid)
                           {' · '}
                           <span className="text-muted-foreground">{timeUntil(r.scheduled_release_at)}</span>
