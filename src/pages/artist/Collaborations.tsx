@@ -107,7 +107,7 @@ const Collaborations = () => {
   if (!isArtist) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <Card><CardContent className="p-6">No tienes acceso al panel de artista.</CardContent></Card>
+        <Card><CardContent className="p-6">{t('artist.noAccess')}</CardContent></Card>
       </div>
     );
   }
@@ -116,16 +116,16 @@ const Collaborations = () => {
     <div className="min-h-screen p-6 max-w-4xl mx-auto pb-24">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Panel artista
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.panelLabel')}
         </Button>
-        <span className="text-xs text-muted-foreground">Colaboraciones</span>
+        <span className="text-xs text-muted-foreground">{t('artist.collabsBackLabel')}</span>
       </div>
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Reclama tus splits</p>
-        <h1 className="display-xl text-3xl">Pozo común de colaboraciones</h1>
+        <p className="eyebrow mb-1">{t('artist.collabsEyebrow')}</p>
+        <h1 className="display-xl text-3xl">{t('artist.collabsTitle')}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Aquí aparecen las canciones donde otro artista te ha incluido como colaborador. Reclama tu parte y un administrador la revisará.
+          {t('artist.collabsSubtitle')}
         </p>
       </div>
 
