@@ -200,6 +200,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         album_title: editing.album_title ?? '',
         genre: editing.genre ?? '',
         release_date: editing.release_date ?? '',
+        nationality: (editing as any).nationality ?? '',
       });
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
