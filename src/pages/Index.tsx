@@ -96,6 +96,19 @@ const Index = () => {
     fetchData();
   }, []);
 
+  // Rotación circular del carrusel cada 15s — la primera pasa al final
+  useEffect(() => {
+    if (recentSongs.length < 2) return;
+    const id = setInterval(() => {
+      setRecentSongs((prev) => {
+        if (prev.length < 2) return prev;
+        const [first, ...rest] = prev;
+        return [...rest, first];
+      });
+    }, 15000);
+    return () => clearInterval(id);
+  }, [recentSongs.length]);
+
   const goSong = (id: string) => navigate('/catalog', { state: { highlightSongId: id } });
 
   return (
