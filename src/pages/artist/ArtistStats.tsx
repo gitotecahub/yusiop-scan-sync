@@ -268,12 +268,12 @@ const ArtistStats = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" /> Últimos 30 días
+                <TrendingUp className="h-4 w-4 text-primary" /> {t('artist.last30Days')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {stats.by_day.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Sin descargas en los últimos 30 días.</p>
+                <p className="text-sm text-muted-foreground">{t('artist.noDownloads30')}</p>
               ) : (
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -282,7 +282,7 @@ const ArtistStats = () => {
                       <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
-                      <Line type="monotone" dataKey="downloads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Descargas" />
+                      <Line type="monotone" dataKey="downloads" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name={t('artist.downloadsLegend')} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
