@@ -167,13 +167,13 @@ const Collaborations = () => {
                   </p>
                 </div>
                 <div className="flex-shrink-0">
-                  {p.has_pending_claim ? (
-                    <Badge variant="outline"><Clock className="h-3 w-3 mr-1" /> En revisión</Badge>
-                  ) : (
-                    <Button size="sm" onClick={() => claim(p.collaborator_id)}>
-                      Reclamar
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => claim(p.collaborator_id)}
+                    disabled={p.has_pending_claim}
+                  >
+                    {p.has_pending_claim ? 'Reclamada' : 'Reclamar'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
