@@ -12,9 +12,13 @@ export interface TemplateEntry {
 import { template as giftReceived } from './gift-received.tsx'
 import { template as songApproved } from './song-approved.tsx'
 import { template as songRejected } from './song-rejected.tsx'
+import { template as collaborationPublishedRegistered } from './collaboration-published-registered.tsx'
+import { template as collaborationPublishedInvite } from './collaboration-published-invite.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'gift-received': giftReceived,
   'song-approved': songApproved,
   'song-rejected': songRejected,
+  'collaboration-published-registered': collaborationPublishedRegistered,
+  'collaboration-published-invite': collaborationPublishedInvite,
 }

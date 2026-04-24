@@ -461,6 +461,7 @@ export type Database = {
           artist_name: string
           claimed_at: string | null
           claimed_by_user_id: string | null
+          contact_email: string | null
           created_at: string
           id: string
           is_primary: boolean
@@ -474,6 +475,7 @@ export type Database = {
           artist_name: string
           claimed_at?: string | null
           claimed_by_user_id?: string | null
+          contact_email?: string | null
           created_at?: string
           id?: string
           is_primary?: boolean
@@ -487,6 +489,7 @@ export type Database = {
           artist_name?: string
           claimed_at?: string | null
           claimed_by_user_id?: string | null
+          contact_email?: string | null
           created_at?: string
           id?: string
           is_primary?: boolean
@@ -1033,6 +1036,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_user_id_by_email: { Args: { p_email: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

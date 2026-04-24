@@ -27,6 +27,7 @@ interface CollaboratorRow {
   share_percent: number;
   is_primary: boolean;
   role: CollabRole;
+  contact_email: string;
 }
 
 /**
@@ -125,7 +126,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
 
   const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
-  const collabValid = !hasCollabs || (collaborators.length >= 2 && Math.abs(collabSum - 100) < 0.01 && collaborators.every(c => c.artist_name.trim().length > 0));
+  const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const collabValid = !hasCollabs || (
+    collaborators.length >= 2 &&
+    Math.abs(collabSum - 100) < 0.01 &&
+    collaborators.every(c => c.artist_name.trim().length > 0) &&
+    collaborators.every(c => c.is_primary || (c.contact_email.trim().length > 0 && emailRe.test(c.contact_email.trim())))
+  );
 
   // Razón por la que el botón "Enviar a revisión" está deshabilitado (para mostrar al usuario)
   const getDisabledReason = (): string | null => {
@@ -136,6 +143,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (hasCollabs) {
       if (collaborators.length < 2) return 'Añade al menos 2 artistas en la colaboración';
       if (collaborators.some(c => !c.artist_name.trim())) return 'Todos los colaboradores necesitan un nombre artístico';
+      const missingEmail = collaborators.find(c => !c.is_primary && !c.contact_email.trim());
+      if (missingEmail) return `Falta el email de ${missingEmail.artist_name || 'un colaborador'}`;
+      const badEmail = collaborators.find(c => !c.is_primary && c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
+      if (badEmail) return `Email inválido: ${badEmail.contact_email}`;
       if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
     }
     return null;
@@ -160,7 +171,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary,role')
+          .select('id,artist_name,share_percent,is_primary,role,contact_email')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
@@ -171,6 +182,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             share_percent: Number(d.share_percent),
             is_primary: !!d.is_primary,
             role: (d.role as CollabRole) ?? 'featuring',
+            contact_email: d.contact_email ?? '',
           })));
         } else {
           setHasCollabs(false);
@@ -201,8 +213,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setHasCollabs(true);
     if (collaborators.length === 0) {
       setCollaborators([
-        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring' },
-        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring' },
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring', contact_email: '' },
+        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring', contact_email: '' },
       ]);
     }
   };
@@ -213,7 +225,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   };
 
   const addCollaborator = () => {
-    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring' }]);
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring', contact_email: '' }]);
   };
 
   const removeCollaborator = (idx: number) => {
@@ -340,6 +352,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       share_percent: c.share_percent,
       is_primary: c.is_primary,
       role: c.role,
+      contact_email: c.is_primary ? null : c.contact_email.trim().toLowerCase(),
     }));
     const { error } = await supabase.from('song_collaborators').insert(rows);
     if (error) throw error;
@@ -657,6 +670,22 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                         <span className="text-sm text-muted-foreground">%</span>
                       </div>
                     </div>
+
+                    {!c.is_primary && (
+                      <div className="space-y-1">
+                        <Input
+                          type="email"
+                          placeholder="Email del colaborador *"
+                          value={c.contact_email}
+                          onChange={(e) => updateCollab(i, { contact_email: e.target.value })}
+                          maxLength={255}
+                          autoComplete="off"
+                        />
+                        <p className="text-[11px] text-muted-foreground">
+                          Le avisaremos por email cuando se publique la canción para que pueda reclamar su parte. Si aún no tiene cuenta, le invitaremos a registrarse.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
 
