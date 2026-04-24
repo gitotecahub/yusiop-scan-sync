@@ -454,6 +454,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         await persistCollaborators(editing.id);
         setProgress(100);
         toast.success('Envío actualizado y reenviado a revisión');
+        // Lanzar análisis de copyright en background (no bloqueante)
+        supabase.functions
+          .invoke('analyze-copyright', { body: { submission_id: editing.id } })
+          .catch((e) => console.warn('Copyright check failed (background):', e));
       } else {
         if (!trackUp) throw new Error('Falta archivo de audio');
         const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
@@ -472,9 +476,15 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           cover_path: cover?.path ?? null,
         } as any).select('id').single();
         if (dbError) throw dbError;
-        if (inserted?.id) await persistCollaborators(inserted.id);
+        if (inserted?.id) {
+          await persistCollaborators(inserted.id);
+          // Lanzar análisis de copyright en background
+          supabase.functions
+            .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
+            .catch((e) => console.warn('Copyright check failed (background):', e));
+        }
         setProgress(100);
-        toast.success('Canción enviada a revisión');
+        toast.success('Canción enviada a revisión. Analizando copyright…');
       }
 
       onOpenChange(false);
