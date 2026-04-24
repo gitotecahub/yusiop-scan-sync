@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Language, LANGUAGES, TranslationKey, translations } from '@/lib/translations';
+import type { Language, TranslationKey } from '@/lib/translations';
+import { LANGUAGES, translations } from '@/lib/translations';
 
 export type { Language, TranslationKey };
 export { LANGUAGES, translations };
