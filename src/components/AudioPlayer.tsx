@@ -82,7 +82,7 @@ const AudioPlayer = () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause]);
+  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause, next, repeat, queue.length]);
 
   // Cargar nueva canción cuando cambia el ID
   useEffect(() => {

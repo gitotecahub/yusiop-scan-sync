@@ -11,7 +11,8 @@ import { cn } from '@/lib/utils';
 const PlaybackControls = () => {
   const {
     currentSong, isPlaying, position, duration,
-    play, pause, setPosition
+    play, pause, setPosition,
+    next, previous, shuffle, repeat, toggleShuffle, cycleRepeat, queue,
   } = usePlayerStore();
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -224,15 +225,22 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full text-muted-foreground hover:text-primary hover:bg-muted/40"
+              onClick={(e) => { e.stopPropagation(); toggleShuffle(); }}
+              className={cn(
+                "h-10 w-10 rounded-full hover:bg-muted/40 transition-colors",
+                shuffle ? "text-primary" : "text-muted-foreground hover:text-primary"
+              )}
               aria-label="Aleatorio"
+              aria-pressed={shuffle}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40"
+              onClick={(e) => { e.stopPropagation(); previous(); }}
+              disabled={queue.length === 0}
+              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 disabled:opacity-40"
               aria-label="Anterior"
             >
               <SkipBack className="h-6 w-6 fill-current" />
@@ -248,7 +256,9 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40"
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              disabled={queue.length === 0}
+              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 disabled:opacity-40"
               aria-label="Siguiente"
             >
               <SkipForward className="h-6 w-6 fill-current" />
@@ -256,10 +266,20 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full text-muted-foreground hover:text-primary hover:bg-muted/40"
+              onClick={(e) => { e.stopPropagation(); cycleRepeat(); }}
+              className={cn(
+                "h-10 w-10 rounded-full hover:bg-muted/40 relative transition-colors",
+                repeat !== 'off' ? "text-primary" : "text-muted-foreground hover:text-primary"
+              )}
               aria-label="Repetir"
+              aria-pressed={repeat !== 'off'}
             >
               <Repeat className="h-4 w-4" />
+              {repeat === 'one' && (
+                <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold bg-primary text-primary-foreground rounded-full w-3.5 h-3.5 flex items-center justify-center leading-none">
+                  1
+                </span>
+              )}
             </Button>
           </div>
         </div>
