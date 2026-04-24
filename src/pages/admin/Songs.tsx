@@ -253,22 +253,38 @@ const Songs = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{song.title}</h3>
                     <p className="text-muted-foreground">{song.artists?.name}</p>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex items-center flex-wrap gap-2 mt-1">
                       {song.albums?.title && (
                         <Badge variant="outline">{song.albums.title}</Badge>
                       )}
                       <span className="text-sm text-muted-foreground">
                         {formatDuration(song.duration_seconds)}
                       </span>
-                      <div className="flex space-x-1">
-                        {song.preview_url && (
-                          <Badge variant="secondary">Preview</Badge>
-                        )}
-                        {song.track_url && (
-                          <Badge variant="secondary">Full Track</Badge>
-                        )}
-                      </div>
+                      {song.preview_url && (
+                        <Badge variant="secondary">Preview</Badge>
+                      )}
+                      {song.track_url && (
+                        <Badge variant="secondary">Full Track</Badge>
+                      )}
                     </div>
+                    {song.song_collaborators && song.song_collaborators.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground mb-1">Colaboradores / Reparto:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {song.song_collaborators.map((c) => (
+                            <Badge
+                              key={c.id}
+                              variant={c.is_primary ? 'default' : 'outline'}
+                              className="text-xs"
+                            >
+                              {c.is_primary && '★ '}
+                              {c.artist_name} · {c.role} · {c.share_percent}%
+                              {!c.claimed_by_user_id && ' · sin reclamar'}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
