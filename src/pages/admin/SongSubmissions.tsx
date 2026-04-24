@@ -77,7 +77,7 @@ const SongSubmissions = () => {
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
     if (error) toast.error('Error cargando envíos');
-    setRows((data ?? []) as SubmissionRow[]);
+    setRows((data ?? []) as unknown as SubmissionRow[]);
     setLoading(false);
   };
 
