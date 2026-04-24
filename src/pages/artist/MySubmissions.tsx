@@ -11,6 +11,7 @@ import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface SubmissionRow {
   id: string;
