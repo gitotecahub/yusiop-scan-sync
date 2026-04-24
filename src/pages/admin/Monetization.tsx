@@ -313,15 +313,24 @@ const Monetization = () => {
       acc[bucket].downloads += 1;
       acc[bucket].gross += r;
     });
+    // Conteo de tarjetas activadas por tipo (físicas + digitales)
+    const cardCounts = { standard: 0, premium: 0 };
+    qrCards.forEach((qr: any) => {
+      if (!qr.is_activated) return;
+      if (qr.card_type === 'premium') cardCounts.premium += 1;
+      else cardCounts.standard += 1;
+    });
     return {
       standard: {
         ...acc.standard,
+        cards: cardCounts.standard,
         artist: acc.standard.gross * ARTIST_SHARE,
         platform: acc.standard.gross * PLATFORM_SHARE,
         investor: acc.standard.gross * INVESTOR_SHARE,
       },
       premium: {
         ...acc.premium,
+        cards: cardCounts.premium,
         artist: acc.premium.gross * ARTIST_SHARE,
         platform: acc.premium.gross * PLATFORM_SHARE,
         investor: acc.premium.gross * INVESTOR_SHARE,
@@ -528,9 +537,18 @@ const Monetization = () => {
                   <p className="text-xs text-muted-foreground">Yusiop (50%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.platform)}</p>
                 </div>
-                <div className="rounded-md border p-3 col-span-2">
+                <div className="rounded-md border p-3">
                   <p className="text-xs text-muted-foreground">Inversor (10%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.investor)}</p>
+                </div>
+                <div className="rounded-md border p-3 bg-yusiop-primary/5">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <CreditCard className="h-3 w-3" />
+                    Tarjetas activadas
+                  </p>
+                  <p className="text-xl font-semibold text-yusiop-primary">
+                    {card.data.cards.toLocaleString('es-ES')}
+                  </p>
                 </div>
               </div>
             </CardContent>
