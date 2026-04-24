@@ -394,23 +394,42 @@ const MyCards = () => {
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" className="w-full h-11 gap-2 mt-2">
                         <Trash2 className="h-4 w-4" />
-                        Eliminar tarjeta agotada
+                        {language === 'es' ? 'Eliminar tarjeta agotada' :
+                         language === 'en' ? 'Delete depleted card' :
+                         language === 'fr' ? 'Supprimer carte épuisée' :
+                         'Excluir cartão esgotado'}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {language === 'es' ? '¿Eliminar esta tarjeta?' :
+                           language === 'en' ? 'Delete this card?' :
+                           language === 'fr' ? 'Supprimer cette carte ?' :
+                           'Excluir este cartão?'}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.
+                          {language === 'es' ? 'La tarjeta agotada se eliminará de tu biblioteca. Esta acción no se puede deshacer.' :
+                           language === 'en' ? 'The depleted card will be removed from your library. This action cannot be undone.' :
+                           language === 'fr' ? 'La carte épuisée sera supprimée de votre bibliothèque. Cette action ne peut pas être annulée.' :
+                           'O cartão esgotado será removido da sua biblioteca. Esta ação não pode ser desfeita.'}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel>
+                          {language === 'es' ? 'Cancelar' :
+                           language === 'en' ? 'Cancel' :
+                           language === 'fr' ? 'Annuler' :
+                           'Cancelar'}
+                        </AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(selected.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Eliminar
+                          {language === 'es' ? 'Eliminar' :
+                           language === 'en' ? 'Delete' :
+                           language === 'fr' ? 'Supprimer' :
+                           'Excluir'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
