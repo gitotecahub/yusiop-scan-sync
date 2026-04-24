@@ -40,6 +40,9 @@ interface SubmissionRow {
   scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
+  copyright_status: CopyrightStatus;
+  copyright_score: number;
+  copyright_matches: CopyrightMatch[] | null;
 }
 
 const formatDuration = (s: number) => {
