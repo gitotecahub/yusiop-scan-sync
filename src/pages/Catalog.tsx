@@ -442,7 +442,7 @@ useEffect(() => {
         {filteredSongs.length === 0 && searchTerm ? (
           <div className="vapor-card p-10 text-center">
             <p className="text-muted-foreground text-sm">
-              Sin resultados para "{searchTerm}"
+              {t('catalog.noResultsFor')} "{searchTerm}"
             </p>
           </div>
         ) : (
