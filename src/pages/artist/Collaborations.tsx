@@ -43,6 +43,7 @@ const Collaborations = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isArtist } = useModeStore();
+  const { t, language } = useLanguageStore();
   const [pending, setPending] = useState<PendingCollab[]>([]);
   const [myClaims, setMyClaims] = useState<MyClaim[]>([]);
   const [loading, setLoading] = useState(true);
