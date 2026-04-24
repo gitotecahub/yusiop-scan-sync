@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase, LineChart } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -784,6 +784,17 @@ const SalesSimulator = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* === PROYECCIÓN A 5 AÑOS === */}
+      <FiveYearProjection
+        baseGrossXAF={totals.totalGross}
+        baseUnits={totals.totalUnits}
+        baseArtistXAF={totals.totalArtist}
+        baseInvestorXAF={totals.totalInvestor}
+        basePlatformXAF={totals.totalPlatform}
+        baseNetXAF={totals.platformNet}
+        baseCostsXAF={totals.totalCosts}
+      />
     </div>
   );
 };
@@ -933,6 +944,205 @@ const InvestorProgress = ({ totalInvestorXAF }: { totalInvestorXAF: number }) =>
             </p>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+/* =====================================================
+   PROYECCIÓN A 5 AÑOS — crecimiento +10% anual
+   ===================================================== */
+const GROWTH_RATE = 0.1; // 10% anual
+const PROJECTION_YEARS = 5;
+
+const FiveYearProjection = ({
+  baseGrossXAF,
+  baseUnits,
+  baseArtistXAF,
+  baseInvestorXAF,
+  basePlatformXAF,
+  baseNetXAF,
+  baseCostsXAF,
+}: {
+  baseGrossXAF: number;
+  baseUnits: number;
+  baseArtistXAF: number;
+  baseInvestorXAF: number;
+  basePlatformXAF: number;
+  baseNetXAF: number;
+  baseCostsXAF: number;
+}) => {
+  const rows = useMemo(() => {
+    const out: {
+      year: number;
+      label: string;
+      multiplier: number;
+      units: number;
+      grossXAF: number;
+      artistXAF: number;
+      investorXAF: number;
+      platformXAF: number;
+      costsXAF: number;
+      netXAF: number;
+    }[] = [];
+    for (let i = 0; i < PROJECTION_YEARS; i++) {
+      const multiplier = Math.pow(1 + GROWTH_RATE, i);
+      out.push({
+        year: i + 1,
+        label: `Año ${i + 1}`,
+        multiplier,
+        units: baseUnits * multiplier,
+        grossXAF: baseGrossXAF * multiplier,
+        artistXAF: baseArtistXAF * multiplier,
+        investorXAF: baseInvestorXAF * multiplier,
+        platformXAF: basePlatformXAF * multiplier,
+        costsXAF: baseCostsXAF * multiplier,
+        netXAF: baseNetXAF * multiplier,
+      });
+    }
+    return out;
+  }, [baseGrossXAF, baseUnits, baseArtistXAF, baseInvestorXAF, basePlatformXAF, baseNetXAF, baseCostsXAF]);
+
+  const totals = useMemo(() => {
+    return rows.reduce(
+      (acc, r) => ({
+        units: acc.units + r.units,
+        grossXAF: acc.grossXAF + r.grossXAF,
+        artistXAF: acc.artistXAF + r.artistXAF,
+        investorXAF: acc.investorXAF + r.investorXAF,
+        platformXAF: acc.platformXAF + r.platformXAF,
+        costsXAF: acc.costsXAF + r.costsXAF,
+        netXAF: acc.netXAF + r.netXAF,
+      }),
+      { units: 0, grossXAF: 0, artistXAF: 0, investorXAF: 0, platformXAF: 0, costsXAF: 0, netXAF: 0 }
+    );
+  }, [rows]);
+
+  const maxGross = Math.max(...rows.map((r) => r.grossXAF), 1);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <LineChart className="h-5 w-5 text-yusiop-primary" />
+          Proyección a 5 años
+        </CardTitle>
+        <CardDescription>
+          Estimación del presupuesto bruto anual partiendo del lote actual de tarjetas
+          (físicas + virtuales), con un <span className="font-semibold">crecimiento del 10% anual</span>{' '}
+          en el volumen de ventas. Año 1 = volumen actual configurado arriba.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* KPIs resumen acumulado 5 años */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <p className="text-xs text-muted-foreground mb-1">Bruto acumulado (5 años)</p>
+            <div className="font-semibold text-lg">{formatEUR(totals.grossXAF, 'left')}</div>
+          </div>
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <p className="text-xs text-muted-foreground mb-1">Plataforma neta acumulada</p>
+            <div className="font-semibold text-lg text-yusiop-primary">
+              {formatEUR(totals.netXAF, 'left')}
+            </div>
+          </div>
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <p className="text-xs text-muted-foreground mb-1">Bolsa artistas acumulada</p>
+            <div className="font-semibold text-lg">{formatEUR(totals.artistXAF, 'left')}</div>
+          </div>
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <p className="text-xs text-muted-foreground mb-1">Tarjetas vendidas (5 años)</p>
+            <p className="font-semibold text-lg tabular-nums">
+              {Math.round(totals.units).toLocaleString('es-ES')}
+            </p>
+          </div>
+        </div>
+
+        {/* Mini-gráfico de barras horizontales */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold">Bruto anual proyectado</h4>
+          <div className="space-y-2">
+            {rows.map((r) => {
+              const widthPct = (r.grossXAF / maxGross) * 100;
+              return (
+                <div key={r.year} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium">
+                      {r.label}{' '}
+                      <span className="text-muted-foreground font-normal">
+                        (×{r.multiplier.toFixed(2)})
+                      </span>
+                    </span>
+                    <span className="tabular-nums font-semibold">
+                      {formatEURNumber(r.grossXAF)}
+                    </span>
+                  </div>
+                  <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-yusiop-primary to-yusiop-primary/60 transition-all"
+                      style={{ width: `${widthPct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tabla detallada por año */}
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2 font-medium">Año</th>
+                <th className="text-right px-3 py-2 font-medium">Tarjetas</th>
+                <th className="text-right px-3 py-2 font-medium">Bruto</th>
+                <th className="text-right px-3 py-2 font-medium">Artistas</th>
+                <th className="text-right px-3 py-2 font-medium">Inversor</th>
+                <th className="text-right px-3 py-2 font-medium">Plataforma neto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.year} className="border-t">
+                  <td className="px-3 py-2 font-medium">
+                    {r.label}
+                    <span className="ml-1 text-[10px] text-muted-foreground">
+                      ×{r.multiplier.toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="text-right px-3 py-2 tabular-nums">
+                    {Math.round(r.units).toLocaleString('es-ES')}
+                  </td>
+                  <td className="text-right px-3 py-2">{formatEUR(r.grossXAF)}</td>
+                  <td className="text-right px-3 py-2">{formatEUR(r.artistXAF)}</td>
+                  <td className="text-right px-3 py-2">{formatEUR(r.investorXAF)}</td>
+                  <td className="text-right px-3 py-2 font-semibold text-yusiop-primary">
+                    {formatEUR(r.netXAF)}
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-t bg-muted/30 font-semibold">
+                <td className="px-3 py-2">Total 5 años</td>
+                <td className="text-right px-3 py-2 tabular-nums">
+                  {Math.round(totals.units).toLocaleString('es-ES')}
+                </td>
+                <td className="text-right px-3 py-2">{formatEUR(totals.grossXAF)}</td>
+                <td className="text-right px-3 py-2">{formatEUR(totals.artistXAF)}</td>
+                <td className="text-right px-3 py-2">{formatEUR(totals.investorXAF)}</td>
+                <td className="text-right px-3 py-2 text-yusiop-primary">
+                  {formatEUR(totals.netXAF)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          * Proyección lineal: cada año crece un 10% sobre el anterior, manteniendo precios,
+          reparto de ingresos y costes unitarios constantes. Los ajustes de cualquier parámetro
+          de arriba se reflejan automáticamente aquí.
+        </p>
       </CardContent>
     </Card>
   );
