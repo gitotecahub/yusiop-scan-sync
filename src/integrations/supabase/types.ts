@@ -282,6 +282,33 @@ export type Database = {
           },
         ]
       }
+      feature_flags: {
+        Row: {
+          enabled_state: Database["public"]["Enums"]["subscription_visibility"]
+          key: string
+          rules: Json
+          updated_at: string
+          updated_by: string | null
+          whitelist_user_ids: string[]
+        }
+        Insert: {
+          enabled_state?: Database["public"]["Enums"]["subscription_visibility"]
+          key: string
+          rules?: Json
+          updated_at?: string
+          updated_by?: string | null
+          whitelist_user_ids?: string[]
+        }
+        Update: {
+          enabled_state?: Database["public"]["Enums"]["subscription_visibility"]
+          key?: string
+          rules?: Json
+          updated_at?: string
+          updated_by?: string | null
+          whitelist_user_ids?: string[]
+        }
+        Relationships: []
+      }
       gift_redemptions: {
         Row: {
           id: string
@@ -617,9 +644,11 @@ export type Database = {
           created_at: string
           duration_seconds: number
           id: string
+          is_premium: boolean
           preview_start_seconds: number
           preview_url: string | null
           scheduled_release_at: string | null
+          subscription_locked_until: string | null
           title: string
           track_url: string | null
         }
@@ -630,9 +659,11 @@ export type Database = {
           created_at?: string
           duration_seconds: number
           id?: string
+          is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
           scheduled_release_at?: string | null
+          subscription_locked_until?: string | null
           title: string
           track_url?: string | null
         }
@@ -643,9 +674,11 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
           scheduled_release_at?: string | null
+          subscription_locked_until?: string | null
           title?: string
           track_url?: string | null
         }
@@ -687,6 +720,78 @@ export type Database = {
           granted_by?: string | null
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_download_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          song_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string
+          song_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          song_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          code: Database["public"]["Enums"]["subscription_plan_code"]
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          is_recommended: boolean
+          monthly_downloads: number
+          name: string
+          price_eur_cents: number
+          price_xaf: number
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: Database["public"]["Enums"]["subscription_plan_code"]
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_recommended?: boolean
+          monthly_downloads: number
+          name: string
+          price_eur_cents: number
+          price_xaf: number
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: Database["public"]["Enums"]["subscription_plan_code"]
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_recommended?: boolean
+          monthly_downloads?: number
+          name?: string
+          price_eur_cents?: number
+          price_xaf?: number
+          stripe_price_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -956,6 +1061,74 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          downloads_remaining: number
+          id: string
+          last_event_at: string
+          monthly_downloads: number
+          plan_id: string
+          renewal_date: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end: string
+          current_period_start?: string
+          downloads_remaining?: number
+          id?: string
+          last_event_at?: string
+          monthly_downloads: number
+          plan_id: string
+          renewal_date?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          downloads_remaining?: number
+          id?: string
+          last_event_at?: string
+          monthly_downloads?: number
+          plan_id?: string
+          renewal_date?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -1026,6 +1199,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      consume_subscription_credit: {
+        Args: { p_song_id: string; p_user_id: string }
+        Returns: {
+          credits_left: number
+          message: string
+          success: boolean
+        }[]
+      }
       ensure_artist_for_user: {
         Args: { _artist_name: string; _user_id: string }
         Returns: string
@@ -1058,6 +1239,14 @@ export type Database = {
           song_cover_url: string
           song_id: string
           song_title: string
+        }[]
+      }
+      get_subscription_visibility: {
+        Args: { _user_id: string }
+        Returns: {
+          reason: string
+          state: Database["public"]["Enums"]["subscription_visibility"]
+          visible: boolean
         }[]
       }
       get_upcoming_releases: {
@@ -1105,6 +1294,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      register_subscription_attempt: {
+        Args: { p_reason?: string; p_song_id?: string }
+        Returns: undefined
+      }
       reject_artist_request: {
         Args: { p_reason?: string; p_request_id: string }
         Returns: {
@@ -1127,6 +1320,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      subscription_metrics: { Args: never; Returns: Json }
       transfer_card_to_user: {
         Args: {
           p_card_id: string
@@ -1193,7 +1387,10 @@ export type Database = {
         | "qr_cards"
         | "monetization"
         | "settings"
+      subscription_plan_code: "plus" | "pro" | "elite"
+      subscription_visibility: "off" | "soft_launch" | "on"
       user_role: "user" | "admin"
+      user_subscription_status: "active" | "cancelled" | "expired" | "past_due"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1346,7 +1543,10 @@ export const Constants = {
         "monetization",
         "settings",
       ],
+      subscription_plan_code: ["plus", "pro", "elite"],
+      subscription_visibility: ["off", "soft_launch", "on"],
       user_role: ["user", "admin"],
+      user_subscription_status: ["active", "cancelled", "expired", "past_due"],
     },
   },
 } as const
