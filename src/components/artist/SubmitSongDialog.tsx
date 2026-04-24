@@ -234,6 +234,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         album_title: '',
         genre: '',
         release_date: '',
+        nationality: '',
       });
       setAudioDuration(0);
       setPreviewStart(0);
