@@ -179,23 +179,44 @@ const Settings = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Shield className="h-5 w-5" />
-              <span>Seguridad</span>
+              <span>
+                {language === 'es' ? 'Seguridad' :
+                 language === 'en' ? 'Security' :
+                 language === 'fr' ? 'Sécurité' :
+                 'Segurança'}
+              </span>
             </CardTitle>
             <CardDescription>
-              Configuraciones de seguridad y autenticación
+              {language === 'es' ? 'Configuraciones de seguridad y autenticación' :
+               language === 'en' ? 'Security and authentication settings' :
+               language === 'fr' ? 'Paramètres de sécurité et d\'authentification' :
+               'Configurações de segurança e autenticação'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="session-timeout">Tiempo de Sesión (minutos)</Label>
+              <Label htmlFor="session-timeout">
+                {language === 'es' ? 'Tiempo de Sesión (minutos)' :
+                 language === 'en' ? 'Session Timeout (minutes)' :
+                 language === 'fr' ? 'Délai de Session (minutes)' :
+                 'Tempo de Sessão (minutos)'}
+              </Label>
               <Input id="session-timeout" type="number" defaultValue="60" />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Autenticación de Dos Factores</Label>
+                <Label>
+                  {language === 'es' ? 'Autenticación de Dos Factores' :
+                   language === 'en' ? 'Two-Factor Authentication' :
+                   language === 'fr' ? 'Authentification à Deux Facteurs' :
+                   'Autenticação de Dois Fatores'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Requerir 2FA para administradores
+                  {language === 'es' ? 'Requerir 2FA para administradores' :
+                   language === 'en' ? 'Require 2FA for administrators' :
+                   language === 'fr' ? 'Exiger 2FA pour les administrateurs' :
+                   'Exigir 2FA para administradores'}
                 </p>
               </div>
               <Switch />
@@ -203,9 +224,17 @@ const Settings = () => {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Logs de Seguridad</Label>
+                <Label>
+                  {language === 'es' ? 'Logs de Seguridad' :
+                   language === 'en' ? 'Security Logs' :
+                   language === 'fr' ? 'Journaux de Sécurité' :
+                   'Logs de Segurança'}
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Registrar intentos de acceso y cambios
+                  {language === 'es' ? 'Registrar intentos de acceso y cambios' :
+                   language === 'en' ? 'Log access attempts and changes' :
+                   language === 'fr' ? 'Enregistrer les tentatives d\'accès et les modifications' :
+                   'Registrar tentativas de acesso e alterações'}
                 </p>
               </div>
               <Switch defaultChecked />
