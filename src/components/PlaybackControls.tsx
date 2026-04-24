@@ -7,6 +7,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useCastDevices } from '@/hooks/useCastDevices';
 
 const PlaybackControls = () => {
   const {
@@ -17,6 +18,7 @@ const PlaybackControls = () => {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const cast = useCastDevices();
 
   // Posición visual interpolada con requestAnimationFrame para un avance fluido
   const [displayPosition, setDisplayPosition] = useState(0);
@@ -162,38 +164,27 @@ const PlaybackControls = () => {
   const handleCast = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (!currentSong) return;
-    // Intenta usar la API Remote Playback (vídeo/audio en TV / Chromecast / AirPlay vía navegador)
-    try {
-      const audioEl = document.querySelector('audio') as (HTMLAudioElement & {
-        remote?: { prompt: () => Promise<void>; state: string };
-        webkitShowPlaybackTargetPicker?: () => void;
-      }) | null;
 
-      // Safari / iOS — AirPlay
-      if (audioEl?.webkitShowPlaybackTargetPicker) {
-        audioEl.webkitShowPlaybackTargetPicker();
-        return;
+    // Si ya hay una sesión conectada, ofrecer desconectar
+    if (cast.state === 'connected') {
+      cast.endSession();
+      toast.success(cast.deviceName ? `Desconectado de ${cast.deviceName}` : 'Reproducción local restaurada');
+      return;
+    }
+
+    const mediaUrl = currentSong.track_url || currentSong.preview_url || `${window.location.origin}/catalog?song=${currentSong.id}`;
+    const ok = await cast.requestSession(mediaUrl, {
+      title: currentSong.title,
+      artist: currentSong.artist,
+      cover: currentSong.cover_url,
+    });
+
+    if (!ok) {
+      if (cast.state === 'unavailable') {
+        toast.info('No se han detectado dispositivos. Asegúrate de estar en la misma red Wi-Fi que tu TV o Chromecast.');
+      } else {
+        toast.error('No se pudo abrir el selector de dispositivos');
       }
-
-      // Chrome / Edge — Remote Playback API
-      if (audioEl?.remote && typeof audioEl.remote.prompt === 'function') {
-        await audioEl.remote.prompt();
-        return;
-      }
-
-      // Presentation API genérica (segundas pantallas)
-      const w = window as unknown as { PresentationRequest?: new (urls: string[]) => { start: () => Promise<unknown> } };
-      if (w.PresentationRequest) {
-        const url = `${window.location.origin}/catalog?song=${currentSong.id}`;
-        const req = new w.PresentationRequest([url]);
-        await req.start();
-        return;
-      }
-
-      toast.info('Tu navegador no permite enviar a TV. Prueba desde Chrome (Cast) o Safari (AirPlay).');
-    } catch (err: any) {
-      if (err?.name === 'AbortError' || err?.name === 'NotAllowedError') return;
-      toast.error('No se pudo conectar con un dispositivo');
     }
   };
 
@@ -264,11 +255,34 @@ const PlaybackControls = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleCast}
-                className="h-9 w-9 rounded-full hover:bg-muted/40"
-                aria-label="Enviar a TV o dispositivo"
-                title="Enviar a TV o dispositivo"
+                className={cn(
+                  'h-9 w-9 rounded-full hover:bg-muted/40 relative transition-colors',
+                  cast.state === 'connected' && 'text-primary bg-primary/10 hover:bg-primary/15',
+                  cast.state === 'available' && 'text-primary',
+                  cast.state === 'connecting' && 'text-primary',
+                )}
+                aria-label={
+                  cast.state === 'connected'
+                    ? `Conectado a ${cast.deviceName ?? 'dispositivo'} (toca para desconectar)`
+                    : 'Enviar a TV o dispositivo'
+                }
+                title={
+                  cast.state === 'connected'
+                    ? `Conectado a ${cast.deviceName ?? 'dispositivo'}`
+                    : cast.state === 'available'
+                      ? 'Dispositivos disponibles'
+                      : cast.state === 'connecting'
+                        ? 'Conectando…'
+                        : 'Buscar dispositivos'
+                }
               >
-                <Cast className="h-4 w-4" />
+                <Cast className={cn('h-4 w-4', cast.state === 'connecting' && 'animate-pulse')} />
+                {cast.state === 'available' && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                )}
+                {cast.state === 'connected' && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
               </Button>
               <Button
                 variant="ghost"
