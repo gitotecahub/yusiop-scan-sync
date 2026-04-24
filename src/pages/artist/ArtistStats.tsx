@@ -145,16 +145,16 @@ const ArtistStats = () => {
     <div className="min-h-screen p-6 max-w-5xl mx-auto pb-24">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Panel de artista
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('artist.panelLabel')}
         </Button>
-        <span className="text-xs text-muted-foreground">Estadísticas</span>
+        <span className="text-xs text-muted-foreground">{t('artist.statsLabel')}</span>
       </div>
 
       <div className="blob-card p-6 mb-6">
-        <p className="eyebrow mb-1">Tu audiencia</p>
+        <p className="eyebrow mb-1">{t('artist.audienceEyebrow')}</p>
         <h1 className="display-xl text-3xl">{artistName || 'Artista'}</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Descargas, ingresos estimados y desde dónde te escuchan.
+          {t('artist.audienceSubtitle')}
         </p>
       </div>
 
