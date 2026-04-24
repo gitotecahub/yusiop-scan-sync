@@ -616,116 +616,6 @@ const Monetization = () => {
         </CardContent>
       </Card>
 
-      {/* Songs revenue */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ingresos por canción</CardTitle>
-          <CardDescription>
-            Precio por descarga, descargas registradas, ingreso bruto y bolsa del artista.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar canción o artista..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Canción</TableHead>
-                  <TableHead>Artista</TableHead>
-                  <TableHead className="text-right">Precio / descarga</TableHead>
-                  <TableHead className="text-right">Descargas</TableHead>
-                  <TableHead className="text-right">Bruto</TableHead>
-                  <TableHead className="text-right">Artista (40%)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSongs.map((s) => {
-                  const pricePerDl =
-                    s.downloads > 0 ? s.grossRevenue / s.downloads : STANDARD_PER_DOWNLOAD;
-                  return (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.title}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {s.artists?.name ?? '—'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {s.downloads > 0 ? (
-                          formatEUR(pricePerDl)
-                        ) : (
-                          <Badge variant="outline">{formatEUR(STANDARD_PER_DOWNLOAD)}</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">{s.downloads}</TableCell>
-                      <TableCell className="text-right">{formatEUR(s.grossRevenue)}</TableCell>
-                      <TableCell className="text-right font-semibold text-yusiop-primary">
-                        {formatEUR(s.artistRevenue)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-                {filteredSongs.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      No hay canciones que coincidan
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Artist revenue */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recaudación por artista</CardTitle>
-          <CardDescription>Bolsa total acumulada por cada artista (40%).</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Artista</TableHead>
-                  <TableHead className="text-right">Descargas</TableHead>
-                  <TableHead className="text-right">Bruto generado</TableHead>
-                  <TableHead className="text-right">Bolsa artista</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {artistStats.map((a) => (
-                  <TableRow key={a.name}>
-                    <TableCell className="font-medium">{a.name}</TableCell>
-                    <TableCell className="text-right">{a.downloads}</TableCell>
-                    <TableCell className="text-right">{formatEUR(a.gross)}</TableCell>
-                    <TableCell className="text-right font-semibold text-yusiop-primary">
-                      {formatEUR(a.artistShare)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {artistStats.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      Sin datos todavía
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Pozo de colaboradores no reclamados */}
       <Card className="border-yusiop-primary/30">
         <CardHeader>
@@ -782,9 +672,9 @@ const Monetization = () => {
             />
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md border max-h-[360px] overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
                   <TableHead>Artista colaborador</TableHead>
                   <TableHead className="text-right">Canciones</TableHead>
@@ -814,6 +704,116 @@ const Monetization = () => {
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                       No hay importes pendientes en el pozo.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Songs revenue */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ingresos por canción</CardTitle>
+          <CardDescription>
+            Precio por descarga, descargas registradas, ingreso bruto y bolsa del artista.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar canción o artista..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="rounded-md border max-h-[360px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>Canción</TableHead>
+                  <TableHead>Artista</TableHead>
+                  <TableHead className="text-right">Precio / descarga</TableHead>
+                  <TableHead className="text-right">Descargas</TableHead>
+                  <TableHead className="text-right">Bruto</TableHead>
+                  <TableHead className="text-right">Artista (40%)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredSongs.map((s) => {
+                  const pricePerDl =
+                    s.downloads > 0 ? s.grossRevenue / s.downloads : STANDARD_PER_DOWNLOAD;
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium">{s.title}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {s.artists?.name ?? '—'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {s.downloads > 0 ? (
+                          formatEUR(pricePerDl)
+                        ) : (
+                          <Badge variant="outline">{formatEUR(STANDARD_PER_DOWNLOAD)}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">{s.downloads}</TableCell>
+                      <TableCell className="text-right">{formatEUR(s.grossRevenue)}</TableCell>
+                      <TableCell className="text-right font-semibold text-yusiop-primary">
+                        {formatEUR(s.artistRevenue)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filteredSongs.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      No hay canciones que coincidan
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Artist revenue */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recaudación por artista</CardTitle>
+          <CardDescription>Bolsa total acumulada por cada artista (40%).</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border max-h-[360px] overflow-y-auto">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10">
+                <TableRow>
+                  <TableHead>Artista</TableHead>
+                  <TableHead className="text-right">Descargas</TableHead>
+                  <TableHead className="text-right">Bruto generado</TableHead>
+                  <TableHead className="text-right">Bolsa artista</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {artistStats.map((a) => (
+                  <TableRow key={a.name}>
+                    <TableCell className="font-medium">{a.name}</TableCell>
+                    <TableCell className="text-right">{a.downloads}</TableCell>
+                    <TableCell className="text-right">{formatEUR(a.gross)}</TableCell>
+                    <TableCell className="text-right font-semibold text-yusiop-primary">
+                      {formatEUR(a.artistShare)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {artistStats.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      Sin datos todavía
                     </TableCell>
                   </TableRow>
                 )}
