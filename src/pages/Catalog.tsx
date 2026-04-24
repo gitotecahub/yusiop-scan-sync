@@ -11,6 +11,7 @@ import { useCreditsStore } from '@/stores/creditsStore';
 import { logger } from '@/lib/logger';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 import { saveSongOffline } from '@/lib/offlineStorage';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface Song {
   id: string;
