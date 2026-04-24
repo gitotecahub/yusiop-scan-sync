@@ -65,8 +65,7 @@ const Songs = () => {
         .select(`
           *,
           artists(name),
-          albums(title),
-          song_collaborators(id, artist_name, role, share_percent, is_primary, claimed_by_user_id)
+          albums(title)
         `)
         .order('created_at', { ascending: false });
 
@@ -75,7 +74,27 @@ const Songs = () => {
         return;
       }
 
-      setSongs(data || []);
+      const songIds = (data || []).map((s) => s.id);
+      let collabsBySong: Record<string, Collaborator[]> = {};
+      if (songIds.length > 0) {
+        const { data: collabs } = await supabase
+          .from('song_collaborators')
+          .select('id, song_id, artist_name, role, share_percent, is_primary, claimed_by_user_id')
+          .in('song_id', songIds);
+        (collabs || []).forEach((c: any) => {
+          if (!c.song_id) return;
+          if (!collabsBySong[c.song_id]) collabsBySong[c.song_id] = [];
+          collabsBySong[c.song_id].push(c);
+        });
+      }
+
+      const enriched: Song[] = (data || []).map((s: any) => ({
+        ...s,
+        song_collaborators: (collabsBySong[s.id] || []).sort(
+          (a, b) => Number(b.is_primary) - Number(a.is_primary) || b.share_percent - a.share_percent
+        ),
+      }));
+      setSongs(enriched);
     } catch (error) {
       console.error('Error fetching songs:', error);
       toast({
