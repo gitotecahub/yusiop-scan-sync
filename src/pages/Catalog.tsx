@@ -10,6 +10,7 @@ import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
 import { logger } from '@/lib/logger';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
+import { saveSongOffline } from '@/lib/offlineStorage';
 
 interface Song {
   id: string;
@@ -301,6 +302,25 @@ useEffect(() => {
       // Refrescar créditos desde servidor para respetar múltiples tarjetas y re-descargas
       await loadUserCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
+
+      // Guardar archivo (audio + portada) en IndexedDB para reproducción offline
+      if (song.track_url) {
+        try {
+          await saveSongOffline({
+            id: song.id,
+            title: song.title,
+            artist: song.artist,
+            duration_seconds: song.duration_seconds,
+            preview_start_seconds: song.preview_start_seconds,
+            track_url: song.track_url,
+            cover_url: song.cover_url ?? null,
+          });
+        } catch (offlineErr) {
+          logger.error('Error saving song offline');
+          // No bloqueamos: el crédito ya se gastó y la descarga quedó registrada en BD
+        }
+      }
+
       toast.success(`"${song.title}" se descargó correctamente`);
     } catch (error) {
       logger.error('Error downloading song');
