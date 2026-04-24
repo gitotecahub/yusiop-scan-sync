@@ -43,14 +43,6 @@ type Stats = {
   pool_pending?: { pending_revenue_cents: number; pending_downloads: number } | null;
 };
 
-const GENDER_LABEL: Record<string, string> = {
-  male: 'Hombre',
-  female: 'Mujer',
-  non_binary: 'No binario',
-  prefer_not_to_say: 'Prefiere no decirlo',
-  unknown: 'Desconocido',
-};
-
 const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', '#f59e0b', '#10b981', '#ef4444', '#94a3b8'];
 
 const formatEuros = (cents: number) => formatEURNumber((cents || 0) / 100);
