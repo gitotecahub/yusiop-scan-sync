@@ -152,7 +152,7 @@ const Index = () => {
                 <button
                   key={song.id}
                   onClick={() => goSong(song.id)}
-                  className="snap-start group relative shrink-0 w-44 rounded-3xl overflow-hidden border border-border hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-vapor text-left"
+                  className="snap-start group relative shrink-0 w-32 rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-vapor text-left"
                 >
                   <div className="aspect-square relative overflow-hidden">
                     <img
@@ -163,17 +163,17 @@ const Index = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
                     {isNew && (
-                      <span className="absolute top-2.5 left-2.5 chip chip-vapor !text-[9px] !px-2 !py-0.5">
-                        <Sparkles className="h-2.5 w-2.5" /> NUEVO
+                      <span className="absolute top-1.5 left-1.5 chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
+                        <Sparkles className="h-2 w-2" /> NUEVO
                       </span>
                     )}
-                    <div className="absolute bottom-2.5 right-2.5 w-9 h-9 rounded-full vapor-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
-                      <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
+                    <div className="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full vapor-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-glow">
+                      <Play className="h-3 w-3 text-primary-foreground ml-0.5" />
                     </div>
                   </div>
-                  <div className="p-3">
-                    <h3 className="font-display font-bold text-sm leading-tight line-clamp-1">{song.title}</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{song.artist}</p>
+                  <div className="p-2">
+                    <h3 className="font-display font-bold text-xs leading-tight line-clamp-1">{song.title}</h3>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{song.artist}</p>
                   </div>
                 </button>
               );
