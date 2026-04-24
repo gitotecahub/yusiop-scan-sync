@@ -327,6 +327,16 @@ const SongSubmissions = () => {
                     <Button size="sm" variant="outline" onClick={() => openDetails(row)}>
                       <Info className="h-4 w-4 mr-1" /> Detalles
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={reanalyzing[row.id] || row.copyright_status === 'analyzing'}
+                      onClick={() => reanalyzeCopyright(row)}
+                      title="Volver a ejecutar el análisis de copyright"
+                    >
+                      <ShieldCheck className="h-4 w-4 mr-1" />
+                      {reanalyzing[row.id] ? 'Analizando…' : 'Re-analizar'}
+                    </Button>
                     {row.status === 'pending' && (
                       <>
                         <Button size="sm" onClick={() => openApprove(row)}>
