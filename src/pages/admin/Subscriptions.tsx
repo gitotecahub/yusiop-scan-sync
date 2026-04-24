@@ -12,16 +12,23 @@ import { supabase } from '@/integrations/supabase/client';
 
 type State = 'off' | 'soft_launch' | 'on';
 
+interface RuleHighActivity { enabled: boolean; min_downloads: number }
+interface RuleNoCredits { enabled: boolean; days: number }
+interface RuleBuyers { enabled: boolean; min_purchases: number; days: number }
+interface RuleActiveUsers { enabled: boolean; min_logins: number; days: number }
+
+interface Rules {
+  rule_high_activity?: RuleHighActivity;
+  rule_no_credits?: RuleNoCredits;
+  rule_buyers?: RuleBuyers;
+  rule_active_users?: RuleActiveUsers;
+}
+
 interface Flag {
   key: string;
   enabled_state: State;
   whitelist_user_ids: string[];
-  rules: {
-    min_downloads: number | null;
-    active_in_last_days: number | null;
-    show_to_users_without_credits: boolean;
-    countries: string[];
-  };
+  rules: Rules;
   updated_at: string;
 }
 
@@ -45,6 +52,15 @@ interface Metrics {
   by_plan: Array<{ plan_code: string; plan_name: string; subscribers: number; revenue_xaf: number }>;
 }
 
+const FLAG_KEY = 'subscriptions_visibility';
+
+const DEFAULT_RULES: Required<Rules> = {
+  rule_high_activity: { enabled: true, min_downloads: 5 },
+  rule_no_credits: { enabled: true, days: 7 },
+  rule_buyers: { enabled: true, min_purchases: 2, days: 30 },
+  rule_active_users: { enabled: true, min_logins: 3, days: 7 },
+};
+
 const Subscriptions = () => {
   const [flag, setFlag] = useState<Flag | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -56,11 +72,19 @@ const Subscriptions = () => {
   const load = async () => {
     setLoading(true);
     const [flagRes, plansRes, metricsRes] = await Promise.all([
-      supabase.from('feature_flags').select('*').eq('key', 'subscriptions').maybeSingle(),
+      supabase.from('feature_flags').select('*').eq('key', FLAG_KEY).maybeSingle(),
       supabase.from('subscription_plans').select('*').order('display_order'),
       supabase.rpc('subscription_metrics'),
     ]);
-    setFlag(flagRes.data as unknown as Flag | null);
+    const raw = flagRes.data as any;
+    if (raw) {
+      setFlag({
+        ...raw,
+        rules: { ...DEFAULT_RULES, ...(raw.rules ?? {}) },
+      });
+    } else {
+      setFlag(null);
+    }
     setPlans((plansRes.data ?? []) as Plan[]);
     if (metricsRes.data && !(metricsRes.data as any).error) {
       setMetrics(metricsRes.data as unknown as Metrics);
@@ -78,10 +102,10 @@ const Subscriptions = () => {
       .update({
         enabled_state: patch.enabled_state ?? flag.enabled_state,
         whitelist_user_ids: patch.whitelist_user_ids ?? flag.whitelist_user_ids,
-        rules: patch.rules ?? flag.rules,
+        rules: (patch.rules ?? flag.rules) as any,
         updated_at: new Date().toISOString(),
       })
-      .eq('key', 'subscriptions');
+      .eq('key', FLAG_KEY);
     setSaving(false);
     if (error) {
       toast.error('Error guardando: ' + error.message);
@@ -91,10 +115,14 @@ const Subscriptions = () => {
     }
   };
 
+  const updateRule = <K extends keyof Rules>(key: K, value: Rules[K]) => {
+    if (!flag) return;
+    updateFlag({ rules: { ...flag.rules, [key]: value } });
+  };
+
   const addToWhitelist = async () => {
     if (!flag || !newWhitelistEmail.trim()) return;
     const email = newWhitelistEmail.trim().toLowerCase();
-
     const { data: userId, error } = await supabase.rpc('get_user_id_by_email', { p_email: email });
     if (error || !userId) {
       toast.error('Usuario no encontrado');
@@ -190,53 +218,134 @@ const Subscriptions = () => {
         </Card>
       )}
 
-      {/* Reglas + whitelist */}
+      {/* Reglas SOFT LAUNCH */}
       {flag && flag.enabled_state === 'soft_launch' && (
         <>
           <Card>
-            <CardHeader><CardTitle className="text-base">Reglas básicas</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">Reglas de segmentación</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Si un usuario cumple <strong>al menos una</strong> regla activa, verá la suscripción.
+              </p>
+            </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Descargas mínimas</Label>
-                  <Input
-                    type="number"
-                    placeholder="Ej: 5 (vacío = no aplicar)"
-                    value={flag.rules.min_downloads ?? ''}
-                    onChange={(e) => updateFlag({
-                      rules: { ...flag.rules, min_downloads: e.target.value ? parseInt(e.target.value, 10) : null },
+              {/* Regla 1: Alta actividad */}
+              <RuleBlock
+                title="Alta actividad"
+                description="Usuarios con más de N descargas totales."
+                enabled={flag.rules.rule_high_activity?.enabled ?? false}
+                onToggle={(v) => updateRule('rule_high_activity', {
+                  ...(flag.rules.rule_high_activity ?? DEFAULT_RULES.rule_high_activity),
+                  enabled: v,
+                })}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <NumberField
+                    label="Descargas mínimas"
+                    value={flag.rules.rule_high_activity?.min_downloads ?? 5}
+                    onSave={(n) => updateRule('rule_high_activity', {
+                      enabled: flag.rules.rule_high_activity?.enabled ?? true,
+                      min_downloads: n,
                     })}
                   />
                 </div>
-                <div>
-                  <Label>Activo en últimos N días</Label>
-                  <Input
-                    type="number"
-                    placeholder="Ej: 7 (vacío = no aplicar)"
-                    value={flag.rules.active_in_last_days ?? ''}
-                    onChange={(e) => updateFlag({
-                      rules: { ...flag.rules, active_in_last_days: e.target.value ? parseInt(e.target.value, 10) : null },
+              </RuleBlock>
+
+              {/* Regla 2: Sin saldo reciente */}
+              <RuleBlock
+                title="Sin saldo reciente"
+                description="Usuarios que han intentado descargar sin créditos."
+                enabled={flag.rules.rule_no_credits?.enabled ?? false}
+                onToggle={(v) => updateRule('rule_no_credits', {
+                  ...(flag.rules.rule_no_credits ?? DEFAULT_RULES.rule_no_credits),
+                  enabled: v,
+                })}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <NumberField
+                    label="En los últimos N días"
+                    value={flag.rules.rule_no_credits?.days ?? 7}
+                    onSave={(n) => updateRule('rule_no_credits', {
+                      enabled: flag.rules.rule_no_credits?.enabled ?? true,
+                      days: n,
                     })}
                   />
                 </div>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border border-border p-3">
-                <div>
-                  <Label className="font-medium">Mostrar a usuarios sin saldo</Label>
-                  <p className="text-xs text-muted-foreground">Usuarios que han intentado descargar sin créditos en 30 días.</p>
+              </RuleBlock>
+
+              {/* Regla 3: Compradores */}
+              <RuleBlock
+                title="Compradores"
+                description="Usuarios que han comprado tarjetas recientemente."
+                enabled={flag.rules.rule_buyers?.enabled ?? false}
+                onToggle={(v) => updateRule('rule_buyers', {
+                  ...(flag.rules.rule_buyers ?? DEFAULT_RULES.rule_buyers),
+                  enabled: v,
+                })}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <NumberField
+                    label="Mínimo de tarjetas"
+                    value={flag.rules.rule_buyers?.min_purchases ?? 2}
+                    onSave={(n) => updateRule('rule_buyers', {
+                      enabled: flag.rules.rule_buyers?.enabled ?? true,
+                      days: flag.rules.rule_buyers?.days ?? 30,
+                      min_purchases: n,
+                    })}
+                  />
+                  <NumberField
+                    label="En los últimos N días"
+                    value={flag.rules.rule_buyers?.days ?? 30}
+                    onSave={(n) => updateRule('rule_buyers', {
+                      enabled: flag.rules.rule_buyers?.enabled ?? true,
+                      min_purchases: flag.rules.rule_buyers?.min_purchases ?? 2,
+                      days: n,
+                    })}
+                  />
                 </div>
-                <Switch
-                  checked={flag.rules.show_to_users_without_credits}
-                  onCheckedChange={(v) => updateFlag({
-                    rules: { ...flag.rules, show_to_users_without_credits: v },
-                  })}
-                />
-              </div>
+              </RuleBlock>
+
+              {/* Regla 4: Usuarios activos */}
+              <RuleBlock
+                title="Usuarios activos"
+                description="Usuarios con sesiones recurrentes."
+                enabled={flag.rules.rule_active_users?.enabled ?? false}
+                onToggle={(v) => updateRule('rule_active_users', {
+                  ...(flag.rules.rule_active_users ?? DEFAULT_RULES.rule_active_users),
+                  enabled: v,
+                })}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <NumberField
+                    label="Mínimo de inicios de sesión"
+                    value={flag.rules.rule_active_users?.min_logins ?? 3}
+                    onSave={(n) => updateRule('rule_active_users', {
+                      enabled: flag.rules.rule_active_users?.enabled ?? true,
+                      days: flag.rules.rule_active_users?.days ?? 7,
+                      min_logins: n,
+                    })}
+                  />
+                  <NumberField
+                    label="En los últimos N días"
+                    value={flag.rules.rule_active_users?.days ?? 7}
+                    onSave={(n) => updateRule('rule_active_users', {
+                      enabled: flag.rules.rule_active_users?.enabled ?? true,
+                      min_logins: flag.rules.rule_active_users?.min_logins ?? 3,
+                      days: n,
+                    })}
+                  />
+                </div>
+              </RuleBlock>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Whitelist manual</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle className="text-base">Whitelist manual</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Estos usuarios <strong>siempre</strong> verán la suscripción, aunque no cumplan reglas.
+              </p>
+            </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex gap-2">
                 <Input
@@ -295,6 +404,62 @@ const Subscriptions = () => {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+};
+
+const RuleBlock = ({
+  title,
+  description,
+  enabled,
+  onToggle,
+  children,
+}: {
+  title: string;
+  description: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  children: React.ReactNode;
+}) => (
+  <div className="rounded-lg border border-border p-4 space-y-3">
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <Label className="font-medium text-sm">{title}</Label>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+      </div>
+      <Switch checked={enabled} onCheckedChange={onToggle} />
+    </div>
+    {enabled && <div className="pt-1">{children}</div>}
+  </div>
+);
+
+const NumberField = ({
+  label,
+  value,
+  onSave,
+}: {
+  label: string;
+  value: number;
+  onSave: (n: number) => void;
+}) => {
+  const [v, setV] = useState(value);
+  useEffect(() => { setV(value); }, [value]);
+  const dirty = v !== value;
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <div className="flex gap-1">
+        <Input
+          type="number"
+          min={0}
+          value={v}
+          onChange={(e) => setV(parseInt(e.target.value, 10) || 0)}
+          className="h-9"
+        />
+        <Button size="sm" disabled={!dirty} onClick={() => onSave(v)} className="h-9">
+          OK
+        </Button>
+      </div>
     </div>
   );
 };
