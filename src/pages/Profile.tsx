@@ -53,7 +53,7 @@ interface ScannedCard {
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguageStore();
+  const { language, setLanguage, t } = useLanguageStore();
   const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
@@ -152,7 +152,7 @@ const Profile = () => {
         }
       } catch (err) {
         console.error('Error loading profile:', err);
-        toast.error('No se pudo cargar el perfil');
+        toast.error(t('state.error'));
       }
     };
 
@@ -203,7 +203,7 @@ const Profile = () => {
         }));
       } catch (err) {
         console.error('Error loading scanned cards:', err);
-        toast.error('No se pudo cargar el historial de tarjetas');
+        toast.error(t('state.error'));
       } finally {
         setLoadingCards(false);
       }
@@ -395,7 +395,7 @@ const Profile = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Sesión cerrada');
+    toast.success(t('profile.logoutSuccess'));
   };
 
   const formatDate = (dateString: string) => {
