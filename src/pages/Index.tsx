@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
+import { useLanguageStore } from '@/stores/languageStore';
 
 interface SongCard {
   id: string;
@@ -24,6 +25,7 @@ const FEATURED_GRADIENTS = [
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, language } = useLanguageStore();
 
   const [popularSongs, setPopularSongs] = useState<SongCard[]>([]);
   const [recentSongs, setRecentSongs] = useState<SongCard[]>([]);
@@ -133,11 +135,16 @@ const Index = () => {
         />
         <div className="relative">
           <h1 className="display-xl text-[2.6rem] sm:text-5xl">
-            Tu música,<br />
-            <span className="vapor-text">en alta fidelidad</span>
+            {t('home.hero.title').split('\\n').map((line, i) => (
+              <span key={i}>
+                {line}
+                {i === 0 && <br />}
+              </span>
+            ))}
+            <span className="vapor-text">{language === 'es' ? 'en alta fidelidad' : language === 'en' ? 'in high fidelity' : language === 'fr' ? 'en haute fidélité' : 'em alta fidelidade'}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-4 max-w-xs leading-relaxed">
-            Escanea, descubre y colecciona. Una experiencia sonora pensada para ti.
+            {t('home.hero.subtitle')}
           </p>
 
           {/* CTAs */}
@@ -147,14 +154,14 @@ const Index = () => {
               className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 vapor-bg shadow-glow hover:shadow-vapor transition-all hover:-translate-y-0.5"
             >
               <QrCode className="h-5 w-5 text-primary-foreground" strokeWidth={2.2} />
-              <span className="font-display font-bold text-sm text-primary-foreground">Escanear tarjeta</span>
+              <span className="font-display font-bold text-sm text-primary-foreground">{t('home.hero.scan')}</span>
             </Link>
             <Link
               to="/catalog"
               className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-primary/40 bg-card/40 backdrop-blur-md hover:border-primary/70 hover:bg-card/70 transition-all hover:-translate-y-0.5"
             >
               <Music className="h-5 w-5 text-foreground" strokeWidth={2.2} />
-              <span className="font-display font-bold text-sm text-foreground">Explorar música</span>
+              <span className="font-display font-bold text-sm text-foreground">{t('home.hero.explore')}</span>
             </Link>
           </div>
         </div>
