@@ -409,6 +409,12 @@ const SongSubmissions = () => {
                   </div>
                 )}
 
+                <CopyrightDetails
+                  status={row.copyright_status}
+                  score={row.copyright_score}
+                  matches={row.copyright_matches}
+                />
+
                 {row.status === 'rejected' && row.rejection_reason && (() => {
                   const items = parseRejectionReason(row.rejection_reason);
                   return (
