@@ -259,15 +259,28 @@ const PlaybackControls = () => {
             <div className="text-center">
               <p className="eyebrow vapor-text">Reproduciendo</p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="h-9 w-9 rounded-full hover:bg-muted/40"
-              aria-label="Compartir"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCast}
+                className="h-9 w-9 rounded-full hover:bg-muted/40"
+                aria-label="Enviar a TV o dispositivo"
+                title="Enviar a TV o dispositivo"
+              >
+                <Cast className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleShare}
+                className="h-9 w-9 rounded-full hover:bg-muted/40"
+                aria-label="Compartir"
+                title="Compartir"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Carátula */}
