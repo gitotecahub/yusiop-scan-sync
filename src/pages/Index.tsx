@@ -217,6 +217,9 @@ const Index = () => {
         )}
       </Section>
 
+      {/* === MÁS POPULAR EN YUSIOP — ranking global === */}
+      <PopularSection />
+
       {/* === TRENDING — lista numerada en grid 2 cols === */}
       <Section title={t('home.section.trending')} eyebrow={language === 'es' ? 'Lo más sonado' : language === 'en' ? 'Most played' : language === 'fr' ? 'Les plus écoutés' : 'Mais tocadas'} link="/catalog">
         {loading ? (
