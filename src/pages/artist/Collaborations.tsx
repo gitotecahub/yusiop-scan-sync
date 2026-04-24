@@ -133,7 +133,7 @@ const Collaborations = () => {
         <CardContent className="p-5 flex items-center gap-3">
           <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
           <div>
-            <p className="text-xs text-muted-foreground">Total estimado pendiente de reclamar</p>
+            <p className="text-xs text-muted-foreground">{t('artist.totalEstPending')}</p>
             <p className="text-2xl font-bold leading-tight">{formatEuros(totalPending)}</p>
             <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXAFNumber(totalPending / 100)}</p>
           </div>
