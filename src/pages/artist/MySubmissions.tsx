@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,6 +35,8 @@ interface SubmissionRow {
   copyright_status: CopyrightStatus;
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
+  express_tier: '72h' | '48h' | '24h' | null;
+  express_price_xaf: number | null;
 }
 
 const MySubmissions = () => {
@@ -55,7 +57,7 @@ const MySubmissions = () => {
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches,express_tier,express_price_xaf')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setRows((data ?? []) as unknown as SubmissionRow[]);
@@ -131,6 +133,8 @@ const MySubmissions = () => {
       cover_url: r.cover_url,
       cover_path: r.cover_path,
       duration_seconds: r.duration_seconds,
+      express_tier: r.express_tier,
+      express_price_xaf: r.express_price_xaf,
     });
     setOpen(true);
   };
@@ -186,7 +190,14 @@ const MySubmissions = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
-                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
+                        r.express_tier ? (
+                          <Badge className="bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white border-0 shadow-[0_0_12px_hsl(265_85%_60%/0.55)]">
+                            <Zap className="h-3 w-3 mr-1" />
+                            En revisión prioritaria · {r.express_tier}
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
+                        )
                       )}
                       {r.status === 'approved' && (
                         r.scheduled_release_at ? (

@@ -514,6 +514,10 @@ export type Database = {
           cover_url: string | null
           created_at: string
           duration_seconds: number
+          express_paid_at: string | null
+          express_price_xaf: number | null
+          express_requested_at: string | null
+          express_tier: Database["public"]["Enums"]["express_tier"] | null
           genre: string | null
           id: string
           nationality: string | null
@@ -545,6 +549,10 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds?: number
+          express_paid_at?: string | null
+          express_price_xaf?: number | null
+          express_requested_at?: string | null
+          express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
           nationality?: string | null
@@ -576,6 +584,10 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds?: number
+          express_paid_at?: string | null
+          express_price_xaf?: number | null
+          express_requested_at?: string | null
+          express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
           nationality?: string | null
@@ -1171,6 +1183,7 @@ export type Database = {
         | "review"
         | "blocked"
         | "error"
+      express_tier: "72h" | "48h" | "24h"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
       staff_area:
@@ -1322,6 +1335,7 @@ export const Constants = {
         "blocked",
         "error",
       ],
+      express_tier: ["72h", "48h", "24h"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
       staff_area: [

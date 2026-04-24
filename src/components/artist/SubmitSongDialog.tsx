@@ -5,11 +5,31 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles } from 'lucide-react';
+import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles, Zap, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { formatXAFFixed } from '@/lib/currency';
+
+type ExpressTier = '72h' | '48h' | '24h';
+
+const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
+  { tier: '72h', priceXaf: 5000, label: 'Express 72h', sub: 'Revisión prioritaria en 3 días' },
+  { tier: '48h', priceXaf: 10000, label: 'Express 48h', sub: 'Revisión prioritaria en 2 días' },
+  { tier: '24h', priceXaf: 15000, label: 'Express urgente 24h', sub: 'Máxima prioridad, en 1 día' },
+];
+
+// Días mínimos de antelación para lanzamiento estándar
+const STANDARD_MIN_DAYS = 7;
+const STANDARD_MAX_DAYS = 14;
+
+const addDaysISO = (days: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+};
 
 type CollabRole = 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
 
@@ -67,6 +87,8 @@ export interface EditingSubmission {
   cover_path: string | null;
   duration_seconds: number;
   preview_start_seconds?: number | null;
+  express_tier?: ExpressTier | null;
+  express_price_xaf?: number | null;
 }
 
 interface SubmitSongDialogProps {
@@ -162,6 +184,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [hasCollabs, setHasCollabs] = useState(false);
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
 
+  // Lanzamiento Express
+  const [expressEnabled, setExpressEnabled] = useState(false);
+  const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
+  const [expressAck, setExpressAck] = useState(false);
+
+  const standardMinDate = addDaysISO(STANDARD_MIN_DAYS);
+  const standardMaxDate = addDaysISO(STANDARD_MAX_DAYS);
+
   const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
   const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
   const collabValid = !hasCollabs || (
@@ -186,6 +216,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       if (badEmail) return `Email inválido: ${badEmail.contact_email}`;
       if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
     }
+    if (expressEnabled) {
+      if (!expressTier) return 'Selecciona un nivel de Lanzamiento Express';
+      if (!expressAck) return 'Debes confirmar el aviso del Lanzamiento Express';
+    } else if (formData.release_date) {
+      if (formData.release_date < standardMinDate) {
+        return `La fecha estándar requiere mínimo ${STANDARD_MIN_DAYS} días desde hoy. Activa "Lanzamiento Express" para acelerar.`;
+      }
+    }
     return null;
   };
   const disabledReason = getDisabledReason();
@@ -205,6 +243,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      // Express previo (si lo tenía)
+      if (editing.express_tier) {
+        setExpressEnabled(true);
+        setExpressTier(editing.express_tier);
+        setExpressAck(true);
+      } else {
+        setExpressEnabled(false);
+        setExpressTier(null);
+        setExpressAck(false);
+      }
       // Cargar colaboradores existentes del envío
       (async () => {
         const { data } = await supabase
@@ -241,6 +289,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioUrl(null);
       setHasCollabs(false);
       setCollaborators([]);
+      setExpressEnabled(false);
+      setExpressTier(null);
+      setExpressAck(false);
     }
     setTrackFile(null);
     setCoverFile(null);
@@ -426,6 +477,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       // Asegurar que previewStart no exceda la duración
       const safePreviewStart = Math.max(0, Math.min(previewStart, Math.max(0, duration - PREVIEW_LENGTH)));
 
+      // Datos del Lanzamiento Express (si está activo)
+      const expressOpt = expressEnabled && expressTier
+        ? EXPRESS_OPTIONS.find(o => o.tier === expressTier) ?? null
+        : null;
+      const nowIso = new Date().toISOString();
+
       if (isEdit && editing) {
         const update: Record<string, any> = {
           title: formData.title.trim(),
@@ -437,6 +494,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
+          express_tier: expressOpt?.tier ?? null,
+          express_price_xaf: expressOpt?.priceXaf ?? null,
+          // Si ya tenía express previo no resetear paid/requested; si lo activa ahora, marcarlo
+          ...(expressOpt && !editing.express_tier
+            ? { express_requested_at: nowIso, express_paid_at: nowIso }
+            : {}),
         };
         if (trackUp) {
           update.track_url = trackUp.url;
@@ -453,7 +516,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (dbError) throw dbError;
         await persistCollaborators(editing.id);
         setProgress(100);
-        toast.success('Envío actualizado y reenviado a revisión');
+        toast.success(expressOpt
+          ? `Envío actualizado · Revisión prioritaria ${expressOpt.tier} activada`
+          : 'Envío actualizado y reenviado a revisión');
         // Lanzar análisis de copyright en background (no bloqueante)
         supabase.functions
           .invoke('analyze-copyright', { body: { submission_id: editing.id } })
@@ -474,6 +539,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
+          express_tier: expressOpt?.tier ?? null,
+          express_price_xaf: expressOpt?.priceXaf ?? null,
+          express_requested_at: expressOpt ? nowIso : null,
+          express_paid_at: expressOpt ? nowIso : null,
         } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) {
@@ -484,7 +553,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             .catch((e) => console.warn('Copyright check failed (background):', e));
         }
         setProgress(100);
-        toast.success('Canción enviada a revisión. Analizando copyright…');
+        toast.success(expressOpt
+          ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
+          : 'Canción enviada a revisión. Analizando copyright…');
       }
 
       onOpenChange(false);
@@ -556,15 +627,136 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               />
             </div>
             <div>
-              <Label htmlFor="release_date">Fecha de lanzamiento</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="release_date">Fecha de lanzamiento</Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExpressEnabled((v) => !v);
+                    if (expressEnabled) {
+                      setExpressTier(null);
+                      setExpressAck(false);
+                    }
+                  }}
+                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full transition-all ${
+                    expressEnabled
+                      ? 'bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white shadow-[0_0_18px_hsl(265_85%_60%/0.55)]'
+                      : 'border border-primary/40 text-primary hover:bg-primary/10'
+                  }`}
+                >
+                  <Zap className="inline h-3 w-3 mr-1" />
+                  {expressEnabled ? 'Express activado' : 'Activar Express'}
+                </button>
+              </div>
               <Input
                 id="release_date"
                 type="date"
                 value={formData.release_date}
+                min={expressEnabled ? undefined : standardMinDate}
+                max={expressEnabled ? undefined : standardMaxDate}
+                disabled={expressEnabled}
                 onChange={(e) => setFormData((p) => ({ ...p, release_date: e.target.value }))}
               />
+              {!expressEnabled && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Lanzamiento estándar: entre {STANDARD_MIN_DAYS} y {STANDARD_MAX_DAYS} días desde hoy.
+                </p>
+              )}
+              {expressEnabled && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  La fecha la fijará el equipo según el nivel express elegido.
+                </p>
+              )}
             </div>
           </div>
+
+          {/* Sección Lanzamiento Express */}
+          {expressEnabled && (
+            <div className="relative rounded-xl p-[1px] bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] shadow-[0_0_30px_hsl(265_85%_60%/0.25)]">
+              <div className="rounded-[11px] bg-background p-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] flex items-center justify-center shadow-lg flex-shrink-0">
+                    <Zap className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
+                      Lanzamiento Express
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Publica tu música en menos de 72h con revisión prioritaria.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  {EXPRESS_OPTIONS.map((opt) => {
+                    const selected = expressTier === opt.tier;
+                    return (
+                      <button
+                        key={opt.tier}
+                        type="button"
+                        onClick={() => setExpressTier(opt.tier)}
+                        className={`relative text-left rounded-lg p-3 transition-all border ${
+                          selected
+                            ? 'border-transparent bg-gradient-to-r from-[hsl(220,90%,55%)]/15 via-[hsl(265,85%,60%)]/15 to-[hsl(180,80%,50%)]/15 ring-2 ring-[hsl(265,85%,60%)] shadow-[0_0_20px_hsl(265_85%_60%/0.4)]'
+                            : 'border-border bg-muted/30 hover:border-primary/40 hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-9 w-9 rounded-md flex items-center justify-center text-sm font-bold ${
+                              selected
+                                ? 'bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white'
+                                : 'bg-muted text-foreground'
+                            }`}>
+                              {opt.tier}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-sm">{opt.label}</div>
+                              <div className="text-[11px] text-muted-foreground">{opt.sub}</div>
+                            </div>
+                          </div>
+                          <div className={`text-sm font-bold whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
+                            {formatXAFFixed(opt.priceXaf)}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                  <div className="flex items-start gap-2">
+                    <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div className="text-xs text-foreground/80 space-y-2">
+                      <p>
+                        El lanzamiento express <strong>no garantiza aprobación automática</strong>. La
+                        canción seguirá pasando por revisión de derechos, calidad de audio,
+                        portada y datos del artista. Si el contenido no cumple los requisitos,
+                        el lanzamiento podrá retrasarse o rechazarse.
+                      </p>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
+                        <li>El pago se realiza antes de enviar la solicitud.</li>
+                        <li>Si el retraso es culpa de YUSIOP: reembolso o crédito interno.</li>
+                        <li>Si es por datos/portada/audio/derechos incorrectos: <strong>no</strong> se devuelve el coste express.</li>
+                      </ul>
+                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={expressAck}
+                          onChange={(e) => setExpressAck(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                        />
+                        <span className="text-xs font-medium">
+                          He leído y acepto las condiciones del Lanzamiento Express.
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="nationality">Nacionalidad del artista</Label>
