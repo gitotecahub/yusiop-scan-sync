@@ -97,17 +97,6 @@ const SongCarousel = ({
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
-                {showRank && song.rank !== undefined && (
-                  <div className="absolute top-1.5 left-1.5">
-                    <span
-                      className="chip !text-[9px] !px-2 !py-1 !rounded-lg !font-display !font-bold !text-white shadow-glow flex items-center gap-1"
-                      style={{ background: HERO_GRADIENTS[(song.rank - 1) % HERO_GRADIENTS.length] }}
-                    >
-                      <Sparkles className="h-2 w-2" />
-                      #{song.rank}
-                    </span>
-                  </div>
-                )}
                 {song.badge && (
                   <span className="absolute top-1.5 right-1.5">{song.badge}</span>
                 )}
