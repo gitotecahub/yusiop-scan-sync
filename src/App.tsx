@@ -106,7 +106,7 @@ const AppContent = () => {
         !session ? (
           <Auth />
         ) : modeLoading ? (
-          <SplashScreen />
+          <div className="min-h-screen bg-background" />
         ) : !profileChoiceMade ? (
           // Tras registro: pantalla de elección de perfil
           <Routes>
