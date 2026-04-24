@@ -76,6 +76,7 @@ interface QrCardRow {
   card_type: 'standard' | 'premium';
   download_credits: number;
   origin: 'physical' | 'digital';
+  is_activated: boolean | null;
 }
 
 interface CollaboratorRow {
