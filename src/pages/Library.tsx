@@ -233,7 +233,7 @@ const Library = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('Debes iniciar sesión');
+        toast.error(t('qr.mustLogin'));
         return;
       }
 
@@ -246,7 +246,7 @@ const Library = () => {
 
       if (deleteError) {
         console.error('Error hiding download:', deleteError);
-        toast.error('No se pudo eliminar la canción');
+        toast.error(t('state.error'));
         return;
       }
 
@@ -264,7 +264,7 @@ const Library = () => {
       toast.success(`"${songToDelete.title}" eliminada de tu biblioteca`);
     } catch (err) {
       console.error('Error in confirmDelete:', err);
-      toast.error('Ocurrió un error al eliminar');
+      toast.error(t('state.error'));
     } finally {
       setDeleting(false);
       setSongToDelete(null);
@@ -312,7 +312,7 @@ const Library = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('Debes iniciar sesión');
+        toast.error(t('qr.mustLogin'));
         return;
       }
       const ids = Array.from(selectedIds);
@@ -335,13 +335,13 @@ const Library = () => {
 
       setDownloads((prev) => prev.filter((s) => !selectedIds.has(s.id)));
       setFavorites((prev) => prev.filter((s) => !selectedIds.has(s.id)));
-      toast.success(`${ids.length} ${ids.length === 1 ? 'canción eliminada' : 'canciones eliminadas'}`);
+      toast.success(`${ids.length} ${t('library.deleted')}`);
       setSelectedIds(new Set());
       setSelectionMode(false);
       setBulkDeleteOpen(false);
     } catch (err) {
       console.error('Bulk delete failed:', err);
-      toast.error('Ocurrió un error al eliminar');
+      toast.error(t('state.error'));
     } finally {
       setBulkProcessing(false);
     }
@@ -351,11 +351,11 @@ const Library = () => {
     if (selectedIds.size === 0) return;
     const username = bulkRecipient.trim().replace(/^@/, '');
     if (!username) {
-      toast.error('Escribe el username del destinatario');
+      toast.error(t('library.recipientUser'));
       return;
     }
     if (username.length > 50) {
-      toast.error('Username demasiado largo');
+      toast.error(t('state.error'));
       return;
     }
 
@@ -386,11 +386,11 @@ const Library = () => {
       }
 
       if (failed.length === 0) {
-        toast.success(`${successCount} ${successCount === 1 ? 'canción enviada' : 'canciones enviadas'} a @${username}`);
+        toast.success(`${successCount} ${t('library.shared')} a @${username}`);
       } else if (successCount > 0) {
         toast.warning(`${successCount} enviadas, ${failed.length} fallaron`);
       } else {
-        toast.error('No se pudo enviar ninguna canción');
+        toast.error(t('state.error'));
       }
 
       setSelectedIds(new Set());
@@ -399,7 +399,7 @@ const Library = () => {
       setBulkRecipient('');
     } catch (err) {
       console.error('Bulk share failed:', err);
-      toast.error('Ocurrió un error al compartir');
+      toast.error(t('state.error'));
     } finally {
       setBulkProcessing(false);
     }
@@ -409,11 +409,11 @@ const Library = () => {
     if (!songToShare) return;
     const username = recipientUsername.trim().replace(/^@/, '');
     if (!username) {
-      toast.error('Escribe el username del destinatario');
+      toast.error(t('library.recipientUser'));
       return;
     }
     if (username.length > 50) {
-      toast.error('Username demasiado largo');
+      toast.error(t('state.error'));
       return;
     }
 
@@ -426,13 +426,13 @@ const Library = () => {
 
       if (error) {
         console.error('Share error:', error);
-        toast.error('No se pudo compartir la canción');
+        toast.error(t('state.error'));
         return;
       }
 
       const result = Array.isArray(data) ? data[0] : data;
       if (!result?.success) {
-        toast.error(result?.message || 'No se pudo compartir');
+        toast.error(result?.message || t('state.error'));
         return;
       }
 
@@ -448,7 +448,7 @@ const Library = () => {
       setSongToShare(null);
     } catch (err) {
       console.error('Error sharing song:', err);
-      toast.error('Ocurrió un error al compartir');
+      toast.error(t('state.error'));
     } finally {
       setSharing(false);
     }
@@ -459,7 +459,7 @@ const Library = () => {
       return (
         <div className="vapor-card p-10 text-center">
           <Music className="h-10 w-10 text-muted-foreground mx-auto mb-3" strokeWidth={1.4} />
-          <p className="text-muted-foreground text-sm">No hay canciones aquí todavía</p>
+          <p className="text-muted-foreground text-sm">{t('library.empty')}</p>
         </div>
       );
     }
@@ -476,7 +476,7 @@ const Library = () => {
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors px-1 py-1"
           >
             {allVisibleSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-            {allVisibleSelected ? 'Deseleccionar todo' : 'Seleccionar todo'}
+            {allVisibleSelected ? t('action.cancel') : t('library.selectAll')}
           </button>
         )}
         {songs.map((song, idx) => {
@@ -501,7 +501,7 @@ const Library = () => {
                   onCheckedChange={() => toggleSelected(song.id)}
                   onClick={(e) => e.stopPropagation()}
                   className="shrink-0"
-                  aria-label={isSelected ? 'Deseleccionar' : 'Seleccionar'}
+                  aria-label={isSelected ? t('action.cancel') : t('library.selectAll')}
                 />
               ) : (
                 <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
@@ -549,7 +549,7 @@ const Library = () => {
                   variant="ghost"
                   onClick={() => handleShareRequest(song)}
                   className="h-9 w-9 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary"
-                  aria-label="Compartir canción"
+                  aria-label={t('library.share')}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -574,8 +574,8 @@ const Library = () => {
     return (
       <div className="space-y-6">
         <div>
-          <p className="eyebrow mb-2">Sección 03</p>
-          <h1 className="display-xl text-4xl">Biblioteca</h1>
+          <p className="eyebrow mb-2">{t('library.title')}</p>
+          <h1 className="display-xl text-4xl">{t('library.title')}</h1>
         </div>
         <div className="space-y-2">
           {[1,2,3].map(i => <div key={i} className="bg-muted h-20 rounded-2xl animate-pulse" />)}
@@ -590,10 +590,10 @@ const Library = () => {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="display-xl text-4xl">
-            Biblioteca
+            {t('library.title')}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-            Tu colección personal, lista para sonar.
+            {t('library.discoverMusic')}
           </p>
         </div>
         {downloads.length > 0 && (
@@ -609,12 +609,12 @@ const Library = () => {
             {selectionMode ? (
               <>
                 <X className="h-4 w-4 mr-1.5" />
-                Cancelar
+                {t('action.cancel')}
               </>
             ) : (
               <>
                 <CheckSquare className="h-4 w-4 mr-1.5" />
-                Seleccionar
+                {t('library.selectAll')}
               </>
             )}
           </Button>
@@ -624,11 +624,11 @@ const Library = () => {
       {/* Stats — blob cards */}
       <div className="grid grid-cols-2 gap-3">
         <div className="blob-card blob-card-aurora p-5">
-          <p className="eyebrow mb-1.5">Descargas</p>
+          <p className="eyebrow mb-1.5">{t('library.downloads')}</p>
           <p className="display-xl text-4xl">{String(downloads.length).padStart(2, '0')}</p>
         </div>
         <div className="blob-card blob-card-sunset p-5">
-          <p className="eyebrow mb-1.5">Favoritos</p>
+          <p className="eyebrow mb-1.5">{t('library.favorites')}</p>
           <p className="display-xl text-4xl vapor-text">{String(favorites.length).padStart(2, '0')}</p>
         </div>
       </div>
@@ -640,25 +640,25 @@ const Library = () => {
             value="all"
             className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
-            Todo
+            {t('library.tab.all')}
           </TabsTrigger>
           <TabsTrigger
             value="recent"
             className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
-            Recientes
+            {t('library.tab.recent')}
           </TabsTrigger>
           <TabsTrigger
             value="favorites"
             className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
-            Favs
+            {t('library.tab.favorites')}
           </TabsTrigger>
           <TabsTrigger
             value="cards"
             className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
           >
-            Tarjetas
+            {t('library.tab.cards')}
           </TabsTrigger>
         </TabsList>
 
@@ -687,8 +687,8 @@ const Library = () => {
             <div className="flex items-center gap-3">
               <ShoppingBag className="h-5 w-5" />
               <div>
-                <p className="font-bold text-sm">Comprar tarjeta</p>
-                <p className="text-xs opacity-80">Estándar o Premium · Regalo disponible</p>
+                <p className="font-bold text-sm">{t('store.buy')}</p>
+                <p className="text-xs opacity-80">{t('card.standard')} / {t('card.premium')}</p>
               </div>
             </div>
             <span className="text-xs font-bold">→</span>
@@ -704,9 +704,9 @@ const Library = () => {
         <div className="fixed bottom-[88px] left-3 right-3 z-40">
           <div className="max-w-md mx-auto glass-strong shadow-vapor rounded-2xl p-3 flex items-center gap-2">
             <div className="flex-1 min-w-0">
-              <p className="eyebrow vapor-text mb-0.5">Selección</p>
+              <p className="eyebrow vapor-text mb-0.5">{t('library.itemsSelected')}</p>
               <p className="font-display font-bold text-sm text-foreground">
-                {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}
+                {selectedIds.size} {t('library.itemsSelected')}
               </p>
             </div>
             <Button
@@ -717,7 +717,7 @@ const Library = () => {
               className="rounded-full"
             >
               <Send className="h-4 w-4 mr-1.5" />
-              Enviar
+              {t('library.send')}
             </Button>
             <Button
               size="sm"
@@ -726,7 +726,7 @@ const Library = () => {
               className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
-              Borrar
+              {t('library.delete')}
             </Button>
           </div>
         </div>
@@ -735,20 +735,19 @@ const Library = () => {
       <AlertDialog open={!!songToDelete} onOpenChange={(open) => !open && !deleting && setSongToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar de tu biblioteca?</AlertDialogTitle>
+            <AlertDialogTitle>{t('library.confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              "{songToDelete?.title}" desaparecerá de tu biblioteca para siempre
-              y perderás el crédito de descarga utilizado. Esta acción no se puede deshacer.
+              "{songToDelete?.title}" — {t('library.confirmDeleteDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t('action.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); confirmDelete(); }}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Eliminando...' : 'Eliminar'}
+              {deleting ? t('state.loading') : t('library.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -758,20 +757,19 @@ const Library = () => {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkDeleteOpen(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}?</AlertDialogTitle>
+            <AlertDialogTitle>{t('library.confirmDelete')} ({selectedIds.size})</AlertDialogTitle>
             <AlertDialogDescription>
-              Las canciones seleccionadas desaparecerán de tu biblioteca para siempre
-              y perderás los créditos de descarga utilizados. Esta acción no se puede deshacer.
+              {t('library.confirmDeleteDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkProcessing}>{t('action.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); confirmBulkDelete(); }}
               disabled={bulkProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {bulkProcessing ? 'Eliminando...' : 'Eliminar'}
+              {bulkProcessing ? t('state.loading') : t('library.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -781,14 +779,13 @@ const Library = () => {
       <AlertDialog open={bulkShareOpen} onOpenChange={(open) => !open && !bulkProcessing && setBulkShareOpen(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enviar {selectedIds.size} {selectedIds.size === 1 ? 'canción' : 'canciones'}</AlertDialogTitle>
+            <AlertDialogTitle>{t('library.send')} ({selectedIds.size})</AlertDialogTitle>
             <AlertDialogDescription>
-              Las canciones seleccionadas <span className="font-semibold text-foreground">cambiarán de biblioteca</span>:
-              dejarán la tuya y entrarán en la del destinatario. Esta acción no se puede deshacer.
+              {t('library.shareDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="bulk-recipient-username">Username del destinatario</Label>
+            <Label htmlFor="bulk-recipient-username">{t('library.recipientUser')}</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
               <Input
@@ -810,12 +807,12 @@ const Library = () => {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkProcessing}>{t('action.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); confirmBulkShare(); }}
               disabled={bulkProcessing || !bulkRecipient.trim()}
             >
-              {bulkProcessing ? 'Enviando...' : 'Enviar'}
+              {bulkProcessing ? t('state.loading') : t('library.send')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -827,17 +824,13 @@ const Library = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Compartir canción</AlertDialogTitle>
+            <AlertDialogTitle>{t('library.shareTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Quieres compartir <span className="font-semibold text-foreground">"{songToShare?.title}"</span>{' '}
-              de <span className="font-semibold text-foreground">{songToShare?.artist}</span>?
-              <br />
-              <br />
-              La canción <span className="font-semibold text-foreground">cambiará de biblioteca</span>: dejará la tuya y entrará directamente en la del destinatario. Esta acción no se puede deshacer.
+              "{songToShare?.title}" — {t('library.shareDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="recipient-username">Username del destinatario</Label>
+            <Label htmlFor="recipient-username">{t('library.recipientUser')}</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">@</span>
               <Input
@@ -859,12 +852,12 @@ const Library = () => {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={sharing}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={sharing}>{t('action.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => { e.preventDefault(); confirmShare(); }}
               disabled={sharing || !recipientUsername.trim()}
             >
-              {sharing ? 'Compartiendo...' : 'Compartir'}
+              {sharing ? t('state.loading') : t('library.share')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
