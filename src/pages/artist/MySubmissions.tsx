@@ -265,10 +265,10 @@ const MySubmissions = () => {
                       <CalendarClock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                       <div className="text-sm flex-1">
                         <p className="font-semibold text-primary">
-                          Lanzamiento programado
+                          {t('artist.scheduledTitle')}
                         </p>
                         <p className="text-foreground/80 mt-1">
-                          "{r.title}" se publicará automáticamente el{' '}
+                          "{r.title}" {t('artist.scheduledDesc')}{' '}
                           <strong>{formatMadrid(r.scheduled_release_at)}</strong> (Europa/Madrid)
                           {' · '}
                           <span className="text-muted-foreground">{timeUntil(r.scheduled_release_at)}</span>
