@@ -429,7 +429,7 @@ const ArtistStats = () => {
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground text-center">
-            Los datos demográficos se basan en los oyentes que han rellenado su edad y género en el perfil.
+            {t('artist.demographicsNote')}
           </p>
         </>
       )}
