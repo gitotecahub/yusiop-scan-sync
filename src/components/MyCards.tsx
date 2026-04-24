@@ -261,26 +261,31 @@ const MyCards = () => {
                 celebrate
               />
 
-              {/* Botón principal de copia rápida */}
-              <Button
-                onClick={() => handleCopy(selected.code)}
-                className="w-full h-12 gap-2 font-semibold"
-                variant={copied ? 'secondary' : 'default'}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4" />
-                    ¡Código copiado!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    Copiar código manual
-                  </>
-                )}
-              </Button>
+              {/* Botón principal: Canjear (lleva al escáner con código pre-rellenado) */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    navigate('/qr', { state: { prefillCode: selected.code } });
+                    setSelected(null);
+                  }}
+                  className="flex-1 h-12 gap-2 font-semibold"
+                >
+                  <ScanLine className="h-4 w-4" />
+                  Canjear
+                </Button>
+                <Button
+                  onClick={() => handleCopy(selected.code)}
+                  variant={copied ? 'secondary' : 'outline'}
+                  size="icon"
+                  className="h-12 w-12 shrink-0"
+                  aria-label="Copiar código manual"
+                  title="Copiar código manual"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground text-center -mt-1">
-                Pégalo en el escáner → "Introducir código manual"
+                Pulsa "Canjear" para activar la tarjeta en el escáner
               </p>
 
               <div className="space-y-3 pt-2">
