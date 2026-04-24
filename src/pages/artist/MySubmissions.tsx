@@ -274,6 +274,12 @@ const MySubmissions = () => {
                     </div>
                   </div>
                 )}
+
+                <CopyrightDetails
+                  status={r.copyright_status}
+                  score={r.copyright_score}
+                  matches={r.copyright_matches}
+                />
               </CardContent>
             </Card>
           ))}
