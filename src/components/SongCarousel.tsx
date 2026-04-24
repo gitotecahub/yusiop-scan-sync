@@ -1,4 +1,4 @@
-import { Play } from 'lucide-react';
+import { Play, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ReactNode } from 'react';
 
@@ -23,6 +23,7 @@ interface Props {
   onSongClick: (id: string) => void;
   emptyText?: string;
   showRank?: boolean;
+  fireTopCount?: number;
 }
 
 const SongCarousel = ({
@@ -37,6 +38,7 @@ const SongCarousel = ({
   onSongClick,
   emptyText,
   showRank,
+  fireTopCount = 3,
 }: Props) => {
   return (
     <section className="space-y-3">
@@ -75,7 +77,7 @@ const SongCarousel = ({
         </div>
       ) : songs.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
-          {songs.map((song) => (
+          {songs.map((song, idx) => (
             <button
               key={song.id}
               onClick={() => onSongClick(song.id)}
@@ -90,8 +92,13 @@ const SongCarousel = ({
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
+                {idx < fireTopCount && (
+                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center">
+                    <Flame className="h-3 w-3 text-primary" />
+                  </div>
+                )}
                 {song.badge && (
-                  <span className="absolute top-1.5 right-1.5">{song.badge}</span>
+                  <span className="absolute top-1.5 left-1.5">{song.badge}</span>
                 )}
                 <div className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full vapor-bg items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity shadow-glow flex">
                   <Play className="h-3.5 w-3.5 text-primary-foreground ml-0.5" />
