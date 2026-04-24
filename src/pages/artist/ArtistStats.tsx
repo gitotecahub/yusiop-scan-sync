@@ -190,7 +190,7 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Users className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Oyentes únicos</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.uniqueListeners')}</p>
                     <p className="text-2xl font-bold">{stats.totals.unique_listeners}</p>
                   </div>
                 </div>
