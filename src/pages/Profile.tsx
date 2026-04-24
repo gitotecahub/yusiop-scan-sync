@@ -38,6 +38,7 @@ import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { useModeStore } from '@/stores/modeStore';
 import ModeSwitcher from '@/components/ModeSwitcher';
+import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
 
 interface ScannedCard {
   id: string;
