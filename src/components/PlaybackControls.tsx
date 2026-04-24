@@ -255,11 +255,34 @@ const PlaybackControls = () => {
                 variant="ghost"
                 size="icon"
                 onClick={handleCast}
-                className="h-9 w-9 rounded-full hover:bg-muted/40"
-                aria-label="Enviar a TV o dispositivo"
-                title="Enviar a TV o dispositivo"
+                className={cn(
+                  'h-9 w-9 rounded-full hover:bg-muted/40 relative transition-colors',
+                  cast.state === 'connected' && 'text-primary bg-primary/10 hover:bg-primary/15',
+                  cast.state === 'available' && 'text-primary',
+                  cast.state === 'connecting' && 'text-primary',
+                )}
+                aria-label={
+                  cast.state === 'connected'
+                    ? `Conectado a ${cast.deviceName ?? 'dispositivo'} (toca para desconectar)`
+                    : 'Enviar a TV o dispositivo'
+                }
+                title={
+                  cast.state === 'connected'
+                    ? `Conectado a ${cast.deviceName ?? 'dispositivo'}`
+                    : cast.state === 'available'
+                      ? 'Dispositivos disponibles'
+                      : cast.state === 'connecting'
+                        ? 'Conectando…'
+                        : 'Buscar dispositivos'
+                }
               >
-                <Cast className="h-4 w-4" />
+                <Cast className={cn('h-4 w-4', cast.state === 'connecting' && 'animate-pulse')} />
+                {cast.state === 'available' && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                )}
+                {cast.state === 'connected' && (
+                  <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
               </Button>
               <Button
                 variant="ghost"
