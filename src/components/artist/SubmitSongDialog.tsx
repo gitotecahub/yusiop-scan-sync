@@ -352,6 +352,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       share_percent: c.share_percent,
       is_primary: c.is_primary,
       role: c.role,
+      contact_email: c.is_primary ? null : c.contact_email.trim().toLowerCase(),
     }));
     const { error } = await supabase.from('song_collaborators').insert(rows);
     if (error) throw error;
