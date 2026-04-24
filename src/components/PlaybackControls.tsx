@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { Slider } from '@/components/ui/slider';
 import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2 } from 'lucide-react';
@@ -17,6 +17,33 @@ const PlaybackControls = () => {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+
+  // Posición visual interpolada con requestAnimationFrame para un avance fluido
+  const [displayPosition, setDisplayPosition] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const isSeekingRef = useRef(false);
+
+  useEffect(() => {
+    const tick = () => {
+      const audio = document.querySelector('audio') as HTMLAudioElement | null;
+      if (audio && !isSeekingRef.current) {
+        const previewStart = currentSong?.preview_start_seconds ?? 0;
+        const isPreview = usePlayerStore.getState().isPreview;
+        const elapsed = isPreview ? Math.max(0, audio.currentTime - previewStart) : audio.currentTime;
+        setDisplayPosition(elapsed);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [currentSong?.id, currentSong?.preview_start_seconds]);
+
+  // Sincronizar cuando cambia la posición del store (cambio de canción / seek externo)
+  useEffect(() => {
+    if (!isSeekingRef.current) setDisplayPosition(position);
+  }, [position, currentSong?.id]);
 
   // Cargar estado de favorito cuando cambia la canción
   useEffect(() => {
@@ -86,9 +113,18 @@ const PlaybackControls = () => {
   };
 
   const handleSeek = (newPosition: number[]) => {
-    setPosition(newPosition[0]);
-    const audioElement = document.querySelector('audio') as HTMLAudioElement;
-    if (audioElement) audioElement.currentTime = newPosition[0];
+    isSeekingRef.current = true;
+    const value = newPosition[0];
+    setDisplayPosition(value);
+    setPosition(value);
+    const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
+    if (audioElement) {
+      const previewStart = currentSong?.preview_start_seconds ?? 0;
+      const isPreview = usePlayerStore.getState().isPreview;
+      audioElement.currentTime = isPreview ? previewStart + value : value;
+    }
+    // Liberar el seek tras un frame para evitar que el rAF lo sobrescriba inmediatamente
+    requestAnimationFrame(() => { isSeekingRef.current = false; });
   };
 
   const togglePlayPause = (e?: React.MouseEvent) => {
@@ -123,8 +159,9 @@ const PlaybackControls = () => {
     }
   };
 
-  const remaining = Math.max(duration - position, 0);
-  const progressPct = duration > 0 ? (position / duration) * 100 : 0;
+  const clampedPos = Math.min(Math.max(displayPosition, 0), duration || 0);
+  const remaining = Math.max(duration - clampedPos, 0);
+  const progressPct = duration > 0 ? (clampedPos / duration) * 100 : 0;
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -137,7 +174,7 @@ const PlaybackControls = () => {
             aria-label="Abrir reproductor"
           >
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted/40">
-              <div className="h-full vapor-bg transition-all" style={{ width: `${progressPct}%` }} />
+              <div className="h-full vapor-bg" style={{ width: `${progressPct}%`, transition: 'width 0.1s linear' }} />
             </div>
 
             <div className="flex items-center gap-3">
@@ -256,14 +293,14 @@ const PlaybackControls = () => {
           {/* Slider Yusiop */}
           <div className="space-y-1.5 mb-5">
             <Slider
-              value={[position]}
+              value={[clampedPos]}
               max={duration || 1}
-              step={1}
+              step={0.01}
               onValueChange={handleSeek}
               className="yusiop-slider w-full"
             />
             <div className="flex justify-between text-[10px] text-muted-foreground tabular-nums tracking-[0.15em] uppercase">
-              <span>{formatTime(position)}</span>
+              <span>{formatTime(clampedPos)}</span>
               <span>-{formatTime(remaining)}</span>
             </div>
           </div>
