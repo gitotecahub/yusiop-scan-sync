@@ -253,7 +253,7 @@ const Index = () => {
       </Section>
 
       {/* === TARJETAS DESTACADAS — reales === */}
-      <Section title="Tarjetas destacadas" eyebrow="Colección" link="/store">
+      <Section title={t('home.section.cards')} eyebrow={language === 'es' ? 'Colección' : language === 'en' ? 'Collection' : language === 'fr' ? 'Collection' : 'Coleção'} link="/store">
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => navigate('/store')}
@@ -267,9 +267,9 @@ const Index = () => {
               compact
             />
             <div className="mt-2 px-0.5">
-              <p className="font-display font-bold text-xs leading-tight">Estándar</p>
+              <p className="font-display font-bold text-xs leading-tight">{t('card.standard')}</p>
               <div className="flex items-center justify-between mt-0.5">
-                <p className="text-[10px] text-muted-foreground">4 descargas</p>
+                <p className="text-[10px] text-muted-foreground">4 {t('card.downloads')}</p>
                 <span className="font-display font-bold text-xs vapor-text">5,00 €</span>
               </div>
             </div>
@@ -287,9 +287,9 @@ const Index = () => {
               compact
             />
             <div className="mt-2 px-0.5">
-              <p className="font-display font-bold text-xs leading-tight">Premium</p>
+              <p className="font-display font-bold text-xs leading-tight">{t('card.premium')}</p>
               <div className="flex items-center justify-between mt-0.5">
-                <p className="text-[10px] text-muted-foreground">10 descargas</p>
+                <p className="text-[10px] text-muted-foreground">10 {t('card.downloads')}</p>
                 <span className="font-display font-bold text-xs vapor-text">10,00 €</span>
               </div>
             </div>
