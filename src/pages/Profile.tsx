@@ -27,9 +27,11 @@ import {
   CheckCircle2,
   Hourglass,
   ShieldCheck,
+  Languages,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
+import { useLanguageStore, LANGUAGES } from '@/stores/languageStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from 'next-themes';
@@ -51,6 +53,8 @@ interface ScannedCard {
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguageStore();
+  const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
   const { areas, isSuperAdmin, loading: staffLoading } = useStaffAreas();
@@ -681,6 +685,36 @@ const Profile = () => {
                 <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-3.5 w-3.5" /> Claro</div></SelectItem>
                 <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-3.5 w-3.5" /> Oscuro</div></SelectItem>
                 <SelectItem value="system"><div className="flex items-center gap-2"><Monitor className="h-3.5 w-3.5" /> Sistema</div></SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Languages className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">Idioma</p>
+                <p className="text-xs text-muted-foreground">Selecciona el idioma de la app</p>
+              </div>
+            </div>
+            <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    <span>{currentLang.flag}</span>
+                    <span className="text-xs">{currentLang.label}</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((l) => (
+                  <SelectItem key={l.code} value={l.code}>
+                    <div className="flex items-center gap-2">
+                      <span>{l.flag}</span>
+                      <span>{l.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
