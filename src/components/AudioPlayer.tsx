@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { toast } from 'sonner';
+import { getOfflineSong } from '@/lib/offlineStorage';
 
 const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const loadedPlaybackRef = useRef<string | null>(null);
   const shouldAutoPlayRef = useRef<boolean>(false);
+  const objectUrlRef = useRef<string | null>(null);
 
   const { currentSong, isPlaying, isPreview, setPosition, setDuration, pause, next, repeat, queue } =
     usePlayerStore();
@@ -89,32 +91,69 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio || !currentSong) return;
 
-    let audioUrl = '';
-    if (isPreview) {
-      const hasCustomPreview =
-        typeof currentSong.preview_start_seconds === 'number' &&
-        !!currentSong.track_url;
-      audioUrl = hasCustomPreview
-        ? (currentSong.track_url as string)
-        : (currentSong.preview_url || currentSong.track_url || '');
-    } else {
-      // Modo completo: priorizar track_url SIEMPRE
-      audioUrl = currentSong.track_url || currentSong.preview_url || '';
-    }
-    if (!audioUrl) {
-      console.warn('Canción sin URL de audio', currentSong);
-      toast.error('Esta canción no tiene archivo de audio');
-      pause();
-      return;
-    }
+    let cancelled = false;
 
-    const playbackKey = `${currentSong.id}:${isPreview ? 'preview' : 'full'}:${audioUrl}`;
-    if (loadedPlaybackRef.current === playbackKey) return;
+    (async () => {
+      let audioUrl = '';
+      let usedOfflineBlob = false;
 
-    loadedPlaybackRef.current = playbackKey;
-    shouldAutoPlayRef.current = isPlaying;
-    audio.src = audioUrl;
-    audio.load();
+      if (isPreview) {
+        const hasCustomPreview =
+          typeof currentSong.preview_start_seconds === 'number' &&
+          !!currentSong.track_url;
+        audioUrl = hasCustomPreview
+          ? (currentSong.track_url as string)
+          : (currentSong.preview_url || currentSong.track_url || '');
+      } else {
+        // Modo completo: intentar primero blob offline (IndexedDB)
+        try {
+          const offline = await getOfflineSong(currentSong.id);
+          if (offline?.audio_blob) {
+            audioUrl = URL.createObjectURL(offline.audio_blob);
+            usedOfflineBlob = true;
+          }
+        } catch {
+          // ignore, fallback a remoto
+        }
+        if (!audioUrl) {
+          audioUrl = currentSong.track_url || currentSong.preview_url || '';
+        }
+      }
+
+      if (cancelled) {
+        if (usedOfflineBlob) URL.revokeObjectURL(audioUrl);
+        return;
+      }
+
+      if (!audioUrl) {
+        console.warn('Canción sin URL de audio', currentSong);
+        toast.error('Esta canción no tiene archivo de audio');
+        pause();
+        return;
+      }
+
+      const playbackKey = `${currentSong.id}:${isPreview ? 'preview' : 'full'}:${usedOfflineBlob ? 'offline' : 'remote'}`;
+      if (loadedPlaybackRef.current === playbackKey) {
+        if (usedOfflineBlob) URL.revokeObjectURL(audioUrl);
+        return;
+      }
+
+      // Liberar object URL anterior si lo había
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+      if (usedOfflineBlob) objectUrlRef.current = audioUrl;
+
+      loadedPlaybackRef.current = playbackKey;
+      shouldAutoPlayRef.current = isPlaying;
+      audio.src = audioUrl;
+      audio.load();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentSong?.id, currentSong?.preview_url, currentSong?.track_url, currentSong?.preview_start_seconds, isPreview, isPlaying, pause]);
 
   // Play / pause cuando cambia el estado (sin tocar src ni currentTime)
