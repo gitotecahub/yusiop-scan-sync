@@ -291,6 +291,7 @@ const SongSubmissions = () => {
                         {row.status === 'rejected' && 'Rechazada'}
                         {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                       </Badge>
+                      <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
                       {row.artist_name}
