@@ -269,17 +269,32 @@ const Monetization = () => {
     return unclaimedPool.list.filter((a) => a.name.toLowerCase().includes(q));
   }, [unclaimedPool, poolSearch]);
 
+  // Ingresos brutos por venta de tarjetas físicas (XAF → EUR aprox.)
+  // Se calcula aquí también para poder sumarlo al bruto general.
+  const physicalSalesEur = useMemo(() => {
+    let xaf = 0;
+    qrCards.forEach((qr: any) => {
+      if (qr.origin !== 'physical' || !qr.is_activated) return;
+      xaf += qr.card_type === 'premium' ? PHYSICAL_PREMIUM_PRICE_XAF : PHYSICAL_STANDARD_PRICE_XAF;
+    });
+    return xaf / 655.957;
+  }, [qrCards]);
+
   const totals = useMemo(() => {
     const totalDownloads = downloads.length;
-    const totalGross = enrichedSongs.reduce((acc, s) => acc + s.grossRevenue, 0);
+    const downloadsGross = enrichedSongs.reduce((acc, s) => acc + s.grossRevenue, 0);
+    // Ingresos brutos = descargas (créditos consumidos) + ventas físicas (XAF→EUR)
+    const totalGross = downloadsGross + physicalSalesEur;
     return {
       totalDownloads,
       totalGross,
+      downloadsGross,
+      physicalSalesEur,
       totalArtist: totalGross * ARTIST_SHARE,
       totalPlatform: totalGross * PLATFORM_SHARE,
       totalInvestor: totalGross * INVESTOR_SHARE,
     };
-  }, [downloads.length, enrichedSongs]);
+  }, [downloads.length, enrichedSongs, physicalSalesEur]);
 
   // Desglose por tipo de tarjeta (estándar / premium)
   const byCardType = useMemo(() => {
