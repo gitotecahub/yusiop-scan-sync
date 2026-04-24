@@ -415,6 +415,14 @@ const Users = () => {
                           <ShieldCheck className="h-3 w-3" /> Admin
                         </Badge>
                       )}
+                      {user.isArtist ? (
+                        <Badge variant="default" className="text-xs gap-1 bg-accent text-accent-foreground">
+                          <Mic2 className="h-3 w-3" />
+                          Artista{user.artistNames.length > 0 ? `: ${user.artistNames.join(', ')}` : ''}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">Oyente</Badge>
+                      )}
                       {user.downloadCount >= 50 && (
                         <Badge variant="default" className="text-xs gap-1 bg-primary/80">
                           <Crown className="h-3 w-3" /> VIP
