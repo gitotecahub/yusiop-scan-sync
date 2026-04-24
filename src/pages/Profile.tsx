@@ -53,7 +53,7 @@ interface ScannedCard {
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguageStore();
+  const { language, setLanguage, t } = useLanguageStore();
   const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
@@ -152,7 +152,7 @@ const Profile = () => {
         }
       } catch (err) {
         console.error('Error loading profile:', err);
-        toast.error('No se pudo cargar el perfil');
+        toast.error(t('state.error'));
       }
     };
 
@@ -203,7 +203,7 @@ const Profile = () => {
         }));
       } catch (err) {
         console.error('Error loading scanned cards:', err);
-        toast.error('No se pudo cargar el historial de tarjetas');
+        toast.error(t('state.error'));
       } finally {
         setLoadingCards(false);
       }
@@ -341,13 +341,13 @@ const Profile = () => {
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      toast.error('Por favor selecciona una imagen válida');
+      toast.error(t('state.error'));
       return;
     }
 
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen debe ser menor a 5MB');
+      toast.error(t('state.error'));
       return;
     }
 
@@ -383,11 +383,11 @@ const Profile = () => {
         .update({ avatar_url: publicUrl })
         .eq('user_id', user.id);
 
-      toast.success('Foto de perfil actualizada correctamente');
+      toast.success(t('state.success'));
 
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      toast.error('Error al subir la imagen');
+      toast.error(t('state.error'));
     } finally {
       setUploading(false);
     }
@@ -395,11 +395,12 @@ const Profile = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Sesión cerrada');
+    toast.success(t('profile.logoutSuccess'));
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
+    const localeMap: Record<string, string> = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', pt: 'pt-PT' };
+    return new Date(dateString).toLocaleDateString(localeMap[language] ?? 'es-ES', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -413,14 +414,14 @@ const Profile = () => {
     const date = new Date(dateString);
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'Hace un momento';
-    if (diffInMinutes < 60) return `Hace ${diffInMinutes} min`;
+    if (diffInMinutes < 1) return language === 'en' ? 'Just now' : language === 'fr' ? "À l'instant" : language === 'pt' ? 'Agora' : 'Hace un momento';
+    if (diffInMinutes < 60) return language === 'en' ? `${diffInMinutes}m ago` : language === 'fr' ? `Il y a ${diffInMinutes} min` : language === 'pt' ? `Há ${diffInMinutes} min` : `Hace ${diffInMinutes} min`;
     
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `Hace ${diffInHours}h`;
+    if (diffInHours < 24) return language === 'en' ? `${diffInHours}h ago` : language === 'fr' ? `Il y a ${diffInHours}h` : language === 'pt' ? `Há ${diffInHours}h` : `Hace ${diffInHours}h`;
     
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `Hace ${diffInDays}d`;
+    if (diffInDays < 7) return language === 'en' ? `${diffInDays}d ago` : language === 'fr' ? `Il y a ${diffInDays}j` : language === 'pt' ? `Há ${diffInDays}d` : `Hace ${diffInDays}d`;
     
     return formatDate(dateString);
   };
@@ -439,10 +440,10 @@ const Profile = () => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          Perfil
+          {t('profile.title')}
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-          Gestiona tu identidad y preferencias.
+          {t('profile.personalInfo')}
         </p>
       </div>
 
@@ -481,7 +482,7 @@ const Profile = () => {
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="eyebrow mb-1">Usuario</p>
+            <p className="eyebrow mb-1">{t('profile.username')}</p>
             <h2 className="font-display text-2xl font-bold leading-tight truncate">{profile.fullName}</h2>
             <p className="text-xs text-muted-foreground mt-1">@{profile.username}</p>
             <Button
@@ -491,7 +492,7 @@ const Profile = () => {
               className="rounded-full h-8 px-3 mt-2 -ml-3 text-xs hover:bg-muted text-primary"
             >
               <Edit className="h-3 w-3 mr-1.5" />
-              Editar
+              {t('profile.edit')}
             </Button>
           </div>
         </div>
@@ -499,7 +500,7 @@ const Profile = () => {
         {editing && (
           <div className="space-y-4 mt-6 pt-6 border-t border-border">
             <div className="space-y-2">
-              <Label className="eyebrow">Nombre completo</Label>
+              <Label className="eyebrow">{t('profile.fullName')}</Label>
               <Input
                 value={profile.fullName}
                 onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
@@ -507,7 +508,7 @@ const Profile = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="eyebrow">Nombre de usuario</Label>
+              <Label className="eyebrow">{t('profile.username')}</Label>
               <Input
                 value={profile.username}
                 onChange={(e) => setProfile(prev => ({ ...prev, username: e.target.value }))}
@@ -516,7 +517,7 @@ const Profile = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label className="eyebrow">Año nacimiento</Label>
+                <Label className="eyebrow">{t('profile.birthYear')}</Label>
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -529,29 +530,29 @@ const Profile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="eyebrow">Género</Label>
+                <Label className="eyebrow">{t('profile.gender')}</Label>
                 <Select
                   value={profile.gender || 'unset'}
                   onValueChange={(v) => setProfile(prev => ({ ...prev, gender: v === 'unset' ? '' : v }))}
                 >
                   <SelectTrigger className="rounded-2xl border-border bg-input h-11">
-                    <SelectValue placeholder="Selecciona" />
+                    <SelectValue placeholder={t('action.search')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unset">Sin especificar</SelectItem>
-                    <SelectItem value="female">Mujer</SelectItem>
-                    <SelectItem value="male">Hombre</SelectItem>
-                    <SelectItem value="non_binary">No binario</SelectItem>
-                    <SelectItem value="prefer_not_to_say">Prefiero no decirlo</SelectItem>
+                    <SelectItem value="unset">{t('profile.preferNotSay')}</SelectItem>
+                    <SelectItem value="female">{t('profile.female')}</SelectItem>
+                    <SelectItem value="male">{t('profile.male')}</SelectItem>
+                    <SelectItem value="non_binary">{t('profile.other')}</SelectItem>
+                    <SelectItem value="prefer_not_to_say">{t('profile.preferNotSay')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Estos datos son opcionales y ayudan a los artistas a conocer a su audiencia de forma anónima.
+              {t('common.optional')}
             </p>
             <Button onClick={handleSaveProfile} className="w-full rounded-full vapor-bg text-primary-foreground hover:opacity-90 h-11 font-bold shadow-glow">
-              Guardar Cambios
+              {t('profile.save')}
             </Button>
           </div>
         )}
@@ -560,15 +561,15 @@ const Profile = () => {
           <div className="grid grid-cols-3 mt-6 pt-6 border-t border-border">
             <div className="text-center">
               <p className="display-xl text-2xl vapor-text">{String(profile.downloadsRemaining).padStart(2, '0')}</p>
-              <p className="eyebrow mt-1.5">Disponibles</p>
+              <p className="eyebrow mt-1.5">{t('profile.remainingDownloads')}</p>
             </div>
             <div className="text-center border-x border-border">
               <p className="display-xl text-2xl">{String(profile.totalDownloads).padStart(2, '0')}</p>
-              <p className="eyebrow mt-1.5">Descargadas</p>
+              <p className="eyebrow mt-1.5">{t('profile.totalDownloads')}</p>
             </div>
             <div className="text-center">
               <p className="display-xl text-2xl">{String(profile.activatedCards).padStart(2, '0')}</p>
-              <p className="eyebrow mt-1.5">Tarjetas</p>
+              <p className="eyebrow mt-1.5">{t('profile.cards')}</p>
             </div>
           </div>
         )}
@@ -585,14 +586,14 @@ const Profile = () => {
               <ShieldCheck className="h-6 w-6 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="eyebrow mb-1">Equipo Yusiop</p>
+              <p className="eyebrow mb-1">Yusiop</p>
               <h3 className="font-display text-lg font-bold leading-tight">
-                Panel de administración
+                {t('profile.adminPanel')}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {isSuperAdmin
-                  ? 'Tienes acceso completo a todas las áreas del panel.'
-                  : `Tienes acceso a ${areas.size} ${areas.size === 1 ? 'área' : 'áreas'} del panel.`}
+                  ? t('admin.panel')
+                  : `${areas.size} ${t('common.all')}`}
               </p>
               <Button
                 size="sm"
@@ -600,7 +601,7 @@ const Profile = () => {
                 className="mt-3 rounded-full vapor-bg text-primary-foreground h-9 px-4 text-xs font-bold shadow-glow"
               >
                 <ShieldCheck className="h-3 w-3 mr-1.5" />
-                Ir al panel
+                {t('profile.accessPanel')}
               </Button>
             </div>
           </div>
@@ -618,17 +619,17 @@ const Profile = () => {
               <p className="eyebrow mb-1">Yusiop Artist</p>
               <h3 className="font-display text-lg font-bold leading-tight">
                 {artistRequestStatus === 'pending'
-                  ? 'Solicitud en revisión'
+                  ? t('mode.requestPending')
                   : artistRequestStatus === 'rejected'
-                    ? 'Solicitud rechazada'
-                    : 'Convertirme en artista'}
+                    ? t('mode.requestRejected')
+                    : t('mode.becomeArtist')}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 {artistRequestStatus === 'pending'
-                  ? 'Estamos revisando tus documentos. Te avisaremos pronto.'
+                  ? t('state.loading')
                   : artistRequestStatus === 'rejected'
-                    ? 'Puedes enviar una nueva solicitud.'
-                    : 'Publica tu música en el catálogo y gestiona tu perfil.'}
+                    ? t('action.retry')
+                    : t('artist.becomeArtistDesc')}
               </p>
               <Button
                 size="sm"
@@ -637,11 +638,11 @@ const Profile = () => {
                 disabled={artistRequestStatus === 'pending'}
               >
                 {artistRequestStatus === 'pending' ? (
-                  <><Hourglass className="h-3 w-3 mr-1.5" /> En revisión</>
+                  <><Hourglass className="h-3 w-3 mr-1.5" /> {t('mode.requestPending')}</>
                 ) : artistRequestStatus === 'rejected' ? (
-                  'Reenviar solicitud'
+                  t('action.retry')
                 ) : (
-                  'Solicitar acceso'
+                  t('artist.requestArtist')
                 )}
               </Button>
             </div>
@@ -653,15 +654,15 @@ const Profile = () => {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Settings className="h-4 w-4 text-primary" strokeWidth={1.5} />
-          <p className="eyebrow">Configuración</p>
+          <p className="eyebrow">{t('settings.title')}</p>
         </div>
         <div className="border-t border-border">
           <div className="flex items-center justify-between py-4 border-b border-border">
             <div className="flex items-center gap-3">
               <Wifi className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               <div>
-                <p className="font-display font-semibold text-sm">Solo Wi-Fi</p>
-                <p className="text-xs text-muted-foreground">Evita usar datos móviles</p>
+                <p className="font-display font-semibold text-sm">{t('profile.wifiOnly')}</p>
+                <p className="text-xs text-muted-foreground">{t('profile.wifiOnlyDesc')}</p>
               </div>
             </div>
             <Switch checked={wifiOnly} onCheckedChange={setWifiOnly} />
@@ -673,8 +674,8 @@ const Profile = () => {
                theme === 'light' ? <Sun className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> :
                <Monitor className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />}
               <div>
-                <p className="font-display font-semibold text-sm">Tema</p>
-                <p className="text-xs text-muted-foreground">Claro, oscuro o sistema</p>
+                <p className="font-display font-semibold text-sm">{t('settings.theme')}</p>
+                <p className="text-xs text-muted-foreground">{t('profile.theme.light')} · {t('profile.theme.dark')} · {t('profile.theme.system')}</p>
               </div>
             </div>
             <Select value={theme} onValueChange={setTheme}>
@@ -682,9 +683,9 @@ const Profile = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-3.5 w-3.5" /> Claro</div></SelectItem>
-                <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-3.5 w-3.5" /> Oscuro</div></SelectItem>
-                <SelectItem value="system"><div className="flex items-center gap-2"><Monitor className="h-3.5 w-3.5" /> Sistema</div></SelectItem>
+                <SelectItem value="light"><div className="flex items-center gap-2"><Sun className="h-3.5 w-3.5" /> {t('profile.theme.light')}</div></SelectItem>
+                <SelectItem value="dark"><div className="flex items-center gap-2"><Moon className="h-3.5 w-3.5" /> {t('profile.theme.dark')}</div></SelectItem>
+                <SelectItem value="system"><div className="flex items-center gap-2"><Monitor className="h-3.5 w-3.5" /> {t('profile.theme.system')}</div></SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -693,8 +694,8 @@ const Profile = () => {
             <div className="flex items-center gap-3">
               <Languages className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               <div>
-                <p className="font-display font-semibold text-sm">Idioma</p>
-                <p className="text-xs text-muted-foreground">Selecciona el idioma de la app</p>
+                <p className="font-display font-semibold text-sm">{t('settings.language')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.languageLabel')}</p>
               </div>
             </div>
             <Select value={language} onValueChange={(v) => setLanguage(v as any)}>
@@ -723,8 +724,8 @@ const Profile = () => {
             <div className="flex items-center gap-3">
               <Download className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               <div>
-                <p className="font-display font-semibold text-sm">Notificaciones</p>
-                <p className="text-xs text-muted-foreground">Avisos de descargas</p>
+                <p className="font-display font-semibold text-sm">{t('settings.notifications')}</p>
+                <p className="text-xs text-muted-foreground">{t('profile.notifDesc')}</p>
               </div>
             </div>
             <Switch checked={notifications} onCheckedChange={setNotifications} />
@@ -740,7 +741,7 @@ const Profile = () => {
           className="w-full rounded-none h-11 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center gap-2 border border-destructive/30"
         >
           <LogOut className="h-4 w-4" />
-          Cerrar Sesión
+          {t('profile.logout')}
         </Button>
       </div>
 
@@ -748,7 +749,7 @@ const Profile = () => {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <CreditCard className="h-4 w-4 text-primary" strokeWidth={1.5} />
-          <p className="eyebrow">Historial de Tarjetas</p>
+          <p className="eyebrow">{t('profile.scannedHistory')}</p>
         </div>
 
         {loadingCards ? (
@@ -765,7 +766,7 @@ const Profile = () => {
                       <span className={`w-1.5 h-1.5 ${card.is_active ? 'bg-primary' : 'bg-muted-foreground'}`} />
                       <p className="font-display font-bold text-sm capitalize">{card.card_type}</p>
                       <Badge variant={card.is_active ? "default" : "secondary"} className="text-[9px] uppercase tracking-wider rounded-none px-1.5 py-0 h-4">
-                        {card.is_active ? "Activa" : "Expirada"}
+                        {card.is_active ? t('profile.cardActive') : t('profile.cardExpired')}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-muted-foreground font-mono truncate">{card.card_id}</p>
@@ -778,7 +779,7 @@ const Profile = () => {
                     <p className="font-display text-xl font-bold tabular-nums">
                       {card.credits_remaining}<span className="text-muted-foreground text-xs">/{card.max_credits}</span>
                     </p>
-                    <p className="eyebrow mt-0.5">créditos</p>
+                    <p className="eyebrow mt-0.5">{t('profile.creditsLeft')}</p>
                     <div className="w-16 h-0.5 bg-muted mt-2 ml-auto overflow-hidden">
                       <div
                         className="h-full bg-primary transition-all"
@@ -793,7 +794,7 @@ const Profile = () => {
         ) : (
           <div className="text-center py-10 border border-border">
             <CreditCard className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" strokeWidth={1.2} />
-            <p className="text-sm text-muted-foreground">No has escaneado ninguna tarjeta aún</p>
+            <p className="text-sm text-muted-foreground">{t('profile.noScannedCards')}</p>
           </div>
         )}
 
