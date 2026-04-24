@@ -7,10 +7,12 @@ import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { signInSchema, signUpSchema } from '@/lib/validation';
+import { useLanguageStore } from '@/stores/languageStore';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { signIn, signUp, loading } = useAuthStore();
+  const { t } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,9 +28,9 @@ const Auth = () => {
     }
     const { error } = await signIn(parsed.data.email, parsed.data.password);
     if (error) {
-      toast.error('Error al iniciar sesión: ' + error.message);
+      toast.error(`${t('auth.signinError')}: ${error.message}`);
     } else {
-      toast.success('¡Bienvenido a YUSIOP!');
+      toast.success(`${t('auth.welcome')} YUSIOP!`);
       navigate('/', { replace: true });
     }
   };
@@ -37,7 +39,7 @@ const Auth = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error(t('auth.passwordsDontMatch'));
       return;
     }
 
@@ -50,13 +52,13 @@ const Auth = () => {
     const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
     if (error) {
       if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
-        toast.error('Este email ya está registrado. Inicia sesión.');
+        toast.error(t('auth.emailRegistered'));
         setActiveTab('signin');
       } else {
-        toast.error('Error al registrarse: ' + error.message);
+        toast.error(`${t('auth.signupError')}: ${error.message}`);
       }
     } else {
-      toast.success('¡Cuenta creada! Te enviamos un email para confirmar tu cuenta.');
+      toast.success(t('auth.accountCreated'));
       setPassword('');
       setConfirmPassword('');
       setUsername('');
@@ -80,7 +82,7 @@ const Auth = () => {
           <h1 className="display-xl text-7xl mb-2">
             <span className="vapor-text">Y</span>USIOP
           </h1>
-          <p className="eyebrow mt-3">Scan · Sync · Play</p>
+          <p className="eyebrow mt-3">{t('auth.tagline')}</p>
         </div>
 
         <div className="glass-strong shadow-vapor p-7">
@@ -91,28 +93,28 @@ const Auth = () => {
                 value="signin"
                 className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
               >
-                Iniciar
+                {t('auth.signin')}
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
                 className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
               >
-                Crear cuenta
+                {t('auth.signup')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="eyebrow">Email</Label>
+                  <Label htmlFor="email" className="eyebrow">{t('auth.email')}</Label>
                   <Input id="email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="eyebrow">Contraseña</Label>
+                  <Label htmlFor="password" className="eyebrow">{t('auth.password')}</Label>
                   <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
-                  {loading ? 'Iniciando…' : 'Entrar'}
+                  {loading ? t('auth.signingIn') : t('auth.signinBtn')}
                 </Button>
               </form>
             </TabsContent>
@@ -120,23 +122,23 @@ const Auth = () => {
             <TabsContent value="signup" className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="eyebrow">Usuario</Label>
+                  <Label htmlFor="username" className="eyebrow">{t('auth.username')}</Label>
                   <Input id="username" type="text" placeholder="usuario123" value={username} onChange={(e) => setUsername(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="eyebrow">Email</Label>
+                  <Label htmlFor="signup-email" className="eyebrow">{t('auth.email')}</Label>
                   <Input id="signup-email" type="email" placeholder="tu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="eyebrow">Contraseña</Label>
+                  <Label htmlFor="signup-password" className="eyebrow">{t('auth.password')}</Label>
                   <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password" className="eyebrow">Repetir</Label>
+                  <Label htmlFor="confirm-password" className="eyebrow">{t('auth.confirmPassword')}</Label>
                   <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
-                  {loading ? 'Creando…' : 'Crear cuenta'}
+                  {loading ? t('auth.signingUp') : t('auth.signupBtn')}
                 </Button>
               </form>
             </TabsContent>
