@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins } from 'lucide-react';
+import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins, ShieldAlert, Gift, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
