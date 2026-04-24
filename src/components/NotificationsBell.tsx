@@ -122,6 +122,13 @@ const NotificationsBell = () => {
       await goArtist('/artist/submissions');
     } else if (n.type === 'artist_request_approved') {
       await goArtist('/artist');
+    } else if (
+      n.type === 'collab_auto_assigned' ||
+      n.type === 'collab_claim_pending' ||
+      n.type === 'collab_claim_approved' ||
+      n.type === 'collab_claim_rejected'
+    ) {
+      await goArtist('/artist/collaborations');
     }
     load();
   };
