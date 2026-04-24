@@ -341,13 +341,13 @@ const Profile = () => {
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      toast.error('Por favor selecciona una imagen válida');
+      toast.error(t('state.error'));
       return;
     }
 
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen debe ser menor a 5MB');
+      toast.error(t('state.error'));
       return;
     }
 
@@ -383,11 +383,11 @@ const Profile = () => {
         .update({ avatar_url: publicUrl })
         .eq('user_id', user.id);
 
-      toast.success('Foto de perfil actualizada correctamente');
+      toast.success(t('state.success'));
 
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      toast.error('Error al subir la imagen');
+      toast.error(t('state.error'));
     } finally {
       setUploading(false);
     }
