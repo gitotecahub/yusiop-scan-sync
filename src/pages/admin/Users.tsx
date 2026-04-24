@@ -343,10 +343,12 @@ const Users = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <StatCard title="Total" value={stats.total} icon={UsersIcon} />
+        <StatCard title="Artistas" value={stats.artists} icon={Mic2} accent />
+        <StatCard title="Oyentes" value={stats.listeners} icon={UsersIcon} hint="Sin perfil de artista" />
         <StatCard title="Clientes" value={stats.customers} icon={ShoppingBag} hint="Con ≥1 compra" />
-        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥50 descargas" accent />
+        <StatCard title="VIP" value={stats.vip} icon={Crown} hint="Con ≥50 descargas" />
         <StatCard title="Admins" value={stats.admins} icon={ShieldCheck} />
       </div>
 
