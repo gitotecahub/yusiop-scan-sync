@@ -627,15 +627,136 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               />
             </div>
             <div>
-              <Label htmlFor="release_date">Fecha de lanzamiento</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="release_date">Fecha de lanzamiento</Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExpressEnabled((v) => !v);
+                    if (expressEnabled) {
+                      setExpressTier(null);
+                      setExpressAck(false);
+                    }
+                  }}
+                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full transition-all ${
+                    expressEnabled
+                      ? 'bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white shadow-[0_0_18px_hsl(265_85%_60%/0.55)]'
+                      : 'border border-primary/40 text-primary hover:bg-primary/10'
+                  }`}
+                >
+                  <Zap className="inline h-3 w-3 mr-1" />
+                  {expressEnabled ? 'Express activado' : 'Activar Express'}
+                </button>
+              </div>
               <Input
                 id="release_date"
                 type="date"
                 value={formData.release_date}
+                min={expressEnabled ? undefined : standardMinDate}
+                max={expressEnabled ? undefined : standardMaxDate}
+                disabled={expressEnabled}
                 onChange={(e) => setFormData((p) => ({ ...p, release_date: e.target.value }))}
               />
+              {!expressEnabled && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Lanzamiento estándar: entre {STANDARD_MIN_DAYS} y {STANDARD_MAX_DAYS} días desde hoy.
+                </p>
+              )}
+              {expressEnabled && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  La fecha la fijará el equipo según el nivel express elegido.
+                </p>
+              )}
             </div>
           </div>
+
+          {/* Sección Lanzamiento Express */}
+          {expressEnabled && (
+            <div className="relative rounded-xl p-[1px] bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] shadow-[0_0_30px_hsl(265_85%_60%/0.25)]">
+              <div className="rounded-[11px] bg-background p-4 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] flex items-center justify-center shadow-lg flex-shrink-0">
+                    <Zap className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
+                      Lanzamiento Express
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Publica tu música en menos de 72h con revisión prioritaria.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  {EXPRESS_OPTIONS.map((opt) => {
+                    const selected = expressTier === opt.tier;
+                    return (
+                      <button
+                        key={opt.tier}
+                        type="button"
+                        onClick={() => setExpressTier(opt.tier)}
+                        className={`relative text-left rounded-lg p-3 transition-all border ${
+                          selected
+                            ? 'border-transparent bg-gradient-to-r from-[hsl(220,90%,55%)]/15 via-[hsl(265,85%,60%)]/15 to-[hsl(180,80%,50%)]/15 ring-2 ring-[hsl(265,85%,60%)] shadow-[0_0_20px_hsl(265_85%_60%/0.4)]'
+                            : 'border-border bg-muted/30 hover:border-primary/40 hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-9 w-9 rounded-md flex items-center justify-center text-sm font-bold ${
+                              selected
+                                ? 'bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white'
+                                : 'bg-muted text-foreground'
+                            }`}>
+                              {opt.tier}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-sm">{opt.label}</div>
+                              <div className="text-[11px] text-muted-foreground">{opt.sub}</div>
+                            </div>
+                          </div>
+                          <div className={`text-sm font-bold whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
+                            {formatXAFFixed(opt.priceXaf)}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                  <div className="flex items-start gap-2">
+                    <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div className="text-xs text-foreground/80 space-y-2">
+                      <p>
+                        El lanzamiento express <strong>no garantiza aprobación automática</strong>. La
+                        canción seguirá pasando por revisión de derechos, calidad de audio,
+                        portada y datos del artista. Si el contenido no cumple los requisitos,
+                        el lanzamiento podrá retrasarse o rechazarse.
+                      </p>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
+                        <li>El pago se realiza antes de enviar la solicitud.</li>
+                        <li>Si el retraso es culpa de YUSIOP: reembolso o crédito interno.</li>
+                        <li>Si es por datos/portada/audio/derechos incorrectos: <strong>no</strong> se devuelve el coste express.</li>
+                      </ul>
+                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={expressAck}
+                          onChange={(e) => setExpressAck(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                        />
+                        <span className="text-xs font-medium">
+                          He leído y acepto las condiciones del Lanzamiento Express.
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="nationality">Nacionalidad del artista</Label>
