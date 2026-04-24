@@ -999,6 +999,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      ensure_artist_for_user: {
+        Args: { _artist_name: string; _user_id: string }
+        Returns: string
+      }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
       get_gift_preview: {
         Args: { p_token: string }
