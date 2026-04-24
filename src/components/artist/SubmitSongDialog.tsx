@@ -171,7 +171,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary,role')
+          .select('id,artist_name,share_percent,is_primary,role,contact_email')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
@@ -182,6 +182,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             share_percent: Number(d.share_percent),
             is_primary: !!d.is_primary,
             role: (d.role as CollabRole) ?? 'featuring',
+            contact_email: d.contact_email ?? '',
           })));
         } else {
           setHasCollabs(false);
@@ -212,8 +213,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setHasCollabs(true);
     if (collaborators.length === 0) {
       setCollaborators([
-        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring' },
-        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring' },
+        { artist_name: formData.artist_name || defaultArtistName, share_percent: 50, is_primary: true, role: 'featuring', contact_email: '' },
+        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring', contact_email: '' },
       ]);
     }
   };
@@ -224,7 +225,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   };
 
   const addCollaborator = () => {
-    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring' }]);
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring', contact_email: '' }]);
   };
 
   const removeCollaborator = (idx: number) => {
