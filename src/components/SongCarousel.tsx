@@ -1,6 +1,13 @@
-import { Play } from 'lucide-react';
+import { Play, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ReactNode } from 'react';
+
+const HERO_GRADIENTS = [
+  'linear-gradient(135deg, hsl(250 95% 35%), hsl(280 85% 45%))',
+  'linear-gradient(135deg, hsl(232 90% 35%), hsl(188 85% 40%))',
+  'linear-gradient(135deg, hsl(280 85% 35%), hsl(320 85% 45%))',
+  'linear-gradient(135deg, hsl(188 85% 35%), hsl(160 80% 40%))',
+];
 
 export interface CarouselSong {
   id: string;
@@ -91,9 +98,15 @@ const SongCarousel = ({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
                 {showRank && song.rank !== undefined && (
-                  <span className="absolute top-1.5 left-1.5 w-6 h-6 rounded-lg vapor-bg flex items-center justify-center font-display font-bold text-xs text-primary-foreground shadow-glow">
-                    {song.rank}
-                  </span>
+                  <div className="absolute top-1.5 left-1.5">
+                    <span
+                      className="chip !text-[9px] !px-2 !py-1 !rounded-lg !font-display !font-bold !text-white shadow-glow flex items-center gap-1"
+                      style={{ background: HERO_GRADIENTS[(song.rank - 1) % HERO_GRADIENTS.length] }}
+                    >
+                      <Sparkles className="h-2 w-2" />
+                      #{song.rank}
+                    </span>
+                  </div>
                 )}
                 {song.badge && (
                   <span className="absolute top-1.5 right-1.5">{song.badge}</span>
