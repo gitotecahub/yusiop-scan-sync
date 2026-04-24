@@ -27,9 +27,11 @@ import {
   CheckCircle2,
   Hourglass,
   ShieldCheck,
+  Languages,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
+import { useLanguageStore, LANGUAGES } from '@/stores/languageStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from 'next-themes';
