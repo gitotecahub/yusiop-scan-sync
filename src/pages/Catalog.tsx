@@ -34,7 +34,7 @@ const Catalog = () => {
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
-  const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
+  const { userCredits, setUserCredits, setLoading: setCreditsLoading } = useCreditsStore();
   
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
@@ -298,14 +298,10 @@ useEffect(() => {
         return;
       }
 
-      // Update local state from authoritative server response
-      decrementCredits();
+      // Refrescar créditos desde servidor para respetar múltiples tarjetas y re-descargas
+      await loadUserCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
       toast.success(`"${song.title}" se descargó correctamente`);
-
-      if (data.credits_remaining <= 0) {
-        setUserCredits(null);
-      }
     } catch (error) {
       logger.error('Error downloading song');
       toast.error('Error al descargar la canción');
