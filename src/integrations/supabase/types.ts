@@ -505,6 +505,11 @@ export type Database = {
         Row: {
           album_title: string | null
           artist_name: string
+          audio_hash: string | null
+          copyright_checked_at: string | null
+          copyright_matches: Json
+          copyright_score: number
+          copyright_status: Database["public"]["Enums"]["copyright_status"]
           cover_path: string | null
           cover_url: string | null
           created_at: string
@@ -531,6 +536,11 @@ export type Database = {
         Insert: {
           album_title?: string | null
           artist_name: string
+          audio_hash?: string | null
+          copyright_checked_at?: string | null
+          copyright_matches?: Json
+          copyright_score?: number
+          copyright_status?: Database["public"]["Enums"]["copyright_status"]
           cover_path?: string | null
           cover_url?: string | null
           created_at?: string
@@ -557,6 +567,11 @@ export type Database = {
         Update: {
           album_title?: string | null
           artist_name?: string
+          audio_hash?: string | null
+          copyright_checked_at?: string | null
+          copyright_matches?: Json
+          copyright_score?: number
+          copyright_status?: Database["public"]["Enums"]["copyright_status"]
           cover_path?: string | null
           cover_url?: string | null
           created_at?: string
@@ -1059,6 +1074,15 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      mark_copyright_blocked: {
+        Args: {
+          p_matches: Json
+          p_reason: string
+          p_score: number
+          p_submission_id: string
+        }
+        Returns: undefined
+      }
       redeem_gift_card: {
         Args: { p_token: string; p_user_email: string; p_user_id: string }
         Returns: {
@@ -1109,6 +1133,16 @@ export type Database = {
           success: boolean
         }[]
       }
+      update_copyright_analysis: {
+        Args: {
+          p_audio_hash?: string
+          p_matches: Json
+          p_score: number
+          p_status: Database["public"]["Enums"]["copyright_status"]
+          p_submission_id: string
+        }
+        Returns: undefined
+      }
       user_owns_artist: {
         Args: { _artist_id: string; _user_id: string }
         Returns: boolean
@@ -1130,6 +1164,13 @@ export type Database = {
       card_type: "standard" | "premium"
       collab_claim_status: "pending" | "approved" | "rejected"
       collab_role: "featuring" | "producer" | "performer" | "composer" | "remix"
+      copyright_status:
+        | "pending"
+        | "analyzing"
+        | "clean"
+        | "review"
+        | "blocked"
+        | "error"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
       staff_area:
@@ -1273,6 +1314,14 @@ export const Constants = {
       card_type: ["standard", "premium"],
       collab_claim_status: ["pending", "approved", "rejected"],
       collab_role: ["featuring", "producer", "performer", "composer", "remix"],
+      copyright_status: [
+        "pending",
+        "analyzing",
+        "clean",
+        "review",
+        "blocked",
+        "error",
+      ],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
       staff_area: [

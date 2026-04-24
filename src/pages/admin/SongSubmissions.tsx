@@ -12,11 +12,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import ApproveSubmissionDialog from '@/components/admin/ApproveSubmissionDialog';
 import { formatMadrid } from '@/lib/madridTime';
+import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
 
 interface SubmissionRow {
   id: string;
@@ -38,6 +40,9 @@ interface SubmissionRow {
   scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
+  copyright_status: CopyrightStatus;
+  copyright_score: number;
+  copyright_matches: CopyrightMatch[] | null;
 }
 
 const formatDuration = (s: number) => {
@@ -72,7 +77,7 @@ const SongSubmissions = () => {
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
     if (error) toast.error('Error cargando envíos');
-    setRows((data ?? []) as SubmissionRow[]);
+    setRows((data ?? []) as unknown as SubmissionRow[]);
     setLoading(false);
   };
 
@@ -286,6 +291,7 @@ const SongSubmissions = () => {
                         {row.status === 'rejected' && 'Rechazada'}
                         {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                       </Badge>
+                      <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
                       {row.artist_name}

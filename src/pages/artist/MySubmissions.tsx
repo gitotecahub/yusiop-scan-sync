@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/authStore';
 import SubmitSongDialog, { type EditingSubmission } from '@/components/artist/SubmitSongDialog';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
+import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
 
 interface SubmissionRow {
   id: string;
@@ -29,6 +31,9 @@ interface SubmissionRow {
   scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
+  copyright_status: CopyrightStatus;
+  copyright_score: number;
+  copyright_matches: CopyrightMatch[] | null;
 }
 
 const MySubmissions = () => {
@@ -46,10 +51,10 @@ const MySubmissions = () => {
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    setRows((data ?? []) as SubmissionRow[]);
+    setRows((data ?? []) as unknown as SubmissionRow[]);
     setLoading(false);
   };
 
@@ -196,6 +201,7 @@ const MySubmissions = () => {
                           <Ban className="h-3 w-3 mr-1" />Eliminada
                         </Badge>
                       )}
+                      <CopyrightBadge status={r.copyright_status} score={r.copyright_score} />
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {r.artist_name}
@@ -268,6 +274,12 @@ const MySubmissions = () => {
                     </div>
                   </div>
                 )}
+
+                <CopyrightDetails
+                  status={r.copyright_status}
+                  score={r.copyright_score}
+                  matches={r.copyright_matches}
+                />
               </CardContent>
             </Card>
           ))}

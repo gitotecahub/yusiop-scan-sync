@@ -27,3 +27,6 @@ verify_jwt = false
 [functions.notify-song-review]
 verify_jwt = true
 
+[functions.analyze-copyright]
+verify_jwt = true
+
