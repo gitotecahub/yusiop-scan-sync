@@ -230,7 +230,7 @@ const MySubmissions = () => {
                         <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
                         <div className="text-sm flex-1">
                           <p className="font-semibold text-destructive">
-                            Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
+                            {t('artist.rejectionReasonsTitle')}
                           </p>
                           <ul className="list-disc pl-5 mt-1.5 space-y-1 text-foreground/80 marker:text-destructive">
                             {(items.length > 0 ? items : [r.rejection_reason!]).map((it, i) => (
