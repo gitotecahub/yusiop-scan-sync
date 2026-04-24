@@ -133,6 +133,8 @@ const MySubmissions = () => {
       cover_url: r.cover_url,
       cover_path: r.cover_path,
       duration_seconds: r.duration_seconds,
+      express_tier: r.express_tier,
+      express_price_xaf: r.express_price_xaf,
     });
     setOpen(true);
   };
