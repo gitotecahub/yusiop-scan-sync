@@ -186,20 +186,20 @@ const Collaborations = () => {
       {myClaims.length > 0 && (
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Mis solicitudes
+            {t('artist.mySubmissionsRequests')}
           </h2>
           <div className="space-y-2">
             {myClaims.map((c) => (
               <Card key={c.id}>
                 <CardContent className="p-3 flex items-center justify-between gap-2 text-sm">
                   <span className="text-muted-foreground">
-                    {new Date(c.created_at).toLocaleDateString('es-ES')}
+                    {new Date(c.created_at).toLocaleDateString(language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US')}
                   </span>
-                  {c.status === 'pending' && <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pendiente</Badge>}
-                  {c.status === 'approved' && <Badge className="bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Aprobada</Badge>}
+                  {c.status === 'pending' && <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.pending')}</Badge>}
+                  {c.status === 'approved' && <Badge className="bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />{t('artist.approved')}</Badge>}
                   {c.status === 'rejected' && (
                     <Badge variant="destructive" title={c.rejection_reason ?? ''}>
-                      <AlertCircle className="h-3 w-3 mr-1" />Rechazada
+                      <AlertCircle className="h-3 w-3 mr-1" />{t('artist.rejected')}
                     </Badge>
                   )}
                 </CardContent>
