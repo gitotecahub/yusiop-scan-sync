@@ -139,6 +139,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     album_title: '',
     genre: '',
     release_date: '',
+    nationality: '',
   });
 
   const [trackFile, setTrackFile] = useState<File | null>(null);
