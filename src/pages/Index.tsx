@@ -224,7 +224,7 @@ const Index = () => {
 
       {/* === TARJETAS DESTACADAS — reales === */}
       <Section title="Tarjetas destacadas" eyebrow="Colección" link="/store">
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => navigate('/store')}
             className="group text-left transition-all hover:-translate-y-1"
@@ -236,12 +236,12 @@ const Index = () => {
               downloadCredits={4}
               compact
             />
-            <div className="flex items-center justify-between mt-2 px-1">
-              <div>
-                <p className="font-display font-bold text-sm">Tarjeta Estándar</p>
-                <p className="text-[11px] text-muted-foreground">4 descargas · Para descubrir</p>
+            <div className="mt-2 px-0.5">
+              <p className="font-display font-bold text-xs leading-tight">Estándar</p>
+              <div className="flex items-center justify-between mt-0.5">
+                <p className="text-[10px] text-muted-foreground">4 descargas</p>
+                <span className="font-display font-bold text-xs vapor-text">5,00 €</span>
               </div>
-              <span className="font-display font-bold text-base vapor-text">5,00 €</span>
             </div>
           </button>
 
@@ -256,12 +256,12 @@ const Index = () => {
               downloadCredits={10}
               compact
             />
-            <div className="flex items-center justify-between mt-2 px-1">
-              <div>
-                <p className="font-display font-bold text-sm">Tarjeta Premium</p>
-                <p className="text-[11px] text-muted-foreground">10 descargas · Para fanáticos</p>
+            <div className="mt-2 px-0.5">
+              <p className="font-display font-bold text-xs leading-tight">Premium</p>
+              <div className="flex items-center justify-between mt-0.5">
+                <p className="text-[10px] text-muted-foreground">10 descargas</p>
+                <span className="font-display font-bold text-xs vapor-text">10,00 €</span>
               </div>
-              <span className="font-display font-bold text-base vapor-text">10,00 €</span>
             </div>
           </button>
         </div>
