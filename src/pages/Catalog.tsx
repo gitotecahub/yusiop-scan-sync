@@ -37,6 +37,7 @@ const Catalog = () => {
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, setLoading: setCreditsLoading } = useCreditsStore();
+  const { t } = useLanguageStore();
   
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
