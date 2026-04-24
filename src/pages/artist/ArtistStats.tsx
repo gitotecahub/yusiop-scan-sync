@@ -369,7 +369,7 @@ const ArtistStats = () => {
                 </div>
               )}
               <p className="mt-4 text-xs text-muted-foreground">
-                La ubicación se obtiene de la IP en el momento de la descarga (aproximada).
+                {t('artist.geoNote')}
               </p>
             </CardContent>
           </Card>
