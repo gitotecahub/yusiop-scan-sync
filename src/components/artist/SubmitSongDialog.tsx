@@ -87,6 +87,8 @@ export interface EditingSubmission {
   cover_path: string | null;
   duration_seconds: number;
   preview_start_seconds?: number | null;
+  express_tier?: ExpressTier | null;
+  express_price_xaf?: number | null;
 }
 
 interface SubmitSongDialogProps {
