@@ -146,7 +146,7 @@ const Collaborations = () => {
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
             <Users className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            No hay colaboraciones pendientes a tu nombre artístico.
+            {t('artist.noPendingCollabs')}
           </CardContent>
         </Card>
       ) : (
