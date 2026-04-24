@@ -539,18 +539,27 @@ const MyCards = () => {
               onClick={() => setGiftOpen(false)}
               disabled={gifting}
             >
-              Cancelar
+              {language === 'es' ? 'Cancelar' :
+               language === 'en' ? 'Cancel' :
+               language === 'fr' ? 'Annuler' :
+               'Cancelar'}
             </Button>
             <Button onClick={handleGift} disabled={gifting || !giftUsername.trim()} className="gap-2">
               {gifting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Enviando...
+                  {language === 'es' ? 'Enviando...' :
+                   language === 'en' ? 'Sending...' :
+                   language === 'fr' ? 'Envoi...' :
+                   'Enviando...'}
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  Confirmar regalo
+                  {language === 'es' ? 'Confirmar regalo' :
+                   language === 'en' ? 'Confirm gift' :
+                   language === 'fr' ? 'Confirmer le cadeau' :
+                   'Confirmar presente'}
                 </>
               )}
             </Button>
