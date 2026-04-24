@@ -251,14 +251,14 @@ const ArtistStats = () => {
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-primary/10 p-2"><Coins className="h-5 w-5 text-primary" /></div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Pendiente en pozo común (sin reclamar)</p>
+                    <p className="text-xs text-muted-foreground">{t('artist.poolPending')}</p>
                     <p className="text-xl font-bold leading-tight">{formatEuros(stats.pool_pending.pending_revenue_cents)}</p>
                     <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.pool_pending.pending_revenue_cents)}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} descargas afectadas</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stats.pool_pending.pending_downloads} {t('artist.poolDesc')}</p>
                   </div>
                 </div>
                 <Button size="sm" onClick={() => navigate('/artist/collaborations')}>
-                  Ir a reclamar
+                  {t('artist.poolGoClaim')}
                 </Button>
               </CardContent>
             </Card>
