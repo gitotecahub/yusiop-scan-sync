@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
+import { QrCode, Music, Play, Sparkles, Send, TrendingUp, Gift, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
