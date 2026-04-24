@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import DigitalCard from '@/components/DigitalCard';
+import SubscriptionBanner from '@/components/SubscriptionBanner';
 import { useLanguageStore } from '@/stores/languageStore';
 
 interface SongCard {
@@ -167,7 +168,8 @@ const Index = () => {
         </div>
       </section>
 
-
+      {/* === BANNER SUSCRIPCIONES (segmentado) === */}
+      <SubscriptionBanner />
 
       {/* === LANZAMIENTOS DESTACADOS — carrusel horizontal === */}
       <Section title={t('home.section.recent')} link="/catalog">
