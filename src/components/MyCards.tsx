@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { useLanguageStore } from '@/stores/languageStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ interface MyCard {
 
 const MyCards = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguageStore();
   const [cards, setCards] = useState<MyCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<MyCard | null>(null);
@@ -247,7 +249,7 @@ const MyCards = () => {
               ) : (
                 <Music className="h-5 w-5 text-primary" />
               )}
-              Tarjeta {selected?.card_type === 'premium' ? 'Premium' : 'Estándar'}
+              {selected?.card_type === 'premium' ? t('card.premium') : t('card.standard')}
             </DialogTitle>
           </DialogHeader>
 
