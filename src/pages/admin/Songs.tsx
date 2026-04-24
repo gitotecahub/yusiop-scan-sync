@@ -8,6 +8,15 @@ import { Search, Plus, Play, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
 
+interface Collaborator {
+  id: string;
+  artist_name: string;
+  role: string;
+  share_percent: number;
+  is_primary: boolean;
+  claimed_by_user_id: string | null;
+}
+
 interface Song {
   id: string;
   title: string;
@@ -20,6 +29,7 @@ interface Song {
   created_at: string;
   artists?: { name: string };
   albums?: { title: string };
+  song_collaborators?: Collaborator[];
 }
 
 interface Artist {
@@ -64,7 +74,27 @@ const Songs = () => {
         return;
       }
 
-      setSongs(data || []);
+      const songIds = (data || []).map((s) => s.id);
+      let collabsBySong: Record<string, Collaborator[]> = {};
+      if (songIds.length > 0) {
+        const { data: collabs } = await supabase
+          .from('song_collaborators')
+          .select('id, song_id, artist_name, role, share_percent, is_primary, claimed_by_user_id')
+          .in('song_id', songIds);
+        (collabs || []).forEach((c: any) => {
+          if (!c.song_id) return;
+          if (!collabsBySong[c.song_id]) collabsBySong[c.song_id] = [];
+          collabsBySong[c.song_id].push(c);
+        });
+      }
+
+      const enriched: Song[] = (data || []).map((s: any) => ({
+        ...s,
+        song_collaborators: (collabsBySong[s.id] || []).sort(
+          (a, b) => Number(b.is_primary) - Number(a.is_primary) || b.share_percent - a.share_percent
+        ),
+      }));
+      setSongs(enriched);
     } catch (error) {
       console.error('Error fetching songs:', error);
       toast({
@@ -223,22 +253,38 @@ const Songs = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{song.title}</h3>
                     <p className="text-muted-foreground">{song.artists?.name}</p>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex items-center flex-wrap gap-2 mt-1">
                       {song.albums?.title && (
                         <Badge variant="outline">{song.albums.title}</Badge>
                       )}
                       <span className="text-sm text-muted-foreground">
                         {formatDuration(song.duration_seconds)}
                       </span>
-                      <div className="flex space-x-1">
-                        {song.preview_url && (
-                          <Badge variant="secondary">Preview</Badge>
-                        )}
-                        {song.track_url && (
-                          <Badge variant="secondary">Full Track</Badge>
-                        )}
-                      </div>
+                      {song.preview_url && (
+                        <Badge variant="secondary">Preview</Badge>
+                      )}
+                      {song.track_url && (
+                        <Badge variant="secondary">Full Track</Badge>
+                      )}
                     </div>
+                    {song.song_collaborators && song.song_collaborators.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground mb-1">Colaboradores / Reparto:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {song.song_collaborators.map((c) => (
+                            <Badge
+                              key={c.id}
+                              variant={c.is_primary ? 'default' : 'outline'}
+                              className="text-xs"
+                            >
+                              {c.is_primary && '★ '}
+                              {c.artist_name} · {c.role} · {c.share_percent}%
+                              {!c.claimed_by_user_id && ' · sin reclamar'}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
