@@ -373,22 +373,22 @@ const Index = () => {
           style={{ background: 'var(--gradient-vapor)' }}
         />
         <div className="relative">
-          <p className="eyebrow mb-2">Tu sonido te espera</p>
+          <p className="eyebrow mb-2">{t('home.footer.cta')}</p>
           <h3 className="font-display text-2xl font-bold leading-tight mb-4">
-            Cada canción cuenta una <span className="vapor-text">historia</span>
+            {t('app.tagline').split(' ').slice(0, -1).join(' ')} <span className="vapor-text">{t('app.tagline').split(' ').pop()}</span>
           </h3>
           <Link
             to="/catalog"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-background text-foreground font-display font-bold text-sm hover:bg-foreground hover:text-background transition-colors"
           >
-            Explorar catálogo <ArrowRight className="h-4 w-4" />
+            {t('home.hero.explore')} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
 
       <div className="pt-2 flex justify-between items-center">
-        <span className="eyebrow">© Yusiop 2026</span>
-        <span className="eyebrow vapor-text">Made for sound</span>
+        <span className="eyebrow">{t('app.copyright')}</span>
+        <span className="eyebrow vapor-text">{t('app.madeForSound')}</span>
       </div>
     </div>
   );
