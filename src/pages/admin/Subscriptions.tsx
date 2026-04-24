@@ -60,7 +60,7 @@ const Subscriptions = () => {
       supabase.from('subscription_plans').select('*').order('display_order'),
       supabase.rpc('subscription_metrics'),
     ]);
-    setFlag(flagRes.data as Flag | null);
+    setFlag(flagRes.data as unknown as Flag | null);
     setPlans((plansRes.data ?? []) as Plan[]);
     if (metricsRes.data && !(metricsRes.data as any).error) {
       setMetrics(metricsRes.data as unknown as Metrics);
