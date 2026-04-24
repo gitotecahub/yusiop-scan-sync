@@ -53,6 +53,8 @@ interface ScannedCard {
 const Profile = () => {
   const { user, signOut } = useAuthStore();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguageStore();
+  const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
   const { areas, isSuperAdmin, loading: staffLoading } = useStaffAreas();
