@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins } from 'lucide-react';
+import { ArrowLeft, Download, Users, Euro, MapPin, BarChart3, TrendingUp, Coins, ShieldAlert, Gift, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,8 +26,15 @@ import {
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 
 type Stats = {
-  totals: { total_downloads: number; unique_listeners: number; total_revenue_cents: number };
-  by_song: { song_id: string; song_title: string; downloads: number; revenue_cents: number }[];
+  totals: {
+    total_downloads: number;
+    real_downloads?: number;
+    promotional_downloads?: number;
+    suspicious_downloads?: number;
+    unique_listeners: number;
+    total_revenue_cents: number;
+  };
+  by_song: { song_id: string; song_title: string; downloads: number; real_downloads?: number; revenue_cents: number }[];
   by_country: { country_code: string; country_name: string; downloads: number }[];
   by_age: { bucket: string; downloads: number }[];
   by_gender: { gender: string; downloads: number }[];
@@ -197,6 +204,40 @@ const ArtistStats = () => {
                     <p className="text-xs text-muted-foreground/80 tabular-nums">{formatXaf(stats.totals.total_revenue_cents)}</p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Desglose por tipo de descarga (antifraude) */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <p className="text-xs text-muted-foreground">Reales</p>
+                </div>
+                <p className="text-xl font-bold">{stats.totals.real_downloads ?? 0}</p>
+                <p className="text-[10px] text-muted-foreground">Generan ingresos</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift className="h-4 w-4 text-accent-foreground" />
+                  <p className="text-xs text-muted-foreground">Promocionales</p>
+                </div>
+                <p className="text-xl font-bold">{stats.totals.promotional_downloads ?? 0}</p>
+                <p className="text-[10px] text-muted-foreground">Tu propia música</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShieldAlert className="h-4 w-4 text-destructive" />
+                  <p className="text-xs text-muted-foreground">Sospechosas</p>
+                </div>
+                <p className="text-xl font-bold">{stats.totals.suspicious_downloads ?? 0}</p>
+                <p className="text-[10px] text-muted-foreground">Excluidas de ingresos</p>
               </CardContent>
             </Card>
           </div>

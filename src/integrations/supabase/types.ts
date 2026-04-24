@@ -742,7 +742,9 @@ export type Database = {
           city: string | null
           country_code: string | null
           country_name: string | null
+          download_type: string
           downloaded_at: string
+          fraud_score: number
           hidden_from_library: boolean
           id: string
           ip_address: string | null
@@ -759,7 +761,9 @@ export type Database = {
           city?: string | null
           country_code?: string | null
           country_name?: string | null
+          download_type?: string
           downloaded_at?: string
+          fraud_score?: number
           hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
@@ -776,7 +780,9 @@ export type Database = {
           city?: string | null
           country_code?: string | null
           country_name?: string | null
+          download_type?: string
           downloaded_at?: string
+          fraud_score?: number
           hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
@@ -832,6 +838,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_fraud_score: {
+        Row: {
+          created_at: string
+          flagged_at: string | null
+          is_suspicious: boolean
+          last_event_at: string
+          notes: string | null
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_at?: string | null
+          is_suspicious?: boolean
+          last_event_at?: string
+          notes?: string | null
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flagged_at?: string | null
+          is_suspicious?: boolean
+          last_event_at?: string
+          notes?: string | null
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
