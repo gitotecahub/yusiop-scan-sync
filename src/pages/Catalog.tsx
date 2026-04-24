@@ -8,7 +8,6 @@ import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock } fro
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
-import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/lib/logger';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
@@ -36,7 +35,7 @@ const Catalog = () => {
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, decrementCredits, setLoading: setCreditsLoading } = useCreditsStore();
-  const { isAdmin } = useAuth();
+  
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
   const loadUserCredits = async () => {
@@ -277,7 +276,7 @@ useEffect(() => {
   };
 
   const handleDownload = async (song: Song) => {
-    if (!isAdmin && (!userCredits || userCredits.credits_remaining <= 0)) {
+    if (!userCredits || userCredits.credits_remaining <= 0) {
       toast.error('No tienes créditos disponibles. Escanea una tarjeta QR para obtener más.');
       return;
     }
@@ -300,14 +299,13 @@ useEffect(() => {
       }
 
       // Update local state from authoritative server response
-      if (!isAdmin) {
-        decrementCredits();
-        if (data.credits_remaining <= 0) {
-          setUserCredits(null);
-        }
-      }
+      decrementCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
       toast.success(`"${song.title}" se descargó correctamente`);
+
+      if (data.credits_remaining <= 0) {
+        setUserCredits(null);
+      }
     } catch (error) {
       logger.error('Error downloading song');
       toast.error('Error al descargar la canción');
@@ -473,7 +471,7 @@ useEffect(() => {
                     <Button
                       size="icon"
                       onClick={() => handleDownload(song)}
-                      disabled={isDownloaded || (!isAdmin && (!userCredits || userCredits.credits_remaining <= 0))}
+                      disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
                       className={`h-9 w-9 rounded-full border-0 ${
                         isDownloaded
                           ? 'bg-muted text-primary'

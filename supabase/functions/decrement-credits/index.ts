@@ -101,44 +101,6 @@ serve(async (req) => {
       }
     }
 
-    // 0) Bypass para administradores: descargas ilimitadas, sin consumir créditos
-    const { data: isAdminData } = await supabase.rpc("is_admin", {
-      _user_id: user.id,
-    });
-    if (isAdminData === true) {
-      const { error: adminDlErr } = await supabase
-        .from("user_downloads")
-        .insert({
-          user_id: user.id,
-          user_email: user.email,
-          song_id: song.id,
-          card_type: "admin",
-          ...geo,
-        });
-      if (adminDlErr) {
-        console.error("Admin download insert error:", adminDlErr);
-        return new Response(
-          JSON.stringify({ error: "Error al registrar la descarga" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-      }
-      return new Response(
-        JSON.stringify({
-          success: true,
-          credits_remaining: 9999,
-          card_type: "admin",
-          source: "admin_bypass",
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
     // 1) Tarjetas digitales/owned (qr_cards) primero
     const { data: ownedCard, error: ownedErr } = await supabase
       .from("qr_cards")
