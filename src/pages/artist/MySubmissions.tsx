@@ -186,23 +186,23 @@ const MySubmissions = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
-                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />En revisión</Badge>
+                        <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
                       )}
                       {r.status === 'approved' && (
                         r.scheduled_release_at ? (
                           <Badge variant="secondary" className="border border-primary/30">
-                            <CalendarClock className="h-3 w-3 mr-1" />Programada
+                            <CalendarClock className="h-3 w-3 mr-1" />{t('artist.scheduledBadge')}
                           </Badge>
                         ) : (
-                          <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />Publicada</Badge>
+                          <Badge className="bg-primary hover:bg-primary"><CheckCircle2 className="h-3 w-3 mr-1" />{t('artist.publishedBadge')}</Badge>
                         )
                       )}
                       {r.status === 'rejected' && (
-                        <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rechazada</Badge>
+                        <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{t('artist.rejectedBadge')}</Badge>
                       )}
                       {r.status === 'removed' && (
                         <Badge variant="outline" className="border-destructive/50 text-destructive">
-                          <Ban className="h-3 w-3 mr-1" />Eliminada
+                          <Ban className="h-3 w-3 mr-1" />{t('artist.removedBadge')}
                         </Badge>
                       )}
                       <CopyrightBadge status={r.copyright_status} score={r.copyright_score} />
@@ -212,12 +212,12 @@ const MySubmissions = () => {
                       {r.album_title ? ` · ${r.album_title}` : ''}
                       {r.genre ? ` · ${r.genre}` : ''}
                       {' · '}
-                      {new Date(r.created_at).toLocaleString('es-ES')}
+                      {new Date(r.created_at).toLocaleString(dateLocale)}
                     </p>
                   </div>
                   {r.status === 'rejected' && (
                     <Button size="sm" onClick={() => handleEdit(r)} className="flex-shrink-0">
-                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> Editar y reenviar
+                      <Pencil className="h-3.5 w-3.5 mr-1.5" /> {t('artist.editAndResend')}
                     </Button>
                   )}
                 </div>
