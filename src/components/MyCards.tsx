@@ -458,11 +458,16 @@ const MyCards = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Gift className="h-5 w-5 text-primary" />
-              Regalar tarjeta
+              {language === 'es' ? 'Regalar tarjeta' :
+               language === 'en' ? 'Gift card' :
+               language === 'fr' ? 'Offrir carte' :
+               'Presentear cartão'}
             </DialogTitle>
             <DialogDescription>
-              La tarjeta pasará a la biblioteca del destinatario y dejará de estar en la tuya.
-              Esta acción no se puede deshacer.
+              {language === 'es' ? 'La tarjeta pasará a la biblioteca del destinatario y dejará de estar en la tuya. Esta acción no se puede deshacer.' :
+               language === 'en' ? 'The card will move to the recipient\'s library and leave yours. This action cannot be undone.' :
+               language === 'fr' ? 'La carte passera à la bibliothèque du destinataire et quittera la vôtre. Cette action ne peut pas être annulée.' :
+               'O cartão passará para a biblioteca do destinatário e sairá da sua. Esta ação não pode ser desfeita.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -470,17 +475,32 @@ const MyCards = () => {
             <div className="space-y-4">
               <div className="rounded-lg bg-muted/40 p-3 text-sm space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tarjeta</span>
-                  <span className="font-semibold capitalize">{selected.card_type}</span>
+                  <span className="text-muted-foreground">
+                    {language === 'es' ? 'Tarjeta' :
+                     language === 'en' ? 'Card' :
+                     language === 'fr' ? 'Carte' :
+                     'Cartão'}
+                  </span>
+                  <span className="font-semibold capitalize">{selected.card_type === 'premium' ? t('card.premium') : t('card.standard')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Descargas</span>
+                  <span className="text-muted-foreground">
+                    {language === 'es' ? 'Descargas' :
+                     language === 'en' ? 'Downloads' :
+                     language === 'fr' ? 'Téléchargements' :
+                     'Downloads'}
+                  </span>
                   <span className="font-semibold text-primary">{selected.download_credits}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gift-username">Username del destinatario</Label>
+                <Label htmlFor="gift-username">
+                  {language === 'es' ? 'Username del destinatario' :
+                   language === 'en' ? 'Recipient username' :
+                   language === 'fr' ? 'Nom d\'utilisateur du destinataire' :
+                   'Username do destinatário'}
+                </Label>
                 <Input
                   id="gift-username"
                   placeholder="@username"
@@ -492,10 +512,15 @@ const MyCards = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gift-message">Mensaje (opcional)</Label>
+                <Label htmlFor="gift-message">
+                  {language === 'es' ? 'Mensaje (opcional)' :
+                   language === 'en' ? 'Message (optional)' :
+                   language === 'fr' ? 'Message (facultatif)' :
+                   'Mensagem (opcional)'}
+                </Label>
                 <Textarea
                   id="gift-message"
-                  placeholder="¡Para que disfrutes la música!"
+                  placeholder={language === 'es' ? '¡Para que disfrutes la música!' : language === 'en' ? 'Enjoy the music!' : language === 'fr' ? 'Pour que tu profites de la musique !' : 'Para que você aproveite a música!'}
                   value={giftMessage}
                   onChange={(e) => setGiftMessage(e.target.value.slice(0, 280))}
                   disabled={gifting}
