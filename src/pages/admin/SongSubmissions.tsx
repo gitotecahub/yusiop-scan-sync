@@ -64,7 +64,25 @@ const SongSubmissions = () => {
   const [approveTarget, setApproveTarget] = useState<SubmissionRow | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
+  const [reanalyzing, setReanalyzing] = useState<Record<string, boolean>>({});
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
+
+  const reanalyzeCopyright = async (row: SubmissionRow) => {
+    setReanalyzing((s) => ({ ...s, [row.id]: true }));
+    try {
+      const { error } = await supabase.functions.invoke('analyze-copyright', {
+        body: { submission_id: row.id },
+      });
+      if (error) {
+        toast.error('Error al re-analizar: ' + error.message);
+      } else {
+        toast.success('Análisis de copyright reiniciado');
+        setTimeout(load, 1500);
+      }
+    } finally {
+      setReanalyzing((s) => ({ ...s, [row.id]: false }));
+    }
+  };
 
   const openDetails = (row: SubmissionRow) => {
     setDetailsTarget(row);
@@ -309,6 +327,16 @@ const SongSubmissions = () => {
                     <Button size="sm" variant="outline" onClick={() => openDetails(row)}>
                       <Info className="h-4 w-4 mr-1" /> Detalles
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={reanalyzing[row.id] || row.copyright_status === 'analyzing'}
+                      onClick={() => reanalyzeCopyright(row)}
+                      title="Volver a ejecutar el análisis de copyright"
+                    >
+                      <ShieldCheck className="h-4 w-4 mr-1" />
+                      {reanalyzing[row.id] ? 'Analizando…' : 'Re-analizar'}
+                    </Button>
                     {row.status === 'pending' && (
                       <>
                         <Button size="sm" onClick={() => openApprove(row)}>
@@ -380,6 +408,12 @@ const SongSubmissions = () => {
                     )}
                   </div>
                 )}
+
+                <CopyrightDetails
+                  status={row.copyright_status}
+                  score={row.copyright_score}
+                  matches={row.copyright_matches}
+                />
 
                 {row.status === 'rejected' && row.rejection_reason && (() => {
                   const items = parseRejectionReason(row.rejection_reason);
@@ -503,6 +537,9 @@ const SongSubmissions = () => {
         defaultReleaseDate={approveTarget?.release_date ?? null}
         songTitle={approveTarget?.title ?? ''}
         onConfirm={confirmApprove}
+        copyrightStatus={approveTarget?.copyright_status}
+        copyrightScore={approveTarget?.copyright_score}
+        copyrightMatches={approveTarget?.copyright_matches}
       />
     </div>
   );

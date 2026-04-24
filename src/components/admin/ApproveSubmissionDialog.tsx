@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar, Zap } from 'lucide-react';
 import { madridLocalToUtcIso, formatMadrid } from '@/lib/madridTime';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import type { CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 
 interface Props {
   open: boolean;
@@ -22,6 +24,10 @@ interface Props {
   songTitle: string;
   /** Llamado con `null` para publicar ya o ISO UTC para programar */
   onConfirm: (releaseAtIso: string | null) => Promise<void> | void;
+  /** Estado del análisis de copyright para mostrar advertencia */
+  copyrightStatus?: CopyrightStatus;
+  copyrightScore?: number;
+  copyrightMatches?: CopyrightMatch[] | null;
 }
 
 const todayYmd = () => {
@@ -39,6 +45,9 @@ const ApproveSubmissionDialog = ({
   defaultReleaseDate,
   songTitle,
   onConfirm,
+  copyrightStatus,
+  copyrightScore,
+  copyrightMatches,
 }: Props) => {
   const [mode, setMode] = useState<'now' | 'scheduled'>('now');
   const [date, setDate] = useState('');
@@ -83,6 +92,14 @@ const ApproveSubmissionDialog = ({
             Vas a aprobar <strong>"{songTitle}"</strong>. Elige cómo publicarla.
           </DialogDescription>
         </DialogHeader>
+
+        {copyrightStatus && (copyrightStatus === 'review' || copyrightStatus === 'blocked') && (
+          <CopyrightDetails
+            status={copyrightStatus}
+            score={copyrightScore}
+            matches={copyrightMatches}
+          />
+        )}
 
         <RadioGroup value={mode} onValueChange={(v) => setMode(v as 'now' | 'scheduled')} className="space-y-3">
           <label className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/40">
