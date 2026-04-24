@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/authStore';
 import SubmitSongDialog, { type EditingSubmission } from '@/components/artist/SubmitSongDialog';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
+import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
+import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
 
 interface SubmissionRow {
   id: string;
@@ -29,6 +31,9 @@ interface SubmissionRow {
   scheduled_release_at: string | null;
   created_at: string;
   reviewed_at: string | null;
+  copyright_status: CopyrightStatus;
+  copyright_score: number;
+  copyright_matches: CopyrightMatch[] | null;
 }
 
 const MySubmissions = () => {
