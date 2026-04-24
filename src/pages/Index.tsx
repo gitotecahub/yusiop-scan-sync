@@ -396,8 +396,8 @@ const Section = ({
 const HScrollSkeleton = ({ variant }: { variant: 'card' }) => (
   <div className="flex gap-3 overflow-hidden -mx-5 px-5">
     {[1, 2, 3].map((i) => (
-      <div key={i} className="shrink-0 w-44">
-        <div className="aspect-square rounded-3xl bg-muted animate-pulse" />
+      <div key={i} className="shrink-0 w-32">
+        <div className="aspect-square rounded-2xl bg-muted animate-pulse" />
       </div>
     ))}
   </div>
