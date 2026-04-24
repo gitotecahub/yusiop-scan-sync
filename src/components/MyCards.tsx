@@ -323,7 +323,12 @@ const MyCards = () => {
                 <div className="w-full flex items-center justify-between text-sm p-3 rounded-lg bg-muted/40">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Hash className="h-4 w-4" />
-                    <span>Código</span>
+                    <span>
+                      {language === 'es' ? 'Código' :
+                       language === 'en' ? 'Code' :
+                       language === 'fr' ? 'Code' :
+                       'Código'}
+                    </span>
                   </div>
                   <span className="font-mono font-bold">{selected.code}</span>
                 </div>
@@ -331,7 +336,12 @@ const MyCards = () => {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CreditCard className="h-4 w-4" />
-                    <span>Descargas restantes</span>
+                    <span>
+                      {language === 'es' ? 'Descargas restantes' :
+                       language === 'en' ? 'Downloads remaining' :
+                       language === 'fr' ? 'Téléchargements restants' :
+                       'Downloads restantes'}
+                    </span>
                   </div>
                   <span className="font-bold text-primary text-lg tabular-nums">
                     {selected.download_credits}
@@ -341,7 +351,12 @@ const MyCards = () => {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span>Activada</span>
+                    <span>
+                      {language === 'es' ? 'Activada' :
+                       language === 'en' ? 'Activated' :
+                       language === 'fr' ? 'Activée' :
+                       'Ativado'}
+                    </span>
                   </div>
                   <span>{formatDate(selected.created_at)}</span>
                 </div>
