@@ -323,9 +323,13 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={(e) => { e.stopPropagation(); previous(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                previous();
+                (e.currentTarget as HTMLButtonElement).blur();
+              }}
               disabled={queue.length === 0}
-              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 disabled:opacity-40"
+              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 active:scale-95 transition-transform disabled:opacity-40 focus-visible:ring-0 focus-visible:ring-offset-0"
               aria-label="Anterior"
             >
               <SkipBack className="h-6 w-6 fill-current" />
@@ -341,9 +345,13 @@ const PlaybackControls = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={(e) => { e.stopPropagation(); next(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+                (e.currentTarget as HTMLButtonElement).blur();
+              }}
               disabled={queue.length === 0}
-              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 disabled:opacity-40"
+              className="h-11 w-11 rounded-full text-foreground hover:bg-muted/40 active:scale-95 transition-transform disabled:opacity-40 focus-visible:ring-0 focus-visible:ring-offset-0"
               aria-label="Siguiente"
             >
               <SkipForward className="h-6 w-6 fill-current" />
