@@ -422,6 +422,8 @@ const Subscriptions = () => {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
