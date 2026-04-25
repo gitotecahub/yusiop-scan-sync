@@ -280,6 +280,13 @@ export type Database = {
             referencedRelation: "song_collaborators"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "collaboration_claims_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "unclaimed_collaborators_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feature_flags: {
@@ -1215,7 +1222,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      unclaimed_collaborators_public: {
+        Row: {
+          artist_name: string | null
+          claimed_at: string | null
+          claimed_by_user_id: string | null
+          created_at: string | null
+          id: string | null
+          is_primary: boolean | null
+          role: Database["public"]["Enums"]["collab_role"] | null
+          share_percent: number | null
+          song_id: string | null
+          submission_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          artist_name?: string | null
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          role?: Database["public"]["Enums"]["collab_role"] | null
+          share_percent?: number | null
+          song_id?: string | null
+          submission_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          artist_name?: string | null
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          role?: Database["public"]["Enums"]["collab_role"] | null
+          share_percent?: number | null
+          song_id?: string | null
+          submission_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_artist_request: {
