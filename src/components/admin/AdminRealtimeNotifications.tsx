@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
 import { playNotificationSound } from '@/lib/notificationSound';
-import { Bell, Music, UserCheck, Users2 } from 'lucide-react';
+import { Bell, Music, UserCheck, Users2, Crown } from 'lucide-react';
 import { createElement } from 'react';
 
 /**
