@@ -43,7 +43,31 @@ interface SubmissionRow {
   copyright_status: CopyrightStatus;
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
+  collaborators?: CollaboratorRow[];
 }
+
+interface CollaboratorRow {
+  id: string;
+  artist_name: string;
+  role: 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
+  share_percent: number;
+  is_primary: boolean;
+}
+
+const roleLabel: Record<CollaboratorRow['role'], string> = {
+  featuring: 'Feat.',
+  producer: 'Prod.',
+  performer: 'Intérprete',
+  composer: 'Compositor',
+  remix: 'Remix',
+};
+
+const formatArtistsWithCollabs = (artistName: string, collaborators?: CollaboratorRow[]) => {
+  const others = (collaborators ?? []).filter((c) => !c.is_primary);
+  if (others.length === 0) return artistName;
+  const feats = others.map((c) => c.artist_name).join(', ');
+  return `${artistName} feat. ${feats}`;
+};
 
 const formatDuration = (s: number) => {
   const m = Math.floor(s / 60);
@@ -95,7 +119,33 @@ const SongSubmissions = () => {
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
     if (error) toast.error('Error cargando envíos');
-    setRows((data ?? []) as unknown as SubmissionRow[]);
+    const submissions = (data ?? []) as unknown as SubmissionRow[];
+
+    // Cargar colaboradores asociados a estos envíos
+    if (submissions.length > 0) {
+      const ids = submissions.map((s) => s.id);
+      const { data: collabs } = await supabase
+        .from('song_collaborators')
+        .select('id,artist_name,role,share_percent,is_primary,submission_id')
+        .in('submission_id', ids);
+      const bySubmission = new Map<string, CollaboratorRow[]>();
+      (collabs ?? []).forEach((c: any) => {
+        const arr = bySubmission.get(c.submission_id) ?? [];
+        arr.push({
+          id: c.id,
+          artist_name: c.artist_name,
+          role: c.role,
+          share_percent: Number(c.share_percent),
+          is_primary: c.is_primary,
+        });
+        bySubmission.set(c.submission_id, arr);
+      });
+      submissions.forEach((s) => {
+        s.collaborators = bySubmission.get(s.id) ?? [];
+      });
+    }
+
+    setRows(submissions);
     setLoading(false);
   };
 
@@ -312,7 +362,7 @@ const SongSubmissions = () => {
                       <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {row.artist_name}
+                      {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
                       {row.album_title ? ` · ${row.album_title}` : ''}
                       {' · '}{formatDuration(row.duration_seconds)}
                       {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
@@ -320,6 +370,23 @@ const SongSubmissions = () => {
                         <> · 📅 lanza {formatMadrid(row.scheduled_release_at)} (Madrid)</>
                       )}
                     </p>
+                    {row.collaborators && row.collaborators.length > 1 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {row.collaborators
+                          .slice()
+                          .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+                          .map((c) => (
+                            <Badge
+                              key={c.id}
+                              variant={c.is_primary ? 'default' : 'secondary'}
+                              className="text-[10px] font-normal"
+                            >
+                              {c.is_primary ? '★ ' : ''}
+                              {c.artist_name} · {roleLabel[c.role]} · {c.share_percent}%
+                            </Badge>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 {(
@@ -483,7 +550,7 @@ const SongSubmissions = () => {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{detailsTarget.title}</p>
-                  <p className="text-xs text-muted-foreground">{detailsTarget.artist_name}</p>
+                  <p className="text-xs text-muted-foreground">{formatArtistsWithCollabs(detailsTarget.artist_name, detailsTarget.collaborators)}</p>
                 </div>
               </div>
 
@@ -491,8 +558,30 @@ const SongSubmissions = () => {
                 <dt className="text-muted-foreground">Título</dt>
                 <dd className="col-span-2 font-medium">{detailsTarget.title}</dd>
 
-                <dt className="text-muted-foreground">Artista</dt>
+                <dt className="text-muted-foreground">Artista principal</dt>
                 <dd className="col-span-2 font-medium">{detailsTarget.artist_name}</dd>
+
+                {detailsTarget.collaborators && detailsTarget.collaborators.length > 0 && (
+                  <>
+                    <dt className="text-muted-foreground">Colaboradores</dt>
+                    <dd className="col-span-2">
+                      <ul className="space-y-1">
+                        {detailsTarget.collaborators
+                          .slice()
+                          .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+                          .map((c) => (
+                            <li key={c.id} className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium">{c.artist_name}</span>
+                              <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
+                                {c.is_primary ? 'Principal' : roleLabel[c.role]}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </dd>
+                  </>
+                )}
 
                 <dt className="text-muted-foreground">Álbum</dt>
                 <dd className="col-span-2">{detailsTarget.album_title || <span className="text-muted-foreground">—</span>}</dd>
