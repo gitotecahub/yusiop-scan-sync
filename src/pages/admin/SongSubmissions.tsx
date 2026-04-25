@@ -119,7 +119,33 @@ const SongSubmissions = () => {
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
     if (error) toast.error('Error cargando envíos');
-    setRows((data ?? []) as unknown as SubmissionRow[]);
+    const submissions = (data ?? []) as unknown as SubmissionRow[];
+
+    // Cargar colaboradores asociados a estos envíos
+    if (submissions.length > 0) {
+      const ids = submissions.map((s) => s.id);
+      const { data: collabs } = await supabase
+        .from('song_collaborators')
+        .select('id,artist_name,role,share_percent,is_primary,submission_id')
+        .in('submission_id', ids);
+      const bySubmission = new Map<string, CollaboratorRow[]>();
+      (collabs ?? []).forEach((c: any) => {
+        const arr = bySubmission.get(c.submission_id) ?? [];
+        arr.push({
+          id: c.id,
+          artist_name: c.artist_name,
+          role: c.role,
+          share_percent: Number(c.share_percent),
+          is_primary: c.is_primary,
+        });
+        bySubmission.set(c.submission_id, arr);
+      });
+      submissions.forEach((s) => {
+        s.collaborators = bySubmission.get(s.id) ?? [];
+      });
+    }
+
+    setRows(submissions);
     setLoading(false);
   };
 
