@@ -362,7 +362,7 @@ const SongSubmissions = () => {
                       <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
                     </CardTitle>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {row.artist_name}
+                      {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
                       {row.album_title ? ` · ${row.album_title}` : ''}
                       {' · '}{formatDuration(row.duration_seconds)}
                       {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
@@ -370,6 +370,23 @@ const SongSubmissions = () => {
                         <> · 📅 lanza {formatMadrid(row.scheduled_release_at)} (Madrid)</>
                       )}
                     </p>
+                    {row.collaborators && row.collaborators.length > 1 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {row.collaborators
+                          .slice()
+                          .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+                          .map((c) => (
+                            <Badge
+                              key={c.id}
+                              variant={c.is_primary ? 'default' : 'secondary'}
+                              className="text-[10px] font-normal"
+                            >
+                              {c.is_primary ? '★ ' : ''}
+                              {c.artist_name} · {roleLabel[c.role]} · {c.share_percent}%
+                            </Badge>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 {(
