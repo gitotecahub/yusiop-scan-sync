@@ -329,50 +329,79 @@ const SongSubmissions = () => {
       ) : (
         <div className="grid gap-4">
           {rows.map((row) => (
-            <Card key={row.id}>
-              <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-16 h-16 rounded-md bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
-                    {row.cover_url ? (
-                      <img src={row.cover_url} alt={row.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <CardTitle className="flex items-center gap-2 flex-wrap">
-                      {row.title}
-                      <Badge
-                        variant={
-                          row.status === 'approved'
-                            ? 'default'
-                            : row.status === 'rejected' || row.status === 'removed'
-                              ? 'destructive'
-                              : 'secondary'
-                        }
-                      >
-                        {row.status === 'pending' && (<><Clock className="h-3 w-3 mr-1" /> Pendiente</>)}
-                        {row.status === 'approved' && (
-                          row.scheduled_release_at
-                            ? (<><CalendarClock className="h-3 w-3 mr-1" /> Programada</>)
-                            : 'Publicada'
-                        )}
-                        {row.status === 'rejected' && 'Rechazada'}
-                        {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
-                      </Badge>
-                      <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
-                      {row.album_title ? ` · ${row.album_title}` : ''}
-                      {' · '}{formatDuration(row.duration_seconds)}
-                      {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
-                      {row.status === 'approved' && row.scheduled_release_at && (
-                        <> · 📅 lanza {formatMadrid(row.scheduled_release_at)} (Madrid)</>
+            <Collapsible key={row.id} asChild>
+              <Card>
+                <CardHeader className="flex flex-row items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="w-12 h-12 rounded-md bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
+                      {row.cover_url ? (
+                        <img src={row.cover_url} alt={row.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
                       )}
-                    </p>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex items-center gap-2 flex-wrap text-base">
+                        <span className="truncate">{row.title}</span>
+                        <Badge
+                          variant={
+                            row.status === 'approved'
+                              ? 'default'
+                              : row.status === 'rejected' || row.status === 'removed'
+                                ? 'destructive'
+                                : 'secondary'
+                          }
+                        >
+                          {row.status === 'pending' && (<><Clock className="h-3 w-3 mr-1" /> Pendiente</>)}
+                          {row.status === 'approved' && (
+                            row.scheduled_release_at
+                              ? (<><CalendarClock className="h-3 w-3 mr-1" /> Programada</>)
+                              : 'Publicada'
+                          )}
+                          {row.status === 'rejected' && 'Rechazada'}
+                          {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
+                        </Badge>
+                        <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
+                        {row.album_title ? ` · ${row.album_title}` : ''}
+                        {' · '}{formatDuration(row.duration_seconds)}
+                        {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
+                        {row.status === 'approved' && row.scheduled_release_at && (
+                          <> · 📅 {formatMadrid(row.scheduled_release_at)}</>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end items-center">
+                    {row.status === 'pending' && (
+                      <>
+                        <Button size="sm" onClick={() => openApprove(row)}>
+                          <Check className="h-4 w-4 mr-1" /> Aprobar
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => openReject(row)}>
+                          <X className="h-4 w-4 mr-1" /> Rechazar
+                        </Button>
+                      </>
+                    )}
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="group"
+                        aria-label="Mostrar detalles"
+                      >
+                        <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                </CardHeader>
+
+                <CollapsibleContent>
+                  <CardContent className="space-y-4 text-sm pt-0">
                     {row.collaborators && row.collaborators.length > 1 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
+                      <div className="flex flex-wrap gap-1">
                         {row.collaborators
                           .slice()
                           .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
@@ -388,118 +417,106 @@ const SongSubmissions = () => {
                           ))}
                       </div>
                     )}
-                  </div>
-                </div>
-                {(
-                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
-                    <Button size="sm" variant="outline" onClick={() => openDetails(row)}>
-                      <Info className="h-4 w-4 mr-1" /> Detalles
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={reanalyzing[row.id] || row.copyright_status === 'analyzing'}
-                      onClick={() => reanalyzeCopyright(row)}
-                      title="Volver a ejecutar el análisis de copyright"
-                    >
-                      <ShieldCheck className="h-4 w-4 mr-1" />
-                      {reanalyzing[row.id] ? 'Analizando…' : 'Re-analizar'}
-                    </Button>
-                    {row.status === 'pending' && (
-                      <>
-                        <Button size="sm" onClick={() => openApprove(row)}>
-                          <Check className="h-4 w-4 mr-1" /> Aprobar
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => openReject(row)}>
-                          <X className="h-4 w-4 mr-1" /> Rechazar
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      Audio completo
-                    </span>
-                    {!signedUrls[row.id]?.track && (
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openDetails(row)}>
+                        <Info className="h-4 w-4 mr-1" /> Detalles
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={loadingAudio[row.id] === 'track'}
-                        onClick={() => loadAndPlay(row.id, 'track', row.track_path, row.track_url)}
+                        disabled={reanalyzing[row.id] || row.copyright_status === 'analyzing'}
+                        onClick={() => reanalyzeCopyright(row)}
+                        title="Volver a ejecutar el análisis de copyright"
                       >
-                        <Play className="h-3 w-3 mr-1" />
-                        {loadingAudio[row.id] === 'track' ? 'Cargando…' : 'Cargar y reproducir'}
+                        <ShieldCheck className="h-4 w-4 mr-1" />
+                        {reanalyzing[row.id] ? 'Analizando…' : 'Re-analizar'}
                       </Button>
-                    )}
-                  </div>
-                  {signedUrls[row.id]?.track && (
-                    <audio
-                      ref={(el) => { audioRefs.current[`${row.id}:track`] = el; }}
-                      src={signedUrls[row.id]!.track}
-                      controls
-                      preload="metadata"
-                      className="w-full"
-                    />
-                  )}
-                </div>
+                    </div>
 
-                {(row.preview_url || row.preview_path) && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                        Preview (20s)
-                      </span>
-                      {!signedUrls[row.id]?.preview && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={loadingAudio[row.id] === 'preview'}
-                          onClick={() => loadAndPlay(row.id, 'preview', row.preview_path, row.preview_url)}
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          {loadingAudio[row.id] === 'preview' ? 'Cargando…' : 'Cargar y reproducir'}
-                        </Button>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          Audio completo
+                        </span>
+                        {!signedUrls[row.id]?.track && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={loadingAudio[row.id] === 'track'}
+                            onClick={() => loadAndPlay(row.id, 'track', row.track_path, row.track_url)}
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            {loadingAudio[row.id] === 'track' ? 'Cargando…' : 'Cargar y reproducir'}
+                          </Button>
+                        )}
+                      </div>
+                      {signedUrls[row.id]?.track && (
+                        <audio
+                          ref={(el) => { audioRefs.current[`${row.id}:track`] = el; }}
+                          src={signedUrls[row.id]!.track}
+                          controls
+                          preload="metadata"
+                          className="w-full"
+                        />
                       )}
                     </div>
-                    {signedUrls[row.id]?.preview && (
-                      <audio
-                        ref={(el) => { audioRefs.current[`${row.id}:preview`] = el; }}
-                        src={signedUrls[row.id]!.preview}
-                        controls
-                        preload="metadata"
-                        className="w-full"
-                      />
+
+                    {(row.preview_url || row.preview_path) && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            Preview (20s)
+                          </span>
+                          {!signedUrls[row.id]?.preview && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={loadingAudio[row.id] === 'preview'}
+                              onClick={() => loadAndPlay(row.id, 'preview', row.preview_path, row.preview_url)}
+                            >
+                              <Play className="h-3 w-3 mr-1" />
+                              {loadingAudio[row.id] === 'preview' ? 'Cargando…' : 'Cargar y reproducir'}
+                            </Button>
+                          )}
+                        </div>
+                        {signedUrls[row.id]?.preview && (
+                          <audio
+                            ref={(el) => { audioRefs.current[`${row.id}:preview`] = el; }}
+                            src={signedUrls[row.id]!.preview}
+                            controls
+                            preload="metadata"
+                            className="w-full"
+                          />
+                        )}
+                      </div>
                     )}
-                  </div>
-                )}
 
-                <CopyrightDetails
-                  status={row.copyright_status}
-                  score={row.copyright_score}
-                  matches={row.copyright_matches}
-                />
+                    <CopyrightDetails
+                      status={row.copyright_status}
+                      score={row.copyright_score}
+                      matches={row.copyright_matches}
+                    />
 
-                {row.status === 'rejected' && row.rejection_reason && (() => {
-                  const items = parseRejectionReason(row.rejection_reason);
-                  return (
-                    <div className="text-xs text-destructive">
-                      <p className="font-semibold mb-1">
-                        Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
-                      </p>
-                      <ul className="list-disc pl-5 space-y-0.5 marker:text-destructive">
-                        {(items.length > 0 ? items : [row.rejection_reason!]).map((it, i) => (
-                          <li key={i}>{it}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
+                    {row.status === 'rejected' && row.rejection_reason && (() => {
+                      const items = parseRejectionReason(row.rejection_reason);
+                      return (
+                        <div className="text-xs text-destructive">
+                          <p className="font-semibold mb-1">
+                            Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
+                          </p>
+                          <ul className="list-disc pl-5 space-y-0.5 marker:text-destructive">
+                            {(items.length > 0 ? items : [row.rejection_reason!]).map((it, i) => (
+                              <li key={i}>{it}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           ))}
         </div>
       )}
