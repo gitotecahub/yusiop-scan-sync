@@ -23,6 +23,12 @@ export const formatXAFFixed = (xaf: number): string =>
 // Convertir un importe en EUR a XAF y devolverlo como string ya formateado
 export const eurToXafString = (eur: number): string => formatXAFFixed(eurToXaf(eur));
 
+// Convertir XAF → EUR (aproximación basada en paridad fija)
+export const xafToEur = (xaf: number): number => xaf / XAF_PER_EUR;
+
+// Formatear un importe XAF mostrando su equivalente en EUR
+export const formatXafAsEur = (xaf: number): string => formatEURNumber(xafToEur(xaf));
+
 // Precios fijos de tarjetas FÍSICAS (vendidas en XAF)
 export const PHYSICAL_STANDARD_PRICE_XAF = 3000;
 export const PHYSICAL_PREMIUM_PRICE_XAF = 7000;

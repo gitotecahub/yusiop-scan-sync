@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscriptionVisibility } from '@/hooks/useSubscriptionVisibility';
 import { useSubscriptionPlans, useMySubscription, type SubscriptionPlan } from '@/hooks/useSubscriptionPlans';
-import { formatXAFFixed } from '@/lib/currency';
+import { formatXAFFixed, formatEURNumber } from '@/lib/currency';
 import { cn } from '@/lib/utils';
 
 const planIcon = (code: string) => {
@@ -182,10 +182,11 @@ const Subscriptions = () => {
 
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold tabular-nums">{formatXAFFixed(plan.price_xaf)}</span>
+                    <span className="text-2xl font-bold tabular-nums">{formatEURNumber(plan.price_eur_cents / 100)}</span>
                     <span className="text-xs text-muted-foreground">/ mes</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{plan.description}</p>
+                  <p className="text-[11px] text-muted-foreground tabular-nums mt-0.5">{formatXAFFixed(plan.price_xaf)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
                 </div>
 
                 <div className="space-y-1.5 pt-2 border-t border-border/50">

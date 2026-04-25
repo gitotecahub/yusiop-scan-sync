@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { formatXAFFixed } from '@/lib/currency';
+import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
 
 type ExpressTier = '72h' | '48h' | '24h';
 
@@ -716,8 +716,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                               <div className="text-[11px] text-muted-foreground">{opt.sub}</div>
                             </div>
                           </div>
-                          <div className={`text-sm font-bold whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
-                            {formatXAFFixed(opt.priceXaf)}
+                          <div className={`flex flex-col items-end leading-tight whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
+                            <span className="text-sm font-bold tabular-nums">{formatXafAsEur(opt.priceXaf)}</span>
+                            <span className="text-[10px] font-normal text-muted-foreground tabular-nums">{formatXAFFixed(opt.priceXaf)}</span>
                           </div>
                         </div>
                       </button>
