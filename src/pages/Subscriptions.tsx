@@ -202,6 +202,14 @@ const Subscriptions = () => {
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     <span>Descarga inmediata</span>
                   </div>
+                  {plan.code === 'elite' && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Zap className="h-3.5 w-3.5 flex-shrink-0 text-transparent bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] [&>path]:stroke-[url(#elite-grad)]" style={{ stroke: 'url(#yusiop-elite-gradient)' }} />
+                      <span className="font-medium bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
+                        Acceso prioritario a lanzamientos
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     <span>Cancela cuando quieras</span>
