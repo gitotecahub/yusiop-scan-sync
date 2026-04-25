@@ -155,6 +155,9 @@ const formatTime = (seconds: number) => {
 
 const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmitted, editing = null }: SubmitSongDialogProps) => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const { subscription } = useMySubscription();
+  const isElite = subscription?.plan?.code === 'elite' && (subscription.status === 'active' || subscription.status === 'past_due');
   const isEdit = !!editing;
 
   const [formData, setFormData] = useState<FormState>({
