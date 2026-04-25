@@ -47,12 +47,8 @@ Deno.serve(async (req) => {
   }
 
   const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: userData.user.id })
-  if (!isAdmin) {
-    return new Response(JSON.stringify({ error: 'forbidden' }), {
-      status: 403,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
+  // El check de admin se aplica condicionalmente más abajo: para phase='submitted'
+  // permitimos que el dueño de la submission lo llame.
 
   let body: any
   try { body = await req.json() } catch {
