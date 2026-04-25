@@ -501,6 +501,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           genre: formData.genre.trim() || null,
           release_date: formData.release_date || null,
           nationality: formData.nationality || null,
+          status: 'pending',
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
