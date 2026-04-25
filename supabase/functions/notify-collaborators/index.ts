@@ -129,9 +129,13 @@ Deno.serve(async (req) => {
   }
 
   const results: Array<{ email: string; template: string; ok: boolean; error?: string }> = []
+  console.log('notify-collaborators: collabs found', { count: collabs?.length ?? 0, songTitle, primaryArtistName, resolvedSongId, submissionId })
 
   for (const c of collabs ?? []) {
-    if (!c.contact_email) continue
+    if (!c.contact_email) {
+      console.log('Skipping collaborator without contact_email', { id: c.id, artist_name: c.artist_name })
+      continue
+    }
     // Resolver si ya tiene cuenta
     const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
       p_email: c.contact_email,
@@ -143,27 +147,49 @@ Deno.serve(async (req) => {
 
     const idempotencyKey = `collab-notify-${c.id}-${templateName}`
 
-    const { error: invokeErr } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName,
-        recipientEmail: c.contact_email,
-        idempotencyKey,
-        templateData: {
-          songTitle,
-          primaryArtistName,
-          collaboratorArtistName: c.artist_name,
-          sharePercent: Number(c.share_percent),
-          role: c.role,
-          appUrl,
+    // Llamar directamente vía fetch con service role para evitar problemas de auth
+    // entre edge functions (functions.invoke usa el JWT del cliente original).
+    let invokeErrMsg: string | null = null
+    try {
+      const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'apikey': supabaseServiceKey,
         },
-      },
-    })
+        body: JSON.stringify({
+          templateName,
+          recipientEmail: c.contact_email,
+          idempotencyKey,
+          templateData: {
+            songTitle,
+            primaryArtistName,
+            collaboratorArtistName: c.artist_name,
+            sharePercent: Number(c.share_percent),
+            role: c.role,
+            appUrl,
+          },
+        }),
+      })
+      if (!resp.ok) {
+        const txt = await resp.text()
+        invokeErrMsg = `HTTP ${resp.status}: ${txt}`
+        console.error('send-transactional-email failed', invokeErrMsg)
+      } else {
+        const json = await resp.json().catch(() => ({}))
+        console.log('send-transactional-email OK', { email: c.contact_email, template: templateName, json })
+      }
+    } catch (e: any) {
+      invokeErrMsg = e?.message ?? 'unknown_error'
+      console.error('fetch send-transactional-email threw', invokeErrMsg)
+    }
 
     results.push({
       email: c.contact_email,
       template: templateName,
-      ok: !invokeErr,
-      ...(invokeErr ? { error: invokeErr.message } : {}),
+      ok: !invokeErrMsg,
+      ...(invokeErrMsg ? { error: invokeErrMsg } : {}),
     })
   }
 

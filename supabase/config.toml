@@ -36,3 +36,6 @@ verify_jwt = true
 [functions.cancel-subscription]
 verify_jwt = true
 
+[functions.notify-collaborators]
+verify_jwt = true
+
