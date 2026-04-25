@@ -561,6 +561,18 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           supabase.functions
             .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
             .catch((e) => console.warn('Copyright check failed (background):', e));
+          // Notificar a colaboradores no principales (en background)
+          if (hasCollabs) {
+            supabase.functions
+              .invoke('notify-collaborators', {
+                body: {
+                  submission_id: inserted.id,
+                  phase: 'submitted',
+                  app_url: window.location.origin,
+                },
+              })
+              .catch((e) => console.warn('notify-collaborators (submitted) failed:', e));
+          }
         }
         setProgress(100);
         toast.success(expressOpt
