@@ -75,10 +75,12 @@ Deno.serve(async (req) => {
   let primaryArtistName = ''
   let resolvedSongId: string | null = songId ?? null
 
+  let submissionOwnerId: string | null = null
+
   if (submissionId) {
     const { data: sub } = await supabase
       .from('song_submissions')
-      .select('title, artist_name, published_song_id')
+      .select('title, artist_name, published_song_id, user_id')
       .eq('id', submissionId)
       .maybeSingle()
     if (!sub) {
@@ -90,6 +92,7 @@ Deno.serve(async (req) => {
     songTitle = sub.title
     primaryArtistName = sub.artist_name
     resolvedSongId = sub.published_song_id ?? resolvedSongId
+    submissionOwnerId = (sub as any).user_id ?? null
   } else if (songId) {
     const { data: song } = await supabase
       .from('songs')
@@ -104,6 +107,18 @@ Deno.serve(async (req) => {
     }
     songTitle = song.title
     primaryArtistName = (song as any).artist?.name ?? ''
+  }
+
+  // Autorización:
+  //  - phase='published': sólo admin (notificación tras aprobar la canción)
+  //  - phase='submitted': admin OR dueño de la submission (notificación al enviarla)
+  const isOwnerOfSubmission = !!submissionOwnerId && submissionOwnerId === userData.user.id
+  const allowed = isAdmin || (phase === 'submitted' && isOwnerOfSubmission)
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   // Cargar colaboradores (preferimos los del song publicado; fallback a submission)
