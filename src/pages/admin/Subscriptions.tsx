@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Sparkles, Trash2, Plus, Users, TrendingUp, Coins, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Sparkles, Trash2, Plus, Users, TrendingUp, Coins, AlertTriangle, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import ActiveSubscriptionsList from '@/components/admin/ActiveSubscriptionsList';
 
 type State = 'off' | 'soft_launch' | 'on';
 
@@ -166,6 +168,22 @@ const Subscriptions = () => {
           Control de visibilidad, segmentación y métricas del sistema de suscripciones.
         </p>
       </header>
+
+      <Tabs defaultValue="config" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="config" className="gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Configuración
+          </TabsTrigger>
+          <TabsTrigger value="active" className="gap-1.5">
+            <ListChecks className="h-3.5 w-3.5" /> Activas
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active">
+          <ActiveSubscriptionsList />
+        </TabsContent>
+
+        <TabsContent value="config" className="space-y-6">
 
       {/* Métricas */}
       {metrics && (
@@ -404,6 +422,8 @@ const Subscriptions = () => {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
