@@ -129,9 +129,13 @@ Deno.serve(async (req) => {
   }
 
   const results: Array<{ email: string; template: string; ok: boolean; error?: string }> = []
+  console.log('notify-collaborators: collabs found', { count: collabs?.length ?? 0, songTitle, primaryArtistName, resolvedSongId, submissionId })
 
   for (const c of collabs ?? []) {
-    if (!c.contact_email) continue
+    if (!c.contact_email) {
+      console.log('Skipping collaborator without contact_email', { id: c.id, artist_name: c.artist_name })
+      continue
+    }
     // Resolver si ya tiene cuenta
     const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
       p_email: c.contact_email,
