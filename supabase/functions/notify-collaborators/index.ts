@@ -47,12 +47,8 @@ Deno.serve(async (req) => {
   }
 
   const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: userData.user.id })
-  if (!isAdmin) {
-    return new Response(JSON.stringify({ error: 'forbidden' }), {
-      status: 403,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
+  // El check de admin se aplica condicionalmente más abajo: para phase='submitted'
+  // permitimos que el dueño de la submission lo llame.
 
   let body: any
   try { body = await req.json() } catch {
@@ -65,6 +61,8 @@ Deno.serve(async (req) => {
   const submissionId: string | undefined = body.submission_id
   const songId: string | undefined = body.song_id
   const appUrl: string = body.app_url ?? 'https://yusiop.com'
+  // phase: 'submitted' (envío inicial) | 'published' (aprobada). Default 'published' por compatibilidad.
+  const phase: 'submitted' | 'published' = body.phase === 'submitted' ? 'submitted' : 'published'
   if (!submissionId && !songId) {
     return new Response(JSON.stringify({ error: 'submission_id_or_song_id_required' }), {
       status: 400,
@@ -77,10 +75,12 @@ Deno.serve(async (req) => {
   let primaryArtistName = ''
   let resolvedSongId: string | null = songId ?? null
 
+  let submissionOwnerId: string | null = null
+
   if (submissionId) {
     const { data: sub } = await supabase
       .from('song_submissions')
-      .select('title, artist_name, published_song_id')
+      .select('title, artist_name, published_song_id, user_id')
       .eq('id', submissionId)
       .maybeSingle()
     if (!sub) {
@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
     songTitle = sub.title
     primaryArtistName = sub.artist_name
     resolvedSongId = sub.published_song_id ?? resolvedSongId
+    submissionOwnerId = (sub as any).user_id ?? null
   } else if (songId) {
     const { data: song } = await supabase
       .from('songs')
@@ -106,6 +107,18 @@ Deno.serve(async (req) => {
     }
     songTitle = song.title
     primaryArtistName = (song as any).artist?.name ?? ''
+  }
+
+  // Autorización:
+  //  - phase='published': sólo admin (notificación tras aprobar la canción)
+  //  - phase='submitted': admin OR dueño de la submission (notificación al enviarla)
+  const isOwnerOfSubmission = !!submissionOwnerId && submissionOwnerId === userData.user.id
+  const allowed = isAdmin || (phase === 'submitted' && isOwnerOfSubmission)
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   // Cargar colaboradores (preferimos los del song publicado; fallback a submission)
@@ -136,16 +149,21 @@ Deno.serve(async (req) => {
       console.log('Skipping collaborator without contact_email', { id: c.id, artist_name: c.artist_name })
       continue
     }
-    // Resolver si ya tiene cuenta
-    const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
-      p_email: c.contact_email,
-    })
-    const isRegistered = !!existingUserId
-    const templateName = isRegistered
-      ? 'collaboration-published-registered'
-      : 'collaboration-published-invite'
+    let templateName: string
+    if (phase === 'submitted') {
+      templateName = 'collaboration-submitted'
+    } else {
+      // Resolver si ya tiene cuenta para elegir invite vs registered
+      const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
+        p_email: c.contact_email,
+      })
+      const isRegistered = !!existingUserId
+      templateName = isRegistered
+        ? 'collaboration-published-registered'
+        : 'collaboration-published-invite'
+    }
 
-    const idempotencyKey = `collab-notify-${c.id}-${templateName}`
+    const idempotencyKey = `collab-notify-${phase}-${c.id}-${templateName}`
 
     // Llamar directamente vía fetch con service role para evitar problemas de auth
     // entre edge functions (functions.invoke usa el JWT del cliente original).

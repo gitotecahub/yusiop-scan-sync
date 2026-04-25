@@ -14,6 +14,7 @@ import { template as songApproved } from './song-approved.tsx'
 import { template as songRejected } from './song-rejected.tsx'
 import { template as collaborationPublishedRegistered } from './collaboration-published-registered.tsx'
 import { template as collaborationPublishedInvite } from './collaboration-published-invite.tsx'
+import { template as collaborationSubmitted } from './collaboration-submitted.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'gift-received': giftReceived,
@@ -21,4 +22,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'song-rejected': songRejected,
   'collaboration-published-registered': collaborationPublishedRegistered,
   'collaboration-published-invite': collaborationPublishedInvite,
+  'collaboration-submitted': collaborationSubmitted,
 }
