@@ -65,6 +65,8 @@ Deno.serve(async (req) => {
   const submissionId: string | undefined = body.submission_id
   const songId: string | undefined = body.song_id
   const appUrl: string = body.app_url ?? 'https://yusiop.com'
+  // phase: 'submitted' (envío inicial) | 'published' (aprobada). Default 'published' por compatibilidad.
+  const phase: 'submitted' | 'published' = body.phase === 'submitted' ? 'submitted' : 'published'
   if (!submissionId && !songId) {
     return new Response(JSON.stringify({ error: 'submission_id_or_song_id_required' }), {
       status: 400,
