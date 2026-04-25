@@ -208,7 +208,7 @@ const es: Dict = {
   'catalog.popular': 'Populares', 'catalog.allSongs': 'Todas las canciones',
   'catalog.noResults': 'Sin resultados', 'catalog.loading': 'Cargando catálogo...',
   // Biblioteca
-  'library.title': 'Mi Biblioteca', 'library.empty': 'Aún no tienes canciones',
+  'library.title': ' Biblioteca', 'library.empty': 'Aún no tienes canciones',
   'library.downloads': 'Descargas', 'library.favorites': 'Favoritos',
   'library.tab.all': 'Todas', 'library.tab.cards': 'Tarjetas',
   'library.tab.recent': 'Recientes', 'library.tab.favorites': 'Favoritos',
