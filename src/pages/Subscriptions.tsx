@@ -116,15 +116,15 @@ const Subscriptions = () => {
         <ArrowLeft className="h-4 w-4" /> Volver
       </button>
 
-      <header className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-primary/20 via-purple-500/20 to-cyan-500/20 border border-primary/30 mb-3">
+      <header className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/20 via-purple-500/20 to-cyan-500/20 border border-primary/30 mb-4">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-medium">YUSIOP Premium</span>
+          <span className="text-xs font-medium tracking-wide">YUSIOP Premium</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-purple-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
           Suscríbete y descarga cada mes
         </h1>
-        <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
+        <p className="text-sm text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">
           Las suscripciones complementan tu tarjeta. Lanzamientos premium siguen disponibles solo con tarjetas QR.
         </p>
       </header>
@@ -180,37 +180,37 @@ const Subscriptions = () => {
                   <h3 className="font-semibold text-base">{plan.name}</h3>
                 </div>
 
-                <div>
+                <div className="space-y-1">
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold tabular-nums">{formatEURNumber(plan.price_eur_cents / 100)}</span>
-                    <span className="text-xs text-muted-foreground">/ mes</span>
+                    <span className="text-xs text-muted-foreground">/mes</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground tabular-nums mt-0.5">{formatXAFFixed(plan.price_xaf)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+                  <p className="text-[11px] text-muted-foreground tabular-nums">{formatXAFFixed(plan.price_xaf)}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{plan.description}</p>
                 </div>
 
-                <div className="space-y-1.5 pt-2 border-t border-border/50">
-                  <div className="flex items-center gap-2 text-sm">
+                <div className="space-y-2 pt-3 border-t border-border/50">
+                  <div className="flex items-center gap-2 text-sm leading-relaxed">
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                    <span><strong>{plan.monthly_downloads}</strong> canciones / mes</span>
+                    <span><strong>{plan.monthly_downloads}</strong> canciones/mes</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm leading-relaxed">
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     <span>Catálogo base completo</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm leading-relaxed">
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     <span>Descarga inmediata</span>
                   </div>
                   {plan.code === 'elite' && (
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm leading-relaxed">
                       <Zap className="h-3.5 w-3.5 flex-shrink-0 fill-[hsl(265,85%,60%)] text-[hsl(265,85%,60%)]" />
                       <span className="font-medium bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
                         Acceso prioritario a lanzamientos
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm leading-relaxed">
                     <Check className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     <span>Cancela cuando quieras</span>
                   </div>
