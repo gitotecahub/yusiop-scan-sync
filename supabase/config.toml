@@ -39,3 +39,6 @@ verify_jwt = true
 [functions.notify-collaborators]
 verify_jwt = true
 
+[functions.process-email-queue]
+verify_jwt = false
+
