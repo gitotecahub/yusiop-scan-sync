@@ -483,8 +483,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       const safePreviewStart = Math.max(0, Math.min(previewStart, Math.max(0, duration - PREVIEW_LENGTH)));
 
       // Datos del Lanzamiento Express (si está activo)
-      const expressOpt = expressEnabled && expressTier
+      // Para usuarios Elite el coste es 0 (incluido en la suscripción).
+      const baseExpressOpt = expressEnabled && expressTier
         ? EXPRESS_OPTIONS.find(o => o.tier === expressTier) ?? null
+        : null;
+      const expressOpt = baseExpressOpt
+        ? { ...baseExpressOpt, priceXaf: isElite ? 0 : baseExpressOpt.priceXaf }
         : null;
       const nowIso = new Date().toISOString();
 
