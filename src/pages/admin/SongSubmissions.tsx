@@ -53,6 +53,7 @@ interface CollaboratorRow {
   role: 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
   share_percent: number;
   is_primary: boolean;
+  contact_email?: string | null;
 }
 
 const roleLabel: Record<CollaboratorRow['role'], string> = {
