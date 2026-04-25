@@ -53,6 +53,7 @@ interface CollaboratorRow {
   role: 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
   share_percent: number;
   is_primary: boolean;
+  contact_email?: string | null;
 }
 
 const roleLabel: Record<CollaboratorRow['role'], string> = {
@@ -127,7 +128,7 @@ const SongSubmissions = () => {
       const ids = submissions.map((s) => s.id);
       const { data: collabs } = await supabase
         .from('song_collaborators')
-        .select('id,artist_name,role,share_percent,is_primary,submission_id')
+        .select('id,artist_name,role,share_percent,is_primary,contact_email,submission_id')
         .in('submission_id', ids);
       const bySubmission = new Map<string, CollaboratorRow[]>();
       (collabs ?? []).forEach((c: any) => {
@@ -138,6 +139,7 @@ const SongSubmissions = () => {
           role: c.role,
           share_percent: Number(c.share_percent),
           is_primary: c.is_primary,
+          contact_email: c.contact_email ?? null,
         });
         bySubmission.set(c.submission_id, arr);
       });
@@ -588,12 +590,22 @@ const SongSubmissions = () => {
                           .slice()
                           .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
                           .map((c) => (
-                            <li key={c.id} className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium">{c.artist_name}</span>
-                              <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
-                                {c.is_primary ? 'Principal' : roleLabel[c.role]}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                            <li key={c.id} className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium">{c.artist_name}</span>
+                                <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
+                                  {c.is_primary ? 'Principal' : roleLabel[c.role]}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                              </div>
+                              {!c.is_primary && c.contact_email && (
+                                <a
+                                  href={`mailto:${c.contact_email}`}
+                                  className="text-xs text-primary hover:underline ml-0.5"
+                                >
+                                  {c.contact_email}
+                                </a>
+                              )}
                             </li>
                           ))}
                       </ul>

@@ -429,6 +429,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (!formData.title.trim()) return toast.error('El título es requerido'), false;
     if (!formData.artist_name.trim()) return toast.error('El nombre del artista es requerido'), false;
     if (!isEdit && !trackFile) return toast.error('Debes subir el archivo de audio completo'), false;
+    if (!isEdit && !coverFile && !editing?.cover_url) return toast.error('La portada es obligatoria'), false;
     if (hasCollabs) {
       if (collaborators.length < 2) return toast.error('Una colaboración requiere al menos 2 artistas'), false;
       if (collaborators.some(c => !c.artist_name.trim())) return toast.error('Todos los colaboradores deben tener nombre artístico'), false;
@@ -874,7 +875,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
 
             <div>
-              <Label>Portada (opcional)</Label>
+              <Label>Portada <span className="text-destructive">*</span></Label>
               <input
                 ref={coverInputRef}
                 type="file"
