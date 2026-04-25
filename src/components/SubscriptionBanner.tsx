@@ -30,7 +30,7 @@ const SubscriptionBanner = () => {
             Descarga sin límites cada mes
           </h3>
           <p className="text-xs sm:text-sm opacity-80 mt-1">
-            Desde 3.000 XAF · Cancela cuando quieras
+            Desde 4,57 € · 3.000 XAF · Cancela cuando quieras
           </p>
         </div>
         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white/20 backdrop-blur group-hover:bg-white/30 transition-colors flex-shrink-0">
