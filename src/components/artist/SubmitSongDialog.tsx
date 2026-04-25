@@ -875,7 +875,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </div>
 
             <div>
-              <Label>Portada (opcional)</Label>
+              <Label>Portada <span className="text-destructive">*</span></Label>
               <input
                 ref={coverInputRef}
                 type="file"
