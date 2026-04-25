@@ -558,8 +558,30 @@ const SongSubmissions = () => {
                 <dt className="text-muted-foreground">Título</dt>
                 <dd className="col-span-2 font-medium">{detailsTarget.title}</dd>
 
-                <dt className="text-muted-foreground">Artista</dt>
+                <dt className="text-muted-foreground">Artista principal</dt>
                 <dd className="col-span-2 font-medium">{detailsTarget.artist_name}</dd>
+
+                {detailsTarget.collaborators && detailsTarget.collaborators.length > 0 && (
+                  <>
+                    <dt className="text-muted-foreground">Colaboradores</dt>
+                    <dd className="col-span-2">
+                      <ul className="space-y-1">
+                        {detailsTarget.collaborators
+                          .slice()
+                          .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+                          .map((c) => (
+                            <li key={c.id} className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium">{c.artist_name}</span>
+                              <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
+                                {c.is_primary ? 'Principal' : roleLabel[c.role]}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </dd>
+                  </>
+                )}
 
                 <dt className="text-muted-foreground">Álbum</dt>
                 <dd className="col-span-2">{detailsTarget.album_title || <span className="text-muted-foreground">—</span>}</dd>
