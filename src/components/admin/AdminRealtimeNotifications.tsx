@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
 import { playNotificationSound } from '@/lib/notificationSound';
-import { Bell, Music, UserCheck, Users2 } from 'lucide-react';
+import { Bell, Music, UserCheck, Users2, Crown } from 'lucide-react';
 import { createElement } from 'react';
 
 /**
@@ -23,6 +23,7 @@ const AdminRealtimeNotifications = () => {
 
   const canArtistRequests = isSuperAdmin || has('artist_requests');
   const canCatalog = isSuperAdmin || has('catalog');
+  const canMonetization = isSuperAdmin || has('monetization');
 
   useEffect(() => {
     const channel = supabase.channel('admin-realtime-notifications');
@@ -98,12 +99,35 @@ const AdminRealtimeNotifications = () => {
         );
     }
 
+    if (canMonetization) {
+      channel.on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'user_subscriptions' },
+        (payload) => {
+          const created = new Date((payload.new as any)?.created_at ?? Date.now()).getTime();
+          if (created < mountedAt.current - 5000) return;
+
+          playNotificationSound();
+          toast('👑 Nueva suscripción activa', {
+            description: 'Un usuario acaba de suscribirse',
+            icon: createElement(Crown, { className: 'h-5 w-5' }),
+            action: {
+              label: 'Ver',
+              onClick: () => navigate('/admin/subscriptions'),
+            },
+            duration: 8000,
+          });
+          window.dispatchEvent(new Event('user-subscriptions-changed'));
+        }
+      );
+    }
+
     channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [canArtistRequests, canCatalog, navigate]);
+  }, [canArtistRequests, canCatalog, canMonetization, navigate]);
 
   return null;
 };
