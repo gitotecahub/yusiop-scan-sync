@@ -43,7 +43,31 @@ interface SubmissionRow {
   copyright_status: CopyrightStatus;
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
+  collaborators?: CollaboratorRow[];
 }
+
+interface CollaboratorRow {
+  id: string;
+  artist_name: string;
+  role: 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
+  share_percent: number;
+  is_primary: boolean;
+}
+
+const roleLabel: Record<CollaboratorRow['role'], string> = {
+  featuring: 'Feat.',
+  producer: 'Prod.',
+  performer: 'Intérprete',
+  composer: 'Compositor',
+  remix: 'Remix',
+};
+
+const formatArtistsWithCollabs = (artistName: string, collaborators?: CollaboratorRow[]) => {
+  const others = (collaborators ?? []).filter((c) => !c.is_primary);
+  if (others.length === 0) return artistName;
+  const feats = others.map((c) => c.artist_name).join(', ');
+  return `${artistName} feat. ${feats}`;
+};
 
 const formatDuration = (s: number) => {
   const m = Math.floor(s / 60);
