@@ -23,6 +23,7 @@ const AdminRealtimeNotifications = () => {
 
   const canArtistRequests = isSuperAdmin || has('artist_requests');
   const canCatalog = isSuperAdmin || has('catalog');
+  const canMonetization = isSuperAdmin || has('monetization');
 
   useEffect(() => {
     const channel = supabase.channel('admin-realtime-notifications');
