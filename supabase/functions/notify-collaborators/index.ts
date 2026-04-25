@@ -149,16 +149,21 @@ Deno.serve(async (req) => {
       console.log('Skipping collaborator without contact_email', { id: c.id, artist_name: c.artist_name })
       continue
     }
-    // Resolver si ya tiene cuenta
-    const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
-      p_email: c.contact_email,
-    })
-    const isRegistered = !!existingUserId
-    const templateName = isRegistered
-      ? 'collaboration-published-registered'
-      : 'collaboration-published-invite'
+    let templateName: string
+    if (phase === 'submitted') {
+      templateName = 'collaboration-submitted'
+    } else {
+      // Resolver si ya tiene cuenta para elegir invite vs registered
+      const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
+        p_email: c.contact_email,
+      })
+      const isRegistered = !!existingUserId
+      templateName = isRegistered
+        ? 'collaboration-published-registered'
+        : 'collaboration-published-invite'
+    }
 
-    const idempotencyKey = `collab-notify-${c.id}-${templateName}`
+    const idempotencyKey = `collab-notify-${phase}-${c.id}-${templateName}`
 
     // Llamar directamente vía fetch con service role para evitar problemas de auth
     // entre edge functions (functions.invoke usa el JWT del cliente original).
