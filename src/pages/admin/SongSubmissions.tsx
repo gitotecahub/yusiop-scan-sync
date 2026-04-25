@@ -550,7 +550,7 @@ const SongSubmissions = () => {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{detailsTarget.title}</p>
-                  <p className="text-xs text-muted-foreground">{detailsTarget.artist_name}</p>
+                  <p className="text-xs text-muted-foreground">{formatArtistsWithCollabs(detailsTarget.artist_name, detailsTarget.collaborators)}</p>
                 </div>
               </div>
 
