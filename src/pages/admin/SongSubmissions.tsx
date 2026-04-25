@@ -590,12 +590,22 @@ const SongSubmissions = () => {
                           .slice()
                           .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
                           .map((c) => (
-                            <li key={c.id} className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium">{c.artist_name}</span>
-                              <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
-                                {c.is_primary ? 'Principal' : roleLabel[c.role]}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                            <li key={c.id} className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-medium">{c.artist_name}</span>
+                                <Badge variant={c.is_primary ? 'default' : 'secondary'} className="text-[10px]">
+                                  {c.is_primary ? 'Principal' : roleLabel[c.role]}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{c.share_percent}%</span>
+                              </div>
+                              {!c.is_primary && c.contact_email && (
+                                <a
+                                  href={`mailto:${c.contact_email}`}
+                                  className="text-xs text-primary hover:underline ml-0.5"
+                                >
+                                  {c.contact_email}
+                                </a>
+                              )}
                             </li>
                           ))}
                       </ul>
