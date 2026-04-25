@@ -692,13 +692,42 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                   </div>
                   <div className="flex-1">
                     <h3 className="text-base font-bold bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
-                      Lanzamiento Express
+                      Lanzamiento prioritario
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Publica tu música en menos de 72h con revisión prioritaria.
+                      Publica tu música con revisión prioritaria.
                     </p>
                   </div>
+                  {isElite && (
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-[hsl(280,85%,45%)] via-[hsl(250,95%,45%)] to-[hsl(188,85%,45%)] text-white text-[10px] font-bold uppercase tracking-wider shadow-lg">
+                      <Crown className="h-3 w-3" /> Incluido en Elite
+                    </div>
+                  )}
                 </div>
+
+                {!isElite && (
+                  <div className="rounded-lg border border-primary/30 bg-gradient-to-r from-[hsl(280,85%,45%)]/10 via-[hsl(250,95%,45%)]/10 to-[hsl(188,85%,45%)]/10 p-3">
+                    <div className="flex items-start gap-2">
+                      <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="text-xs flex-1 space-y-2">
+                        <p className="font-semibold text-foreground">
+                          Disponible gratis con YUSIOP Elite
+                        </p>
+                        <p className="text-muted-foreground">
+                          Mejora tu plan para acceder al lanzamiento prioritario sin coste adicional, o paga por uso a continuación.
+                        </p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => { onOpenChange(false); navigate('/subscriptions'); }}
+                          className="bg-gradient-to-r from-[hsl(280,85%,45%)] via-[hsl(250,95%,45%)] to-[hsl(188,85%,45%)] hover:opacity-90 text-white h-7 text-[11px] font-semibold"
+                        >
+                          <Crown className="h-3 w-3 mr-1" /> Mejorar a Elite
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid gap-2">
                   {EXPRESS_OPTIONS.map((opt) => {
@@ -729,8 +758,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                             </div>
                           </div>
                           <div className={`flex flex-col items-end leading-tight whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
-                            <span className="text-sm font-bold tabular-nums">{formatXafAsEur(opt.priceXaf)}</span>
-                            <span className="text-[10px] font-normal text-muted-foreground tabular-nums">{formatXAFFixed(opt.priceXaf)}</span>
+                            {isElite ? (
+                              <span className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">
+                                Incluido
+                              </span>
+                            ) : (
+                              <>
+                                <span className="text-sm font-bold tabular-nums">{formatXafAsEur(opt.priceXaf)}</span>
+                                <span className="text-[10px] font-normal text-muted-foreground tabular-nums">{formatXAFFixed(opt.priceXaf)}</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </button>
@@ -738,35 +775,37 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                   })}
                 </div>
 
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-                  <div className="flex items-start gap-2">
-                    <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <div className="text-xs text-foreground/80 space-y-2">
-                      <p>
-                        El lanzamiento express <strong>no garantiza aprobación automática</strong>. La
-                        canción seguirá pasando por revisión de derechos, calidad de audio,
-                        portada y datos del artista. Si el contenido no cumple los requisitos,
-                        el lanzamiento podrá retrasarse o rechazarse.
-                      </p>
-                      <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
-                        <li>El pago se realiza antes de enviar la solicitud.</li>
-                        <li>Si el retraso es culpa de YUSIOP: reembolso o crédito interno.</li>
-                        <li>Si es por datos/portada/audio/derechos incorrectos: <strong>no</strong> se devuelve el coste express.</li>
-                      </ul>
-                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={expressAck}
-                          onChange={(e) => setExpressAck(e.target.checked)}
-                          className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
-                        />
-                        <span className="text-xs font-medium">
-                          He leído y acepto las condiciones del Lanzamiento Express.
-                        </span>
-                      </label>
+                {!isElite && (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <ShieldAlert className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                      <div className="text-xs text-foreground/80 space-y-2">
+                        <p>
+                          El lanzamiento express <strong>no garantiza aprobación automática</strong>. La
+                          canción seguirá pasando por revisión de derechos, calidad de audio,
+                          portada y datos del artista. Si el contenido no cumple los requisitos,
+                          el lanzamiento podrá retrasarse o rechazarse.
+                        </p>
+                        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
+                          <li>El pago se realiza antes de enviar la solicitud.</li>
+                          <li>Si el retraso es culpa de YUSIOP: reembolso o crédito interno.</li>
+                          <li>Si es por datos/portada/audio/derechos incorrectos: <strong>no</strong> se devuelve el coste express.</li>
+                        </ul>
+                        <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={expressAck}
+                            onChange={(e) => setExpressAck(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                          />
+                          <span className="text-xs font-medium">
+                            He leído y acepto las condiciones del Lanzamiento Express.
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
