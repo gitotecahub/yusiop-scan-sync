@@ -25,7 +25,7 @@ const CopyrightBadge = ({ status, score, className }: Props) => {
       );
     case 'clean':
       return (
-        <Badge variant="secondary" className={`border border-emerald-500/40 text-emerald-700 dark:text-emerald-400 ${className ?? ''}`}>
+        <Badge variant="secondary" className={`border border-emerald-500/40 text-black dark:text-white ${className ?? ''}`}>
           <ShieldCheck className="h-3 w-3 mr-1" /> Sin copyright detectado
         </Badge>
       );
