@@ -128,7 +128,7 @@ const SongSubmissions = () => {
       const ids = submissions.map((s) => s.id);
       const { data: collabs } = await supabase
         .from('song_collaborators')
-        .select('id,artist_name,role,share_percent,is_primary,submission_id')
+        .select('id,artist_name,role,share_percent,is_primary,contact_email,submission_id')
         .in('submission_id', ids);
       const bySubmission = new Map<string, CollaboratorRow[]>();
       (collabs ?? []).forEach((c: any) => {
@@ -139,6 +139,7 @@ const SongSubmissions = () => {
           role: c.role,
           share_percent: Number(c.share_percent),
           is_primary: c.is_primary,
+          contact_email: c.contact_email ?? null,
         });
         bySubmission.set(c.submission_id, arr);
       });
