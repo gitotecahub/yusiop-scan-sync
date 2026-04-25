@@ -647,14 +647,17 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                       setExpressAck(false);
                     }
                   }}
-                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full transition-all ${
+                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full transition-all inline-flex items-center gap-1 ${
                     expressEnabled
                       ? 'bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white shadow-[0_0_18px_hsl(265_85%_60%/0.55)]'
                       : 'border border-primary/40 text-primary hover:bg-primary/10'
                   }`}
                 >
-                  <Zap className="inline h-3 w-3 mr-1" />
-                  {expressEnabled ? 'Express activado' : 'Activar Express'}
+                  <Zap className="h-3 w-3" />
+                  {expressEnabled ? 'Express activado' : 'Lanzamiento prioritario'}
+                  {isElite && !expressEnabled && (
+                    <Crown className="h-3 w-3 text-[hsl(45,95%,60%)]" />
+                  )}
                 </button>
               </div>
               <Input
@@ -673,7 +676,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               )}
               {expressEnabled && (
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  La fecha la fijará el equipo según el nivel express elegido.
+                  La fecha la fijará el equipo según el nivel prioritario elegido.
                 </p>
               )}
             </div>
