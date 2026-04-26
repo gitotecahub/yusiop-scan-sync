@@ -952,6 +952,83 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sender_type: Database["public"]["Enums"]["support_message_sender"]
+          sender_user_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sender_type: Database["public"]["Enums"]["support_message_sender"]
+          sender_user_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sender_type?: Database["public"]["Enums"]["support_message_sender"]
+          sender_user_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["support_ticket_category"]
+          created_at: string
+          description: string
+          id: string
+          priority: Database["public"]["Enums"]["support_ticket_priority"]
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["support_ticket_category"]
+          created_at?: string
+          description: string
+          id?: string
+          priority?: Database["public"]["Enums"]["support_ticket_priority"]
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["support_ticket_category"]
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: Database["public"]["Enums"]["support_ticket_priority"]
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["support_ticket_status"]
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -1686,6 +1763,18 @@ export type Database = {
         | "settings"
       subscription_plan_code: "plus" | "pro" | "elite"
       subscription_visibility: "off" | "soft_launch" | "on"
+      support_message_sender: "user" | "ai" | "admin"
+      support_ticket_category:
+        | "qr"
+        | "downloads"
+        | "payments"
+        | "cards"
+        | "subscriptions"
+        | "artist"
+        | "collaborations"
+        | "other"
+      support_ticket_priority: "low" | "medium" | "high"
+      support_ticket_status: "open" | "pending" | "resolved" | "closed"
       user_role: "user" | "admin"
       user_subscription_status: "active" | "cancelled" | "expired" | "past_due"
     }
@@ -1842,6 +1931,19 @@ export const Constants = {
       ],
       subscription_plan_code: ["plus", "pro", "elite"],
       subscription_visibility: ["off", "soft_launch", "on"],
+      support_message_sender: ["user", "ai", "admin"],
+      support_ticket_category: [
+        "qr",
+        "downloads",
+        "payments",
+        "cards",
+        "subscriptions",
+        "artist",
+        "collaborations",
+        "other",
+      ],
+      support_ticket_priority: ["low", "medium", "high"],
+      support_ticket_status: ["open", "pending", "resolved", "closed"],
       user_role: ["user", "admin"],
       user_subscription_status: ["active", "cancelled", "expired", "past_due"],
     },
