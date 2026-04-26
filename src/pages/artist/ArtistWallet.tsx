@@ -93,6 +93,14 @@ const ArtistWallet = () => {
     await loadHistory();
   };
 
+  // Recarga automática al volver a la pestaña
+  useEffect(() => {
+    const onFocus = () => { refreshAll(); };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artistId]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando wallet…</div>;
   }
