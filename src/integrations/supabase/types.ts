@@ -273,44 +273,60 @@ export type Database = {
           artist_id: string
           country: string | null
           created_at: string
+          details_json: Json
           id: string
           is_default: boolean
+          last_used_at: string | null
           method_type: Database["public"]["Enums"]["artist_payment_method_type"]
           payment_details: Json
+          rejection_reason: string | null
           updated_at: string
           user_id: string
           verification_status: string
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           account_holder_name: string
           artist_id: string
           country?: string | null
           created_at?: string
+          details_json?: Json
           id?: string
           is_default?: boolean
+          last_used_at?: string | null
           method_type: Database["public"]["Enums"]["artist_payment_method_type"]
           payment_details?: Json
+          rejection_reason?: string | null
           updated_at?: string
           user_id: string
           verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           account_holder_name?: string
           artist_id?: string
           country?: string | null
           created_at?: string
+          details_json?: Json
           id?: string
           is_default?: boolean
+          last_used_at?: string | null
           method_type?: Database["public"]["Enums"]["artist_payment_method_type"]
           payment_details?: Json
+          rejection_reason?: string | null
           updated_at?: string
           user_id?: string
           verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
       artist_withdrawal_requests: {
         Row: {
+          admin_internal_note: string | null
           amount_requested_xaf: number
           artist_id: string
           created_at: string
@@ -321,6 +337,8 @@ export type Database = {
           paid_by: string | null
           payment_method_id: string | null
           payment_method_snapshot: Json | null
+          payment_proof_url: string | null
+          payment_reference: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -329,6 +347,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_internal_note?: string | null
           amount_requested_xaf: number
           artist_id: string
           created_at?: string
@@ -339,6 +358,8 @@ export type Database = {
           paid_by?: string | null
           payment_method_id?: string | null
           payment_method_snapshot?: Json | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -347,6 +368,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_internal_note?: string | null
           amount_requested_xaf?: number
           artist_id?: string
           created_at?: string
@@ -357,6 +379,8 @@ export type Database = {
           paid_by?: string | null
           payment_method_id?: string | null
           payment_method_snapshot?: Json | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1687,12 +1711,23 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: Json
       }
-      admin_mark_withdrawal_paid: {
-        Args: { p_request_id: string }
-        Returns: Json
-      }
+      admin_mark_withdrawal_paid:
+        | { Args: { p_request_id: string }; Returns: Json }
+        | {
+            Args: {
+              p_admin_internal_note?: string
+              p_payment_proof_url?: string
+              p_payment_reference?: string
+              p_request_id: string
+            }
+            Returns: Json
+          }
       admin_reject_withdrawal: {
         Args: { p_reason: string; p_request_id: string }
+        Returns: Json
+      }
+      admin_set_method_status: {
+        Args: { p_method_id: string; p_reason?: string; p_status: string }
         Returns: Json
       }
       approve_artist_request: {
@@ -1997,6 +2032,8 @@ export type Database = {
         | "mobile_money"
         | "paypal"
         | "other"
+        | "crypto"
+        | "manual_other"
       artist_request_status: "pending" | "approved" | "rejected"
       artist_withdrawal_status:
         | "requested"
@@ -2184,6 +2221,8 @@ export const Constants = {
         "mobile_money",
         "paypal",
         "other",
+        "crypto",
+        "manual_other",
       ],
       artist_request_status: ["pending", "approved", "rejected"],
       artist_withdrawal_status: [
