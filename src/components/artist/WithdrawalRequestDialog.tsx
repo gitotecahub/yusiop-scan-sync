@@ -7,12 +7,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatXAFFixed } from '@/lib/currency';
 import { toast } from 'sonner';
-import { Loader2, AlertTriangle, Plus } from 'lucide-react';
+import { Loader2, AlertTriangle, Plus, Banknote } from 'lucide-react';
 import { FinancialSettings } from '@/hooks/useArtistWallet';
 import AddPaymentMethodDialog from './AddPaymentMethodDialog';
+import {
+  WithdrawalMethod,
+  METHOD_LABELS,
+  WITHDRAWAL_ERROR_MAP,
+  formatMethodSummary,
+} from '@/lib/withdrawalMethods';
 
 type Props = {
   open: boolean;
@@ -23,35 +29,30 @@ type Props = {
   onSubmitted?: () => void;
 };
 
-type Method = {
-  id: string;
-  method_type: string;
-  account_holder_name: string;
-  payment_details: Record<string, string>;
-};
-
-const METHOD_LABELS: Record<string, string> = {
-  bank_transfer: 'Transferencia bancaria',
-  mobile_money: 'Mobile Money',
-  paypal: 'PayPal',
-  other: 'Otro',
-};
-
 const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, settings, onSubmitted }: Props) => {
-  const [methods, setMethods] = useState<Method[]>([]);
+  const [methods, setMethods] = useState<WithdrawalMethod[]>([]);
   const [methodId, setMethodId] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [confirm, setConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [loadingMethods, setLoadingMethods] = useState(false);
 
   const loadMethods = async () => {
+    setLoadingMethods(true);
     const { data } = await supabase
       .from('artist_withdrawal_methods')
-      .select('id, method_type, account_holder_name, payment_details')
+      .select('id, artist_id, user_id, method_type, account_holder_name, country, details_json, payment_details, is_default, verification_status, rejection_reason, last_used_at, created_at, updated_at')
       .eq('artist_id', artistId);
-    setMethods((data as Method[]) ?? []);
-    if (data && data.length === 1) setMethodId(data[0].id);
+    setLoadingMethods(false);
+    const all = (data as WithdrawalMethod[]) ?? [];
+    setMethods(all);
+    const verified = all.filter((m) => m.verification_status === 'verified');
+    if (verified.length === 1) setMethodId(verified[0].id);
+    else if (verified.length > 0) {
+      const def = verified.find((m) => m.is_default);
+      if (def) setMethodId(def.id);
+    }
   };
 
   useEffect(() => {
@@ -59,9 +60,14 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
       loadMethods();
       setAmount('');
       setConfirm(false);
+      setMethodId('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, artistId]);
+
+  const verifiedMethods = methods.filter((m) => m.verification_status === 'verified');
+  const selectedMethod = methods.find((m) => m.id === methodId);
+  const isCrypto = selectedMethod?.method_type === 'crypto';
 
   const amountNum = Number(amount) || 0;
   const minXaf = settings?.withdrawal_minimum_xaf ?? 0;
@@ -72,6 +78,7 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
 
   const canSubmit =
     !!methodId &&
+    selectedMethod?.verification_status === 'verified' &&
     amountNum >= minXaf &&
     amountNum <= availableXaf &&
     confirm &&
@@ -88,21 +95,12 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
     setSubmitting(false);
     if (error) {
       const msg = error.message || '';
-      const map: Record<string, string> = {
-        withdrawals_disabled: 'Los retiros están temporalmente desactivados.',
-        amount_below_minimum: `La cantidad mínima es ${formatXAFFixed(minXaf)}.`,
-        invalid_method: 'Método de pago inválido.',
-        frequency_limit: `Solo puedes solicitar 1 retiro cada ${settings?.withdrawal_frequency_days} días.`,
-        insufficient_balance: 'Balance disponible insuficiente.',
-        earnings_under_review: 'Tienes ingresos bajo revisión. No puedes retirar ahora.',
-        not_authorized: 'No autorizado.',
-      };
-      const friendly = Object.entries(map).find(([k]) => msg.includes(k))?.[1] || 'No se pudo enviar la solicitud.';
+      const friendly = Object.entries(WITHDRAWAL_ERROR_MAP).find(([k]) => msg.includes(k))?.[1] || 'No se pudo enviar la solicitud.';
       toast.error(friendly);
       return;
     }
     if ((data as { success?: boolean })?.success) {
-      toast.success('Solicitud enviada. Será revisada por YUSIOP.');
+      toast.success('Solicitud enviada. Será revisada por el equipo financiero de YUSIOP.');
       onSubmitted?.();
       onOpenChange(false);
     }
@@ -111,11 +109,11 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Solicitar retiro</DialogTitle>
             <DialogDescription>
-              Esta solicitud será revisada por el equipo financiero de YUSIOP.
+              YUSIOP revisará tu solicitud antes de procesar el pago manualmente.
             </DialogDescription>
           </DialogHeader>
 
@@ -142,31 +140,47 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <Label>Método de pago</Label>
+                <Label>Método de cobro</Label>
                 <Button variant="ghost" size="sm" onClick={() => setAddOpen(true)}>
                   <Plus className="h-4 w-4 mr-1" /> Añadir método
                 </Button>
               </div>
-              {methods.length === 0 ? (
+
+              {loadingMethods ? (
+                <p className="text-xs text-muted-foreground">Cargando…</p>
+              ) : verifiedMethods.length === 0 ? (
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Sin métodos verificados</AlertTitle>
                   <AlertDescription>
-                    Añade un método de pago antes de solicitar tu primer retiro.
+                    Debes añadir y verificar un método de cobro antes de solicitar un retiro.
+                    {methods.length > 0 && ' Tienes métodos pendientes de revisión por YUSIOP.'}
                   </AlertDescription>
                 </Alert>
               ) : (
                 <Select value={methodId} onValueChange={setMethodId}>
                   <SelectTrigger><SelectValue placeholder="Selecciona método" /></SelectTrigger>
                   <SelectContent>
-                    {methods.map((m) => (
+                    {verifiedMethods.map((m) => (
                       <SelectItem key={m.id} value={m.id}>
-                        {METHOD_LABELS[m.method_type]} — {m.account_holder_name}
+                        {METHOD_LABELS[m.method_type]} · {formatMethodSummary(m)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             </div>
+
+            {isCrypto && (
+              <Alert className="border-amber-500/40 bg-amber-500/5">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertTitle>Retiro en crypto</AlertTitle>
+                <AlertDescription>
+                  Los pagos en crypto son <strong>irreversibles</strong>. Verifica cuidadosamente que la red
+                  ({selectedMethod?.details_json?.network}) y la wallet seleccionadas son correctas.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {amountNum > 0 && (
               <Card className="p-3 space-y-1 text-sm">
@@ -178,19 +192,29 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
                 <div className="flex justify-between font-semibold pt-1 border-t">
                   <span>Recibirás</span><span className="text-primary">{formatXAFFixed(netXaf)}</span>
                 </div>
-                <div className="text-xs text-muted-foreground pt-1">Procesamiento: 3-7 días hábiles tras aprobación.</div>
+                {selectedMethod && (
+                  <div className="flex justify-between text-xs text-muted-foreground pt-1">
+                    <span>Método</span>
+                    <span>{METHOD_LABELS[selectedMethod.method_type]}</span>
+                  </div>
+                )}
+                <div className="text-xs text-muted-foreground pt-1">Tiempo estimado: 3-7 días hábiles tras aprobación.</div>
               </Card>
             )}
 
             <label className="flex items-start gap-2 text-xs">
               <Checkbox checked={confirm} onCheckedChange={(v) => setConfirm(v === true)} />
-              <span>Confirmo que los datos de pago son correctos y entiendo que esta solicitud será revisada por YUSIOP.</span>
+              <span>
+                Confirmo que los datos del método de cobro son correctos. Esta solicitud será revisada por
+                el equipo financiero de YUSIOP y pagada manualmente.
+              </span>
             </label>
 
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={submitting}>Cancelar</Button>
               <Button onClick={handleSubmit} disabled={!canSubmit}>
                 {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <Banknote className="h-4 w-4 mr-2" />
                 Enviar solicitud
               </Button>
             </div>
@@ -202,10 +226,7 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
         open={addOpen}
         onOpenChange={setAddOpen}
         artistId={artistId}
-        onCreated={() => {
-          setAddOpen(false);
-          loadMethods();
-        }}
+        onSaved={() => loadMethods()}
       />
     </>
   );
