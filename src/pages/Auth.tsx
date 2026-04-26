@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { signInSchema, signUpSchema } from '@/lib/validation';
 import { useLanguageStore } from '@/stores/languageStore';
+import { PasswordField } from '@/components/auth/PasswordField';
 
 const Auth = () => {
   const navigate = useNavigate();
