@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, LineChart } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, LineChart, Download } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -751,6 +751,15 @@ const SalesSimulator = () => {
         </Card>
       </div>
 
+      {/* === SIMULADOR DE BENEFICIOS POR DESCARGAS === */}
+      <DownloadsProfitSimulator
+        avgValuePerDownloadXAF={
+          totals.totalDownloads > 0 ? totals.totalGross / totals.totalDownloads : 0
+        }
+        artistShare={artistShare}
+        platformShare={platformShare}
+      />
+
       {/* === PROYECCIÓN A 5 AÑOS === */}
       <FiveYearProjection
         baseGrossXAF={totals.totalGross}
@@ -999,6 +1008,174 @@ const FiveYearProjection = ({
           * Proyección lineal: cada año crece un 10% sobre el anterior, manteniendo precios,
           reparto de ingresos y costes unitarios constantes. Los ajustes de cualquier parámetro
           de arriba se reflejan automáticamente aquí.
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
+
+/* =====================================================
+   SIMULADOR DE BENEFICIOS POR DESCARGAS
+   - El usuario introduce un nº de descargas
+   - Calcula el bruto generado y el reparto artista / plataforma
+   - Usa el valor medio por descarga derivado de la mezcla
+     actual de tarjetas físicas + virtuales
+   ===================================================== */
+const DOWNLOAD_PRESETS = [100, 1_000, 10_000, 100_000, 1_000_000];
+
+const DownloadsProfitSimulator = ({
+  avgValuePerDownloadXAF,
+  artistShare,
+  platformShare,
+}: {
+  avgValuePerDownloadXAF: number;
+  artistShare: number;
+  platformShare: number;
+}) => {
+  const [downloads, setDownloads] = useState(10_000);
+  const [customValueXAF, setCustomValueXAF] = useState<number | ''>('');
+
+  const valuePerDl = customValueXAF === '' ? avgValuePerDownloadXAF : customValueXAF;
+
+  const grossXAF = valuePerDl * downloads;
+  const artistXAF = grossXAF * (artistShare / 100);
+  const platformXAF = grossXAF * (platformShare / 100);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Download className="h-5 w-5 text-yusiop-primary" />
+          Simulador de beneficios por descargas
+        </CardTitle>
+        <CardDescription>
+          Calcula rápido cuánto genera un volumen concreto de descargas.
+          Por defecto se usa el valor medio por descarga calculado con la mezcla
+          actual de tarjetas (físicas + virtuales). Puedes sobrescribirlo si quieres
+          simular otro precio.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Inputs */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+            <Label>Número de descargas</Label>
+            <Input
+              type="number"
+              min={0}
+              value={downloads}
+              onChange={(e) => setDownloads(Math.max(0, Number(e.target.value) || 0))}
+            />
+            <Slider
+              value={[Math.min(downloads, 1_000_000)]}
+              onValueChange={(v) => setDownloads(v[0])}
+              min={0}
+              max={1_000_000}
+              step={100}
+            />
+            <div className="flex flex-wrap gap-2 pt-1">
+              {DOWNLOAD_PRESETS.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setDownloads(n)}
+                  className={`text-xs px-2 py-1 rounded-md border transition-colors ${
+                    downloads === n
+                      ? 'bg-yusiop-primary text-primary-foreground border-yusiop-primary'
+                      : 'bg-background hover:bg-muted'
+                  }`}
+                >
+                  {n.toLocaleString('es-ES')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+            <Label>Valor medio por descarga (XAF)</Label>
+            <Input
+              type="number"
+              min={0}
+              placeholder={avgValuePerDownloadXAF.toFixed(2)}
+              value={customValueXAF}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw === '') {
+                  setCustomValueXAF('');
+                } else {
+                  setCustomValueXAF(Math.max(0, Number(raw) || 0));
+                }
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Calculado de la mezcla actual:{' '}
+              <span className="font-semibold">{formatEUR(avgValuePerDownloadXAF)}</span>
+              {customValueXAF !== '' && (
+                <>
+                  {' '}
+                  · Vacía el campo para volver al valor calculado.
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Resultados */}
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <KpiCard
+            icon={<Coins className="h-4 w-4 text-yusiop-primary" />}
+            label="Ingreso bruto"
+          >
+            {formatEUR(grossXAF, 'left')}
+          </KpiCard>
+          <KpiCard
+            icon={<UsersIcon className="h-4 w-4 text-yusiop-primary" />}
+            label={`Artistas (${artistShare}%)`}
+          >
+            {formatEUR(artistXAF, 'left')}
+          </KpiCard>
+          <KpiCard
+            icon={<TrendingUp className="h-4 w-4 text-yusiop-primary" />}
+            label={`Plataforma (${platformShare}%)`}
+          >
+            {formatEUR(platformXAF, 'left')}
+          </KpiCard>
+        </div>
+
+        {/* Tabla de referencia */}
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2 font-medium">Descargas</th>
+                <th className="text-right px-3 py-2 font-medium">Bruto</th>
+                <th className="text-right px-3 py-2 font-medium">Artistas</th>
+                <th className="text-right px-3 py-2 font-medium">Plataforma</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DOWNLOAD_PRESETS.map((n) => {
+                const g = valuePerDl * n;
+                const a = g * (artistShare / 100);
+                const p = g * (platformShare / 100);
+                return (
+                  <tr key={n} className="border-t">
+                    <td className="px-3 py-2 tabular-nums">{n.toLocaleString('es-ES')}</td>
+                    <td className="px-3 py-2 text-right">{formatEUR(g)}</td>
+                    <td className="px-3 py-2 text-right">{formatEUR(a)}</td>
+                    <td className="px-3 py-2 text-right">{formatEUR(p)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          * El valor por descarga sale de dividir los ingresos brutos totales entre las
+          descargas habilitadas configuradas arriba. Los costes de producción de tarjetas
+          físicas no se descuentan aquí porque dependen del nº de tarjetas vendidas, no de
+          las descargas consumidas.
         </p>
       </CardContent>
     </Card>
