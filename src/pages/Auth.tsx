@@ -132,11 +132,12 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="eyebrow">{t('auth.password')}</Label>
-                  <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
+                  <PasswordField id="signup-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" showStrength className="rounded-2xl border-border bg-input h-12" />
+                  <p className="text-[11px] text-muted-foreground">Mínimo 8 caracteres. Acepta letras, números y símbolos.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password" className="eyebrow">{t('auth.confirmPassword')}</Label>
-                  <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="rounded-2xl border-border bg-input h-12" />
+                  <PasswordField id="confirm-password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className="rounded-2xl border-border bg-input h-12" />
                 </div>
                 <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
                   {loading ? t('auth.signingUp') : t('auth.signupBtn')}
