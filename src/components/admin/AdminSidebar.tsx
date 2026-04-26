@@ -17,6 +17,7 @@ import {
   Users2,
   Sparkles,
   Crown,
+  Headphones,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -55,6 +56,7 @@ const menuItems: MenuItem[] = [
   { title: 'Monetización', url: '/admin/monetization', icon: Coins, area: 'monetization' },
   { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator, area: 'monetization' },
   { title: 'Suscripciones', url: '/admin/subscriptions', icon: Sparkles, area: 'monetization' },
+  { title: 'Soporte', url: '/admin/support', icon: Headphones, area: null },
   { title: 'Configuración', url: '/admin/settings', icon: Settings, area: 'settings' },
 ];
 
