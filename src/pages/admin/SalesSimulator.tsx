@@ -958,7 +958,6 @@ const FiveYearProjection = ({
                 <th className="text-right px-3 py-2 font-medium">Tarjetas</th>
                 <th className="text-right px-3 py-2 font-medium">Bruto</th>
                 <th className="text-right px-3 py-2 font-medium">Artistas</th>
-                <th className="text-right px-3 py-2 font-medium">Inversor</th>
                 <th className="text-right px-3 py-2 font-medium">Plataforma neto</th>
               </tr>
             </thead>
@@ -976,7 +975,6 @@ const FiveYearProjection = ({
                   </td>
                   <td className="text-right px-3 py-2">{formatEUR(r.grossXAF)}</td>
                   <td className="text-right px-3 py-2">{formatEUR(r.artistXAF)}</td>
-                  <td className="text-right px-3 py-2">{formatEUR(r.investorXAF)}</td>
                   <td className="text-right px-3 py-2 font-semibold text-yusiop-primary">
                     {formatEUR(r.netXAF)}
                   </td>
@@ -989,7 +987,6 @@ const FiveYearProjection = ({
                 </td>
                 <td className="text-right px-3 py-2">{formatEUR(totals.grossXAF)}</td>
                 <td className="text-right px-3 py-2">{formatEUR(totals.artistXAF)}</td>
-                <td className="text-right px-3 py-2">{formatEUR(totals.investorXAF)}</td>
                 <td className="text-right px-3 py-2 text-yusiop-primary">
                   {formatEUR(totals.netXAF)}
                 </td>
