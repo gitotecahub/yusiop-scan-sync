@@ -751,6 +751,15 @@ const SalesSimulator = () => {
         </Card>
       </div>
 
+      {/* === SIMULADOR DE BENEFICIOS POR DESCARGAS === */}
+      <DownloadsProfitSimulator
+        avgValuePerDownloadXAF={
+          totals.totalDownloads > 0 ? totals.totalGross / totals.totalDownloads : 0
+        }
+        artistShare={artistShare}
+        platformShare={platformShare}
+      />
+
       {/* === PROYECCIÓN A 5 AÑOS === */}
       <FiveYearProjection
         baseGrossXAF={totals.totalGross}
