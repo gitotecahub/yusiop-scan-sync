@@ -110,6 +110,9 @@ export default function Support() {
         </div>
       </div>
 
+      {/* Publicidad */}
+      <RequestAdButton variant="card" />
+
       {/* Botones rápidos */}
       <div>
         <h2 className="font-display text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
