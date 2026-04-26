@@ -23,6 +23,7 @@ import ArtistDashboard from '@/pages/artist/ArtistDashboard';
 import MySubmissions from '@/pages/artist/MySubmissions';
 import ArtistStats from '@/pages/artist/ArtistStats';
 import Collaborations from '@/pages/artist/Collaborations';
+import ArtistWallet from '@/pages/artist/ArtistWallet';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
 import CollaborationClaims from '@/pages/admin/CollaborationClaims';
 import { RequireStaffArea } from '@/components/admin/RequireStaffArea';
@@ -46,6 +47,7 @@ import Subscriptions from '@/pages/Subscriptions';
 import Popular from '@/pages/Popular';
 import Support from '@/pages/Support';
 import AdminSupport from '@/pages/admin/Support';
+import AdminWithdrawals from '@/pages/admin/Withdrawals';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -104,6 +106,7 @@ const AppContent = () => {
         <Route path="collab-claims" element={<RequireStaffArea area="catalog"><CollaborationClaims /></RequireStaffArea>} />
         <Route path="subscriptions" element={<RequireStaffArea area="monetization"><AdminSubscriptions /></RequireStaffArea>} />
         <Route path="support" element={<AdminSupport />} />
+        <Route path="withdrawals" element={<RequireStaffArea area="monetization"><AdminWithdrawals /></RequireStaffArea>} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -129,6 +132,7 @@ const AppContent = () => {
             <Route path="/artist/submissions" element={<MySubmissions />} />
             <Route path="/artist/stats" element={<ArtistStats />} />
             <Route path="/artist/collaborations" element={<Collaborations />} />
+            <Route path="/artist/wallet" element={<ArtistWallet />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
             <Route path="/support" element={<Support />} />
             <Route path="/profile" element={

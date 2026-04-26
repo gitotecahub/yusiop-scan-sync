@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Music, Disc3, BarChart3, ArrowLeft, Upload, Users, HelpCircle } from 'lucide-react';
+import { Music, Disc3, BarChart3, ArrowLeft, Upload, Users, HelpCircle, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/authStore';
@@ -148,6 +148,17 @@ const ArtistDashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">
               {t('artist.collabsCardDesc')}
             </p>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-glow transition-shadow cursor-pointer sm:col-span-2 border-primary/30" onClick={() => navigate('/artist/wallet')}>
+          <CardContent className="p-6 flex items-start gap-4">
+            <Wallet className="h-8 w-8 text-primary shrink-0" />
+            <div className="min-w-0">
+              <h3 className="font-display font-bold text-lg">Ingresos y Retiros</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Consulta tu balance, ingresos por canción y solicita retiros de forma segura.
+              </p>
+            </div>
           </CardContent>
         </Card>
         <Card className="hover:shadow-glow transition-shadow cursor-pointer sm:col-span-2" onClick={() => navigate('/support')}>
