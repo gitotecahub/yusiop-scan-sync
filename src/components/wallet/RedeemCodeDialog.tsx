@@ -64,8 +64,8 @@ export const RedeemCodeDialog = ({ open, onOpenChange }: RedeemCodeDialogProps) 
 
         {success ? (
           <div className="flex flex-col items-center gap-3 py-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/15">
-              <CheckCircle2 className="h-9 w-9 text-green-500" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+              <CheckCircle2 className="h-9 w-9 text-primary" />
             </div>
             <p className="text-2xl font-bold">+{formatXAFFixed(success.amount)}</p>
             <p className="text-sm text-muted-foreground">
