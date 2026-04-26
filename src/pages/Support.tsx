@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, HelpCircle, MessageCircle, Ticket, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import UserTicketDetailDialog from '@/components/support/UserTicketDetailDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -41,12 +42,14 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
 
 export default function Support() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const [initialPrompt, setInitialPrompt] = useState<string | null>(null);
   const [escalateOpen, setEscalateOpen] = useState(false);
   const [escalateCategory, setEscalateCategory] = useState<string | undefined>();
   const [escalateDescription, setEscalateDescription] = useState<string | undefined>();
   const [myTickets, setMyTickets] = useState<MyTicket[]>([]);
+  const [openTicketId, setOpenTicketId] = useState<string | null>(null);
 
   const loadTickets = async () => {
     if (!user) return;
