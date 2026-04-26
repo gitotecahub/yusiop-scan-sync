@@ -13,7 +13,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { formatXAFFixed } from '@/lib/currency';
-import { CheckCircle2, XCircle, Banknote, Loader2, RefreshCw, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, Banknote, Loader2, RefreshCw, AlertTriangle, Copy, AlertCircle } from 'lucide-react';
+import MarkPaidDialog from '@/components/admin/MarkPaidDialog';
+import { METHOD_LABELS, type MethodType } from '@/lib/withdrawalMethods';
 
 type Request = {
   id: string;
@@ -26,6 +28,9 @@ type Request = {
   created_at: string;
   paid_at: string | null;
   payment_method_snapshot: Record<string, unknown> | null;
+  payment_reference: string | null;
+  payment_proof_url: string | null;
+  admin_internal_note: string | null;
 };
 
 type Settings = {
@@ -58,6 +63,7 @@ const Withdrawals = () => {
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [payDialog, setPayDialog] = useState<{ id: string; net: number } | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{
     total_downloads: number; will_create?: number; inserted?: number; skipped: number; estimated_artist_xaf_total: number; dry_run: boolean;
@@ -66,7 +72,7 @@ const Withdrawals = () => {
   const load = async () => {
     const { data: reqs } = await supabase
       .from('artist_withdrawal_requests')
-      .select('id, artist_id, amount_requested_xaf, fee_amount_xaf, net_amount_xaf, status, rejection_reason, created_at, paid_at, payment_method_snapshot')
+      .select('id, artist_id, amount_requested_xaf, fee_amount_xaf, net_amount_xaf, status, rejection_reason, created_at, paid_at, payment_method_snapshot, payment_reference, payment_proof_url, admin_internal_note')
       .order('created_at', { ascending: false });
     setRequests((reqs as Request[]) ?? []);
 
@@ -114,6 +120,17 @@ const Withdrawals = () => {
     setRejectId(null);
     setRejectReason('');
     load();
+  };
+
+  const copy = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); toast.success('Copiado'); }
+    catch { toast.error('No se pudo copiar'); }
+  };
+
+  const openProof = async (path: string) => {
+    const { data } = await supabase.storage.from('withdrawal-proofs').createSignedUrl(path, 60 * 5);
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+    else toast.error('No se pudo abrir el comprobante');
   };
 
   const saveSettings = async () => {
