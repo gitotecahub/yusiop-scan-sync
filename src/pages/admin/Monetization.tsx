@@ -418,7 +418,7 @@ const Monetization = () => {
             Estándar: {formatEUR(STANDARD_PRICE_EUR)} ({STANDARD_CREDITS} descargas →{' '}
             {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_EUR)} —
             valor por descarga calculado según los créditos de cada tarjeta. Reparto por descarga:{' '}
-            <strong>Artista 40%</strong> · <strong>Yusiop 60%</strong>.
+            <strong>Artista 30%</strong> · <strong>Yusiop 70%</strong>.
           </CardDescription>
         </CardHeader>
       </Card>
