@@ -518,8 +518,8 @@ const SalesSimulator = () => {
         <CardHeader>
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
-            Aplica al total combinado (físicas + virtuales). Por defecto: 40% artistas,
-            60% plataforma.
+            Aplica al total combinado (físicas + virtuales). Por defecto: 30% artistas,
+            70% plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
