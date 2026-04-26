@@ -49,6 +49,7 @@ import Popular from '@/pages/Popular';
 import Support from '@/pages/Support';
 import AdminSupport from '@/pages/admin/Support';
 import AdminWithdrawals from '@/pages/admin/Withdrawals';
+import PaymentMethodsAdmin from '@/pages/admin/PaymentMethodsAdmin';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -108,6 +109,7 @@ const AppContent = () => {
         <Route path="subscriptions" element={<RequireStaffArea area="monetization"><AdminSubscriptions /></RequireStaffArea>} />
         <Route path="support" element={<AdminSupport />} />
         <Route path="withdrawals" element={<RequireStaffArea area="monetization"><AdminWithdrawals /></RequireStaffArea>} />
+        <Route path="payment-methods" element={<RequireStaffArea area="monetization"><PaymentMethodsAdmin /></RequireStaffArea>} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
