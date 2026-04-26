@@ -30,6 +30,7 @@ import { RequireStaffArea } from '@/components/admin/RequireStaffArea';
 // Admin Pages
 import AdminLayout from '@/pages/admin/AdminLayout';
 import Dashboard from '@/pages/admin/Dashboard';
+import CeoCenter from '@/pages/admin/CeoCenter';
 import Users from '@/pages/admin/Users';
 import UserDetail from '@/pages/admin/UserDetail';
 import Songs from '@/pages/admin/Songs';
@@ -86,6 +87,7 @@ const AppContent = () => {
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path="ceo-center" element={<CeoCenter />} />
         <Route path="users" element={<RequireStaffArea area="users"><Users /></RequireStaffArea>} />
         <Route path="users/:userId" element={<RequireStaffArea area="users"><UserDetail /></RequireStaffArea>} />
         <Route path="songs" element={<RequireStaffArea area="catalog"><Songs /></RequireStaffArea>} />
