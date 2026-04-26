@@ -406,7 +406,7 @@ const Monetization = () => {
       <div>
         <h1 className="text-3xl font-bold">Monetización</h1>
         <p className="text-muted-foreground">
-          Reparto por descarga: artista 40% · Yusiop 60%.
+          Reparto por descarga: artista 30% · Yusiop 70%.
         </p>
       </div>
 
