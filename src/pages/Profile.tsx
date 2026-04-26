@@ -40,6 +40,7 @@ import { useNavigate } from 'react-router-dom';
 import { useModeStore } from '@/stores/modeStore';
 import ModeSwitcher from '@/components/ModeSwitcher';
 import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
+import RequestAdButton from '@/components/ads/RequestAdButton';
 
 interface ScannedCard {
   id: string;
@@ -681,6 +682,9 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Publicidad */}
+      <RequestAdButton variant="card" />
 
       {/* Settings */}
       <div>
