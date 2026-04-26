@@ -306,6 +306,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressEnabled(false);
       setExpressTier(null);
       setExpressAck(false);
+      setPromo({
+        enabled: false,
+        plan: null,
+        ad_text: '',
+        cta_text: 'Escuchar ahora',
+        start_date: new Date().toISOString().split('T')[0],
+      });
     }
     setTrackFile(null);
     setCoverFile(null);
