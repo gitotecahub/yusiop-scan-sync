@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase, LineChart } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, LineChart } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -47,8 +47,7 @@ const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
 const DEFAULT_PREM_CREDITS = 10;
 const DEFAULT_ARTIST_SHARE = 40; // %
-const DEFAULT_INVESTOR_SHARE = 10; // %
-const DEFAULT_PLATFORM_SHARE = 50; // %
+const DEFAULT_PLATFORM_SHARE = 60; // %
 
 // Defaults virtuales (EUR base, sin costes de producción)
 const DEFAULT_VSTD_PRICE_EUR = 5;
@@ -63,7 +62,6 @@ const SalesSimulator = () => {
   const [stdCredits, setStdCredits] = useState(DEFAULT_STD_CREDITS);
   const [premCredits, setPremCredits] = useState(DEFAULT_PREM_CREDITS);
   const [artistShare, setArtistShare] = useState(DEFAULT_ARTIST_SHARE);
-  const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
   const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
   // Volume inputs físicas (annual)
@@ -99,7 +97,6 @@ const SalesSimulator = () => {
     const totalGross = physicalGross + virtualGrossXAF;
 
     const artistPct = artistShare / 100;
-    const investorPct = investorShare / 100;
     const platformPct = platformShare / 100;
 
     const stdArtist = stdGross * artistPct;
@@ -108,7 +105,6 @@ const SalesSimulator = () => {
     const vPremArtist = vPremGrossXAF * artistPct;
     const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
-    const totalInvestor = totalGross * investorPct;
     const totalPlatform = totalGross * platformPct;
 
     // Las virtuales no tienen costes de producción
@@ -121,7 +117,6 @@ const SalesSimulator = () => {
 
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
-    const monthlyInvestor = totalInvestor / 12;
     const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
@@ -151,7 +146,6 @@ const SalesSimulator = () => {
       vStdArtist,
       vPremArtist,
       totalArtist,
-      totalInvestor,
       totalPlatform,
       totalCosts,
       platformNet,
@@ -160,7 +154,6 @@ const SalesSimulator = () => {
       totalUnits,
       monthlyGross,
       monthlyPlatform,
-      monthlyInvestor,
       monthlyArtist,
       monthlyNet,
       totalDownloads,
@@ -175,7 +168,6 @@ const SalesSimulator = () => {
     stdCredits,
     premCredits,
     artistShare,
-    investorShare,
     platformShare,
     stdYearly,
     premYearly,
@@ -195,7 +187,6 @@ const SalesSimulator = () => {
     setStdCredits(DEFAULT_STD_CREDITS);
     setPremCredits(DEFAULT_PREM_CREDITS);
     setArtistShare(DEFAULT_ARTIST_SHARE);
-    setInvestorShare(DEFAULT_INVESTOR_SHARE);
     setPlatformShare(DEFAULT_PLATFORM_SHARE);
     setVStdPriceEUR(DEFAULT_VSTD_PRICE_EUR);
     setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
@@ -528,7 +519,7 @@ const SalesSimulator = () => {
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
             Aplica al total combinado (físicas + virtuales). Por defecto: 40% artistas,
-            10% inversor, 50% plataforma.
+            60% plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -546,19 +537,7 @@ const SalesSimulator = () => {
             />
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Inversor (%)</Label>
-              <span className="text-sm font-semibold">{investorShare}%</span>
-            </div>
-            <Slider
-              value={[investorShare]}
-              onValueChange={(v) => setInvestorShare(v[0])}
-              min={0}
-              max={100}
-              step={1}
-            />
-          </div>
+
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -575,7 +554,7 @@ const SalesSimulator = () => {
           </div>
 
           {(() => {
-            const sum = artistShare + investorShare + platformShare;
+            const sum = artistShare + platformShare;
             const ok = sum === 100;
             return (
               <div
@@ -640,11 +619,10 @@ const SalesSimulator = () => {
         </Card>
       </div>
 
-      {/* Investor ROI progress */}
-      <InvestorProgress totalInvestorXAF={totals.totalInvestor} />
+
 
       {/* KPIs */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={<Package className="h-4 w-4 text-yusiop-primary" />}
           label="Tarjetas vendidas / año"
@@ -664,12 +642,6 @@ const SalesSimulator = () => {
           label={`Bolsa artistas (${artistShare}%)`}
         >
           {formatEUR(totals.totalArtist, 'left')}
-        </KpiCard>
-        <KpiCard
-          icon={<Briefcase className="h-4 w-4 text-yusiop-primary" />}
-          label={`Inversor (${investorShare}%)`}
-        >
-          {formatEUR(totals.totalInvestor, 'left')}
         </KpiCard>
         <KpiCard
           icon={<TrendingUp className="h-4 w-4 text-yusiop-primary" />}
@@ -706,12 +678,6 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Inversor (${investorShare}%)`}
-              value={formatEUR(totals.totalInvestor)}
-              bold
-            />
-            <Separator />
-            <Row
               label={`Plataforma bruto (${platformShare}%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
@@ -736,7 +702,7 @@ const SalesSimulator = () => {
           <CardContent className="space-y-2 text-sm">
             <Row label="Ingresos brutos / mes" value={formatEUR(totals.monthlyGross)} />
             <Row label="Bolsa artistas / mes" value={formatEUR(totals.monthlyArtist)} />
-            <Row label="Inversor / mes" value={formatEUR(totals.monthlyInvestor)} />
+            
             <Row
               label="Plataforma bruto / mes"
               value={formatEUR(totals.monthlyPlatform)}
@@ -790,7 +756,6 @@ const SalesSimulator = () => {
         baseGrossXAF={totals.totalGross}
         baseUnits={totals.totalUnits}
         baseArtistXAF={totals.totalArtist}
-        baseInvestorXAF={totals.totalInvestor}
         basePlatformXAF={totals.totalPlatform}
         baseNetXAF={totals.platformNet}
         baseCostsXAF={totals.totalCosts}
@@ -848,106 +813,6 @@ const KpiCard = ({
   </Card>
 );
 
-// Capital inicial y objetivo del inversor
-const INVESTOR_CAPITAL_EUR = 26500;
-const INVESTOR_OPEX_EUR = 16000;
-const INVESTOR_INTEREST_PCT = 0.25;
-const INVESTOR_TARGET_EUR = INVESTOR_CAPITAL_EUR * (1 + INVESTOR_INTEREST_PCT); // 33.125 €
-
-const InvestorProgress = ({ totalInvestorXAF }: { totalInvestorXAF: number }) => {
-  const investorEUR = totalInvestorXAF / XAF_PER_EUR;
-  const pct = Math.max(0, Math.min(100, (investorEUR / INVESTOR_TARGET_EUR) * 100));
-  const remaining = Math.max(0, INVESTOR_TARGET_EUR - investorEUR);
-  const reached = investorEUR >= INVESTOR_TARGET_EUR;
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-yusiop-primary" />
-          Retorno del inversor
-        </CardTitle>
-        <CardDescription>
-          Capital inicial {INVESTOR_CAPITAL_EUR.toLocaleString('es-ES')} € + 25% de intereses ={' '}
-          <span className="font-semibold text-foreground">
-            {INVESTOR_TARGET_EUR.toLocaleString('es-ES')} €
-          </span>
-          . Costes operativos de referencia: {INVESTOR_OPEX_EUR.toLocaleString('es-ES')} €.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="relative h-7 w-full overflow-hidden rounded-full border border-border/60 bg-muted/40 shadow-inner">
-          {/* Barra degradada rojo→verde, estilo cristal */}
-          <div
-            className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out"
-            style={{
-              width: `${pct}%`,
-              background:
-                'linear-gradient(90deg, hsl(0 85% 55%) 0%, hsl(35 90% 55%) 40%, hsl(70 80% 50%) 70%, hsl(140 75% 45%) 100%)',
-              boxShadow:
-                'inset 0 1px 0 hsl(0 0% 100% / 0.45), inset 0 -6px 10px hsl(0 0% 0% / 0.18), 0 0 12px hsl(var(--primary) / 0.15)',
-            }}
-          >
-            {/* Brillo cristal superior */}
-            <div
-              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full"
-              style={{
-                background:
-                  'linear-gradient(180deg, hsl(0 0% 100% / 0.45) 0%, hsl(0 0% 100% / 0.05) 100%)',
-              }}
-            />
-          </div>
-          {/* Marcador de objetivo (100%) */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-            <span
-              className={`text-[10px] font-semibold tabular-nums ${
-                reached ? 'text-white drop-shadow' : 'text-muted-foreground'
-              }`}
-            >
-              {pct.toFixed(1)}%
-            </span>
-          </div>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-3 text-sm">
-          <div className="space-y-0.5">
-            <p className="text-xs text-muted-foreground">Ganancias del inversor / año</p>
-            <p className="font-semibold tabular-nums">
-              {investorEUR.toLocaleString('es-ES', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{' '}
-              €
-            </p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xs text-muted-foreground">Objetivo (capital + 25%)</p>
-            <p className="font-semibold tabular-nums">
-              {INVESTOR_TARGET_EUR.toLocaleString('es-ES')} €
-            </p>
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-xs text-muted-foreground">
-              {reached ? 'Estado' : 'Pendiente por devolver'}
-            </p>
-            <p
-              className={`font-semibold tabular-nums ${
-                reached ? 'text-green-500' : 'text-destructive'
-              }`}
-            >
-              {reached
-                ? '✓ Inversión recuperada con intereses'
-                : `${remaining.toLocaleString('es-ES', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })} €`}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 /* =====================================================
    PROYECCIÓN A 5 AÑOS — crecimiento +10% anual
@@ -959,7 +824,6 @@ const FiveYearProjection = ({
   baseGrossXAF,
   baseUnits,
   baseArtistXAF,
-  baseInvestorXAF,
   basePlatformXAF,
   baseNetXAF,
   baseCostsXAF,
@@ -967,7 +831,6 @@ const FiveYearProjection = ({
   baseGrossXAF: number;
   baseUnits: number;
   baseArtistXAF: number;
-  baseInvestorXAF: number;
   basePlatformXAF: number;
   baseNetXAF: number;
   baseCostsXAF: number;
@@ -980,7 +843,6 @@ const FiveYearProjection = ({
       units: number;
       grossXAF: number;
       artistXAF: number;
-      investorXAF: number;
       platformXAF: number;
       costsXAF: number;
       netXAF: number;
@@ -994,14 +856,13 @@ const FiveYearProjection = ({
         units: baseUnits * multiplier,
         grossXAF: baseGrossXAF * multiplier,
         artistXAF: baseArtistXAF * multiplier,
-        investorXAF: baseInvestorXAF * multiplier,
         platformXAF: basePlatformXAF * multiplier,
         costsXAF: baseCostsXAF * multiplier,
         netXAF: baseNetXAF * multiplier,
       });
     }
     return out;
-  }, [baseGrossXAF, baseUnits, baseArtistXAF, baseInvestorXAF, basePlatformXAF, baseNetXAF, baseCostsXAF]);
+  }, [baseGrossXAF, baseUnits, baseArtistXAF, basePlatformXAF, baseNetXAF, baseCostsXAF]);
 
   const totals = useMemo(() => {
     return rows.reduce(
@@ -1009,12 +870,11 @@ const FiveYearProjection = ({
         units: acc.units + r.units,
         grossXAF: acc.grossXAF + r.grossXAF,
         artistXAF: acc.artistXAF + r.artistXAF,
-        investorXAF: acc.investorXAF + r.investorXAF,
         platformXAF: acc.platformXAF + r.platformXAF,
         costsXAF: acc.costsXAF + r.costsXAF,
         netXAF: acc.netXAF + r.netXAF,
       }),
-      { units: 0, grossXAF: 0, artistXAF: 0, investorXAF: 0, platformXAF: 0, costsXAF: 0, netXAF: 0 }
+      { units: 0, grossXAF: 0, artistXAF: 0, platformXAF: 0, costsXAF: 0, netXAF: 0 }
     );
   }, [rows]);
 
@@ -1098,7 +958,6 @@ const FiveYearProjection = ({
                 <th className="text-right px-3 py-2 font-medium">Tarjetas</th>
                 <th className="text-right px-3 py-2 font-medium">Bruto</th>
                 <th className="text-right px-3 py-2 font-medium">Artistas</th>
-                <th className="text-right px-3 py-2 font-medium">Inversor</th>
                 <th className="text-right px-3 py-2 font-medium">Plataforma neto</th>
               </tr>
             </thead>
@@ -1116,7 +975,6 @@ const FiveYearProjection = ({
                   </td>
                   <td className="text-right px-3 py-2">{formatEUR(r.grossXAF)}</td>
                   <td className="text-right px-3 py-2">{formatEUR(r.artistXAF)}</td>
-                  <td className="text-right px-3 py-2">{formatEUR(r.investorXAF)}</td>
                   <td className="text-right px-3 py-2 font-semibold text-yusiop-primary">
                     {formatEUR(r.netXAF)}
                   </td>
@@ -1129,7 +987,6 @@ const FiveYearProjection = ({
                 </td>
                 <td className="text-right px-3 py-2">{formatEUR(totals.grossXAF)}</td>
                 <td className="text-right px-3 py-2">{formatEUR(totals.artistXAF)}</td>
-                <td className="text-right px-3 py-2">{formatEUR(totals.investorXAF)}</td>
                 <td className="text-right px-3 py-2 text-yusiop-primary">
                   {formatEUR(totals.netXAF)}
                 </td>
