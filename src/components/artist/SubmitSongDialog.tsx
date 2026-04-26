@@ -194,6 +194,15 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Promoción de lanzamiento (banner Home)
+  const [promo, setPromo] = useState<PromoData>({
+    enabled: false,
+    plan: null,
+    ad_text: '',
+    cta_text: 'Escuchar ahora',
+    start_date: new Date().toISOString().split('T')[0],
+  });
+
   const standardMinDate = addDaysISO(STANDARD_MIN_DAYS);
   const standardMaxDate = addDaysISO(STANDARD_MAX_DAYS);
 
