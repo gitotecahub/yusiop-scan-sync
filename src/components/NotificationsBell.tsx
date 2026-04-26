@@ -129,6 +129,12 @@ const NotificationsBell = () => {
       n.type === 'collab_claim_rejected'
     ) {
       await goArtist('/artist/collaborations');
+    } else if (n.type === 'support_reply' || n.type === 'support_ticket_updated') {
+      const ticketId = n.data?.ticket_id;
+      navigate(ticketId ? `/support?ticket=${ticketId}` : '/support');
+    } else if (n.type === 'support_ticket_created') {
+      // Notificación para admins cuando un usuario crea un ticket
+      navigate('/admin/support');
     }
     load();
   };
