@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Wallet, Clock, CheckCircle2, AlertOctagon, Banknote, Download as DownloadIcon, Music } from 'lucide-react';
+import { ArrowLeft, Wallet, Clock, CheckCircle2, AlertOctagon, Banknote, Download as DownloadIcon, Music, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -93,6 +93,14 @@ const ArtistWallet = () => {
     await loadHistory();
   };
 
+  // Recarga automática al volver a la pestaña
+  useEffect(() => {
+    const onFocus = () => { refreshAll(); };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artistId]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando wallet…</div>;
   }
@@ -122,6 +130,10 @@ const ArtistWallet = () => {
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
           <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+        </Button>
+        <Button variant="outline" size="sm" onClick={refreshAll} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Refrescar
         </Button>
       </div>
 
