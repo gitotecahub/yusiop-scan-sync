@@ -493,13 +493,28 @@ const Library = () => {
           return (
             <div
               key={song.id}
-              onClick={selectionMode ? () => toggleSelected(song.id) : undefined}
+              onClick={
+                selectionMode
+                  ? () => toggleSelected(song.id)
+                  : () => handlePlay(song, songs)
+              }
+              role={selectionMode ? undefined : 'button'}
+              tabIndex={selectionMode ? undefined : 0}
+              onKeyDown={
+                selectionMode
+                  ? undefined
+                  : (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handlePlay(song, songs);
+                      }
+                    }
+              }
               className={cn(
-                'flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-colors',
-                selectionMode && 'cursor-pointer',
+                'flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-colors cursor-pointer select-none',
                 isSelected
                   ? 'bg-primary/10 border-primary/50 shadow-glow'
-                  : 'bg-card/40 border-border'
+                  : 'bg-card/40 border-border hover:bg-card/60'
               )}
             >
               {selectionMode ? (
@@ -515,20 +530,16 @@ const Library = () => {
                   {String(idx + 1).padStart(2, '0')}
                 </span>
               )}
-              <div className="relative shrink-0 group">
+              <div className="relative shrink-0">
                 <img
                   src={song.cover_url}
                   alt={`${song.title} cover`}
                   className="w-12 h-12 object-cover rounded-xl"
                 />
-                {!selectionMode && (
-                  <Button
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); handlePlay(song, songs); }}
-                    className="absolute inset-0 m-auto h-9 w-9 rounded-full bg-black/35 hover:bg-black/50 active:bg-black/55 backdrop-blur-[2px] text-white border-0 p-0 shadow-none ring-1 ring-white/20"
-                  >
-                    {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5 fill-current" />}
-                  </Button>
+                {isCurrentlyPlaying && (
+                  <div className="absolute inset-0 m-auto h-9 w-9 rounded-full bg-black/45 backdrop-blur-[2px] ring-1 ring-white/20 flex items-center justify-center pointer-events-none">
+                    <Pause className="h-4 w-4 text-white" />
+                  </div>
                 )}
               </div>
 
@@ -542,33 +553,39 @@ const Library = () => {
               </div>
 
               {!selectionMode && (
-              <div className="flex items-center shrink-0">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleToggleFavorite(song)}
-                  className={`h-9 w-9 rounded-full hover:bg-muted ${song.is_favorite ? 'text-primary' : 'text-muted-foreground'}`}
-                >
-                  <Heart className={`h-4 w-4 ${song.is_favorite ? 'fill-current' : ''}`} />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleShareRequest(song)}
-                  className="h-9 w-9 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary"
-                  aria-label={t('library.share')}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleDeleteRequest(song)}
-                  className="h-9 w-9 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+                <div className="flex items-center shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+                        aria-label="Más opciones"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => handleToggleFavorite(song)}>
+                        <Heart className={cn('h-4 w-4 mr-2', song.is_favorite && 'fill-current text-primary')} />
+                        {song.is_favorite ? t('library.removeFavorite') || 'Quitar de favoritos' : t('library.addFavorite') || 'Me gusta'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShareRequest(song)}>
+                        <Send className="h-4 w-4 mr-2" />
+                        {t('library.share') || 'Enviar'}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleDeleteRequest(song)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {t('library.delete') || 'Eliminar'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               )}
             </div>
           );
