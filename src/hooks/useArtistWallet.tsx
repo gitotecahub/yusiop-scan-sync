@@ -79,8 +79,27 @@ export const useArtistWallet = () => {
         supabase.rpc('get_public_financial_settings'),
       ]);
 
-      if (summaryRes.data) setSummary(summaryRes.data as unknown as WalletSummary);
-      if (settingsRes.data) setSettings(settingsRes.data as unknown as FinancialSettings);
+      if (summaryRes.error) {
+        console.error('[useArtistWallet] summary error:', summaryRes.error);
+      }
+      // jsonb RPCs pueden venir como objeto o como array de un objeto
+      const rawSummary: any = Array.isArray(summaryRes.data) ? summaryRes.data[0] : summaryRes.data;
+      if (rawSummary && typeof rawSummary === 'object') {
+        setSummary({
+          pending_xaf: Number(rawSummary.pending_xaf ?? 0),
+          available_xaf: Number(rawSummary.available_xaf ?? 0),
+          under_review_xaf: Number(rawSummary.under_review_xaf ?? 0),
+          blocked_xaf: Number(rawSummary.blocked_xaf ?? 0),
+          withdrawn_xaf: Number(rawSummary.withdrawn_xaf ?? 0),
+          gross_total_xaf: Number(rawSummary.gross_total_xaf ?? 0),
+          reserved_xaf: Number(rawSummary.reserved_xaf ?? 0),
+          earnings_count: Number(rawSummary.earnings_count ?? 0),
+        });
+      }
+      const rawSettings: any = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
+      if (rawSettings && typeof rawSettings === 'object') {
+        setSettings(rawSettings as FinancialSettings);
+      }
     } finally {
       setLoading(false);
     }
