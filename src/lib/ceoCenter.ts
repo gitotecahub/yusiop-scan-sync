@@ -74,6 +74,30 @@ export interface TopArtist {
   recommendation: 'high_potential' | 'invest' | 'maintain' | 'review';
 }
 
+export interface SuspiciousUserItem {
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  score: number;
+  last_event_at: string;
+  notes: string | null;
+}
+
+export interface RepeatedIpItem {
+  ip_address: string;
+  unique_users: number;
+  total_downloads: number;
+  country_name: string | null;
+  city: string | null;
+  last_seen: string;
+}
+
+export interface CeoAlertData {
+  users?: SuspiciousUserItem[];
+  ips?: RepeatedIpItem[];
+  total?: number;
+}
+
 export interface CeoAlert {
   id: string;
   type: string;
@@ -82,6 +106,7 @@ export interface CeoAlert {
   description: string;
   recommendation: string;
   created_at: string;
+  data?: CeoAlertData;
 }
 
 export interface FraudSummary {
