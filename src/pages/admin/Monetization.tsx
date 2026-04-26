@@ -820,7 +820,7 @@ const Monetization = () => {
       <Card>
         <CardHeader>
           <CardTitle>Recaudación por artista</CardTitle>
-          <CardDescription>Bolsa total acumulada por cada artista (40%).</CardDescription>
+          <CardDescription>Bolsa total acumulada por cada artista (30%).</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border max-h-[360px] overflow-y-auto">
