@@ -35,6 +35,54 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_financial_settings: {
+        Row: {
+          artist_percentage: number
+          auto_release_enabled: boolean
+          created_at: string
+          id: number
+          platform_percentage: number
+          updated_at: string
+          validation_period_days: number
+          value_per_download_xaf: number
+          withdrawal_fee_type: Database["public"]["Enums"]["withdrawal_fee_type"]
+          withdrawal_fee_value: number
+          withdrawal_frequency_days: number
+          withdrawal_minimum_xaf: number
+          withdrawals_enabled: boolean
+        }
+        Insert: {
+          artist_percentage?: number
+          auto_release_enabled?: boolean
+          created_at?: string
+          id?: number
+          platform_percentage?: number
+          updated_at?: string
+          validation_period_days?: number
+          value_per_download_xaf?: number
+          withdrawal_fee_type?: Database["public"]["Enums"]["withdrawal_fee_type"]
+          withdrawal_fee_value?: number
+          withdrawal_frequency_days?: number
+          withdrawal_minimum_xaf?: number
+          withdrawals_enabled?: boolean
+        }
+        Update: {
+          artist_percentage?: number
+          auto_release_enabled?: boolean
+          created_at?: string
+          id?: number
+          platform_percentage?: number
+          updated_at?: string
+          validation_period_days?: number
+          value_per_download_xaf?: number
+          withdrawal_fee_type?: Database["public"]["Enums"]["withdrawal_fee_type"]
+          withdrawal_fee_value?: number
+          withdrawal_frequency_days?: number
+          withdrawal_minimum_xaf?: number
+          withdrawals_enabled?: boolean
+        }
+        Relationships: []
+      }
       admin_user_notes: {
         Row: {
           author_user_id: string
@@ -100,6 +148,74 @@ export type Database = {
           },
         ]
       }
+      artist_earnings: {
+        Row: {
+          artist_amount_xaf: number
+          artist_id: string
+          artist_percentage: number
+          created_at: string
+          fraud_score: number
+          gross_amount_xaf: number
+          id: string
+          notes: string | null
+          platform_amount_xaf: number
+          qr_card_id: string | null
+          song_id: string | null
+          source_download_id: string | null
+          status: Database["public"]["Enums"]["artist_earning_status"]
+          updated_at: string
+          user_id: string | null
+          validation_release_date: string
+          withdrawal_request_id: string | null
+        }
+        Insert: {
+          artist_amount_xaf?: number
+          artist_id: string
+          artist_percentage: number
+          created_at?: string
+          fraud_score?: number
+          gross_amount_xaf?: number
+          id?: string
+          notes?: string | null
+          platform_amount_xaf?: number
+          qr_card_id?: string | null
+          song_id?: string | null
+          source_download_id?: string | null
+          status?: Database["public"]["Enums"]["artist_earning_status"]
+          updated_at?: string
+          user_id?: string | null
+          validation_release_date: string
+          withdrawal_request_id?: string | null
+        }
+        Update: {
+          artist_amount_xaf?: number
+          artist_id?: string
+          artist_percentage?: number
+          created_at?: string
+          fraud_score?: number
+          gross_amount_xaf?: number
+          id?: string
+          notes?: string | null
+          platform_amount_xaf?: number
+          qr_card_id?: string | null
+          song_id?: string | null
+          source_download_id?: string | null
+          status?: Database["public"]["Enums"]["artist_earning_status"]
+          updated_at?: string
+          user_id?: string | null
+          validation_release_date?: string
+          withdrawal_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_earnings_withdrawal"
+            columns: ["withdrawal_request_id"]
+            isOneToOne: false
+            referencedRelation: "artist_withdrawal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_requests: {
         Row: {
           artist_name: string
@@ -150,6 +266,113 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      artist_withdrawal_methods: {
+        Row: {
+          account_holder_name: string
+          artist_id: string
+          country: string | null
+          created_at: string
+          id: string
+          is_default: boolean
+          method_type: Database["public"]["Enums"]["artist_payment_method_type"]
+          payment_details: Json
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }
+        Insert: {
+          account_holder_name: string
+          artist_id: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          method_type: Database["public"]["Enums"]["artist_payment_method_type"]
+          payment_details?: Json
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+        }
+        Update: {
+          account_holder_name?: string
+          artist_id?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          method_type?: Database["public"]["Enums"]["artist_payment_method_type"]
+          payment_details?: Json
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+        }
+        Relationships: []
+      }
+      artist_withdrawal_requests: {
+        Row: {
+          amount_requested_xaf: number
+          artist_id: string
+          created_at: string
+          fee_amount_xaf: number
+          id: string
+          net_amount_xaf: number
+          paid_at: string | null
+          paid_by: string | null
+          payment_method_id: string | null
+          payment_method_snapshot: Json | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["artist_withdrawal_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_requested_xaf: number
+          artist_id: string
+          created_at?: string
+          fee_amount_xaf?: number
+          id?: string
+          net_amount_xaf: number
+          paid_at?: string | null
+          paid_by?: string | null
+          payment_method_id?: string | null
+          payment_method_snapshot?: Json | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["artist_withdrawal_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_requested_xaf?: number
+          artist_id?: string
+          created_at?: string
+          fee_amount_xaf?: number
+          id?: string
+          net_amount_xaf?: number
+          paid_at?: string | null
+          paid_by?: string | null
+          payment_method_id?: string | null
+          payment_method_snapshot?: Json | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["artist_withdrawal_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_withdrawal_requests_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "artist_withdrawal_methods"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       artists: {
         Row: {
@@ -1460,6 +1683,18 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_withdrawal: {
+        Args: { p_request_id: string }
+        Returns: Json
+      }
+      admin_mark_withdrawal_paid: {
+        Args: { p_request_id: string }
+        Returns: Json
+      }
+      admin_reject_withdrawal: {
+        Args: { p_reason: string; p_request_id: string }
+        Returns: Json
+      }
       approve_artist_request: {
         Args: { p_request_id: string }
         Returns: {
@@ -1519,6 +1754,10 @@ export type Database = {
         Returns: string
       }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
+      get_artist_wallet_summary: {
+        Args: { p_artist_id: string }
+        Returns: Json
+      }
       get_ceo_ai_alerts: { Args: { p_days?: number }; Returns: Json }
       get_ceo_fraud_summary: { Args: { p_days?: number }; Returns: Json }
       get_ceo_health_score: { Args: { p_days?: number }; Returns: Json }
@@ -1597,6 +1836,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_public_financial_settings: { Args: never; Returns: Json }
       get_subscription_visibility: {
         Args: { _user_id: string }
         Returns: {
@@ -1686,7 +1926,12 @@ export type Database = {
           success: boolean
         }[]
       }
+      release_pending_earnings: { Args: never; Returns: number }
       release_scheduled_songs: { Args: never; Returns: number }
+      request_artist_withdrawal: {
+        Args: { p_amount_xaf: number; p_artist_id: string; p_method_id: string }
+        Returns: Json
+      }
       resolve_collaboration_claim: {
         Args: { p_approve: boolean; p_claim_id: string; p_reason?: string }
         Returns: {
@@ -1695,6 +1940,7 @@ export type Database = {
         }[]
       }
       subscription_metrics: { Args: never; Returns: Json }
+      sync_historical_earnings: { Args: { p_dry_run?: boolean }; Returns: Json }
       transfer_card_to_user: {
         Args: {
           p_card_id: string
@@ -1739,7 +1985,26 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "artist"
+      artist_earning_status:
+        | "pending_validation"
+        | "available"
+        | "withdrawn"
+        | "blocked"
+        | "refunded"
+        | "under_review"
+      artist_payment_method_type:
+        | "bank_transfer"
+        | "mobile_money"
+        | "paypal"
+        | "other"
       artist_request_status: "pending" | "approved" | "rejected"
+      artist_withdrawal_status:
+        | "requested"
+        | "under_review"
+        | "approved"
+        | "paid"
+        | "rejected"
+        | "cancelled"
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
       collab_claim_status: "pending" | "approved" | "rejected"
@@ -1777,6 +2042,7 @@ export type Database = {
       support_ticket_status: "open" | "pending" | "resolved" | "closed"
       user_role: "user" | "admin"
       user_subscription_status: "active" | "cancelled" | "expired" | "past_due"
+      withdrawal_fee_type: "none" | "fixed" | "percent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1905,7 +2171,29 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user", "artist"],
+      artist_earning_status: [
+        "pending_validation",
+        "available",
+        "withdrawn",
+        "blocked",
+        "refunded",
+        "under_review",
+      ],
+      artist_payment_method_type: [
+        "bank_transfer",
+        "mobile_money",
+        "paypal",
+        "other",
+      ],
       artist_request_status: ["pending", "approved", "rejected"],
+      artist_withdrawal_status: [
+        "requested",
+        "under_review",
+        "approved",
+        "paid",
+        "rejected",
+        "cancelled",
+      ],
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
       collab_claim_status: ["pending", "approved", "rejected"],
@@ -1946,6 +2234,7 @@ export const Constants = {
       support_ticket_status: ["open", "pending", "resolved", "closed"],
       user_role: ["user", "admin"],
       user_subscription_status: ["active", "cancelled", "expired", "past_due"],
+      withdrawal_fee_type: ["none", "fixed", "percent"],
     },
   },
 } as const
