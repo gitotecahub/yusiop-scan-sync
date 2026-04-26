@@ -922,6 +922,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             />
           </div>
 
+          {!isEdit && (
+            <PromoteReleaseBlock
+              value={promo}
+              onChange={setPromo}
+              defaultTitle={formData.title || formData.artist_name}
+            />
+          )}
+
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Archivos</h3>
             {isEdit && (
