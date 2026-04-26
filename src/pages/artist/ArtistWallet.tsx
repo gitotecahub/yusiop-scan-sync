@@ -131,12 +131,6 @@ const ArtistWallet = () => {
         <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
           <ArrowLeft className="h-4 w-4 mr-2" /> Volver
         </Button>
-      </div>
-
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate('/artist')} className="-ml-3">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver
-        </Button>
         <Button variant="outline" size="sm" onClick={refreshAll} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Refrescar
