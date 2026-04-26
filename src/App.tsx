@@ -24,6 +24,7 @@ import MySubmissions from '@/pages/artist/MySubmissions';
 import ArtistStats from '@/pages/artist/ArtistStats';
 import Collaborations from '@/pages/artist/Collaborations';
 import ArtistWallet from '@/pages/artist/ArtistWallet';
+import PaymentMethods from '@/pages/artist/PaymentMethods';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
 import CollaborationClaims from '@/pages/admin/CollaborationClaims';
 import { RequireStaffArea } from '@/components/admin/RequireStaffArea';
@@ -133,6 +134,7 @@ const AppContent = () => {
             <Route path="/artist/stats" element={<ArtistStats />} />
             <Route path="/artist/collaborations" element={<Collaborations />} />
             <Route path="/artist/wallet" element={<ArtistWallet />} />
+            <Route path="/artist/payment-methods" element={<PaymentMethods />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
             <Route path="/support" element={<Support />} />
             <Route path="/profile" element={

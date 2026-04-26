@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Wallet, Clock, CheckCircle2, AlertOctagon, Banknote, Download as DownloadIcon, Music, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Wallet, Clock, CheckCircle2, AlertOctagon, Banknote, Download as DownloadIcon, Music, RefreshCw, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -216,12 +216,17 @@ const ArtistWallet = () => {
               {settings ? ` 1 cada ${settings.withdrawal_frequency_days} días` : ''}
             </p>
           </div>
-          <Button
-            onClick={() => setWithdrawOpen(true)}
-            disabled={!settings?.withdrawals_enabled || trulyAvailable < (settings?.withdrawal_minimum_xaf ?? Infinity)}
-          >
-            <Banknote className="h-4 w-4 mr-2" /> Retirar ingresos
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => navigate('/artist/payment-methods')}>
+              <CreditCard className="h-4 w-4 mr-2" /> Métodos de cobro
+            </Button>
+            <Button
+              onClick={() => setWithdrawOpen(true)}
+              disabled={!settings?.withdrawals_enabled || trulyAvailable < (settings?.withdrawal_minimum_xaf ?? Infinity)}
+            >
+              <Banknote className="h-4 w-4 mr-2" /> Retirar ingresos
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
