@@ -974,6 +974,51 @@ export type Database = {
         }
         Relationships: []
       }
+      recharge_cards: {
+        Row: {
+          amount: number
+          batch: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          expires_at: string | null
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["recharge_card_status"]
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          amount: number
+          batch?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["recharge_card_status"]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          amount?: number
+          batch?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["recharge_card_status"]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       song_collaborators: {
         Row: {
           artist_name: string
@@ -1778,6 +1823,39 @@ export type Database = {
           },
         ]
       }
+      user_wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          total_recharged: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          total_recharged?: number
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          total_recharged?: number
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -1804,6 +1882,65 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json
+          payment_method: string | null
+          reference: string | null
+          related_card_id: string | null
+          related_song_id: string | null
+          status: Database["public"]["Enums"]["wallet_transaction_status"]
+          type: Database["public"]["Enums"]["wallet_transaction_type"]
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          payment_method?: string | null
+          reference?: string | null
+          related_card_id?: string | null
+          related_song_id?: string | null
+          status?: Database["public"]["Enums"]["wallet_transaction_status"]
+          type: Database["public"]["Enums"]["wallet_transaction_type"]
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          payment_method?: string | null
+          reference?: string | null
+          related_card_id?: string | null
+          related_song_id?: string | null
+          status?: Database["public"]["Enums"]["wallet_transaction_status"]
+          type?: Database["public"]["Enums"]["wallet_transaction_type"]
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "user_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1857,6 +1994,15 @@ export type Database = {
       }
       admin_approve_withdrawal: {
         Args: { p_request_id: string }
+        Returns: Json
+      }
+      admin_generate_recharge_cards: {
+        Args: {
+          p_amount: number
+          p_batch?: string
+          p_expires_at?: string
+          p_quantity: number
+        }
         Returns: Json
       }
       admin_mark_withdrawal_paid:
@@ -2021,6 +2167,25 @@ export type Database = {
           area: Database["public"]["Enums"]["staff_area"]
         }[]
       }
+      get_or_create_wallet: {
+        Args: { p_user_id: string }
+        Returns: {
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          total_recharged: number
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_wallets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_pending_collaborations_for_artist: {
         Args: never
         Returns: {
@@ -2071,6 +2236,7 @@ export type Database = {
         }[]
       }
       get_user_id_by_email: { Args: { p_email: string }; Returns: string }
+      get_wallet_summary: { Args: { p_limit?: number }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2123,6 +2289,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      redeem_recharge_card: { Args: { p_code: string }; Returns: Json }
       register_subscription_attempt: {
         Args: { p_reason?: string; p_song_id?: string }
         Returns: undefined
@@ -2217,6 +2384,10 @@ export type Database = {
           is_activated: boolean
         }[]
       }
+      wallet_consume_for_download: {
+        Args: { p_amount: number; p_song_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       ad_campaign_status:
@@ -2274,6 +2445,7 @@ export type Database = {
         | "error"
       express_tier: "72h" | "48h" | "24h"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
+      recharge_card_status: "active" | "used" | "expired" | "disabled"
       song_submission_status: "pending" | "approved" | "rejected" | "removed"
       staff_area:
         | "catalog"
@@ -2298,6 +2470,13 @@ export type Database = {
       support_ticket_status: "open" | "pending" | "resolved" | "closed"
       user_role: "user" | "admin"
       user_subscription_status: "active" | "cancelled" | "expired" | "past_due"
+      wallet_transaction_status: "pending" | "completed" | "failed" | "reversed"
+      wallet_transaction_type:
+        | "recharge"
+        | "purchase"
+        | "refund"
+        | "bonus"
+        | "adjustment"
       withdrawal_fee_type: "none" | "fixed" | "percent"
     }
     CompositeTypes: {
@@ -2488,6 +2667,7 @@ export const Constants = {
       ],
       express_tier: ["72h", "48h", "24h"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
+      recharge_card_status: ["active", "used", "expired", "disabled"],
       song_submission_status: ["pending", "approved", "rejected", "removed"],
       staff_area: [
         "catalog",
@@ -2514,6 +2694,14 @@ export const Constants = {
       support_ticket_status: ["open", "pending", "resolved", "closed"],
       user_role: ["user", "admin"],
       user_subscription_status: ["active", "cancelled", "expired", "past_due"],
+      wallet_transaction_status: ["pending", "completed", "failed", "reversed"],
+      wallet_transaction_type: [
+        "recharge",
+        "purchase",
+        "refund",
+        "bonus",
+        "adjustment",
+      ],
       withdrawal_fee_type: ["none", "fixed", "percent"],
     },
   },
