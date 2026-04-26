@@ -71,9 +71,8 @@ export default function Support() {
       setEscalateOpen(true);
       return;
     }
-    // Reasignar siempre, incluso si es el mismo prompt, para retriggar el efecto
-    setInitialPrompt(`${topic.prompt} #${Date.now()}`.replace(/ #\d+$/, '') + ' ');
-    setInitialPrompt(topic.prompt);
+    // Forzar nuevo trigger usando timestamp invisible al final del prompt
+    setInitialPrompt(`${topic.prompt}\u200B${Date.now()}`);
   };
 
   return (
