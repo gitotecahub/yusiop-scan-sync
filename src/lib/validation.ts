@@ -17,8 +17,8 @@ export const usernameSchema = z
   .min(3, "El usuario debe tener al menos 3 caracteres")
   .max(50, "El usuario es demasiado largo")
   .regex(
-    /^[a-zA-Z0-9_-]+$/,
-    "Solo se permiten letras, números, guion y guion bajo",
+    /^[a-zA-Z0-9._-]+$/,
+    "El usuario solo puede contener letras, números, punto, guion y guion bajo (sin espacios ni símbolos especiales)",
   );
 
 export const fullNameSchema = z
