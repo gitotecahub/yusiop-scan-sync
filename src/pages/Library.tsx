@@ -569,11 +569,11 @@ const Library = () => {
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onClick={() => handleToggleFavorite(song)}>
                         <Heart className={cn('h-4 w-4 mr-2', song.is_favorite && 'fill-current text-primary')} />
-                        {song.is_favorite ? t('library.removeFavorite') || 'Quitar de favoritos' : t('library.addFavorite') || 'Me gusta'}
+                        {song.is_favorite ? 'Quitar de favoritos' : 'Me gusta'}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleShareRequest(song)}>
                         <Send className="h-4 w-4 mr-2" />
-                        {t('library.share') || 'Enviar'}
+                        {t('library.share')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -581,7 +581,7 @@ const Library = () => {
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {t('library.delete') || 'Eliminar'}
+                        {t('library.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
