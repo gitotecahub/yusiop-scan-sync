@@ -14,7 +14,7 @@ import { useMySubscription } from '@/hooks/useSubscriptionPlans';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
-
+import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
 type ExpressTier = '72h' | '48h' | '24h';
 
 const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
@@ -194,6 +194,15 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Promoción de lanzamiento (banner Home)
+  const [promo, setPromo] = useState<PromoData>({
+    enabled: false,
+    plan: null,
+    ad_text: '',
+    cta_text: 'Escuchar ahora',
+    start_date: new Date().toISOString().split('T')[0],
+  });
+
   const standardMinDate = addDaysISO(STANDARD_MIN_DAYS);
   const standardMaxDate = addDaysISO(STANDARD_MAX_DAYS);
 
@@ -297,6 +306,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressEnabled(false);
       setExpressTier(null);
       setExpressAck(false);
+      setPromo({
+        enabled: false,
+        plan: null,
+        ad_text: '',
+        cta_text: 'Escuchar ahora',
+        start_date: new Date().toISOString().split('T')[0],
+      });
     }
     setTrackFile(null);
     setCoverFile(null);
@@ -579,6 +595,57 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         toast.success(expressOpt
           ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
           : 'Canción enviada a revisión. Analizando copyright…');
+
+        // Si el artista activó la promoción del lanzamiento, crear la campaña y abrir checkout
+        if (promo.enabled && promo.plan && inserted?.id) {
+          const plan = PROMO_PLANS.find(p => p.id === promo.plan);
+          if (plan) {
+            try {
+              // Resolver artist_id propio (si existe)
+              const { data: artistRow } = await supabase
+                .from('song_collaborators')
+                .select('id')
+                .limit(1)
+                .maybeSingle();
+              void artistRow;
+
+              const coverImg = cover?.url ?? editing?.cover_url ?? null;
+              const { data: campaign, error: campErr } = await supabase
+                .from('ad_campaigns')
+                .insert({
+                  user_id: user.id,
+                  campaign_type: 'artist_release',
+                  title: promo.ad_text.trim() || formData.title.trim(),
+                  subtitle: formData.artist_name.trim(),
+                  image_url: coverImg,
+                  cta_text: promo.cta_text.trim() || 'Escuchar ahora',
+                  cta_url: `/catalog?song=${inserted.id}`,
+                  duration_days: plan.days,
+                  price_eur: plan.priceEur,
+                  status: 'pending_payment',
+                  payment_status: 'unpaid',
+                  placement: 'home_top_banner',
+                })
+                .select('id')
+                .single();
+
+              if (campErr) throw campErr;
+
+              const { data: checkout, error: chkErr } = await supabase.functions.invoke(
+                'create-ad-checkout',
+                { body: { campaign_id: campaign.id } },
+              );
+              if (chkErr) throw chkErr;
+              if (checkout?.url) {
+                toast.success('Redirigiendo al pago de la promoción…');
+                window.open(checkout.url, '_blank');
+              }
+            } catch (e: any) {
+              console.error('Promo campaign creation failed', e);
+              toast.error('No se pudo crear la promoción: ' + (e.message ?? 'error'));
+            }
+          }
+        }
       }
 
       onOpenChange(false);
@@ -854,6 +921,14 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               maxLength={120}
             />
           </div>
+
+          {!isEdit && (
+            <PromoteReleaseBlock
+              value={promo}
+              onChange={setPromo}
+              defaultTitle={formData.title || formData.artist_name}
+            />
+          )}
 
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Archivos</h3>

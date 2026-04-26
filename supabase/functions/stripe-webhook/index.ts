@@ -71,6 +71,27 @@ Deno.serve(async (req) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
+      // ----- Pago de campaña publicitaria -----
+      if (session.metadata?.purpose === "ad_campaign") {
+        const campaignId = session.metadata.campaign_id;
+        const durationDays = parseInt(session.metadata.duration_days ?? "1", 10);
+        if (campaignId) {
+          const startDate = new Date();
+          const endDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+          await supabase.from("ad_campaigns").update({
+            payment_status: "paid",
+            payment_reference: (session.payment_intent as string) ?? session.id,
+            status: "pending_review",
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+          }).eq("id", campaignId);
+          console.log(`Ad campaign paid: ${campaignId}`);
+        }
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // ----- Modo subscription -----
       if (session.mode === "subscription") {
         const meta = session.metadata ?? {};
