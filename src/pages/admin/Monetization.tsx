@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode, Briefcase } from 'lucide-react';
+import { Search, Coins, TrendingUp, Music as MusicIcon, Users as UsersIcon, UserX, Wallet, CreditCard, QrCode } from 'lucide-react';
 import {
   formatEURNumber,
   formatXAFNumber,
@@ -27,8 +27,7 @@ const STANDARD_CREDITS = 4;
 const PREMIUM_PRICE_EUR = 10.00;
 const PREMIUM_CREDITS_DEFAULT = 10; // matches checkout PRICING.premium.credits
 const ARTIST_SHARE = 0.4;
-const PLATFORM_SHARE = 0.5;
-const INVESTOR_SHARE = 0.1;
+const PLATFORM_SHARE = 0.6;
 
 const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.25 €
 
@@ -292,7 +291,6 @@ const Monetization = () => {
       physicalSalesEur,
       totalArtist: totalGross * ARTIST_SHARE,
       totalPlatform: totalGross * PLATFORM_SHARE,
-      totalInvestor: totalGross * INVESTOR_SHARE,
     };
   }, [downloads.length, enrichedSongs, physicalSalesEur]);
 
@@ -326,14 +324,12 @@ const Monetization = () => {
         cards: cardCounts.standard,
         artist: acc.standard.gross * ARTIST_SHARE,
         platform: acc.standard.gross * PLATFORM_SHARE,
-        investor: acc.standard.gross * INVESTOR_SHARE,
       },
       premium: {
         ...acc.premium,
         cards: cardCounts.premium,
         artist: acc.premium.gross * ARTIST_SHARE,
         platform: acc.premium.gross * PLATFORM_SHARE,
-        investor: acc.premium.gross * INVESTOR_SHARE,
       },
     };
   }, [downloads, qrCards]);
@@ -410,7 +406,7 @@ const Monetization = () => {
       <div>
         <h1 className="text-3xl font-bold">Monetización</h1>
         <p className="text-muted-foreground">
-          Reparto por descarga: artista 40% · Yusiop 50% · inversor 10%.
+          Reparto por descarga: artista 40% · Yusiop 60%.
         </p>
       </div>
 
@@ -422,14 +418,13 @@ const Monetization = () => {
             Estándar: {formatEUR(STANDARD_PRICE_EUR)} ({STANDARD_CREDITS} descargas →{' '}
             {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_EUR)} —
             valor por descarga calculado según los créditos de cada tarjeta. Reparto por descarga:{' '}
-            <strong>Artista 40%</strong> · <strong>Yusiop 50%</strong> ·{' '}
-            <strong>Inversor 10%</strong>.
+            <strong>Artista 40%</strong> · <strong>Yusiop 60%</strong>.
           </CardDescription>
         </CardHeader>
       </Card>
 
       {/* KPI cards */}
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Descargas totales</CardDescription>
@@ -464,19 +459,10 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Yusiop (50%)</CardDescription>
+            <CardDescription>Yusiop (60%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalPlatform)}
-            </CardTitle>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Inversor (10%)</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalInvestor)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -534,12 +520,8 @@ const Monetization = () => {
                   </p>
                 </div>
                 <div className="rounded-md border p-3">
-                  <p className="text-xs text-muted-foreground">Yusiop (50%)</p>
+                  <p className="text-xs text-muted-foreground">Yusiop (60%)</p>
                   <p className="text-xl font-semibold">{formatEUR(card.data.platform)}</p>
-                </div>
-                <div className="rounded-md border p-3">
-                  <p className="text-xs text-muted-foreground">Inversor (10%)</p>
-                  <p className="text-xl font-semibold">{formatEUR(card.data.investor)}</p>
                 </div>
                 <div className="rounded-md border p-3 bg-yusiop-primary/5">
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
