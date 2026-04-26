@@ -26,8 +26,8 @@ const STANDARD_PRICE_EUR = 5.00;
 const STANDARD_CREDITS = 4;
 const PREMIUM_PRICE_EUR = 10.00;
 const PREMIUM_CREDITS_DEFAULT = 10; // matches checkout PRICING.premium.credits
-const ARTIST_SHARE = 0.4;
-const PLATFORM_SHARE = 0.6;
+const ARTIST_SHARE = 0.3;
+const PLATFORM_SHARE = 0.7;
 
 const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS; // 1.25 €
 
@@ -208,7 +208,7 @@ const Monetization = () => {
   }, [enrichedSongs]);
 
   // Pozo de colaboradores no reclamados (artistas no dados de alta o sin reclamar)
-  // Para cada song con colaboradores, repartimos los ingresos del artista (40%) según share_percent
+  // Para cada song con colaboradores, repartimos los ingresos del artista (30%) según share_percent
   // de los colaboradores cuyo claimed_by_user_id IS NULL.
   const unclaimedPool = useMemo(() => {
     // Agrupar colaboradores por canción
@@ -406,7 +406,7 @@ const Monetization = () => {
       <div>
         <h1 className="text-3xl font-bold">Monetización</h1>
         <p className="text-muted-foreground">
-          Reparto por descarga: artista 40% · Yusiop 60%.
+          Reparto por descarga: artista 30% · Yusiop 70%.
         </p>
       </div>
 
@@ -418,7 +418,7 @@ const Monetization = () => {
             Estándar: {formatEUR(STANDARD_PRICE_EUR)} ({STANDARD_CREDITS} descargas →{' '}
             {formatEUR(STANDARD_PER_DOWNLOAD)} / descarga). Premium: {formatEUR(PREMIUM_PRICE_EUR)} —
             valor por descarga calculado según los créditos de cada tarjeta. Reparto por descarga:{' '}
-            <strong>Artista 40%</strong> · <strong>Yusiop 60%</strong>.
+            <strong>Artista 30%</strong> · <strong>Yusiop 70%</strong>.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -450,7 +450,7 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Bolsa artistas (40%)</CardDescription>
+            <CardDescription>Bolsa artistas (30%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <UsersIcon className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalArtist)}
@@ -514,7 +514,7 @@ const Monetization = () => {
                   <p className="text-xl font-semibold">{formatEUR(card.data.gross)}</p>
                 </div>
                 <div className="rounded-md border p-3">
-                  <p className="text-xs text-muted-foreground">Artistas (40%)</p>
+                  <p className="text-xs text-muted-foreground">Artistas (30%)</p>
                   <p className="text-xl font-semibold text-yusiop-primary">
                     {formatEUR(card.data.artist)}
                   </p>
@@ -775,7 +775,7 @@ const Monetization = () => {
                   <TableHead className="text-right">Precio / descarga</TableHead>
                   <TableHead className="text-right">Descargas</TableHead>
                   <TableHead className="text-right">Bruto</TableHead>
-                  <TableHead className="text-right">Artista (40%)</TableHead>
+                  <TableHead className="text-right">Artista (30%)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -820,7 +820,7 @@ const Monetization = () => {
       <Card>
         <CardHeader>
           <CardTitle>Recaudación por artista</CardTitle>
-          <CardDescription>Bolsa total acumulada por cada artista (40%).</CardDescription>
+          <CardDescription>Bolsa total acumulada por cada artista (30%).</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border max-h-[360px] overflow-y-auto">

@@ -46,8 +46,8 @@ const DEFAULT_STD_PRICE_XAF = 3000;
 const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
 const DEFAULT_PREM_CREDITS = 10;
-const DEFAULT_ARTIST_SHARE = 40; // %
-const DEFAULT_PLATFORM_SHARE = 60; // %
+const DEFAULT_ARTIST_SHARE = 30; // %
+const DEFAULT_PLATFORM_SHARE = 70; // %
 
 // Defaults virtuales (EUR base, sin costes de producción)
 const DEFAULT_VSTD_PRICE_EUR = 5;
@@ -518,8 +518,8 @@ const SalesSimulator = () => {
         <CardHeader>
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
-            Aplica al total combinado (físicas + virtuales). Por defecto: 40% artistas,
-            60% plataforma.
+            Aplica al total combinado (físicas + virtuales). Por defecto: 30% artistas,
+            70% plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
