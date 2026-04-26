@@ -775,7 +775,7 @@ const Monetization = () => {
                   <TableHead className="text-right">Precio / descarga</TableHead>
                   <TableHead className="text-right">Descargas</TableHead>
                   <TableHead className="text-right">Bruto</TableHead>
-                  <TableHead className="text-right">Artista (40%)</TableHead>
+                  <TableHead className="text-right">Artista (30%)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
