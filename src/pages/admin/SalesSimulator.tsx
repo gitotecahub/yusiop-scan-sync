@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, Briefcase, LineChart } from 'lucide-react';
+import { Calculator, Coins, TrendingUp, Users as UsersIcon, Package, LineChart } from 'lucide-react';
 
 // Currency
 const XAF_PER_EUR = 655.957;
@@ -47,8 +47,7 @@ const DEFAULT_PREM_PRICE_XAF = 7000;
 const DEFAULT_STD_CREDITS = 4;
 const DEFAULT_PREM_CREDITS = 10;
 const DEFAULT_ARTIST_SHARE = 40; // %
-const DEFAULT_INVESTOR_SHARE = 10; // %
-const DEFAULT_PLATFORM_SHARE = 50; // %
+const DEFAULT_PLATFORM_SHARE = 60; // %
 
 // Defaults virtuales (EUR base, sin costes de producción)
 const DEFAULT_VSTD_PRICE_EUR = 5;
@@ -63,7 +62,6 @@ const SalesSimulator = () => {
   const [stdCredits, setStdCredits] = useState(DEFAULT_STD_CREDITS);
   const [premCredits, setPremCredits] = useState(DEFAULT_PREM_CREDITS);
   const [artistShare, setArtistShare] = useState(DEFAULT_ARTIST_SHARE);
-  const [investorShare, setInvestorShare] = useState(DEFAULT_INVESTOR_SHARE);
   const [platformShare, setPlatformShare] = useState(DEFAULT_PLATFORM_SHARE);
 
   // Volume inputs físicas (annual)
@@ -99,7 +97,6 @@ const SalesSimulator = () => {
     const totalGross = physicalGross + virtualGrossXAF;
 
     const artistPct = artistShare / 100;
-    const investorPct = investorShare / 100;
     const platformPct = platformShare / 100;
 
     const stdArtist = stdGross * artistPct;
@@ -108,7 +105,6 @@ const SalesSimulator = () => {
     const vPremArtist = vPremGrossXAF * artistPct;
     const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
-    const totalInvestor = totalGross * investorPct;
     const totalPlatform = totalGross * platformPct;
 
     // Las virtuales no tienen costes de producción
@@ -121,7 +117,6 @@ const SalesSimulator = () => {
 
     const monthlyGross = totalGross / 12;
     const monthlyPlatform = totalPlatform / 12;
-    const monthlyInvestor = totalInvestor / 12;
     const monthlyArtist = totalArtist / 12;
     const monthlyNet = platformNet / 12;
 
@@ -151,7 +146,6 @@ const SalesSimulator = () => {
       vStdArtist,
       vPremArtist,
       totalArtist,
-      totalInvestor,
       totalPlatform,
       totalCosts,
       platformNet,
@@ -160,7 +154,6 @@ const SalesSimulator = () => {
       totalUnits,
       monthlyGross,
       monthlyPlatform,
-      monthlyInvestor,
       monthlyArtist,
       monthlyNet,
       totalDownloads,
@@ -175,7 +168,6 @@ const SalesSimulator = () => {
     stdCredits,
     premCredits,
     artistShare,
-    investorShare,
     platformShare,
     stdYearly,
     premYearly,
@@ -195,7 +187,6 @@ const SalesSimulator = () => {
     setStdCredits(DEFAULT_STD_CREDITS);
     setPremCredits(DEFAULT_PREM_CREDITS);
     setArtistShare(DEFAULT_ARTIST_SHARE);
-    setInvestorShare(DEFAULT_INVESTOR_SHARE);
     setPlatformShare(DEFAULT_PLATFORM_SHARE);
     setVStdPriceEUR(DEFAULT_VSTD_PRICE_EUR);
     setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
