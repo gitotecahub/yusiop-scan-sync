@@ -50,6 +50,7 @@ import Support from '@/pages/Support';
 import AdminSupport from '@/pages/admin/Support';
 import AdminWithdrawals from '@/pages/admin/Withdrawals';
 import PaymentMethodsAdmin from '@/pages/admin/PaymentMethodsAdmin';
+import Advertising from '@/pages/admin/Advertising';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -110,6 +111,7 @@ const AppContent = () => {
         <Route path="support" element={<AdminSupport />} />
         <Route path="withdrawals" element={<RequireStaffArea area="monetization"><AdminWithdrawals /></RequireStaffArea>} />
         <Route path="payment-methods" element={<RequireStaffArea area="monetization"><PaymentMethodsAdmin /></RequireStaffArea>} />
+        <Route path="advertising" element={<Advertising />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
