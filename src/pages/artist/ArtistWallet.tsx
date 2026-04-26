@@ -181,28 +181,28 @@ const ArtistWallet = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-amber-500 mb-1"><Clock className="h-4 w-4" /><span className="text-xs">Pendiente</span></div>
-            <div className="text-xl font-bold">{formatXAFFixed(summary.pending_xaf)}</div>
+            <div className="text-xl font-bold">{formatXAFFixed(displaySummary.pending_xaf)}</div>
           </CardContent>
         </Card>
         <Card className="border-emerald-500/30">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-emerald-500 mb-1"><CheckCircle2 className="h-4 w-4" /><span className="text-xs">Disponible</span></div>
-            <div className="text-xl font-bold">{formatXAFFixed(trulyAvailable)}</div>
-            {summary.reserved_xaf > 0 && (
-              <div className="text-[10px] text-muted-foreground">Reservado: {formatXAFFixed(summary.reserved_xaf)}</div>
+            <div className="text-xl font-bold">{formatXAFFixed(displayAvailable)}</div>
+            {displaySummary.reserved_xaf > 0 && (
+              <div className="text-[10px] text-muted-foreground">Reservado: {formatXAFFixed(displaySummary.reserved_xaf)}</div>
             )}
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-sky-500 mb-1"><Banknote className="h-4 w-4" /><span className="text-xs">Retirado</span></div>
-            <div className="text-xl font-bold">{formatXAFFixed(summary.withdrawn_xaf)}</div>
+            <div className="text-xl font-bold">{formatXAFFixed(displaySummary.withdrawn_xaf)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-primary mb-1"><Wallet className="h-4 w-4" /><span className="text-xs">Total bruto</span></div>
-            <div className="text-xl font-bold">{formatXAFFixed(summary.gross_total_xaf)}</div>
+            <div className="text-xl font-bold">{formatXAFFixed(displaySummary.gross_total_xaf)}</div>
           </CardContent>
         </Card>
       </div>
