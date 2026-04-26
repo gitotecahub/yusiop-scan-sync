@@ -35,6 +35,150 @@ export type Database = {
         }
         Relationships: []
       }
+      ad_campaigns: {
+        Row: {
+          artist_id: string | null
+          campaign_type: Database["public"]["Enums"]["ad_campaign_type"]
+          clicks: number
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          duration_days: number | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          impressions: number
+          payment_reference: string | null
+          payment_status: Database["public"]["Enums"]["ad_payment_status"]
+          placement: string
+          price_eur: number | null
+          price_xaf: number | null
+          priority: number
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["ad_campaign_status"]
+          subtitle: string | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          campaign_type: Database["public"]["Enums"]["ad_campaign_type"]
+          clicks?: number
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          duration_days?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["ad_payment_status"]
+          placement?: string
+          price_eur?: number | null
+          price_xaf?: number | null
+          priority?: number
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ad_campaign_status"]
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          campaign_type?: Database["public"]["Enums"]["ad_campaign_type"]
+          clicks?: number
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          duration_days?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          impressions?: number
+          payment_reference?: string | null
+          payment_status?: Database["public"]["Enums"]["ad_payment_status"]
+          placement?: string
+          price_eur?: number | null
+          price_xaf?: number | null
+          priority?: number
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["ad_campaign_status"]
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ad_requests: {
+        Row: {
+          ad_type: string
+          admin_notes: string | null
+          asset_url: string | null
+          budget: string | null
+          company_name: string | null
+          created_at: string
+          desired_dates: string | null
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          sector: string | null
+          status: Database["public"]["Enums"]["ad_request_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ad_type: string
+          admin_notes?: string | null
+          asset_url?: string | null
+          budget?: string | null
+          company_name?: string | null
+          created_at?: string
+          desired_dates?: string | null
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          sector?: string | null
+          status?: Database["public"]["Enums"]["ad_request_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ad_type?: string
+          admin_notes?: string | null
+          asset_url?: string | null
+          budget?: string | null
+          company_name?: string | null
+          created_at?: string
+          desired_dates?: string | null
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          sector?: string | null
+          status?: Database["public"]["Enums"]["ad_request_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_financial_settings: {
         Row: {
           artist_percentage: number
@@ -1707,6 +1851,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_ad_campaign: {
+        Args: { p_campaign_id: string }
+        Returns: undefined
+      }
       admin_approve_withdrawal: {
         Args: { p_request_id: string }
         Returns: Json
@@ -1722,6 +1870,10 @@ export type Database = {
             }
             Returns: Json
           }
+      admin_reject_ad_campaign: {
+        Args: { p_campaign_id: string; p_reason?: string }
+        Returns: undefined
+      }
       admin_reject_withdrawal: {
         Args: { p_reason: string; p_request_id: string }
         Returns: Json
@@ -1776,6 +1928,21 @@ export type Database = {
           success: boolean
         }[]
       }
+      create_artist_release_ad: {
+        Args: {
+          p_artist_id: string
+          p_cta_text: string
+          p_cta_url: string
+          p_duration_days: number
+          p_image_url: string
+          p_price_eur: number
+          p_price_xaf: number
+          p_start_date?: string
+          p_subtitle: string
+          p_title: string
+        }
+        Returns: string
+      }
       delete_email: {
         Args: { msg_id: number; queue_name: string }
         Returns: boolean
@@ -1787,6 +1954,19 @@ export type Database = {
       ensure_artist_for_user: {
         Args: { _artist_name: string; _user_id: string }
         Returns: string
+      }
+      expire_ad_campaigns: { Args: never; Returns: number }
+      get_active_ad_campaigns: {
+        Args: { p_limit?: number; p_placement?: string }
+        Returns: {
+          campaign_type: Database["public"]["Enums"]["ad_campaign_type"]
+          cta_text: string
+          cta_url: string
+          id: string
+          image_url: string
+          subtitle: string
+          title: string
+        }[]
       }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
       get_artist_wallet_summary: {
@@ -1974,8 +2154,28 @@ export type Database = {
           success: boolean
         }[]
       }
+      submit_ad_request: {
+        Args: {
+          p_ad_type: string
+          p_asset_url?: string
+          p_budget?: string
+          p_company_name?: string
+          p_desired_dates?: string
+          p_email: string
+          p_message?: string
+          p_name: string
+          p_phone?: string
+          p_sector?: string
+        }
+        Returns: string
+      }
       subscription_metrics: { Args: never; Returns: Json }
       sync_historical_earnings: { Args: { p_dry_run?: boolean }; Returns: Json }
+      track_ad_click: { Args: { p_campaign_id: string }; Returns: undefined }
+      track_ad_impression: {
+        Args: { p_campaign_id: string }
+        Returns: undefined
+      }
       transfer_card_to_user: {
         Args: {
           p_card_id: string
@@ -2019,6 +2219,25 @@ export type Database = {
       }
     }
     Enums: {
+      ad_campaign_status:
+        | "draft"
+        | "pending_payment"
+        | "pending_review"
+        | "active"
+        | "rejected"
+        | "expired"
+        | "cancelled"
+      ad_campaign_type:
+        | "artist_release"
+        | "external_business"
+        | "yusiop_service"
+      ad_payment_status: "unpaid" | "paid" | "refunded"
+      ad_request_status:
+        | "new"
+        | "contacted"
+        | "proposal_sent"
+        | "converted"
+        | "rejected"
       app_role: "admin" | "moderator" | "user" | "artist"
       artist_earning_status:
         | "pending_validation"
@@ -2207,6 +2426,28 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_campaign_status: [
+        "draft",
+        "pending_payment",
+        "pending_review",
+        "active",
+        "rejected",
+        "expired",
+        "cancelled",
+      ],
+      ad_campaign_type: [
+        "artist_release",
+        "external_business",
+        "yusiop_service",
+      ],
+      ad_payment_status: ["unpaid", "paid", "refunded"],
+      ad_request_status: [
+        "new",
+        "contacted",
+        "proposal_sent",
+        "converted",
+        "rejected",
+      ],
       app_role: ["admin", "moderator", "user", "artist"],
       artist_earning_status: [
         "pending_validation",

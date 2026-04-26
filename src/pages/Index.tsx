@@ -7,6 +7,7 @@ import DigitalCard from '@/components/DigitalCard';
 import SubscriptionBanner from '@/components/SubscriptionBanner';
 import PopularSection from '@/components/PopularSection';
 import SongCarousel, { CarouselSong } from '@/components/SongCarousel';
+import AdBanner from '@/components/ads/AdBanner';
 import { useLanguageStore } from '@/stores/languageStore';
 
 interface SongRow {
@@ -198,6 +199,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* === BANNER PUBLICITARIO === */}
+      <AdBanner />
 
       {/* === HERO DESTACADO — carrusel grande === */}
       <section className="space-y-3">

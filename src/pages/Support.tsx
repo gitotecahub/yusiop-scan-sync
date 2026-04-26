@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import RequestAdButton from '@/components/ads/RequestAdButton';
 
 interface MyTicket {
   id: string;
@@ -108,6 +109,9 @@ export default function Support() {
           </div>
         </div>
       </div>
+
+      {/* Publicidad */}
+      <RequestAdButton variant="card" />
 
       {/* Botones rápidos */}
       <div>

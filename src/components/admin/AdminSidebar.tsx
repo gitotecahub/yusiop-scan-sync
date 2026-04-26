@@ -20,6 +20,7 @@ import {
   Headphones,
   Wallet,
   CreditCard,
+  Megaphone,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -60,6 +61,7 @@ const menuItems: MenuItem[] = [
   { title: 'Suscripciones', url: '/admin/subscriptions', icon: Sparkles, area: 'monetization' },
   { title: 'Retiros artistas', url: '/admin/withdrawals', icon: Wallet, area: 'monetization' },
   { title: 'Métodos de cobro', url: '/admin/payment-methods', icon: CreditCard, area: 'monetization' },
+  { title: 'Publicidad', url: '/admin/advertising', icon: Megaphone, area: null, superAdminOnly: true },
   { title: 'Soporte', url: '/admin/support', icon: Headphones, area: null },
   { title: 'Configuración', url: '/admin/settings', icon: Settings, area: 'settings' },
 ];
