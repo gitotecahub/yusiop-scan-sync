@@ -14,7 +14,7 @@ import { useMySubscription } from '@/hooks/useSubscriptionPlans';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
-
+import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
 type ExpressTier = '72h' | '48h' | '24h';
 
 const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
