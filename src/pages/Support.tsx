@@ -67,6 +67,12 @@ export default function Support() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Abrir un ticket directamente desde una notificación: /support?ticket=<id>
+  useEffect(() => {
+    const tid = searchParams.get('ticket');
+    if (tid) setOpenTicketId(tid);
+  }, [searchParams]);
+
   const handleQuick = (topic: typeof QUICK_TOPICS[number]) => {
     if (topic.key === 'human') {
       setEscalateCategory('other');
@@ -145,9 +151,11 @@ export default function Support() {
           </h2>
           <div className="space-y-2">
             {myTickets.map((t) => (
-              <div
+              <button
                 key={t.id}
-                className="rounded-2xl border border-border/60 bg-card p-3 flex items-center justify-between gap-3"
+                type="button"
+                onClick={() => setOpenTicketId(t.id)}
+                className="w-full text-left rounded-2xl border border-border/60 bg-card hover:bg-accent hover:border-primary/40 transition-colors p-3 flex items-center justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm truncate">{t.subject}</p>
@@ -156,7 +164,8 @@ export default function Support() {
                   </p>
                 </div>
                 <Badge variant={STATUS_VARIANT[t.status]}>{STATUS_LABEL[t.status]}</Badge>
-              </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </button>
             ))}
           </div>
         </div>
@@ -189,6 +198,22 @@ export default function Support() {
         defaultCategory={escalateCategory}
         defaultDescription={escalateDescription}
         onCreated={loadTickets}
+      />
+
+      <UserTicketDetailDialog
+        ticketId={openTicketId}
+        open={!!openTicketId}
+        onOpenChange={(o) => {
+          if (!o) {
+            setOpenTicketId(null);
+            // Limpia el query param para no reabrir al volver atrás
+            if (searchParams.get('ticket')) {
+              searchParams.delete('ticket');
+              setSearchParams(searchParams, { replace: true });
+            }
+          }
+        }}
+        onUpdated={loadTickets}
       />
     </div>
   );
