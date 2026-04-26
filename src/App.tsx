@@ -44,6 +44,8 @@ import ArtistRequests from '@/pages/admin/ArtistRequests';
 import AdminSubscriptions from '@/pages/admin/Subscriptions';
 import Subscriptions from '@/pages/Subscriptions';
 import Popular from '@/pages/Popular';
+import Support from '@/pages/Support';
+import AdminSupport from '@/pages/admin/Support';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -101,6 +103,7 @@ const AppContent = () => {
         <Route path="song-submissions" element={<RequireStaffArea area="catalog"><SongSubmissions /></RequireStaffArea>} />
         <Route path="collab-claims" element={<RequireStaffArea area="catalog"><CollaborationClaims /></RequireStaffArea>} />
         <Route path="subscriptions" element={<RequireStaffArea area="monetization"><AdminSubscriptions /></RequireStaffArea>} />
+        <Route path="support" element={<AdminSupport />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
