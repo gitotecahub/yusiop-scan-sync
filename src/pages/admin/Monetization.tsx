@@ -450,7 +450,7 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Bolsa artistas (40%)</CardDescription>
+            <CardDescription>Bolsa artistas (30%)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <UsersIcon className="h-5 w-5 text-yusiop-primary" />
               {formatEUR(totals.totalArtist)}
