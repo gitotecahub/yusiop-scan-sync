@@ -519,7 +519,7 @@ const SalesSimulator = () => {
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
             Aplica al total combinado (físicas + virtuales). Por defecto: 40% artistas,
-            10% inversor, 50% plataforma.
+            60% plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -537,19 +537,7 @@ const SalesSimulator = () => {
             />
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Inversor (%)</Label>
-              <span className="text-sm font-semibold">{investorShare}%</span>
-            </div>
-            <Slider
-              value={[investorShare]}
-              onValueChange={(v) => setInvestorShare(v[0])}
-              min={0}
-              max={100}
-              step={1}
-            />
-          </div>
+
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -566,7 +554,7 @@ const SalesSimulator = () => {
           </div>
 
           {(() => {
-            const sum = artistShare + investorShare + platformShare;
+            const sum = artistShare + platformShare;
             const ok = sum === 100;
             return (
               <div
@@ -631,11 +619,10 @@ const SalesSimulator = () => {
         </Card>
       </div>
 
-      {/* Investor ROI progress */}
-      <InvestorProgress totalInvestorXAF={totals.totalInvestor} />
+
 
       {/* KPIs */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={<Package className="h-4 w-4 text-yusiop-primary" />}
           label="Tarjetas vendidas / año"
@@ -655,12 +642,6 @@ const SalesSimulator = () => {
           label={`Bolsa artistas (${artistShare}%)`}
         >
           {formatEUR(totals.totalArtist, 'left')}
-        </KpiCard>
-        <KpiCard
-          icon={<Briefcase className="h-4 w-4 text-yusiop-primary" />}
-          label={`Inversor (${investorShare}%)`}
-        >
-          {formatEUR(totals.totalInvestor, 'left')}
         </KpiCard>
         <KpiCard
           icon={<TrendingUp className="h-4 w-4 text-yusiop-primary" />}
@@ -697,12 +678,6 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Inversor (${investorShare}%)`}
-              value={formatEUR(totals.totalInvestor)}
-              bold
-            />
-            <Separator />
-            <Row
               label={`Plataforma bruto (${platformShare}%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
@@ -727,7 +702,7 @@ const SalesSimulator = () => {
           <CardContent className="space-y-2 text-sm">
             <Row label="Ingresos brutos / mes" value={formatEUR(totals.monthlyGross)} />
             <Row label="Bolsa artistas / mes" value={formatEUR(totals.monthlyArtist)} />
-            <Row label="Inversor / mes" value={formatEUR(totals.monthlyInvestor)} />
+            
             <Row
               label="Plataforma bruto / mes"
               value={formatEUR(totals.monthlyPlatform)}
