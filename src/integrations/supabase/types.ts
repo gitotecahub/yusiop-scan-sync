@@ -1442,6 +1442,39 @@ export type Database = {
         Returns: string
       }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
+      get_ceo_ai_alerts: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_fraud_summary: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_health_score: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_kpis: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_recommendations: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_revenue_breakdown: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_sales_forecast: { Args: { p_days?: number }; Returns: Json }
+      get_ceo_top_artists: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          active_songs: number
+          artist_id: string
+          downloads_now: number
+          downloads_prev: number
+          estimated_revenue: number
+          growth_pct: number
+          name: string
+          recommendation: string
+        }[]
+      }
+      get_ceo_top_songs: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          ai_status: string
+          artist_name: string
+          downloads_now: number
+          downloads_prev: number
+          estimated_revenue: number
+          growth_pct: number
+          song_id: string
+          title: string
+        }[]
+      }
       get_gift_preview: {
         Args: { p_token: string }
         Returns: {
