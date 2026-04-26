@@ -80,7 +80,9 @@ export default function SupportChat({ initialPrompt, onEscalate }: SupportChatPr
   // Procesar prompt inicial proveniente de los botones rápidos
   useEffect(() => {
     if (initialPrompt) {
-      sendMessage(initialPrompt);
+      // Quitar marcador invisible usado para forzar re-trigger desde el padre
+      const clean = initialPrompt.split('\u200B')[0];
+      sendMessage(clean);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPrompt]);
