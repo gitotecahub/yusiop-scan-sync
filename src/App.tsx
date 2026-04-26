@@ -130,6 +130,7 @@ const AppContent = () => {
             <Route path="/artist/stats" element={<ArtistStats />} />
             <Route path="/artist/collaborations" element={<Collaborations />} />
             <Route path="/artist/request" element={<ArtistRequest />} />
+            <Route path="/support" element={<Support />} />
             <Route path="/profile" element={
               <Layout>
                 <AudioPlayer />
@@ -151,6 +152,7 @@ const AppContent = () => {
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/popular" element={<Popular />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/support" element={<Support />} />
               <Route path="/artist/request" element={<ArtistRequest />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
