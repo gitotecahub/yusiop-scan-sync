@@ -115,6 +115,31 @@ const ArtistWallet = () => {
     );
   }
 
+  const historySummary = earnings.reduce(
+    (acc, earning) => {
+      acc.gross_total_xaf += earning.artist_amount_xaf;
+      if (earning.status === 'pending_validation') acc.pending_xaf += earning.artist_amount_xaf;
+      if (earning.status === 'available') acc.available_xaf += earning.artist_amount_xaf;
+      if (earning.status === 'withdrawn') acc.withdrawn_xaf += earning.artist_amount_xaf;
+      if (earning.status === 'under_review') acc.under_review_xaf += earning.artist_amount_xaf;
+      if (earning.status === 'blocked') acc.blocked_xaf += earning.artist_amount_xaf;
+      return acc;
+    },
+    {
+      pending_xaf: 0,
+      available_xaf: 0,
+      under_review_xaf: 0,
+      blocked_xaf: 0,
+      withdrawn_xaf: 0,
+      gross_total_xaf: 0,
+    }
+  );
+
+  const displaySummary = summary.gross_total_xaf > 0 || earnings.length === 0
+    ? summary
+    : { ...summary, ...historySummary, earnings_count: earnings.length };
+  const displayAvailable = Math.max(0, displaySummary.available_xaf - displaySummary.reserved_xaf);
+
   const earningsBySong = earnings.reduce<Record<string, { title: string; total: number; count: number }>>((acc, e) => {
     const key = e.song_id ?? 'unknown';
     const title = songsMap[key] ?? 'Canción';
