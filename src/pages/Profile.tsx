@@ -28,6 +28,7 @@ import {
   Hourglass,
   ShieldCheck,
   Languages,
+  HelpCircle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
@@ -653,6 +654,33 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Ayuda y Soporte */}
+      <div className="blob-card p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yusiop-primary via-yusiop-accent to-yusiop-secondary flex items-center justify-center shrink-0">
+            <HelpCircle className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="eyebrow mb-1">Soporte</p>
+            <h3 className="font-display text-lg font-bold leading-tight">
+              Ayuda y Soporte
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Resuelve dudas sobre tarjetas, descargas y tu cuenta.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate('/support')}
+              className="mt-3 rounded-full h-9 px-4 text-xs font-bold"
+            >
+              <HelpCircle className="h-3 w-3 mr-1.5" />
+              Abrir centro de ayuda
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Settings */}
       <div>
