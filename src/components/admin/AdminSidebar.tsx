@@ -16,6 +16,7 @@ import {
   Upload,
   Users2,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -37,9 +38,11 @@ type MenuItem = {
   url: string;
   icon: typeof LayoutDashboard;
   area: StaffArea | null; // null = visible para todos los miembros del panel
+  superAdminOnly?: boolean;
 };
 
 const menuItems: MenuItem[] = [
+  { title: 'CEO Center', url: '/admin/ceo-center', icon: Crown, area: null, superAdminOnly: true },
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard, area: null },
   { title: 'Usuarios', url: '/admin/users', icon: Users, area: 'users' },
   { title: 'Solicitudes artista', url: '/admin/artist-requests', icon: UserCheck, area: 'artist_requests' },
@@ -60,13 +63,16 @@ export function AdminSidebar() {
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { signOut } = useAuth();
-  const { has } = useStaffAreas();
+  const { has, isSuperAdmin } = useStaffAreas();
   const currentPath = location.pathname;
   const [pendingArtistCount, setPendingArtistCount] = useState(0);
   const [pendingSongCount, setPendingSongCount] = useState(0);
   const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
 
-  const visibleItems = menuItems.filter((item) => item.area === null || has(item.area));
+  const visibleItems = menuItems.filter((item) => {
+    if (item.superAdminOnly) return isSuperAdmin;
+    return item.area === null || has(item.area);
+  });
 
   const loadPendingCount = async () => {
     const { count } = await supabase
