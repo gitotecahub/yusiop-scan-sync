@@ -208,7 +208,7 @@ const Monetization = () => {
   }, [enrichedSongs]);
 
   // Pozo de colaboradores no reclamados (artistas no dados de alta o sin reclamar)
-  // Para cada song con colaboradores, repartimos los ingresos del artista (40%) según share_percent
+  // Para cada song con colaboradores, repartimos los ingresos del artista (30%) según share_percent
   // de los colaboradores cuyo claimed_by_user_id IS NULL.
   const unclaimedPool = useMemo(() => {
     // Agrupar colaboradores por canción
