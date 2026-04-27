@@ -390,12 +390,38 @@ const SongSubmissions = () => {
                           {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                         </Badge>
                         <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
+                        {row.promo && (
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] gap-1 border-primary/40 ${
+                              row.promo.payment_status === 'paid'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/40'
+                            }`}
+                            title={
+                              row.promo.payment_status === 'paid'
+                                ? 'Promoción pagada'
+                                : 'Promoción pendiente de pago'
+                            }
+                          >
+                            <Megaphone className="h-3 w-3" />
+                            Promo {row.promo.duration_days ?? '?'}d
+                            {row.promo.payment_status === 'paid' ? (
+                              <CheckCircle2 className="h-3 w-3" />
+                            ) : (
+                              <AlertCircle className="h-3 w-3" />
+                            )}
+                          </Badge>
+                        )}
                       </CardTitle>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
                         {row.album_title ? ` · ${row.album_title}` : ''}
                         {' · '}{formatDuration(row.duration_seconds)}
                         {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
+                        {row.release_date && (
+                          <> · 🎯 Solicitada: {new Date(row.release_date).toLocaleDateString('es-ES')}</>
+                        )}
                         {row.status === 'approved' && row.scheduled_release_at && (
                           <> · 📅 {formatMadrid(row.scheduled_release_at)}</>
                         )}
