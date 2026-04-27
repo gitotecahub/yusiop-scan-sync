@@ -588,6 +588,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (!trackUp) throw new Error('Falta archivo de audio');
         // Express necesita pago si NO es Elite y hay tier seleccionado con precio > 0
         const expressNeedsPayment = !!expressOpt && !isElite && (expressOpt.priceXaf > 0);
+        const promoEnabled = !!(promo.enabled && promo.plan);
+        // Si hay algo que pagar, la canción se queda en "pending_payment"
+        // y NO aparecerá al admin hasta que Stripe confirme el pago.
+        const requiresPayment = expressNeedsPayment || promoEnabled;
+        const initialStatus = requiresPayment ? 'pending_payment' : 'pending';
+
         const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
           user_id: user.id,
           title: formData.title.trim(),
@@ -602,6 +608,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           track_path: trackUp.path,
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
+          status: initialStatus,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
@@ -611,30 +618,33 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (dbError) throw dbError;
         if (inserted?.id) {
           await persistCollaborators(inserted.id);
-          // Lanzar análisis de copyright en background
-          supabase.functions
-            .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
-            .catch((e) => console.warn('Copyright check failed (background):', e));
-          // Notificar a colaboradores no principales (en background)
-          if (hasCollabs) {
+          // Solo lanzar análisis y notificaciones si NO requiere pago.
+          // Si requiere pago, esto se hará tras la confirmación del webhook
+          // (o quedará pendiente; el admin no la verá hasta entonces).
+          if (!requiresPayment) {
             supabase.functions
-              .invoke('notify-collaborators', {
-                body: {
-                  submission_id: inserted.id,
-                  phase: 'submitted',
-                  app_url: window.location.origin,
-                },
-              })
-              .catch((e) => console.warn('notify-collaborators (submitted) failed:', e));
+              .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
+              .catch((e) => console.warn('Copyright check failed (background):', e));
+            if (hasCollabs) {
+              supabase.functions
+                .invoke('notify-collaborators', {
+                  body: {
+                    submission_id: inserted.id,
+                    phase: 'submitted',
+                    app_url: window.location.origin,
+                  },
+                })
+                .catch((e) => console.warn('notify-collaborators (submitted) failed:', e));
+            }
           }
         }
         setProgress(100);
 
         // ===== Pago combinado: Express + Promoción =====
-        // Si hay express por pagar y/o promoción seleccionada, redirigir a UNA
-        // sola pasarela de Stripe con la suma de ambos servicios.
-        const promoEnabled = !!(promo.enabled && promo.plan && inserted?.id);
-        if ((expressNeedsPayment || promoEnabled) && inserted?.id) {
+        // Si hay algo que pagar, redirigir SIEMPRE a la pasarela.
+        // La canción quedó en pending_payment y NO se enviará al admin
+        // hasta que Stripe confirme el pago vía webhook.
+        if (requiresPayment && inserted?.id) {
           let campaignId: string | null = null;
 
           // Crear la campaña promocional si procede (queda pending_payment)
@@ -682,12 +692,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           );
 
           if (chkErr || !checkout?.url) {
-            toast.error('No se pudo abrir la pasarela de pago. Puedes reintentarlo desde tu panel de artista.');
+            toast.error('No se pudo abrir la pasarela de pago. Tu canción quedó guardada como "pendiente de pago" — puedes reintentarlo desde "Mis envíos".');
           } else {
             const parts: string[] = [];
             if (expressNeedsPayment) parts.push(`Express ${expressOpt?.tier}`);
             if (promoEnabled) parts.push('Promoción');
-            toast.success(`Redirigiendo a la pasarela: ${parts.join(' + ')}…`);
+            toast.success(`Redirigiendo a la pasarela: ${parts.join(' + ')}. Tu canción se enviará al admin tras confirmar el pago.`);
             onOpenChange(false);
             onSubmitted?.();
             window.location.href = checkout.url;
