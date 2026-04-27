@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { signInSchema, signUpSchema } from '@/lib/validation';
 import { useLanguageStore } from '@/stores/languageStore';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +121,15 @@ const Auth = () => {
                   <Label htmlFor="password" className="eyebrow">{t('auth.password')}</Label>
                   <PasswordField id="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" className="rounded-2xl border-border bg-input h-12" />
                 </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setForgotOpen(true)}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
                 <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
                   {loading ? t('auth.signingIn') : t('auth.signinBtn')}
                 </Button>
@@ -154,6 +165,8 @@ const Auth = () => {
 
         <p className="eyebrow text-center mt-6">© Yusiop · 2026</p>
       </div>
+
+      <ForgotPasswordDialog open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
     </div>
   );
 };
