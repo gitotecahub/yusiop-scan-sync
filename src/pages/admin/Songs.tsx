@@ -53,6 +53,8 @@ const Songs = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
