@@ -68,6 +68,9 @@ const Library = () => {
   const [bulkShareOpen, setBulkShareOpen] = useState(false);
   const [bulkRecipient, setBulkRecipient] = useState('');
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [offlineIds, setOfflineIds] = useState<Set<string>>(new Set());
+  const [storageBytes, setStorageBytes] = useState<number>(0);
+  const online = useOnlineStatus();
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas (online: BD; offline: IndexedDB)
