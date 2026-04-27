@@ -6,6 +6,14 @@ import { PasswordField } from '@/components/auth/PasswordField';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
+
+type Status = 'validating' | 'ready' | 'invalid';
+
+const parseHash = (hash: string) => {
+  const h = hash.startsWith('#') ? hash.slice(1) : hash;
+  return new URLSearchParams(h);
+};
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -13,29 +21,65 @@ const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [invalid, setInvalid] = useState(false);
+  const [status, setStatus] = useState<Status>('validating');
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
-    // Supabase coloca los tokens en el hash (#access_token=...&type=recovery)
-    // y dispara automáticamente PASSWORD_RECOVERY al inicializar el cliente.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true);
-    });
+    // 1) Comprobar errores en el hash (token caducado / inválido)
+    const hashParams = parseHash(window.location.hash);
+    const queryParams = new URLSearchParams(window.location.search);
+    const errorCode =
+      hashParams.get('error_code') || queryParams.get('error_code');
+    const errorDescription =
+      hashParams.get('error_description') || queryParams.get('error_description');
 
-    // Comprobar si ya hay sesión de recuperación activa
-    const hash = window.location.hash || '';
-    const isRecovery = hash.includes('type=recovery');
+    if (errorCode) {
+      setStatus('invalid');
+      if (errorCode === 'otp_expired') {
+        setErrorMsg('El enlace ha caducado. Solicita uno nuevo abajo.');
+      } else {
+        setErrorMsg(
+          errorDescription?.replace(/\+/g, ' ') ||
+            'Este enlace ya no es válido. Solicita uno nuevo.',
+        );
+      }
+      return;
+    }
+
+    // 2) Escuchar el evento PASSWORD_RECOVERY que dispara Supabase tras parsear el hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          setStatus('ready');
+        }
+      },
+    );
+
+    // 3) Validar si ya hay sesión de recuperación o token en el hash
+    const hasRecoveryToken =
+      hashParams.get('type') === 'recovery' && !!hashParams.get('access_token');
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && (isRecovery || ready)) {
-        setReady(true);
-      } else if (!isRecovery && !session) {
-        setInvalid(true);
+      if (session || hasRecoveryToken) {
+        setStatus('ready');
+      } else {
+        // Pequeño delay para dar tiempo a detectSessionInUrl
+        setTimeout(() => {
+          supabase.auth.getSession().then(({ data: { session: s2 } }) => {
+            if (s2) setStatus('ready');
+            else {
+              setStatus('invalid');
+              setErrorMsg(
+                'No se ha detectado un enlace de recuperación válido. Solicita uno nuevo.',
+              );
+            }
+          });
+        }, 800);
       }
     });
 
     return () => subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +96,13 @@ const ResetPassword = () => {
     const { error } = await updatePassword(password);
     setSubmitting(false);
     if (error) {
-      toast.error(`Error: ${error.message}`);
+      const msg = error.message || '';
+      if (/expired|invalid|grant/i.test(msg)) {
+        setStatus('invalid');
+        setErrorMsg('El enlace ha caducado. Solicita uno nuevo.');
+      } else {
+        toast.error(`Error: ${msg}`);
+      }
       return;
     }
     toast.success('Contraseña actualizada. Inicia sesión con tu nueva contraseña.');
@@ -74,19 +124,24 @@ const ResetPassword = () => {
         </div>
 
         <div className="glass-strong shadow-vapor p-7">
-          {invalid ? (
+          {status === 'invalid' ? (
             <div className="text-center space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Este enlace ya no es válido o ha expirado. Solicita un nuevo correo de recuperación.
-              </p>
+              <p className="text-sm text-muted-foreground">{errorMsg}</p>
               <Button
-                onClick={() => navigate('/auth')}
+                onClick={() => setForgotOpen(true)}
                 className="w-full h-12 rounded-full vapor-bg text-primary-foreground font-bold shadow-glow"
+              >
+                Solicitar nuevo enlace
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/auth')}
+                className="w-full h-10 rounded-full"
               >
                 Volver al inicio de sesión
               </Button>
             </div>
-          ) : !ready ? (
+          ) : status === 'validating' ? (
             <p className="text-sm text-muted-foreground text-center">Validando enlace…</p>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -127,6 +182,8 @@ const ResetPassword = () => {
           )}
         </div>
       </div>
+
+      <ForgotPasswordDialog open={forgotOpen} onOpenChange={setForgotOpen} />
     </div>
   );
 };
