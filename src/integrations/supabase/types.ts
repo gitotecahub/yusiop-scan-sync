@@ -2573,7 +2573,12 @@ export type Database = {
       express_tier: "72h" | "48h" | "24h"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
-      song_submission_status: "pending" | "approved" | "rejected" | "removed"
+      song_submission_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "removed"
+        | "pending_payment"
       staff_area:
         | "catalog"
         | "users"
@@ -2795,7 +2800,13 @@ export const Constants = {
       express_tier: ["72h", "48h", "24h"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
-      song_submission_status: ["pending", "approved", "rejected", "removed"],
+      song_submission_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "removed",
+        "pending_payment",
+      ],
       staff_area: [
         "catalog",
         "users",
