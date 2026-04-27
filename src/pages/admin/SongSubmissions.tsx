@@ -394,6 +394,29 @@ const SongSubmissions = () => {
                           {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                         </Badge>
                         <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
+                        {row.express_tier && (
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] gap-1 ${
+                              row.express_paid_at
+                                ? 'border-primary/40 bg-gradient-to-r from-primary/20 to-primary/10 text-primary'
+                                : 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            }`}
+                            title={
+                              row.express_paid_at
+                                ? `Revisión prioritaria pagada (${row.express_tier})`
+                                : `Revisión prioritaria pendiente de pago (${row.express_tier})`
+                            }
+                          >
+                            <Zap className="h-3 w-3" />
+                            Revisión prioritaria · {row.express_tier}
+                            {row.express_paid_at ? (
+                              <CheckCircle2 className="h-3 w-3" />
+                            ) : (
+                              <AlertCircle className="h-3 w-3" />
+                            )}
+                          </Badge>
+                        )}
                         {row.promo && (
                           <Badge
                             variant="outline"
