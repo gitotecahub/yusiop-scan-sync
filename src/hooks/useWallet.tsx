@@ -12,6 +12,10 @@ export interface WalletState {
   total_recharged: number;
   total_spent: number;
   updated_at: string;
+  /** Descargas estimadas calculadas en backend (floor(balance / value_per_download_xaf)) */
+  estimated_downloads: number;
+  /** Precio por descarga configurado en admin_financial_settings (XAF) */
+  value_per_download_xaf: number;
 }
 
 export interface WalletTransaction {
@@ -26,9 +30,21 @@ export interface WalletTransaction {
   created_at: string;
 }
 
+export interface ActiveSubscriptionInfo {
+  id: string;
+  plan_code: string;
+  plan_name: string;
+  downloads_remaining: number;
+  monthly_downloads: number;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  status: string;
+}
+
 interface UseWalletResult {
   wallet: WalletState | null;
   transactions: WalletTransaction[];
+  subscription: ActiveSubscriptionInfo | null;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -39,6 +55,7 @@ export function useWallet(): UseWalletResult {
   const { user } = useAuthStore();
   const [wallet, setWallet] = useState<WalletState | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [subscription, setSubscription] = useState<ActiveSubscriptionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +63,7 @@ export function useWallet(): UseWalletResult {
     if (!user?.id) {
       setWallet(null);
       setTransactions([]);
+      setSubscription(null);
       setLoading(false);
       return;
     }
@@ -63,6 +81,8 @@ export function useWallet(): UseWalletResult {
         total_recharged: Number(payload.wallet.total_recharged ?? 0),
         total_spent: Number(payload.wallet.total_spent ?? 0),
         updated_at: payload.wallet.updated_at,
+        estimated_downloads: Number(payload.wallet.estimated_downloads ?? 0),
+        value_per_download_xaf: Number(payload.wallet.value_per_download_xaf ?? 650),
       });
       setTransactions(
         (payload.transactions ?? []).map((t: any) => ({
@@ -70,6 +90,20 @@ export function useWallet(): UseWalletResult {
           amount: Number(t.amount),
           balance_after: Number(t.balance_after),
         })),
+      );
+      setSubscription(
+        payload.subscription
+          ? {
+              id: payload.subscription.id,
+              plan_code: payload.subscription.plan_code,
+              plan_name: payload.subscription.plan_name,
+              downloads_remaining: Number(payload.subscription.downloads_remaining ?? 0),
+              monthly_downloads: Number(payload.subscription.monthly_downloads ?? 0),
+              current_period_end: payload.subscription.current_period_end,
+              cancel_at_period_end: !!payload.subscription.cancel_at_period_end,
+              status: payload.subscription.status,
+            }
+          : null,
       );
     } catch (e: any) {
       setError(e.message ?? 'Error cargando wallet');
@@ -98,5 +132,5 @@ export function useWallet(): UseWalletResult {
     [refresh],
   );
 
-  return { wallet, transactions, loading, error, refresh, redeemCode };
+  return { wallet, transactions, subscription, loading, error, refresh, redeemCode };
 }
