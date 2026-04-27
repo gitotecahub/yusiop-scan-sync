@@ -201,6 +201,7 @@ const Wallet = () => {
       </div>
 
       <RedeemCodeDialog open={redeemOpen} onOpenChange={setRedeemOpen} />
+      <RechargeWalletDialog open={rechargeOpen} onOpenChange={setRechargeOpen} />
     </div>
   );
 };
