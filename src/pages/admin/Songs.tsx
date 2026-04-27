@@ -299,7 +299,14 @@ const Songs = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedSong(song);
+                      setEditDialogOpen(true);
+                    }}
+                  >
                     <Edit className="h-4 w-4 mr-1" />
                     Editar
                   </Button>
