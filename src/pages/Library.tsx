@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { supabase } from '@/integrations/supabase/client';
