@@ -63,13 +63,25 @@ const Catalog = () => {
         .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
         .gt('download_credits', 0);
 
+      // 3) Wallet recargable: convertir saldo en descargas estimadas
+      let totalWallet = 0;
+      try {
+        const { data: walletData } = await supabase.rpc('get_wallet_summary', { p_limit: 1 });
+        const payload = walletData as any;
+        if (payload?.wallet?.estimated_downloads) {
+          totalWallet = Number(payload.wallet.estimated_downloads) || 0;
+        }
+      } catch (e) {
+        console.warn('No se pudo cargar el saldo del wallet', e);
+      }
+
       const totalLegacy = (creditsRows ?? []).reduce((s, r: any) => s + (r.credits_remaining ?? 0), 0);
       const totalOwned = (ownedCards ?? []).reduce((s, c: any) => s + (c.download_credits ?? 0), 0);
-      const total = totalLegacy + totalOwned;
+      const total = totalLegacy + totalOwned + totalWallet;
 
       if (total > 0) {
         const cardType =
-          creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? 'standard';
+          creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? (totalWallet > 0 ? 'wallet' : 'standard');
         const expires =
           creditsRows?.[0]?.expires_at ??
           new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
