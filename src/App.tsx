@@ -39,6 +39,7 @@ import UserDetail from '@/pages/admin/UserDetail';
 import Songs from '@/pages/admin/Songs';
 import Albums from '@/pages/admin/Albums';
 import QRCards from '@/pages/admin/QRCards';
+import RechargeCards from '@/pages/admin/RechargeCards';
 import Downloads from '@/pages/admin/Downloads';
 import Monetization from '@/pages/admin/Monetization';
 import SalesSimulator from '@/pages/admin/SalesSimulator';
@@ -102,6 +103,7 @@ const AppContent = () => {
         <Route path="songs" element={<RequireStaffArea area="catalog"><Songs /></RequireStaffArea>} />
         <Route path="albums" element={<RequireStaffArea area="catalog"><Albums /></RequireStaffArea>} />
         <Route path="qr-cards" element={<RequireStaffArea area="qr_cards"><QRCards /></RequireStaffArea>} />
+        <Route path="recharge-cards" element={<RequireStaffArea area="qr_cards"><RechargeCards /></RequireStaffArea>} />
         <Route path="downloads" element={<RequireStaffArea area="monetization"><Downloads /></RequireStaffArea>} />
         <Route path="monetization" element={<RequireStaffArea area="monetization"><Monetization /></RequireStaffArea>} />
         <Route path="simulator" element={<RequireStaffArea area="monetization"><SalesSimulator /></RequireStaffArea>} />

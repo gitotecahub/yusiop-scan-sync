@@ -135,6 +135,7 @@ const Wallet = () => {
           >
             <Ticket className="h-5 w-5" />
             <span className="text-xs font-medium">Introducir código</span>
+            <span className="text-[10px] text-muted-foreground">Tarjeta física</span>
           </Button>
           <Button
             onClick={() => setRechargeOpen(true)}
@@ -142,8 +143,13 @@ const Wallet = () => {
           >
             <Plus className="h-5 w-5" />
             <span className="text-xs font-medium">Recargar saldo</span>
+            <span className="text-[10px] opacity-80">Pago digital</span>
           </Button>
         </div>
+
+        <p className="text-[11px] text-muted-foreground text-center px-4 -mt-1">
+          Tu saldo se descuenta automáticamente al descargar canciones ({formatXAFFixed(wallet?.value_per_download_xaf ?? 650)} por descarga).
+        </p>
 
         {/* Historial */}
         <div className="space-y-2">

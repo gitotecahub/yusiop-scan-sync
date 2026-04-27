@@ -56,6 +56,7 @@ const menuItems: MenuItem[] = [
   { title: 'Reclamaciones colab.', url: '/admin/collab-claims', icon: Users2, area: 'catalog' },
   { title: 'Álbumes', url: '/admin/albums', icon: Album, area: 'catalog' },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode, area: 'qr_cards' },
+  { title: 'Tarjetas recargables', url: '/admin/recharge-cards', icon: Wallet, area: 'qr_cards' },
   { title: 'Descargas', url: '/admin/downloads', icon: Download, area: 'monetization' },
   { title: 'Monetización', url: '/admin/monetization', icon: Coins, area: 'monetization' },
   { title: 'Simulador ventas', url: '/admin/simulator', icon: Calculator, area: 'monetization' },
