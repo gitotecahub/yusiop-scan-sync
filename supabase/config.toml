@@ -45,3 +45,8 @@ verify_jwt = false
 [functions.admin-cancel-subscription]
 verify_jwt = true
 
+[functions.generate-song-access]
+verify_jwt = true
+
+[functions.get-song-stream]
+verify_jwt = false
