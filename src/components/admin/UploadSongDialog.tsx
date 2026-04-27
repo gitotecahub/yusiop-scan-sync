@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Music, AlertCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Upload, Music, AlertCircle, Users, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,6 +37,26 @@ interface SongFormData {
   cover_url: string;
 }
 
+type CollabRole = 'featuring' | 'producer' | 'performer' | 'composer' | 'remix';
+
+const COLLAB_ROLES: { value: CollabRole; label: string }[] = [
+  { value: 'featuring', label: 'Featuring' },
+  { value: 'producer', label: 'Productor' },
+  { value: 'performer', label: 'Intérprete' },
+  { value: 'composer', label: 'Compositor' },
+  { value: 'remix', label: 'Remix' },
+];
+
+interface CollaboratorRow {
+  artist_name: string;
+  share_percent: number;
+  is_primary: boolean;
+  role: CollabRole;
+  contact_email: string;
+}
+
+const emailRe = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
 const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums }: UploadSongDialogProps) => {
   const [formData, setFormData] = useState<SongFormData>({
     title: '',
@@ -50,10 +71,16 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Colaboraciones
+  const [hasCollabs, setHasCollabs] = useState(false);
+  const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
   
   const trackInputRef = useRef<HTMLInputElement>(null);
   const previewInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const collabSum = collaborators.reduce((acc, c) => acc + (Number(c.share_percent) || 0), 0);
 
   const resetForm = () => {
     setFormData({
@@ -67,6 +94,35 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
     setPreviewFile(null);
     setCoverFile(null);
     setUploadProgress(0);
+    setHasCollabs(false);
+    setCollaborators([]);
+  };
+
+  const enableCollabs = () => {
+    setHasCollabs(true);
+    if (collaborators.length === 0) {
+      setCollaborators([
+        { artist_name: formData.artist_name, share_percent: 50, is_primary: true, role: 'featuring', contact_email: '' },
+        { artist_name: '', share_percent: 50, is_primary: false, role: 'featuring', contact_email: '' },
+      ]);
+    }
+  };
+
+  const disableCollabs = () => {
+    setHasCollabs(false);
+    setCollaborators([]);
+  };
+
+  const addCollaborator = () => {
+    setCollaborators(prev => [...prev, { artist_name: '', share_percent: 0, is_primary: false, role: 'featuring', contact_email: '' }]);
+  };
+
+  const removeCollaborator = (idx: number) => {
+    setCollaborators(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateCollab = (idx: number, patch: Partial<CollaboratorRow>) => {
+    setCollaborators(prev => prev.map((c, i) => i === idx ? { ...c, ...patch } : c));
   };
 
   const validateForm = () => {
@@ -81,6 +137,25 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
     if (!trackFile) {
       toast.error('Debes subir el archivo de audio completo');
       return false;
+    }
+    if (hasCollabs) {
+      if (collaborators.length < 2) {
+        toast.error('Una colaboración requiere al menos 2 artistas');
+        return false;
+      }
+      if (collaborators.some(c => !c.artist_name.trim())) {
+        toast.error('Todos los colaboradores deben tener nombre artístico');
+        return false;
+      }
+      const badEmail = collaborators.find(c => c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
+      if (badEmail) {
+        toast.error(`Email inválido: ${badEmail.contact_email}`);
+        return false;
+      }
+      if (Math.abs(collabSum - 100) > 0.01) {
+        toast.error(`La suma de splits debe ser 100% (actual: ${collabSum}%)`);
+        return false;
+      }
     }
     return true;
   };
@@ -173,7 +248,7 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
       }
 
       // Crear registro en la base de datos
-      const { error: dbError } = await supabase
+      const { data: insertedSong, error: dbError } = await supabase
         .from('songs')
         .insert({
           title: formData.title,
@@ -183,9 +258,30 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
           track_url: trackUrl,
           preview_url: previewUrl,
           cover_url: coverUrl
-        });
+        })
+        .select('id')
+        .single();
 
       if (dbError) throw dbError;
+
+      // Insertar colaboradores si los hay
+      if (hasCollabs && collaborators.length > 0 && insertedSong?.id) {
+        const rows = collaborators.map(c => ({
+          song_id: insertedSong.id,
+          artist_name: c.artist_name.trim(),
+          share_percent: Number(c.share_percent) || 0,
+          is_primary: c.is_primary,
+          role: c.role,
+          contact_email: c.contact_email.trim() || null,
+        }));
+        const { error: collabError } = await supabase
+          .from('song_collaborators')
+          .insert(rows);
+        if (collabError) {
+          console.error('Error guardando colaboradores:', collabError);
+          toast.error('Canción creada, pero falló al guardar colaboradores: ' + collabError.message);
+        }
+      }
 
       setUploadProgress(100);
       toast.success('Canción subida exitosamente');
@@ -384,6 +480,112 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Colaboraciones / Reparto */}
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <div>
+                  <h3 className="font-semibold">Colaboraciones / Reparto</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Define los splits de royalties entre los artistas participantes
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={hasCollabs}
+                onCheckedChange={(v) => (v ? enableCollabs() : disableCollabs())}
+              />
+            </div>
+
+            {hasCollabs && (
+              <div className="space-y-3 pt-2">
+                {collaborators.map((c, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-2 items-end border rounded-md p-3">
+                    <div className="col-span-12 md:col-span-4">
+                      <Label className="text-xs">Nombre artístico *</Label>
+                      <Input
+                        value={c.artist_name}
+                        onChange={(e) => updateCollab(idx, { artist_name: e.target.value })}
+                        placeholder="Nombre artístico"
+                      />
+                    </div>
+                    <div className="col-span-6 md:col-span-3">
+                      <Label className="text-xs">Rol</Label>
+                      <Select
+                        value={c.role}
+                        onValueChange={(v) => updateCollab(idx, { role: v as CollabRole })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COLLAB_ROLES.map(r => (
+                            <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-3 md:col-span-2">
+                      <Label className="text-xs">Split %</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        step={0.01}
+                        value={c.share_percent}
+                        onChange={(e) => updateCollab(idx, { share_percent: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="col-span-3 md:col-span-2 flex items-center gap-2 pb-2">
+                      <Switch
+                        checked={c.is_primary}
+                        onCheckedChange={(v) => {
+                          // Solo uno puede ser primary
+                          setCollaborators(prev => prev.map((row, i) => ({
+                            ...row,
+                            is_primary: i === idx ? v : (v ? false : row.is_primary),
+                          })));
+                        }}
+                      />
+                      <Label className="text-xs">Principal</Label>
+                    </div>
+                    <div className="col-span-12 md:col-span-11">
+                      <Label className="text-xs">Email de contacto (para invitación / reclamación)</Label>
+                      <Input
+                        type="email"
+                        value={c.contact_email}
+                        onChange={(e) => updateCollab(idx, { contact_email: e.target.value })}
+                        placeholder="email@ejemplo.com"
+                      />
+                    </div>
+                    <div className="col-span-12 md:col-span-1 flex justify-end">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeCollaborator(idx)}
+                        disabled={collaborators.length <= 2}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center justify-between">
+                  <Button type="button" variant="outline" size="sm" onClick={addCollaborator}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Añadir colaborador
+                  </Button>
+                  <span className={`text-sm font-medium ${Math.abs(collabSum - 100) < 0.01 ? 'text-green-600' : 'text-destructive'}`}>
+                    Suma: {collabSum}% {Math.abs(collabSum - 100) < 0.01 ? '✓' : '(debe ser 100%)'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Progress */}
