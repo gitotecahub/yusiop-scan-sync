@@ -2155,6 +2155,16 @@ export type Database = {
         }
         Returns: string
       }
+      credit_wallet_recharge: {
+        Args: {
+          p_amount_eur: number
+          p_amount_xaf: number
+          p_payment_intent?: string
+          p_stripe_session_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { msg_id: number; queue_name: string }
         Returns: boolean
