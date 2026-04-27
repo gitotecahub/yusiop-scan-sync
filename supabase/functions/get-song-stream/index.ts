@@ -62,19 +62,29 @@ serve(async (req) => {
       return json(404, { error: "La canción no tiene archivo" });
     }
 
-    // Extraer storage path del bucket "songs"
+    // Detectar bucket y path correctos a partir de la URL guardada.
+    // Soporta tanto URLs públicas como signed URLs de cualquier bucket
+    // (p.ej. "songs" para subidas del admin, "artist-submissions" para
+    // canciones aprobadas que vienen de envíos de artistas).
+    const KNOWN_BUCKETS = ["songs", "artist-submissions"];
+    let bucket = "songs";
     let storagePath = source as string;
-    const marker = "/songs/";
-    const idx = storagePath.indexOf(marker);
-    if (idx >= 0) {
-      storagePath = storagePath.substring(idx + marker.length);
-      const q = storagePath.indexOf("?");
-      if (q >= 0) storagePath = storagePath.substring(0, q);
+
+    for (const b of KNOWN_BUCKETS) {
+      const marker = `/${b}/`;
+      const idx = storagePath.indexOf(marker);
+      if (idx >= 0) {
+        bucket = b;
+        storagePath = storagePath.substring(idx + marker.length);
+        const q = storagePath.indexOf("?");
+        if (q >= 0) storagePath = storagePath.substring(0, q);
+        break;
+      }
     }
 
     const { data: signed, error: signErr } = await supabase
       .storage
-      .from("songs")
+      .from(bucket)
       .createSignedUrl(storagePath, 300); // 5 min para streaming
 
     if (signErr || !signed?.signedUrl) {
