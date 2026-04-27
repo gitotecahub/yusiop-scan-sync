@@ -21,6 +21,7 @@ import {
   Wallet,
   CreditCard,
   Megaphone,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -62,6 +63,7 @@ const menuItems: MenuItem[] = [
   { title: 'Retiros artistas', url: '/admin/withdrawals', icon: Wallet, area: 'monetization' },
   { title: 'Métodos de cobro', url: '/admin/payment-methods', icon: CreditCard, area: 'monetization' },
   { title: 'Publicidad', url: '/admin/advertising', icon: Megaphone, area: null, superAdminOnly: true },
+  { title: 'Audit Log', url: '/admin/audit-log', icon: ShieldCheck, area: null, superAdminOnly: true },
   { title: 'Soporte', url: '/admin/support', icon: Headphones, area: null },
   { title: 'Configuración', url: '/admin/settings', icon: Settings, area: 'settings' },
 ];
