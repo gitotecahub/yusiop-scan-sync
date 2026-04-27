@@ -1631,6 +1631,7 @@ export type Database = {
           hidden_from_library: boolean
           id: string
           ip_address: string | null
+          last_played_at: string | null
           local_user_id: string | null
           qr_card_id: string | null
           region: string | null
@@ -1650,6 +1651,7 @@ export type Database = {
           hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
+          last_played_at?: string | null
           local_user_id?: string | null
           qr_card_id?: string | null
           region?: string | null
@@ -1669,6 +1671,7 @@ export type Database = {
           hidden_from_library?: boolean
           id?: string
           ip_address?: string | null
+          last_played_at?: string | null
           local_user_id?: string | null
           qr_card_id?: string | null
           region?: string | null
