@@ -12,6 +12,7 @@ import Catalog from '@/pages/Catalog';
 import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Auth from '@/pages/Auth';
+import ResetPassword from '@/pages/ResetPassword';
 import Install from './pages/Install';
 import Store from '@/pages/Store';
 import Redeem from '@/pages/Redeem';
@@ -128,6 +129,7 @@ const AppContent = () => {
       </Route>
 
       <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/install" element={<Install />} />
       <Route path="/redeem/:token" element={<Redeem />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
