@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Upload, ImageIcon, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
 
 interface Artist {
   id: string;
@@ -70,7 +71,7 @@ const UploadAlbumDialog = ({ open, onOpenChange, onAlbumUploaded, artists }: Upl
     return true;
   };
 
-  const handleCoverSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validar tipo de archivo
@@ -78,15 +79,23 @@ const UploadAlbumDialog = ({ open, onOpenChange, onAlbumUploaded, artists }: Upl
         toast.error('Por favor selecciona un archivo de imagen válido');
         return;
       }
-      
+
       // Validar tamaño (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('La imagen no puede superar los 5MB');
         return;
       }
-      
+
+      // Validar dimensiones mínimas
+      try {
+        await validateCoverDimensions(file);
+      } catch (err: any) {
+        toast.error(err?.message || 'La portada no cumple los requisitos.');
+        return;
+      }
+
       setCoverFile(file);
-      
+
       // Crear preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -221,6 +230,9 @@ const UploadAlbumDialog = ({ open, onOpenChange, onAlbumUploaded, artists }: Upl
                 <ImageIcon className="h-4 w-4 mr-2" />
                 {coverFile ? 'Cambiar Portada' : 'Seleccionar Portada'}
               </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+              </p>
               
               <input
                 ref={coverInputRef}

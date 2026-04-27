@@ -458,11 +458,25 @@ useEffect(() => {
                   <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
                     {String(idx + 1).padStart(2, '0')}
                   </span>
-                  <img
-                    src={song.cover_url}
-                    alt={`${song.title} cover`}
-                    className="w-12 h-12 object-cover rounded-xl shrink-0"
-                  />
+                  <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-muted border border-border/50">
+                    {song.cover_url ? (
+                      <img
+                        src={song.cover_url}
+                        alt={`Portada de ${song.title}`}
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                        <Music className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>

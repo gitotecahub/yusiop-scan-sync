@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Upload, Music, AlertCircle, Users, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
 
 export interface Artist {
   id: string;
@@ -370,7 +371,7 @@ const EditSongDialog = ({ open, onOpenChange, onSongUpdated, song, artists, albu
     }
   };
 
-  const handleFileSelect = (type: 'track' | 'preview' | 'cover', file: File | null) => {
+  const handleFileSelect = async (type: 'track' | 'preview' | 'cover', file: File | null) => {
     if (!file) return;
 
     const maxSize = 50 * 1024 * 1024; // 50MB
@@ -389,6 +390,12 @@ const EditSongDialog = ({ open, onOpenChange, onSongUpdated, song, artists, albu
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Formato de imagen no soportado. Use JPG, PNG o WebP.');
+        return;
+      }
+      try {
+        await validateCoverDimensions(file);
+      } catch (err: any) {
+        toast.error(err?.message || 'La portada no cumple los requisitos.');
         return;
       }
     }
@@ -585,6 +592,9 @@ const EditSongDialog = ({ open, onOpenChange, onSongUpdated, song, artists, albu
                   <Upload className="h-4 w-4 mr-2" />
                   {coverFile ? `Seleccionado: ${coverFile.name}` : 'Seleccionar nueva imagen'}
                 </Button>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+                </p>
                 {coverFile && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Reemplazará la portada actual

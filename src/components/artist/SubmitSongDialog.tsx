@@ -9,6 +9,7 @@ import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles,
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
 import { useAuthStore } from '@/stores/authStore';
 import { useMySubscription } from '@/hooks/useSubscriptionPlans';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -434,6 +435,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       const allowed = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowed.includes(file.type)) {
         toast.error('Formato de imagen no soportado. Usa JPG, PNG o WebP.');
+        return;
+      }
+      try {
+        await validateCoverDimensions(file);
+      } catch (err: any) {
+        toast.error(err?.message || 'La portada no cumple los requisitos.');
         return;
       }
       setCoverFile(file);
@@ -980,6 +987,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                 <Upload className="h-4 w-4 mr-2" />
                 {coverFile ? `Seleccionado: ${coverFile.name}` : 'Seleccionar imagen (JPG/PNG/WebP)'}
               </Button>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+              </p>
             </div>
           </div>
 
