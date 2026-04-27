@@ -73,7 +73,7 @@ const QRScanner = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) {
-          const [{ data: creditsRows }, { data: ownedCards }] = await Promise.all([
+          const [{ data: creditsRows }, { data: ownedCards }, { data: walletData }] = await Promise.all([
             supabase
               .from('user_credits')
               .select('*')
@@ -87,16 +87,18 @@ const QRScanner = () => {
               .select('card_type, download_credits')
               .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
               .gt('download_credits', 0),
+            supabase.rpc('get_wallet_summary', { p_limit: 1 }),
           ]);
 
           const totalLegacy = (creditsRows ?? []).reduce((s, r: any) => s + (r.credits_remaining ?? 0), 0);
           const totalOwned = (ownedCards ?? []).reduce((s, c: any) => s + (c.download_credits ?? 0), 0);
-          const total = totalLegacy + totalOwned;
+          const totalWallet = Number((walletData as any)?.wallet?.estimated_downloads ?? 0);
+          const total = totalLegacy + totalOwned + totalWallet;
 
           if (total > 0) {
             setUserCredits({
               credits_remaining: total,
-              card_type: (creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? data.cardType ?? 'standard') as string,
+              card_type: (creditsRows?.[0]?.card_type ?? ownedCards?.[0]?.card_type ?? data.cardType ?? (totalWallet > 0 ? 'wallet' : 'standard')) as string,
               expires_at: creditsRows?.[0]?.expires_at ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
               is_active: true,
             });
