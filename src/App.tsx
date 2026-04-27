@@ -59,6 +59,8 @@ import AuditLog from '@/pages/admin/AuditLog';
 import Layout from '@/components/Layout';
 import AudioPlayer from '@/components/AudioPlayer';
 import SplashScreen from '@/components/SplashScreen';
+import OnlineOnlyRoute from '@/components/OnlineOnlyRoute';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
@@ -71,6 +73,7 @@ const AppContent = () => {
   const { session, user, initialize } = useAuthStore();
   const { loadForUser, profileChoiceMade, mode, loading: modeLoading, reset } = useModeStore();
   const [showSplash, setShowSplash] = useState(true);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     initialize();
@@ -126,7 +129,18 @@ const AppContent = () => {
 
       <Route path="/*" element={
         !session ? (
-          <Auth />
+          online ? (
+            <Auth />
+          ) : (
+            // Offline sin sesión: permitir acceder a la biblioteca offline
+            <Layout>
+              <AudioPlayer />
+              <Routes>
+                <Route path="/library" element={<Library />} />
+                <Route path="*" element={<Navigate to="/library" replace />} />
+              </Routes>
+            </Layout>
+          )
         ) : modeLoading ? (
           <div className="min-h-screen bg-background" />
         ) : !profileChoiceMade ? (
@@ -138,14 +152,14 @@ const AppContent = () => {
         ) : mode === 'artist' ? (
           // Modo artista
           <Routes>
-            <Route path="/artist" element={<ArtistDashboard />} />
-            <Route path="/artist/submissions" element={<MySubmissions />} />
-            <Route path="/artist/stats" element={<ArtistStats />} />
-            <Route path="/artist/collaborations" element={<Collaborations />} />
-            <Route path="/artist/wallet" element={<ArtistWallet />} />
-            <Route path="/artist/payment-methods" element={<PaymentMethods />} />
-            <Route path="/artist/request" element={<ArtistRequest />} />
-            <Route path="/support" element={<Support />} />
+            <Route path="/artist" element={<OnlineOnlyRoute><ArtistDashboard /></OnlineOnlyRoute>} />
+            <Route path="/artist/submissions" element={<OnlineOnlyRoute><MySubmissions /></OnlineOnlyRoute>} />
+            <Route path="/artist/stats" element={<OnlineOnlyRoute><ArtistStats /></OnlineOnlyRoute>} />
+            <Route path="/artist/collaborations" element={<OnlineOnlyRoute><Collaborations /></OnlineOnlyRoute>} />
+            <Route path="/artist/wallet" element={<OnlineOnlyRoute><ArtistWallet /></OnlineOnlyRoute>} />
+            <Route path="/artist/payment-methods" element={<OnlineOnlyRoute><PaymentMethods /></OnlineOnlyRoute>} />
+            <Route path="/artist/request" element={<OnlineOnlyRoute><ArtistRequest /></OnlineOnlyRoute>} />
+            <Route path="/support" element={<OnlineOnlyRoute><Support /></OnlineOnlyRoute>} />
             <Route path="/profile" element={
               <Layout>
                 <AudioPlayer />
@@ -160,16 +174,16 @@ const AppContent = () => {
             <AudioPlayer />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/qr" element={<QRScanner />} />
-              <Route path="/catalog" element={<Catalog />} />
+              <Route path="/qr" element={<OnlineOnlyRoute><QRScanner /></OnlineOnlyRoute>} />
+              <Route path="/catalog" element={<OnlineOnlyRoute><Catalog /></OnlineOnlyRoute>} />
               <Route path="/library" element={<Library />} />
-              <Route path="/store" element={<Store />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="/subscriptions" element={<Subscriptions />} />
-              <Route path="/popular" element={<Popular />} />
+              <Route path="/store" element={<OnlineOnlyRoute><Store /></OnlineOnlyRoute>} />
+              <Route path="/wallet" element={<OnlineOnlyRoute><Wallet /></OnlineOnlyRoute>} />
+              <Route path="/subscriptions" element={<OnlineOnlyRoute><Subscriptions /></OnlineOnlyRoute>} />
+              <Route path="/popular" element={<OnlineOnlyRoute><Popular /></OnlineOnlyRoute>} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/artist/request" element={<ArtistRequest />} />
+              <Route path="/support" element={<OnlineOnlyRoute><Support /></OnlineOnlyRoute>} />
+              <Route path="/artist/request" element={<OnlineOnlyRoute><ArtistRequest /></OnlineOnlyRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>

@@ -11,10 +11,19 @@ import '@fontsource/dm-sans/500.css'
 import '@fontsource/dm-sans/600.css'
 import '@fontsource/dm-sans/700.css'
 
+// El service worker SOLO debe activarse en producción (dominio publicado o
+// app instalada). En el preview de Lovable y en localhost lo desregistramos
+// para evitar servir builds cacheadas mientras se itera.
+const hostname = window.location.hostname
+const isInIframe = (() => {
+  try { return window.self !== window.top } catch { return true }
+})()
 const isPreviewEnvironment =
-  window.location.hostname.includes('preview--') ||
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1'
+  hostname.includes('preview--') ||
+  hostname.includes('lovableproject.com') ||
+  hostname === 'localhost' ||
+  hostname === '127.0.0.1' ||
+  isInIframe
 
 if (isPreviewEnvironment && 'serviceWorker' in navigator) {
   void navigator.serviceWorker.getRegistrations().then((registrations) => {
