@@ -10,18 +10,18 @@ import { Upload, Music, AlertCircle, Users, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Artist {
+export interface Artist {
   id: string;
   name: string;
 }
 
-interface Album {
+export interface Album {
   id: string;
   title: string;
   cover_url?: string;
 }
 
-interface Collaborator {
+export interface Collaborator {
   id?: string;
   artist_name: string;
   role: string;
@@ -31,7 +31,7 @@ interface Collaborator {
   claimed_by_user_id?: string | null;
 }
 
-interface Song {
+export interface Song {
   id: string;
   title: string;
   artist_id: string;
