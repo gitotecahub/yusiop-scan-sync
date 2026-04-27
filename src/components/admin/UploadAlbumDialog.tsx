@@ -232,6 +232,7 @@ const UploadAlbumDialog = ({ open, onOpenChange, onAlbumUploaded, artists }: Upl
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+              </p>
               
               <input
                 ref={coverInputRef}
