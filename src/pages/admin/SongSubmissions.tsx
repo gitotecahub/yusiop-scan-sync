@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldCheck, ChevronDown, Megaphone, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
@@ -45,6 +45,19 @@ interface SubmissionRow {
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
   collaborators?: CollaboratorRow[];
+  promo?: PromoCampaign | null;
+}
+
+interface PromoCampaign {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  cta_text: string | null;
+  duration_days: number | null;
+  price_eur: number | null;
+  start_date: string | null;
+  status: string;
+  payment_status: string;
 }
 
 interface CollaboratorRow {
@@ -145,6 +158,19 @@ const SongSubmissions = () => {
       });
       submissions.forEach((s) => {
         s.collaborators = bySubmission.get(s.id) ?? [];
+      });
+
+      // Cargar campañas de promoción asociadas a estos envíos
+      const { data: campaigns } = await supabase
+        .from('ad_campaigns')
+        .select('id,title,subtitle,cta_text,duration_days,price_eur,start_date,status,payment_status,submission_id')
+        .in('submission_id', ids);
+      const promoBySubmission = new Map<string, PromoCampaign>();
+      (campaigns ?? []).forEach((c: any) => {
+        if (c.submission_id) promoBySubmission.set(c.submission_id, c as PromoCampaign);
+      });
+      submissions.forEach((s) => {
+        s.promo = promoBySubmission.get(s.id) ?? null;
       });
     }
 
@@ -364,12 +390,38 @@ const SongSubmissions = () => {
                           {row.status === 'removed' && (<><Ban className="h-3 w-3 mr-1" /> Eliminada</>)}
                         </Badge>
                         <CopyrightBadge status={row.copyright_status} score={row.copyright_score} />
+                        {row.promo && (
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] gap-1 border-primary/40 ${
+                              row.promo.payment_status === 'paid'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/40'
+                            }`}
+                            title={
+                              row.promo.payment_status === 'paid'
+                                ? 'Promoción pagada'
+                                : 'Promoción pendiente de pago'
+                            }
+                          >
+                            <Megaphone className="h-3 w-3" />
+                            Promo {row.promo.duration_days ?? '?'}d
+                            {row.promo.payment_status === 'paid' ? (
+                              <CheckCircle2 className="h-3 w-3" />
+                            ) : (
+                              <AlertCircle className="h-3 w-3" />
+                            )}
+                          </Badge>
+                        )}
                       </CardTitle>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
                         {row.album_title ? ` · ${row.album_title}` : ''}
                         {' · '}{formatDuration(row.duration_seconds)}
                         {' · '}{new Date(row.created_at).toLocaleString('es-ES')}
+                        {row.release_date && (
+                          <> · 🎯 Solicitada: {new Date(row.release_date).toLocaleDateString('es-ES')}</>
+                        )}
                         {row.status === 'approved' && row.scheduled_release_at && (
                           <> · 📅 {formatMadrid(row.scheduled_release_at)}</>
                         )}
@@ -402,6 +454,58 @@ const SongSubmissions = () => {
 
                 <CollapsibleContent>
                   <CardContent className="space-y-4 text-sm pt-0">
+                    {row.promo && (
+                      <div className={`rounded-lg border p-3 space-y-2 ${
+                        row.promo.payment_status === 'paid'
+                          ? 'border-primary/40 bg-primary/5'
+                          : 'border-amber-500/40 bg-amber-500/5'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <Megaphone className="h-4 w-4 text-primary" />
+                          <span className="font-semibold text-sm">
+                            Promoción solicitada por el artista
+                          </span>
+                          <Badge
+                            variant={row.promo.payment_status === 'paid' ? 'default' : 'secondary'}
+                            className="text-[10px] ml-auto"
+                          >
+                            {row.promo.payment_status === 'paid' ? 'Pagada ✓' : 'Pendiente de pago'}
+                          </Badge>
+                        </div>
+                        <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs">
+                          <dt className="text-muted-foreground">Plan</dt>
+                          <dd className="col-span-2 font-medium">
+                            {row.promo.duration_days ?? '?'} días · {Number(row.promo.price_eur ?? 0).toFixed(2)} €
+                          </dd>
+                          <dt className="text-muted-foreground">Texto del anuncio</dt>
+                          <dd className="col-span-2">{row.promo.title}</dd>
+                          {row.promo.subtitle && (
+                            <>
+                              <dt className="text-muted-foreground">Subtítulo</dt>
+                              <dd className="col-span-2">{row.promo.subtitle}</dd>
+                            </>
+                          )}
+                          {row.promo.cta_text && (
+                            <>
+                              <dt className="text-muted-foreground">CTA del botón</dt>
+                              <dd className="col-span-2">{row.promo.cta_text}</dd>
+                            </>
+                          )}
+                          {row.promo.start_date && (
+                            <>
+                              <dt className="text-muted-foreground">Inicio deseado</dt>
+                              <dd className="col-span-2">{new Date(row.promo.start_date).toLocaleDateString('es-ES')}</dd>
+                            </>
+                          )}
+                        </dl>
+                        {row.promo.payment_status !== 'paid' && (
+                          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-start gap-1">
+                            <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                            El artista aún no ha completado el pago. La campaña no se activará hasta que lo haga.
+                          </p>
+                        )}
+                      </div>
+                    )}
                     {row.collaborators && row.collaborators.length > 1 && (
                       <div className="flex flex-wrap gap-1">
                         {row.collaborators

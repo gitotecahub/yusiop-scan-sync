@@ -59,6 +59,7 @@ export type Database = {
           reviewed_by: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["ad_campaign_status"]
+          submission_id: string | null
           subtitle: string | null
           title: string
           updated_at: string
@@ -87,6 +88,7 @@ export type Database = {
           reviewed_by?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["ad_campaign_status"]
+          submission_id?: string | null
           subtitle?: string | null
           title: string
           updated_at?: string
@@ -115,6 +117,7 @@ export type Database = {
           reviewed_by?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["ad_campaign_status"]
+          submission_id?: string | null
           subtitle?: string | null
           title?: string
           updated_at?: string
