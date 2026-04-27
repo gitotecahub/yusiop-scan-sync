@@ -78,15 +78,19 @@ const AppContent = () => {
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
   // redirigir inmediatamente a /reset-password preservando el hash.
-  useEffect(() => {
+  // Se ejecuta SÍNCRONO antes del primer render para evitar que el flujo
+  // normal de auth/onboarding intercepte la sesión de recuperación.
+  if (typeof window !== 'undefined') {
     const hash = window.location.hash || '';
     const isRecovery =
       hash.includes('type=recovery') ||
-      hash.includes('error_code=otp_expired');
+      hash.includes('error_code=otp_expired') ||
+      (hash.includes('access_token=') && hash.includes('type=recovery')) ||
+      hash.includes('type=recovery');
     if (isRecovery && window.location.pathname !== '/reset-password') {
       window.location.replace(`/reset-password${hash}`);
     }
-  }, []);
+  }
 
   useEffect(() => {
     initialize();
