@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { listOfflineSongs, deleteOfflineSong } from '@/lib/offlineStorage';
 import { useLanguageStore } from '@/stores/languageStore';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { recordPlayback } from '@/lib/playbackSync';
 
 interface DownloadedSong {
   id: string;
