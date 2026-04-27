@@ -94,7 +94,7 @@ const AdBanner = () => {
                   Llega a más oyentes con un banner premium
                 </p>
               </div>
-              <div className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-foreground text-xs font-bold">
+              <div className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold">
                 Quiero anunciarme <ArrowRight className="h-3 w-3" />
               </div>
             </div>
@@ -159,7 +159,7 @@ const AdBanner = () => {
               )}
             </div>
             {current.cta_text && (
-              <div className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-foreground text-xs font-bold">
+              <div className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold">
                 {current.cta_text} <ArrowRight className="h-3 w-3" />
               </div>
             )}
