@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowDownLeft, ArrowUpRight, Plus, Ticket, Wallet as WalletIcon, RefreshCw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet, type WalletTransaction } from '@/hooks/useWallet';
 import { formatXAFFixed } from '@/lib/currency';
 import RedeemCodeDialog from '@/components/wallet/RedeemCodeDialog';
+import RechargeWalletDialog from '@/components/wallet/RechargeWalletDialog';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const formatDate = (iso: string) => {
