@@ -81,18 +81,20 @@ const Dashboard = () => {
     giftRedemptionRate: 0,
   });
   const [newUsers, setNewUsers] = useState(0);
+  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, totalGross: 0 });
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const [rev, dls, top, qrStats, nu] = await Promise.all([
+        const [rev, dls, top, qrStats, nu, mg] = await Promise.all([
           fetchRevenueSeries(range),
           fetchDownloadsSeries(range),
           fetchTopSongs(range),
           fetchQrStats(),
           fetchNewUsers(range),
+          fetchMonetizationGross(),
         ]);
         if (cancelled) return;
         setRevenue(rev);
@@ -100,6 +102,7 @@ const Dashboard = () => {
         setTopSongs(top);
         setQr(qrStats);
         setNewUsers(nu);
+        setMonetGross(mg);
       } catch (err) {
         console.error('Dashboard load error:', err);
       } finally {
