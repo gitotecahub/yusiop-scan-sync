@@ -454,6 +454,58 @@ const SongSubmissions = () => {
 
                 <CollapsibleContent>
                   <CardContent className="space-y-4 text-sm pt-0">
+                    {row.promo && (
+                      <div className={`rounded-lg border p-3 space-y-2 ${
+                        row.promo.payment_status === 'paid'
+                          ? 'border-primary/40 bg-primary/5'
+                          : 'border-amber-500/40 bg-amber-500/5'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <Megaphone className="h-4 w-4 text-primary" />
+                          <span className="font-semibold text-sm">
+                            Promoción solicitada por el artista
+                          </span>
+                          <Badge
+                            variant={row.promo.payment_status === 'paid' ? 'default' : 'secondary'}
+                            className="text-[10px] ml-auto"
+                          >
+                            {row.promo.payment_status === 'paid' ? 'Pagada ✓' : 'Pendiente de pago'}
+                          </Badge>
+                        </div>
+                        <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs">
+                          <dt className="text-muted-foreground">Plan</dt>
+                          <dd className="col-span-2 font-medium">
+                            {row.promo.duration_days ?? '?'} días · {Number(row.promo.price_eur ?? 0).toFixed(2)} €
+                          </dd>
+                          <dt className="text-muted-foreground">Texto del anuncio</dt>
+                          <dd className="col-span-2">{row.promo.title}</dd>
+                          {row.promo.subtitle && (
+                            <>
+                              <dt className="text-muted-foreground">Subtítulo</dt>
+                              <dd className="col-span-2">{row.promo.subtitle}</dd>
+                            </>
+                          )}
+                          {row.promo.cta_text && (
+                            <>
+                              <dt className="text-muted-foreground">CTA del botón</dt>
+                              <dd className="col-span-2">{row.promo.cta_text}</dd>
+                            </>
+                          )}
+                          {row.promo.start_date && (
+                            <>
+                              <dt className="text-muted-foreground">Inicio deseado</dt>
+                              <dd className="col-span-2">{new Date(row.promo.start_date).toLocaleDateString('es-ES')}</dd>
+                            </>
+                          )}
+                        </dl>
+                        {row.promo.payment_status !== 'paid' && (
+                          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-start gap-1">
+                            <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                            El artista aún no ha completado el pago. La campaña no se activará hasta que lo haga.
+                          </p>
+                        )}
+                      </div>
+                    )}
                     {row.collaborators && row.collaborators.length > 1 && (
                       <div className="flex flex-wrap gap-1">
                         {row.collaborators
