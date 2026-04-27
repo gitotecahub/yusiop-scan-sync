@@ -144,20 +144,20 @@ const Dashboard = () => {
       {/* KPIs principales */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          title="Ingresos"
-          value={formatEur(revenue.totalEur)}
-          subValue={formatXaf(revenue.totalEur)}
+          title="Ingresos brutos totales"
+          value={formatEur(monetGross.totalGross)}
+          subValue={formatXaf(monetGross.totalGross)}
           icon={Euro}
-          hint={`${revenue.count} compras`}
+          hint="Descargas + tarjetas físicas (histórico)"
           loading={loading}
           accent
         />
         <KpiCard
-          title="Ticket promedio"
-          value={formatEur(revenue.avgTicketEur)}
-          subValue={formatXaf(revenue.avgTicketEur)}
+          title="Ingresos del periodo"
+          value={formatEur(revenue.totalEur)}
+          subValue={`${revenue.count} compras`}
           icon={Receipt}
-          hint="Por compra"
+          hint={`Pagos en ${range}`}
           loading={loading}
         />
         <KpiCard
@@ -175,24 +175,6 @@ const Dashboard = () => {
           loading={loading}
         />
       </div>
-
-      {/* Ingresos brutos de monetización (igual que /admin/monetization) */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Euro className="h-4 w-4 text-primary" />
-            Ingresos brutos (Monetización)
-          </CardTitle>
-          <CardDescription>
-            Histórico total: créditos consumidos en descargas + ventas de tarjetas físicas activadas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <RevenueEngineTile label="Total bruto" eur={monetGross.totalGross} count={0} loading={loading} highlight />
-          <RevenueEngineTile label="Descargas (créditos)" eur={monetGross.downloadsGross} count={0} loading={loading} />
-          <RevenueEngineTile label="Tarjetas físicas" eur={monetGross.physicalSalesEur} count={0} loading={loading} />
-        </CardContent>
-      </Card>
 
       {/* Desglose por motor de ingresos */}
       {revenue.breakdown && (
