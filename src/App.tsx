@@ -15,6 +15,7 @@ import Auth from '@/pages/Auth';
 import Install from './pages/Install';
 import Store from '@/pages/Store';
 import Redeem from '@/pages/Redeem';
+import Wallet from '@/pages/Wallet';
 import Unsubscribe from '@/pages/Unsubscribe';
 import NotFound from "./pages/NotFound";
 import ProfileSelection from '@/pages/ProfileSelection';
@@ -159,6 +160,7 @@ const AppContent = () => {
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/library" element={<Library />} />
               <Route path="/store" element={<Store />} />
+              <Route path="/wallet" element={<Wallet />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/popular" element={<Popular />} />
               <Route path="/profile" element={<Profile />} />
