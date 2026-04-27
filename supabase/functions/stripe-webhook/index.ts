@@ -108,6 +108,41 @@ Deno.serve(async (req) => {
         });
       }
 
+      // ----- Pago combinado de envío de canción (Express + Promoción) -----
+      if (session.metadata?.purpose === "submission_payment") {
+        const meta = session.metadata;
+        const submissionId = meta.submission_id;
+        const campaignId = meta.campaign_id;
+        const includesExpress = meta.includes_express === "1";
+        const includesCampaign = meta.includes_campaign === "1";
+        const durationDays = parseInt(meta.campaign_duration_days ?? "1", 10);
+        const nowIso = new Date().toISOString();
+
+        if (includesExpress && submissionId) {
+          await supabase.from("song_submissions").update({
+            express_paid_at: nowIso,
+          }).eq("id", submissionId);
+          console.log(`Express paid for submission ${submissionId}`);
+        }
+
+        if (includesCampaign && campaignId) {
+          const startDate = new Date();
+          const endDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
+          await supabase.from("ad_campaigns").update({
+            payment_status: "paid",
+            payment_reference: (session.payment_intent as string) ?? session.id,
+            status: "pending_review",
+            start_date: startDate.toISOString(),
+            end_date: endDate.toISOString(),
+          }).eq("id", campaignId);
+          console.log(`Ad campaign paid (combined): ${campaignId}`);
+        }
+
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // ----- Pago de campaña publicitaria -----
       if (session.metadata?.purpose === "ad_campaign") {
         const campaignId = session.metadata.campaign_id;
