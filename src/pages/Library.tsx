@@ -48,6 +48,7 @@ interface DownloadedSong {
 const Library = () => {
   const { t } = useLanguageStore();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
   const initialTab =
     tabParam === 'cards' || tabParam === 'recent' || tabParam === 'favorites' ? tabParam : 'all';
