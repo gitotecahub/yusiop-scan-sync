@@ -135,6 +135,9 @@ const SongSubmissions = () => {
   const load = async () => {
     setLoading(true);
     let q = supabase.from('song_submissions').select('*').order('created_at', { ascending: false });
+    // Excluir SIEMPRE las pendientes de pago: aún no han sido pagadas y no
+    // deben aparecer al admin hasta que Stripe confirme el pago.
+    q = q.neq('status', 'pending_payment');
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
     if (error) toast.error('Error cargando envíos');
