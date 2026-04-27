@@ -31,35 +31,120 @@ export const buildDailySeries = <T extends { date: string }>(
   return out;
 };
 
+// Conversion XAF -> EUR (approx) for Express revenue (Express is priced in XAF)
+const XAF_PER_EUR = 655.957;
+
+export type RevenueBreakdown = {
+  cards_eur: number;
+  cards_count: number;
+  express_eur: number;
+  express_count: number;
+  promo_eur: number;
+  promo_count: number;
+  subs_eur: number;
+  subs_count: number;
+};
+
 export const fetchRevenueSeries = async (range: RangeKey) => {
   const start = startDateFor(range);
-  const { data, error } = await supabase
-    .from('card_purchases')
-    .select('amount_cents, created_at, status')
-    .eq('status', 'paid')
-    .gte('created_at', start.toISOString());
-  if (error) throw error;
+  const startIso = start.toISOString();
+
+  const [cardsRes, expressRes, promoRes, subsRes] = await Promise.all([
+    // 1) Card purchases (EUR cents)
+    supabase
+      .from('card_purchases')
+      .select('amount_cents, created_at, status')
+      .eq('status', 'paid')
+      .gte('created_at', startIso),
+    // 2) Express payments (XAF) on song_submissions
+    supabase
+      .from('song_submissions')
+      .select('express_price_xaf, express_paid_at')
+      .not('express_paid_at', 'is', null)
+      .gte('express_paid_at', startIso),
+    // 3) Promo / artist_release ad campaigns (EUR)
+    supabase
+      .from('ad_campaigns')
+      .select('price_eur, created_at, payment_status, campaign_type')
+      .eq('campaign_type', 'artist_release')
+      .eq('payment_status', 'paid')
+      .gte('created_at', startIso),
+    // 4) Active subscriptions started in range (joined with plan price)
+    supabase
+      .from('user_subscriptions')
+      .select('created_at, status, subscription_plans!inner(price_eur_cents)')
+      .gte('created_at', startIso)
+      .in('status', ['active', 'cancelled', 'past_due']),
+  ]);
+
+  if (cardsRes.error) throw cardsRes.error;
+  if (expressRes.error) console.warn('[revenue] express error', expressRes.error);
+  if (promoRes.error) console.warn('[revenue] promo error', promoRes.error);
+  if (subsRes.error) console.warn('[revenue] subs error', subsRes.error);
 
   const grouped = new Map<string, number>();
-  let totalCents = 0;
-  let count = 0;
-  (data ?? []).forEach((p) => {
-    const day = formatDay(new Date(p.created_at));
-    grouped.set(day, (grouped.get(day) ?? 0) + (p.amount_cents ?? 0));
-    totalCents += p.amount_cents ?? 0;
-    count += 1;
+  const breakdown: RevenueBreakdown = {
+    cards_eur: 0, cards_count: 0,
+    express_eur: 0, express_count: 0,
+    promo_eur: 0, promo_count: 0,
+    subs_eur: 0, subs_count: 0,
+  };
+  let totalEur = 0;
+  let totalCount = 0;
+
+  const addToDay = (dateStr: string, eur: number) => {
+    const day = formatDay(new Date(dateStr));
+    grouped.set(day, (grouped.get(day) ?? 0) + eur);
+  };
+
+  (cardsRes.data ?? []).forEach((p: any) => {
+    const eur = (p.amount_cents ?? 0) / 100;
+    addToDay(p.created_at, eur);
+    breakdown.cards_eur += eur;
+    breakdown.cards_count += 1;
+    totalEur += eur;
+    totalCount += 1;
+  });
+
+  (expressRes.data ?? []).forEach((s: any) => {
+    const eur = (Number(s.express_price_xaf) || 0) / XAF_PER_EUR;
+    if (s.express_paid_at) addToDay(s.express_paid_at, eur);
+    breakdown.express_eur += eur;
+    breakdown.express_count += 1;
+    totalEur += eur;
+    totalCount += 1;
+  });
+
+  (promoRes.data ?? []).forEach((c: any) => {
+    const eur = Number(c.price_eur) || 0;
+    addToDay(c.created_at, eur);
+    breakdown.promo_eur += eur;
+    breakdown.promo_count += 1;
+    totalEur += eur;
+    totalCount += 1;
+  });
+
+  (subsRes.data ?? []).forEach((s: any) => {
+    const cents = Number(s.subscription_plans?.price_eur_cents) || 0;
+    const eur = cents / 100;
+    addToDay(s.created_at, eur);
+    breakdown.subs_eur += eur;
+    breakdown.subs_count += 1;
+    totalEur += eur;
+    totalCount += 1;
   });
 
   const series = buildDailySeries(
     start,
-    Array.from(grouped.entries()).map(([day, value]) => ({ day, value: value / 100 })),
+    Array.from(grouped.entries()).map(([day, value]) => ({ day, value })),
   );
 
   return {
     series,
-    totalEur: totalCents / 100,
-    count,
-    avgTicketEur: count > 0 ? totalCents / count / 100 : 0,
+    totalEur,
+    count: totalCount,
+    avgTicketEur: totalCount > 0 ? totalEur / totalCount : 0,
+    breakdown,
   };
 };
 

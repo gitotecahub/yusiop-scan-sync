@@ -57,6 +57,12 @@ const Dashboard = () => {
     totalEur: number;
     count: number;
     avgTicketEur: number;
+    breakdown?: {
+      cards_eur: number; cards_count: number;
+      express_eur: number; express_count: number;
+      promo_eur: number; promo_count: number;
+      subs_eur: number; subs_count: number;
+    };
   }>({ series: [], totalEur: 0, count: 0, avgTicketEur: 0 });
   const [downloads, setDownloads] = useState<{
     series: { date: string; value: number }[];
@@ -165,6 +171,25 @@ const Dashboard = () => {
           loading={loading}
         />
       </div>
+
+      {/* Desglose por motor de ingresos */}
+      {revenue.breakdown && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Euro className="h-4 w-4 text-primary" />
+              Desglose de ingresos
+            </CardTitle>
+            <CardDescription>Por motor en el periodo seleccionado</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <RevenueEngineTile label="Tarjetas QR" eur={revenue.breakdown.cards_eur} count={revenue.breakdown.cards_count} loading={loading} />
+            <RevenueEngineTile label="Express" eur={revenue.breakdown.express_eur} count={revenue.breakdown.express_count} loading={loading} />
+            <RevenueEngineTile label="Promo lanzamientos" eur={revenue.breakdown.promo_eur} count={revenue.breakdown.promo_count} loading={loading} />
+            <RevenueEngineTile label="Suscripciones" eur={revenue.breakdown.subs_eur} count={revenue.breakdown.subs_count} loading={loading} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Charts row */}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -372,3 +397,21 @@ const StatRow = ({
 );
 
 export default Dashboard;
+
+const RevenueEngineTile = ({
+  label,
+  eur,
+  count,
+  loading,
+}: {
+  label: string;
+  eur: number;
+  count: number;
+  loading?: boolean;
+}) => (
+  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+    <p className="text-xs text-muted-foreground mb-1">{label}</p>
+    <p className="text-lg font-bold leading-tight">{loading ? '—' : formatEURNumber(eur)}</p>
+    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{count} {count === 1 ? 'pago' : 'pagos'}</p>
+  </div>
+);
