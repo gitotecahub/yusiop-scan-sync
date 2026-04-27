@@ -709,7 +709,20 @@ const Library = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Almacenamiento offline */}
+      {offlineIds.size > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-2xl bg-card/40 border border-border">
+          <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <HardDrive className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="eyebrow mb-0.5">Almacenamiento offline</p>
+            <p className="text-sm font-semibold text-foreground">
+              {offlineIds.size} canci{offlineIds.size === 1 ? 'ón' : 'ones'} · {formatBytes(storageBytes)}
+            </p>
+          </div>
+        </div>
+      )}
       <Tabs defaultValue={initialTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
