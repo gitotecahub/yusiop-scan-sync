@@ -15,7 +15,7 @@ interface AuthState {
   loading: boolean;
   initialize: () => void;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, username: string) => Promise<{ error: any; alreadyRegistered?: boolean }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -187,7 +187,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     const redirectUrl = `${window.location.origin}/auth`;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -196,7 +196,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
     set({ loading: false });
-    return { error };
+
+    // Supabase returns 200 OK with a "fake" user (no identities) when the
+    // email is already registered, to avoid leaking account existence.
+    // Detect this case so the UI can surface a clear message.
+    const alreadyRegistered =
+      !error &&
+      !!data?.user &&
+      Array.isArray((data.user as any).identities) &&
+      (data.user as any).identities.length === 0;
+
+    return { error, alreadyRegistered };
   },
 
   signInWithGoogle: async () => {

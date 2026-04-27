@@ -50,7 +50,7 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
+    const { error, alreadyRegistered } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
     if (error) {
       if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
         toast.error(t('auth.emailRegistered'));
@@ -58,6 +58,11 @@ const Auth = () => {
       } else {
         toast.error(`${t('auth.signupError')}: ${error.message}`);
       }
+    } else if (alreadyRegistered) {
+      toast.error(t('auth.emailRegistered') || 'Ya existe una cuenta con este email. Inicia sesión o recupera tu contraseña.');
+      setActiveTab('signin');
+      setPassword('');
+      setConfirmPassword('');
     } else {
       toast.success(t('auth.accountCreated'));
       setPassword('');
