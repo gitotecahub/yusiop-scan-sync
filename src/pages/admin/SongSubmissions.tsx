@@ -44,6 +44,10 @@ interface SubmissionRow {
   copyright_status: CopyrightStatus;
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
+  express_tier: '72h' | '48h' | '24h' | null;
+  express_paid_at: string | null;
+  express_requested_at: string | null;
+  express_price_xaf: number | null;
   collaborators?: CollaboratorRow[];
   promo?: PromoCampaign | null;
 }
