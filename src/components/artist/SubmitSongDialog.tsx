@@ -554,9 +554,32 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (dbError) throw dbError;
         await persistCollaborators(editing.id);
         setProgress(100);
-        toast.success(expressOpt
-          ? `Envío actualizado · Revisión prioritaria ${expressOpt.tier} activada`
-          : 'Envío actualizado y reenviado a revisión');
+
+        // Si se acaba de activar Express y requiere pago (no Elite), redirigir a la pasarela
+        const expressNeedsPaymentEdit =
+          !!expressOpt &&
+          !isElite &&
+          (expressOpt.priceXaf > 0) &&
+          !editing.express_tier; // recién activado en esta edición
+        if (expressNeedsPaymentEdit) {
+          const { data: checkout, error: chkErr } = await supabase.functions.invoke(
+            'create-submission-checkout',
+            { body: { submission_id: editing.id } },
+          );
+          if (chkErr || !checkout?.url) {
+            toast.error('No se pudo abrir la pasarela. Reintenta desde tu panel.');
+          } else {
+            toast.success(`Redirigiendo a la pasarela: Express ${expressOpt!.tier}…`);
+            onOpenChange(false);
+            onSubmitted?.();
+            window.location.href = checkout.url;
+            return;
+          }
+        } else {
+          toast.success(expressOpt
+            ? `Envío actualizado · Revisión prioritaria ${expressOpt.tier} activada`
+            : 'Envío actualizado y reenviado a revisión');
+        }
         // Lanzar análisis de copyright en background (no bloqueante)
         supabase.functions
           .invoke('analyze-copyright', { body: { submission_id: editing.id } })
