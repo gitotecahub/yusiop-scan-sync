@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Upload, Music, AlertCircle, Users, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
 
 interface Artist {
   id: string;
