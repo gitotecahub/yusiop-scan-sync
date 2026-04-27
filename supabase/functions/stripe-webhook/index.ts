@@ -71,6 +71,54 @@ Deno.serve(async (req) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
 
+      // ----- Recarga digital de wallet -----
+      if (session.metadata?.purpose === "wallet_recharge") {
+        const meta = session.metadata;
+        const userId = meta.user_id;
+        const amountEur = parseFloat(meta.amount_eur ?? "0");
+        const amountXaf = parseFloat(meta.amount_xaf ?? "0");
+
+        if (!userId || amountXaf <= 0) {
+          console.warn("wallet_recharge sin metadata válida", meta);
+          return new Response(JSON.stringify({ received: true }), {
+            status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const { data: creditRes, error: creditErr } = await supabase.rpc(
+          "credit_wallet_recharge",
+          {
+            p_user_id: userId,
+            p_amount_xaf: amountXaf,
+            p_amount_eur: amountEur,
+            p_stripe_session_id: session.id,
+            p_payment_intent: (session.payment_intent as string) ?? null,
+          },
+        );
+
+        if (creditErr) {
+          console.error("credit_wallet_recharge error", creditErr);
+          throw creditErr;
+        }
+
+        console.log("Wallet recargado:", creditRes);
+
+        // Aplicar bonus si corresponde (no bloquear si falla)
+        try {
+          const { error: bonusErr } = await supabase.rpc(
+            "apply_recharge_bonus",
+            { p_amount_eur: amountEur },
+          );
+          if (bonusErr) console.warn("apply_recharge_bonus (no bloqueante)", bonusErr);
+        } catch (e) {
+          console.warn("bonus exception", e);
+        }
+
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // ----- Pago de campaña publicitaria -----
       if (session.metadata?.purpose === "ad_campaign") {
         const campaignId = session.metadata.campaign_id;
