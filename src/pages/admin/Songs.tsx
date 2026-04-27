@@ -341,6 +341,16 @@ const Songs = () => {
         artists={artists}
         albums={albums}
       />
+
+      {/* Edit Dialog */}
+      <EditSongDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSongUpdated={fetchSongs}
+        song={selectedSong}
+        artists={artists}
+        albums={albums}
+      />
     </div>
   );
 };
