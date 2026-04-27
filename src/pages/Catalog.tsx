@@ -279,11 +279,6 @@ useEffect(() => {
   };
 
   const handleDownload = async (song: Song) => {
-    if (!userCredits || userCredits.credits_remaining <= 0) {
-      toast.error(t('catalog.errorNoCredits'));
-      return;
-    }
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -291,36 +286,34 @@ useEffect(() => {
         return;
       }
 
-      // Server-side credit decrement & download registration (prevents client tampering)
-      const { data, error } = await supabase.functions.invoke('decrement-credits', {
+      // Flujo unificado: consume_download (QR → suscripción → wallet) + signed URL
+      const { data, error } = await supabase.functions.invoke('generate-song-access', {
         body: { songId: song.id },
       });
 
-      if (error || !data?.success) {
-        toast.error(data?.error || t('catalog.errorDownload'));
+      if (error || !data?.success || !data?.signed_url) {
+        const msg = (data as any)?.error || (error as any)?.message || t('catalog.errorDownload');
+        toast.error(msg);
         return;
       }
 
-      // Refrescar créditos desde servidor para respetar múltiples tarjetas y re-descargas
       await loadUserCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
 
       // Guardar archivo (audio + portada) en IndexedDB para reproducción offline
-      if (song.track_url) {
-        try {
-          await saveSongOffline({
-            id: song.id,
-            title: song.title,
-            artist: song.artist,
-            duration_seconds: song.duration_seconds,
-            preview_start_seconds: song.preview_start_seconds,
-            track_url: song.track_url,
-            cover_url: song.cover_url ?? null,
-          });
-        } catch (offlineErr) {
-          logger.error('Error saving song offline');
-          // No bloqueamos: el crédito ya se gastó y la descarga quedó registrada en BD
-        }
+      try {
+        await saveSongOffline({
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          duration_seconds: song.duration_seconds,
+          preview_start_seconds: song.preview_start_seconds,
+          track_url: data.signed_url,
+          cover_url: song.cover_url ?? null,
+        });
+      } catch (offlineErr) {
+        logger.error('Error saving song offline');
+        // No bloqueamos: el crédito ya se gastó y la descarga quedó registrada en BD
       }
 
       toast.success(`"${song.title}" ${t('catalog.downloadOk')}`);

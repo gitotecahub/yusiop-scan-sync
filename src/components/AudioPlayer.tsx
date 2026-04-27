@@ -2,6 +2,29 @@ import { useEffect, useRef } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { toast } from 'sonner';
 import { getOfflineSong } from '@/lib/offlineStorage';
+import { supabase } from '@/integrations/supabase/client';
+
+// Cache de signed URLs de streaming (válidas 5 min). Evita llamadas repetidas.
+const streamUrlCache = new Map<string, { url: string; expires: number }>();
+
+const getStreamUrl = async (songId: string): Promise<string | null> => {
+  const cached = streamUrlCache.get(songId);
+  if (cached && cached.expires > Date.now() + 10_000) return cached.url;
+  try {
+    const { data, error } = await supabase.functions.invoke('get-song-stream', {
+      body: { songId },
+    });
+    if (error || !data?.signed_url) return null;
+    streamUrlCache.set(songId, {
+      url: data.signed_url,
+      expires: Date.now() + (data.expires_in ?? 300) * 1000,
+    });
+    return data.signed_url;
+  } catch {
+    return null;
+  }
+};
+
 
 const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -98,12 +121,10 @@ const AudioPlayer = () => {
       let usedOfflineBlob = false;
 
       if (isPreview) {
-        const hasCustomPreview =
-          typeof currentSong.preview_start_seconds === 'number' &&
-          !!currentSong.track_url;
-        audioUrl = hasCustomPreview
-          ? (currentSong.track_url as string)
-          : (currentSong.preview_url || currentSong.track_url || '');
+        // Preview: siempre vía signed URL (bucket privado).
+        // Si la canción tiene preview_url propio se usa ese; si no, se reproduce
+        // un fragmento del track completo controlado por preview_start_seconds.
+        audioUrl = (await getStreamUrl(currentSong.id)) || '';
       } else {
         // Modo completo: intentar primero blob offline (IndexedDB)
         try {
@@ -116,7 +137,8 @@ const AudioPlayer = () => {
           // ignore, fallback a remoto
         }
         if (!audioUrl) {
-          audioUrl = currentSong.track_url || currentSong.preview_url || '';
+          // No descargada: streaming vía signed URL (no consume crédito).
+          audioUrl = (await getStreamUrl(currentSong.id)) || '';
         }
       }
 
