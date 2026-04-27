@@ -530,9 +530,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           reviewed_by: null,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
-          // Si ya tenía express previo no resetear paid/requested; si lo activa ahora, marcarlo
+          // Si activa Express ahora (no lo tenía antes): marcar requested.
+          // Solo marcar como pagado automáticamente si es Elite (incluido en la suscripción).
           ...(expressOpt && !editing.express_tier
-            ? { express_requested_at: nowIso, express_paid_at: nowIso }
+            ? {
+                express_requested_at: nowIso,
+                express_paid_at: isElite ? nowIso : null,
+              }
             : {}),
         };
         if (trackUp) {
