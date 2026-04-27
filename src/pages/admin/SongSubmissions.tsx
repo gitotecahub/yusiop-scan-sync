@@ -45,6 +45,19 @@ interface SubmissionRow {
   copyright_score: number;
   copyright_matches: CopyrightMatch[] | null;
   collaborators?: CollaboratorRow[];
+  promo?: PromoCampaign | null;
+}
+
+interface PromoCampaign {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  cta_text: string | null;
+  duration_days: number | null;
+  price_eur: number | null;
+  start_date: string | null;
+  status: string;
+  payment_status: string;
 }
 
 interface CollaboratorRow {
