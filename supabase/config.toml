@@ -1,52 +1,39 @@
 project_id = "wbzwdihdayasmikmqvgp"
 
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.create-card-checkout]
-verify_jwt = true
-
-[functions.redeem-gift]
-verify_jwt = true
-
-[functions.confirm-card-purchase]
-verify_jwt = true
-
-[functions.send-transactional-email]
-verify_jwt = true
-
-[functions.preview-transactional-email]
-verify_jwt = false
-
-[functions.handle-email-unsubscribe]
-verify_jwt = false
-
-[functions.handle-email-suppression]
-verify_jwt = false
-
-[functions.notify-song-review]
-verify_jwt = true
-
-[functions.analyze-copyright]
-verify_jwt = true
-
-[functions.create-subscription-checkout]
-verify_jwt = true
-
-[functions.cancel-subscription]
-verify_jwt = true
-
-[functions.notify-collaborators]
-verify_jwt = true
-
-[functions.process-email-queue]
-verify_jwt = false
-
-[functions.admin-cancel-subscription]
-verify_jwt = true
-
-[functions.generate-song-access]
-verify_jwt = true
-
-[functions.get-song-stream]
-verify_jwt = false
+[functions]
+  [functions.admin-cancel-subscription]
+    verify_jwt = true
+  [functions.analyze-copyright]
+    verify_jwt = true
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.cancel-subscription]
+    verify_jwt = true
+  [functions.confirm-card-purchase]
+    verify_jwt = true
+  [functions.create-card-checkout]
+    verify_jwt = true
+  [functions.create-subscription-checkout]
+    verify_jwt = true
+  [functions.generate-song-access]
+    verify_jwt = true
+  [functions.get-song-stream]
+    verify_jwt = false
+  [functions.handle-email-suppression]
+    verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
+  [functions.notify-collaborators]
+    verify_jwt = true
+  [functions.notify-song-review]
+    verify_jwt = true
+  [functions.preview-transactional-email]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = false
+  [functions.redeem-gift]
+    verify_jwt = true
+  [functions.send-transactional-email]
+    verify_jwt = true
+  [functions.stripe-webhook]
+    verify_jwt = false
