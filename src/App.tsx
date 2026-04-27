@@ -59,6 +59,8 @@ import AuditLog from '@/pages/admin/AuditLog';
 import Layout from '@/components/Layout';
 import AudioPlayer from '@/components/AudioPlayer';
 import SplashScreen from '@/components/SplashScreen';
+import OnlineOnlyRoute from '@/components/OnlineOnlyRoute';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 // Hooks and Providers
 import { useAuthStore } from '@/stores/authStore';
@@ -71,6 +73,7 @@ const AppContent = () => {
   const { session, user, initialize } = useAuthStore();
   const { loadForUser, profileChoiceMade, mode, loading: modeLoading, reset } = useModeStore();
   const [showSplash, setShowSplash] = useState(true);
+  const online = useOnlineStatus();
 
   useEffect(() => {
     initialize();
