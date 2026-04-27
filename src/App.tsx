@@ -111,7 +111,8 @@ const AppContent = () => {
     }
   }, [user?.id, loadForUser, reset]);
 
-  if (showSplash) return <SplashScreen />;
+  // Saltar splash en la pantalla de reset para no consumir tiempo del token
+  if (showSplash && window.location.pathname !== '/reset-password') return <SplashScreen />;
 
   return (
     <Routes>
