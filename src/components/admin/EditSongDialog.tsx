@@ -593,7 +593,7 @@ const EditSongDialog = ({ open, onOpenChange, onSongUpdated, song, artists, albu
                   {coverFile ? `Seleccionado: ${coverFile.name}` : 'Seleccionar nueva imagen'}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-1.5">
-                  Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+                  Cuadrada · JPG, PNG o WebP
                 </p>
                 {coverFile && (
                   <p className="text-xs text-muted-foreground mt-1">

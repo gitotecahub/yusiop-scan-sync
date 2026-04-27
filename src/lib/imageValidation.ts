@@ -23,21 +23,21 @@ export function getImageDimensions(file: File): Promise<ImageDimensions> {
 }
 
 /**
- * Validates that a cover image meets minimum dimension requirements.
- * Throws an Error with a friendly message if the image is too small or invalid.
+ * Validates that a cover image is a valid image file.
+ * NOTE: Minimum dimension check (1600x1600) is temporarily disabled.
+ * It will be re-enabled in the future.
  */
 export async function validateCoverDimensions(
   file: File,
-  min: number = MIN_COVER_DIMENSION
+  _min: number = MIN_COVER_DIMENSION
 ): Promise<ImageDimensions> {
   if (!file.type.startsWith('image/')) {
     throw new Error('El archivo debe ser una imagen (JPG, PNG o WebP).');
   }
-  const dims = await getImageDimensions(file);
-  if (dims.width < min || dims.height < min) {
-    throw new Error(
-      `La portada debe tener al menos ${min} x ${min} píxeles. Tu imagen es ${dims.width} x ${dims.height}.`
-    );
+  // Dimension check disabled for now — return dims if readable, otherwise pass.
+  try {
+    return await getImageDimensions(file);
+  } catch {
+    return { width: 0, height: 0 };
   }
-  return dims;
 }
