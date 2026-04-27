@@ -397,3 +397,21 @@ const StatRow = ({
 );
 
 export default Dashboard;
+
+const RevenueEngineTile = ({
+  label,
+  eur,
+  count,
+  loading,
+}: {
+  label: string;
+  eur: number;
+  count: number;
+  loading?: boolean;
+}) => (
+  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+    <p className="text-xs text-muted-foreground mb-1">{label}</p>
+    <p className="text-lg font-bold leading-tight">{loading ? '—' : formatEURNumber(eur)}</p>
+    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{count} {count === 1 ? 'pago' : 'pagos'}</p>
+  </div>
+);
