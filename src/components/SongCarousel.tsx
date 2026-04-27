@@ -91,7 +91,6 @@ const SongCarousel = ({
                   loading="lazy"
                   draggable={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
                 {idx < fireTopCount && (
                   <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center">
                     <Flame className="h-3 w-3 text-primary" />
