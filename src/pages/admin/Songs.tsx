@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
-import EditSongDialog from '@/components/admin/EditSongDialog';
+import EditSongDialog, { type Song, type Artist, type Album } from '@/components/admin/EditSongDialog';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
 interface Collaborator {
@@ -18,33 +18,6 @@ interface Collaborator {
   is_primary: boolean;
   claimed_by_user_id: string | null;
   contact_email?: string | null;
-}
-
-interface Song {
-  id: string;
-  title: string;
-  artist_id: string;
-  album_id: string | null;
-  duration_seconds: number;
-  preview_url: string | null;
-  track_url: string | null;
-  cover_url: string | null;
-  created_at: string;
-  scheduled_release_at: string | null;
-  artists?: { name: string };
-  albums?: { title: string };
-  song_collaborators?: Collaborator[];
-}
-
-interface Artist {
-  id: string;
-  name: string;
-}
-
-interface Album {
-  id: string;
-  title: string;
-  cover_url?: string;
 }
 
 const Songs = () => {
