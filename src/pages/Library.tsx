@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
