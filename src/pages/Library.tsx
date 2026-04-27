@@ -184,8 +184,35 @@ const Library = () => {
     };
   }, []);
 
+  // Calcular IDs disponibles offline + bytes ocupados
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const offline = await listOfflineSongs();
+        if (cancelled) return;
+        const ids = new Set(offline.map((r) => r.id));
+        const bytes = offline.reduce(
+          (acc, r) => acc + (r.audio_blob?.size || 0) + (r.cover_blob?.size || 0),
+          0
+        );
+        setOfflineIds(ids);
+        setStorageBytes(bytes);
+      } catch {
+        // noop
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [downloads.length]);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
   const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
