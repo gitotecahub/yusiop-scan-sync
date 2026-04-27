@@ -118,11 +118,29 @@ Deno.serve(async (req) => {
         const durationDays = parseInt(meta.campaign_duration_days ?? "1", 10);
         const nowIso = new Date().toISOString();
 
-        if (includesExpress && submissionId) {
-          await supabase.from("song_submissions").update({
-            express_paid_at: nowIso,
-          }).eq("id", submissionId);
-          console.log(`Express paid for submission ${submissionId}`);
+        // Marcar el pago de express si procede y, en cualquier caso, mover
+        // la submission de "pending_payment" a "pending" para que el admin
+        // pueda revisarla.
+        if (submissionId) {
+          const updates: Record<string, any> = {};
+          if (includesExpress) updates.express_paid_at = nowIso;
+
+          // Si la submission estaba en pending_payment, pasarla a pending
+          const { data: subRow } = await supabase
+            .from("song_submissions")
+            .select("status")
+            .eq("id", submissionId)
+            .maybeSingle();
+          if (subRow?.status === "pending_payment") {
+            updates.status = "pending";
+          }
+          if (Object.keys(updates).length > 0) {
+            await supabase.from("song_submissions").update(updates).eq("id", submissionId);
+            console.log(
+              `Submission ${submissionId} updated after payment:`,
+              updates,
+            );
+          }
         }
 
         if (includesCampaign && campaignId) {
