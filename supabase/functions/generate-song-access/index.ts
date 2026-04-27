@@ -117,27 +117,40 @@ serve(async (req) => {
       });
     }
 
-    // Extraer storage path de track_url. Acepta:
-    //  - "songs/path/file.mp3"  (path relativo)
-    //  - URL pública / firmada de Supabase storage que contenga "/storage/v1/object/.../songs/<path>"
+    // Extraer bucket + path desde track_url. Acepta:
+    //  - "songs/path/file.mp3" o "artist-submissions/uid/file.mp3" (path con bucket prefijado)
+    //  - URL pública o firmada: ".../storage/v1/object/(public|sign)/<bucket>/<path>?token=..."
+    //  - Path relativo dentro del bucket "songs" (legacy)
+    const KNOWN_BUCKETS = ["songs", "artist-submissions"];
+    let bucket = "songs";
     let storagePath = song.track_url as string;
-    const marker = "/songs/";
-    const idx = storagePath.indexOf(marker);
-    if (idx >= 0) {
-      storagePath = storagePath.substring(idx + marker.length);
-      // quitar query string si la hubiera (signed url antigua)
-      const q = storagePath.indexOf("?");
-      if (q >= 0) storagePath = storagePath.substring(0, q);
+
+    // Si es URL completa, extraer la parte tras /object/(public|sign)/
+    const urlMatch = storagePath.match(/\/storage\/v1\/object\/(?:public|sign)\/([^?]+)/);
+    if (urlMatch) {
+      storagePath = urlMatch[1];
+    }
+    // Quitar query string si la hubiera
+    const q = storagePath.indexOf("?");
+    if (q >= 0) storagePath = storagePath.substring(0, q);
+
+    // Detectar bucket por prefijo
+    for (const b of KNOWN_BUCKETS) {
+      if (storagePath.startsWith(`${b}/`)) {
+        bucket = b;
+        storagePath = storagePath.substring(b.length + 1);
+        break;
+      }
     }
 
     // Generar signed URL (60s)
     const { data: signed, error: signErr } = await supabase
       .storage
-      .from("songs")
+      .from(bucket)
       .createSignedUrl(storagePath, 60, { download: `${song.title}.mp3` });
 
     if (signErr || !signed?.signedUrl) {
-      console.error("createSignedUrl error:", signErr, "path:", storagePath);
+      console.error("createSignedUrl error:", signErr, "bucket:", bucket, "path:", storagePath);
       return json(500, { error: "No se pudo generar acceso al archivo" });
     }
 
