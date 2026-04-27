@@ -137,13 +137,11 @@ const Wallet = () => {
             <span className="text-xs font-medium">Introducir código</span>
           </Button>
           <Button
-            onClick={() => {/* futuro: pago digital */}}
+            onClick={() => setRechargeOpen(true)}
             className="h-auto py-4 flex-col gap-1.5 rounded-2xl"
-            disabled
-            variant="outline"
           >
             <Plus className="h-5 w-5" />
-            <span className="text-xs font-medium">Recargar (próx.)</span>
+            <span className="text-xs font-medium">Recargar saldo</span>
           </Button>
         </div>
 
