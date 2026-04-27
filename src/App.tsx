@@ -79,6 +79,11 @@ const AppContent = () => {
     initialize();
   }, [initialize]);
 
+  // Inicializar sync de reproducciones offline (vacía cola al volver online)
+  useEffect(() => {
+    void import('@/lib/playbackSync').then((m) => m.initPlaybackSync());
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(timer);

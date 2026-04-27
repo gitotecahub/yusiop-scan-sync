@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { listOfflineSongs, deleteOfflineSong } from '@/lib/offlineStorage';
 import { useLanguageStore } from '@/stores/languageStore';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { recordPlayback } from '@/lib/playbackSync';
 
 interface DownloadedSong {
   id: string;
@@ -66,6 +68,9 @@ const Library = () => {
   const [bulkShareOpen, setBulkShareOpen] = useState(false);
   const [bulkRecipient, setBulkRecipient] = useState('');
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [offlineIds, setOfflineIds] = useState<Set<string>>(new Set());
+  const [storageBytes, setStorageBytes] = useState<number>(0);
+  const online = useOnlineStatus();
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause, stop } = usePlayerStore();
 
   // Cargar canciones descargadas (online: BD; offline: IndexedDB)
@@ -179,6 +184,34 @@ const Library = () => {
     };
   }, []);
 
+  // Calcular IDs disponibles offline + bytes ocupados
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const offline = await listOfflineSongs();
+        if (cancelled) return;
+        const ids = new Set(offline.map((r) => r.id));
+        const bytes = offline.reduce(
+          (acc, r) => acc + (r.audio_blob?.size || 0) + (r.cover_blob?.size || 0),
+          0
+        );
+        setOfflineIds(ids);
+        setStorageBytes(bytes);
+      } catch {
+        // noop
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [downloads.length]);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -194,6 +227,11 @@ const Library = () => {
   };
 
   const handlePlay = (song: DownloadedSong, list?: DownloadedSong[]) => {
+    // Bloquear si estamos offline y la canción no está descargada localmente
+    if (!online && !offlineIds.has(song.id)) {
+      toast.error('Esta canción no está disponible offline');
+      return;
+    }
     if (currentSong?.id === song.id && !isPreview) {
       if (isPlaying) {
         pause();
@@ -207,6 +245,8 @@ const Library = () => {
       setQueue(queueList, startIdx >= 0 ? startIdx : 0, false);
       play();
     }
+    // Registrar reproducción (sync online o cola offline)
+    void recordPlayback(song.id);
   };
 
   const handleToggleFavorite = (song: DownloadedSong) => {
@@ -550,6 +590,17 @@ const Library = () => {
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
                   <span>{formatDuration(song.duration_seconds)}</span>
                   {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
+                  {offlineIds.has(song.id) ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary tracking-wide">
+                      <Download className="h-2.5 w-2.5" />
+                      Offline
+                    </span>
+                  ) : !online ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive tracking-wide">
+                      <WifiOff className="h-2.5 w-2.5" />
+                      No disponible
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
@@ -658,7 +709,20 @@ const Library = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Almacenamiento offline */}
+      {offlineIds.size > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-2xl bg-card/40 border border-border">
+          <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <HardDrive className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="eyebrow mb-0.5">Almacenamiento offline</p>
+            <p className="text-sm font-semibold text-foreground">
+              {offlineIds.size} canci{offlineIds.size === 1 ? 'ón' : 'ones'} · {formatBytes(storageBytes)}
+            </p>
+          </div>
+        </div>
+      )}
       <Tabs defaultValue={initialTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
