@@ -189,6 +189,7 @@ export type Database = {
           updated_at: string
           validation_period_days: number
           value_per_download_xaf: number
+          wallet_price_per_download_xaf: number
           withdrawal_fee_type: Database["public"]["Enums"]["withdrawal_fee_type"]
           withdrawal_fee_value: number
           withdrawal_frequency_days: number
@@ -204,6 +205,7 @@ export type Database = {
           updated_at?: string
           validation_period_days?: number
           value_per_download_xaf?: number
+          wallet_price_per_download_xaf?: number
           withdrawal_fee_type?: Database["public"]["Enums"]["withdrawal_fee_type"]
           withdrawal_fee_value?: number
           withdrawal_frequency_days?: number
@@ -219,6 +221,7 @@ export type Database = {
           updated_at?: string
           validation_period_days?: number
           value_per_download_xaf?: number
+          wallet_price_per_download_xaf?: number
           withdrawal_fee_type?: Database["public"]["Enums"]["withdrawal_fee_type"]
           withdrawal_fee_value?: number
           withdrawal_frequency_days?: number
@@ -1585,7 +1588,7 @@ export type Database = {
           region: string | null
           song_id: string
           user_email: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           card_id_str?: string | null
@@ -1604,7 +1607,7 @@ export type Database = {
           region?: string | null
           song_id: string
           user_email?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           card_id_str?: string | null
@@ -1623,7 +1626,7 @@ export type Database = {
           region?: string | null
           song_id?: string
           user_email?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -2066,6 +2069,23 @@ export type Database = {
           success: boolean
         }[]
       }
+      consume_download: {
+        Args: {
+          p_city?: string
+          p_country_code?: string
+          p_country_name?: string
+          p_ip?: string
+          p_region?: string
+          p_song_id: string
+          p_user_id: string
+        }
+        Returns: {
+          balance_info: Json
+          message: string
+          source: string
+          success: boolean
+        }[]
+      }
       consume_subscription_credit: {
         Args: { p_song_id: string; p_user_id: string }
         Returns: {
@@ -2384,10 +2404,16 @@ export type Database = {
           is_activated: boolean
         }[]
       }
-      wallet_consume_for_download: {
-        Args: { p_amount: number; p_song_id: string }
-        Returns: Json
-      }
+      wallet_consume_for_download:
+        | { Args: { p_amount: number; p_song_id: string }; Returns: Json }
+        | {
+            Args: { p_amount: number; p_song_id: string; p_user_id: string }
+            Returns: {
+              balance_after: number
+              message: string
+              success: boolean
+            }[]
+          }
     }
     Enums: {
       ad_campaign_status:
