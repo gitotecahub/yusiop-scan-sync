@@ -485,6 +485,9 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
                   <Upload className="h-4 w-4 mr-2" />
                   {coverFile ? `Seleccionado: ${coverFile.name}` : 'Seleccionar imagen'}
                 </Button>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Mínimo {MIN_COVER_DIMENSION} x {MIN_COVER_DIMENSION} px · Cuadrada · JPG, PNG o WebP
+                </p>
               </div>
             </div>
           </div>
