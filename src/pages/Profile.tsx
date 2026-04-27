@@ -781,28 +781,6 @@ const Profile = () => {
         </Button>
       </div>
 
-      {/* Wallet Quick Access */}
-      <button
-        onClick={() => navigate('/wallet')}
-        className="relative overflow-hidden w-full text-left rounded-2xl p-4 shadow-lg active:scale-[0.99] transition-transform"
-        style={{
-          background:
-            'linear-gradient(135deg, hsl(258 90% 56%) 0%, hsl(220 90% 56%) 50%, hsl(180 80% 45%) 100%)',
-        }}
-      >
-        <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-        <div className="relative flex items-center gap-3">
-          <div className="h-11 w-11 rounded-xl bg-white/15 flex items-center justify-center">
-            <CreditCard className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-widest text-white/70">YUSIOP Wallet</p>
-            <p className="text-sm font-semibold text-white">Mi saldo y movimientos</p>
-          </div>
-          <span className="text-white/80 text-xs">→</span>
-        </div>
-      </button>
-
       {/* Activated Cards History */}
       <div>
         <div className="flex items-center gap-2 mb-4">
