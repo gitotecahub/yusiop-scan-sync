@@ -134,4 +134,3 @@ export function useWallet(): UseWalletResult {
 
   return { wallet, transactions, subscription, loading, error, refresh, redeemCode };
 }
-}
