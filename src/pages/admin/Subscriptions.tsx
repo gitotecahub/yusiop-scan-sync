@@ -428,13 +428,28 @@ const Subscriptions = () => {
 
       {/* Planes */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Planes y precios</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {plans.map((p) => (
-            <PlanRow key={p.id} plan={p} onSave={updatePlanPrice} />
-          ))}
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base">Planes y precios</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Edita nombre, descripción, descargas/mes, precios y visibilidad de cada plan.
+            </p>
+          </div>
+          <Button size="sm" onClick={createPlan}>
+            <Plus className="h-4 w-4 mr-1" /> Nuevo plan
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {plans.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No hay planes configurados.</p>
+          ) : (
+            plans.map((p) => (
+              <PlanRow key={p.id} plan={p} onSave={updatePlan} onDelete={deletePlan} />
+            ))
+          )}
         </CardContent>
       </Card>
+
 
       {metrics && metrics.by_plan.length > 0 && (
         <Card>
