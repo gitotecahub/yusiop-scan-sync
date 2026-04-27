@@ -88,7 +88,7 @@ serve(async (req) => {
       .createSignedUrl(storagePath, 300); // 5 min para streaming
 
     if (signErr || !signed?.signedUrl) {
-      console.error("createSignedUrl error:", signErr, "path:", storagePath);
+      console.error("createSignedUrl error:", signErr, "bucket:", bucket, "path:", storagePath);
       return json(500, { error: "No se pudo generar acceso al archivo" });
     }
 
