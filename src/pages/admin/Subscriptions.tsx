@@ -36,13 +36,15 @@ interface Flag {
 
 interface Plan {
   id: string;
-  code: string;
+  code: 'plus' | 'pro' | 'elite';
   name: string;
+  description: string | null;
   monthly_downloads: number;
   price_xaf: number;
   price_eur_cents: number;
   is_recommended: boolean;
   is_active: boolean;
+  display_order: number;
 }
 
 interface Metrics {
