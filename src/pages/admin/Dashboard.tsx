@@ -57,6 +57,12 @@ const Dashboard = () => {
     totalEur: number;
     count: number;
     avgTicketEur: number;
+    breakdown?: {
+      cards_eur: number; cards_count: number;
+      express_eur: number; express_count: number;
+      promo_eur: number; promo_count: number;
+      subs_eur: number; subs_count: number;
+    };
   }>({ series: [], totalEur: 0, count: 0, avgTicketEur: 0 });
   const [downloads, setDownloads] = useState<{
     series: { date: string; value: number }[];
