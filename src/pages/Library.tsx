@@ -590,6 +590,17 @@ const Library = () => {
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
                   <span>{formatDuration(song.duration_seconds)}</span>
                   {showDate && (<><span>·</span><span>{formatDate(song.downloaded_at)}</span></>)}
+                  {offlineIds.has(song.id) ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary tracking-wide">
+                      <Download className="h-2.5 w-2.5" />
+                      Offline
+                    </span>
+                  ) : !online ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive tracking-wide">
+                      <WifiOff className="h-2.5 w-2.5" />
+                      No disponible
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
