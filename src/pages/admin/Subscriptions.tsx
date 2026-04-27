@@ -530,28 +530,152 @@ const NumberField = ({
   );
 };
 
-const PlanRow = ({ plan, onSave }: { plan: Plan; onSave: (id: string, xaf: number, eur: number) => void }) => {
+const PlanRow = ({
+  plan,
+  onSave,
+  onDelete,
+}: {
+  plan: Plan;
+  onSave: (id: string, patch: Partial<Plan>) => void;
+  onDelete: (id: string) => void;
+}) => {
+  const [name, setName] = useState(plan.name);
+  const [description, setDescription] = useState(plan.description ?? '');
+  const [downloads, setDownloads] = useState(plan.monthly_downloads);
   const [xaf, setXaf] = useState(plan.price_xaf);
   const [eur, setEur] = useState(plan.price_eur_cents);
-  const dirty = xaf !== plan.price_xaf || eur !== plan.price_eur_cents;
+  const [order, setOrder] = useState(plan.display_order);
+  const [recommended, setRecommended] = useState(plan.is_recommended);
+  const [active, setActive] = useState(plan.is_active);
+
+  useEffect(() => {
+    setName(plan.name);
+    setDescription(plan.description ?? '');
+    setDownloads(plan.monthly_downloads);
+    setXaf(plan.price_xaf);
+    setEur(plan.price_eur_cents);
+    setOrder(plan.display_order);
+    setRecommended(plan.is_recommended);
+    setActive(plan.is_active);
+  }, [plan]);
+
+  const dirty =
+    name !== plan.name ||
+    description !== (plan.description ?? '') ||
+    downloads !== plan.monthly_downloads ||
+    xaf !== plan.price_xaf ||
+    eur !== plan.price_eur_cents ||
+    order !== plan.display_order ||
+    recommended !== plan.is_recommended ||
+    active !== plan.is_active;
+
   return (
-    <div className="flex items-center gap-3 text-sm border-b border-border/40 pb-3">
-      <div className="flex-1">
-        <p className="font-medium">{plan.name} <span className="text-xs text-muted-foreground">({plan.monthly_downloads} desc/mes)</span></p>
+    <div className="rounded-lg border border-border p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="font-mono text-[10px] uppercase">{plan.code}</Badge>
+          {plan.is_recommended && <Badge className="text-[10px]">Recomendado</Badge>}
+          {!plan.is_active && <Badge variant="secondary" className="text-[10px]">Inactivo</Badge>}
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          onClick={() => onDelete(plan.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
-      <div className="flex items-center gap-1">
-        <Input className="w-24" type="number" value={xaf} onChange={(e) => setXaf(parseInt(e.target.value, 10) || 0)} />
-        <span className="text-xs text-muted-foreground">XAF</span>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Nombre</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Descargas / mes</Label>
+          <Input
+            type="number"
+            min={0}
+            value={downloads}
+            onChange={(e) => setDownloads(parseInt(e.target.value, 10) || 0)}
+          />
+        </div>
       </div>
-      <div className="flex items-center gap-1">
-        <Input className="w-20" type="number" value={eur} onChange={(e) => setEur(parseInt(e.target.value, 10) || 0)} />
-        <span className="text-xs text-muted-foreground">€¢</span>
+
+      <div className="space-y-1">
+        <Label className="text-xs text-muted-foreground">Descripción</Label>
+        <Input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Descripción visible para el usuario"
+        />
       </div>
-      <Button size="sm" disabled={!dirty} onClick={() => onSave(plan.id, xaf, eur)}>
-        Guardar
-      </Button>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Precio (XAF)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={xaf}
+            onChange={(e) => setXaf(parseInt(e.target.value, 10) || 0)}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Precio (€¢)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={eur}
+            onChange={(e) => setEur(parseInt(e.target.value, 10) || 0)}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Orden</Label>
+          <Input
+            type="number"
+            min={0}
+            value={order}
+            onChange={(e) => setOrder(parseInt(e.target.value, 10) || 0)}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Switch checked={active} onCheckedChange={setActive} />
+          <Label className="text-xs">Activo</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch checked={recommended} onCheckedChange={setRecommended} />
+          <Label className="text-xs">Recomendado</Label>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          disabled={!dirty}
+          onClick={() =>
+            onSave(plan.id, {
+              name,
+              description: description.trim() || null,
+              monthly_downloads: downloads,
+              price_xaf: xaf,
+              price_eur_cents: eur,
+              display_order: order,
+              is_recommended: recommended,
+              is_active: active,
+            })
+          }
+        >
+          Guardar cambios
+        </Button>
+      </div>
     </div>
   );
 };
+
 
 export default Subscriptions;
