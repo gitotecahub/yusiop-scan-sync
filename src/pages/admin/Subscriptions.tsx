@@ -147,14 +147,43 @@ const Subscriptions = () => {
     updateFlag({ whitelist_user_ids: flag.whitelist_user_ids.filter((u) => u !== userId) });
   };
 
-  const updatePlanPrice = async (planId: string, priceXaf: number, priceEurCents: number) => {
+  const updatePlan = async (planId: string, patch: Partial<Plan>) => {
     const { error } = await supabase
       .from('subscription_plans')
-      .update({ price_xaf: priceXaf, price_eur_cents: priceEurCents })
+      .update({ ...patch, updated_at: new Date().toISOString() } as any)
       .eq('id', planId);
     if (error) toast.error(error.message);
-    else { toast.success('Precio actualizado'); load(); }
+    else { toast.success('Plan actualizado'); load(); }
   };
+
+  const deletePlan = async (planId: string) => {
+    if (!confirm('¿Eliminar este plan? No se podrá recuperar.')) return;
+    const { error } = await supabase.from('subscription_plans').delete().eq('id', planId);
+    if (error) toast.error(error.message);
+    else { toast.success('Plan eliminado'); load(); }
+  };
+
+  const createPlan = async () => {
+    const code = prompt('Código del plan (plus, pro o elite):')?.trim().toLowerCase();
+    if (!code || !['plus', 'pro', 'elite'].includes(code)) {
+      toast.error('Código inválido. Usa: plus, pro o elite');
+      return;
+    }
+    const { error } = await supabase.from('subscription_plans').insert({
+      code: code as any,
+      name: code.charAt(0).toUpperCase() + code.slice(1),
+      description: '',
+      monthly_downloads: 5,
+      price_xaf: 1500,
+      price_eur_cents: 299,
+      is_active: true,
+      is_recommended: false,
+      display_order: plans.length,
+    } as any);
+    if (error) toast.error(error.message);
+    else { toast.success('Plan creado'); load(); }
+  };
+
 
   if (loading) {
     return <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
