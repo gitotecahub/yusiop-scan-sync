@@ -35,6 +35,36 @@ const Wallet = () => {
   const navigate = useNavigate();
   const { wallet, transactions, loading, refresh } = useWallet();
   const [redeemOpen, setRedeemOpen] = useState(false);
+  const [rechargeOpen, setRechargeOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Manejar el retorno de Stripe Checkout
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status === 'success') {
+      toast({
+        title: '¡Recarga completada!',
+        description: 'Tu saldo se ha actualizado.',
+      });
+      // Refrescar varias veces porque el webhook puede tardar unos segundos
+      refresh();
+      const t1 = setTimeout(() => refresh(), 2000);
+      const t2 = setTimeout(() => refresh(), 5000);
+      searchParams.delete('status');
+      searchParams.delete('session_id');
+      setSearchParams(searchParams, { replace: true });
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    if (status === 'cancelled') {
+      toast({
+        title: 'Recarga cancelada',
+        description: 'No se ha realizado ningún cargo.',
+        variant: 'destructive',
+      });
+      searchParams.delete('status');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refresh]);
 
   const balance = wallet?.balance ?? 0;
 
