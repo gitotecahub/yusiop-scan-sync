@@ -17,6 +17,7 @@ interface Collaborator {
   share_percent: number;
   is_primary: boolean;
   claimed_by_user_id: string | null;
+  contact_email?: string | null;
 }
 
 interface Song {
