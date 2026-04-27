@@ -229,17 +229,13 @@ const Index = () => {
                 onClick={() => goSong(slide.id)}
                 className="snap-start group relative shrink-0 w-[88%] sm:w-[420px] h-44 rounded-3xl overflow-hidden border border-border md:hover:border-primary/50 transition-all text-left animate-fade-in"
               >
-                <div
-                  className="absolute inset-0"
-                  style={{ background: HERO_GRADIENTS[idx % HERO_GRADIENTS.length] }}
-                />
                 <img
                   src={slide.cover_url}
                   alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover opacity-70 md:group-hover:opacity-90 md:group-hover:scale-105 transition-all duration-700 mix-blend-luminosity"
+                  className="absolute inset-0 w-full h-full object-cover md:group-hover:scale-105 transition-all duration-700"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
                 <div className="absolute top-3 left-3">
                   <span className="chip chip-vapor !text-[9px]">
                     <Sparkles className="h-2.5 w-2.5" />{' '}
