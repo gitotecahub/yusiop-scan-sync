@@ -7,18 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
-import EditSongDialog, { type Song, type Artist, type Album } from '@/components/admin/EditSongDialog';
+import EditSongDialog, { type Song, type Artist, type Album, type Collaborator } from '@/components/admin/EditSongDialog';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
-
-interface Collaborator {
-  id: string;
-  artist_name: string;
-  role: string;
-  share_percent: number;
-  is_primary: boolean;
-  claimed_by_user_id: string | null;
-  contact_email?: string | null;
-}
 
 const Songs = () => {
   const [songs, setSongs] = useState<Song[]>([]);
