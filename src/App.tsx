@@ -76,6 +76,18 @@ const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
   const online = useOnlineStatus();
 
+  // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
+  // redirigir inmediatamente a /reset-password preservando el hash.
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    const isRecovery =
+      hash.includes('type=recovery') ||
+      hash.includes('error_code=otp_expired');
+    if (isRecovery && window.location.pathname !== '/reset-password') {
+      window.location.replace(`/reset-password${hash}`);
+    }
+  }, []);
+
   useEffect(() => {
     initialize();
   }, [initialize]);
@@ -99,7 +111,8 @@ const AppContent = () => {
     }
   }, [user?.id, loadForUser, reset]);
 
-  if (showSplash) return <SplashScreen />;
+  // Saltar splash en la pantalla de reset para no consumir tiempo del token
+  if (showSplash && window.location.pathname !== '/reset-password') return <SplashScreen />;
 
   return (
     <Routes>
