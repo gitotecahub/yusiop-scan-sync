@@ -1227,13 +1227,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             onClick={handleSubmit}
             disabled={!!disabledReason}
           >
-            {uploading
-              ? 'Guardando…'
-              : isEdit
-                ? 'Guardar y reenviar'
-                : promo.enabled && promo.plan
-                  ? 'Enviar y pagar promoción'
-                  : 'Enviar a revisión'}
+            {(() => {
+              if (uploading) return 'Guardando…';
+              if (isEdit) return 'Guardar y reenviar';
+              const expressPaid = expressEnabled && expressTier && !isElite;
+              const promoPaid = promo.enabled && promo.plan;
+              if (expressPaid && promoPaid) return 'Enviar y pagar Express + Promoción';
+              if (expressPaid) return 'Enviar y pagar Express';
+              if (promoPaid) return 'Enviar y pagar promoción';
+              return 'Enviar a revisión';
+            })()}
           </Button>
         </DialogFooter>
       </DialogContent>
