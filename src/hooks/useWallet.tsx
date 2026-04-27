@@ -12,6 +12,10 @@ export interface WalletState {
   total_recharged: number;
   total_spent: number;
   updated_at: string;
+  /** Descargas estimadas calculadas en backend (floor(balance / value_per_download_xaf)) */
+  estimated_downloads: number;
+  /** Precio por descarga configurado en admin_financial_settings (XAF) */
+  value_per_download_xaf: number;
 }
 
 export interface WalletTransaction {
@@ -26,9 +30,21 @@ export interface WalletTransaction {
   created_at: string;
 }
 
+export interface ActiveSubscriptionInfo {
+  id: string;
+  plan_code: string;
+  plan_name: string;
+  downloads_remaining: number;
+  monthly_downloads: number;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  status: string;
+}
+
 interface UseWalletResult {
   wallet: WalletState | null;
   transactions: WalletTransaction[];
+  subscription: ActiveSubscriptionInfo | null;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;

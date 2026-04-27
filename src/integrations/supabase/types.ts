@@ -228,6 +228,7 @@ export type Database = {
           created_at: string
           id: number
           platform_percentage: number
+          subscriber_extra_bonus_pct: number
           updated_at: string
           validation_period_days: number
           value_per_download_xaf: number
@@ -244,6 +245,7 @@ export type Database = {
           created_at?: string
           id?: number
           platform_percentage?: number
+          subscriber_extra_bonus_pct?: number
           updated_at?: string
           validation_period_days?: number
           value_per_download_xaf?: number
@@ -260,6 +262,7 @@ export type Database = {
           created_at?: string
           id?: number
           platform_percentage?: number
+          subscriber_extra_bonus_pct?: number
           updated_at?: string
           validation_period_days?: number
           value_per_download_xaf?: number
@@ -2073,6 +2076,7 @@ export type Database = {
         Args: { p_method_id: string; p_reason?: string; p_status: string }
         Returns: Json
       }
+      apply_recharge_bonus: { Args: { p_amount_eur: number }; Returns: Json }
       approve_artist_request: {
         Args: { p_request_id: string }
         Returns: {
@@ -2163,6 +2167,7 @@ export type Database = {
         Args: { _artist_name: string; _user_id: string }
         Returns: string
       }
+      estimate_downloads: { Args: { p_balance_xaf: number }; Returns: number }
       expire_ad_campaigns: { Args: never; Returns: number }
       expire_stale_card_purchases: { Args: never; Returns: number }
       get_active_ad_campaigns: {
