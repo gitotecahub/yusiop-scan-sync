@@ -9,6 +9,7 @@ import { Upload, Music, AlertCircle, Play, Pause, Plus, Trash2, Users, Sparkles,
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
 import { useAuthStore } from '@/stores/authStore';
 import { useMySubscription } from '@/hooks/useSubscriptionPlans';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -434,6 +435,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       const allowed = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowed.includes(file.type)) {
         toast.error('Formato de imagen no soportado. Usa JPG, PNG o WebP.');
+        return;
+      }
+      try {
+        await validateCoverDimensions(file);
+      } catch (err: any) {
+        toast.error(err?.message || 'La portada no cumple los requisitos.');
         return;
       }
       setCoverFile(file);
