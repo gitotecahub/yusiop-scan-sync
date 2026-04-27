@@ -603,53 +603,54 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
           : 'Canción enviada a revisión. Analizando copyright…');
 
-        // Si el artista activó la promoción del lanzamiento, crear la campaña y abrir checkout
+        // Si el artista activó la promoción del lanzamiento, crear la campaña
+        // y redirigir a Stripe Checkout en la misma pestaña. La canción queda enviada
+        // a revisión, y la campaña asociada queda pendiente de pago hasta que vuelva
+        // del flujo de Stripe (gestionado por el webhook).
         if (promo.enabled && promo.plan && inserted?.id) {
           const plan = PROMO_PLANS.find(p => p.id === promo.plan);
           if (plan) {
-            try {
-              // Resolver artist_id propio (si existe)
-              const { data: artistRow } = await supabase
-                .from('song_collaborators')
-                .select('id')
-                .limit(1)
-                .maybeSingle();
-              void artistRow;
+            const coverImg = cover?.url ?? editing?.cover_url ?? null;
+            const { data: campaign, error: campErr } = await supabase
+              .from('ad_campaigns')
+              .insert({
+                user_id: user.id,
+                submission_id: inserted.id,
+                campaign_type: 'artist_release',
+                title: promo.ad_text.trim() || formData.title.trim(),
+                subtitle: formData.artist_name.trim(),
+                image_url: coverImg,
+                cta_text: promo.cta_text.trim() || 'Escuchar ahora',
+                cta_url: `/catalog?song=${inserted.id}`,
+                duration_days: plan.days,
+                price_eur: plan.priceEur,
+                start_date: promo.start_date ? new Date(promo.start_date).toISOString() : null,
+                status: 'pending_payment',
+                payment_status: 'unpaid',
+                placement: 'home_top_banner',
+              } as any)
+              .select('id')
+              .single();
 
-              const coverImg = cover?.url ?? editing?.cover_url ?? null;
-              const { data: campaign, error: campErr } = await supabase
-                .from('ad_campaigns')
-                .insert({
-                  user_id: user.id,
-                  campaign_type: 'artist_release',
-                  title: promo.ad_text.trim() || formData.title.trim(),
-                  subtitle: formData.artist_name.trim(),
-                  image_url: coverImg,
-                  cta_text: promo.cta_text.trim() || 'Escuchar ahora',
-                  cta_url: `/catalog?song=${inserted.id}`,
-                  duration_days: plan.days,
-                  price_eur: plan.priceEur,
-                  status: 'pending_payment',
-                  payment_status: 'unpaid',
-                  placement: 'home_top_banner',
-                })
-                .select('id')
-                .single();
-
-              if (campErr) throw campErr;
-
+            if (campErr) {
+              console.error('Promo campaign creation failed', campErr);
+              toast.error('No se pudo crear la promoción: ' + campErr.message);
+            } else {
               const { data: checkout, error: chkErr } = await supabase.functions.invoke(
                 'create-ad-checkout',
                 { body: { campaign_id: campaign.id } },
               );
-              if (chkErr) throw chkErr;
-              if (checkout?.url) {
-                toast.success('Redirigiendo al pago de la promoción…');
-                window.open(checkout.url, '_blank');
+              if (chkErr || !checkout?.url) {
+                toast.error('No se pudo abrir la pasarela de pago. Puedes reintentarlo desde tu panel de artista.');
+              } else {
+                toast.success('Redirigiendo a la pasarela de pago…');
+                onOpenChange(false);
+                onSubmitted?.();
+                // Redirección en la MISMA pestaña — evita bloqueos de pop-up y asegura
+                // que el artista pase por el pago antes de volver a la app.
+                window.location.href = checkout.url;
+                return;
               }
-            } catch (e: any) {
-              console.error('Promo campaign creation failed', e);
-              toast.error('No se pudo crear la promoción: ' + (e.message ?? 'error'));
             }
           }
         }
