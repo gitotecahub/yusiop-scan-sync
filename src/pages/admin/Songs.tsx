@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
+import EditSongDialog from '@/components/admin/EditSongDialog';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 
 interface Collaborator {
