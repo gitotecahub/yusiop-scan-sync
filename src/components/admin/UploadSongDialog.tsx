@@ -297,7 +297,7 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
     }
   };
 
-  const handleFileSelect = (type: 'track' | 'preview' | 'cover', file: File | null) => {
+  const handleFileSelect = async (type: 'track' | 'preview' | 'cover', file: File | null) => {
     if (!file) return;
 
     const maxSize = 50 * 1024 * 1024; // 50MB
@@ -316,6 +316,12 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Formato de imagen no soportado. Use JPG, PNG o WebP.');
+        return;
+      }
+      try {
+        await validateCoverDimensions(file);
+      } catch (err: any) {
+        toast.error(err?.message || 'La portada no cumple los requisitos.');
         return;
       }
     }
