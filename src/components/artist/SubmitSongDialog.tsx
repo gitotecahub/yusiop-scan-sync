@@ -701,15 +701,16 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               <Input
                 id="artist"
                 value={formData.artist_name}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setFormData((p) => ({ ...p, artist_name: v }));
-                  // Mantener sincronizado el "principal" en la lista de colaboradores
-                  setCollaborators((prev) => prev.map((c) => c.is_primary ? { ...c, artist_name: v } : c));
-                }}
+                readOnly
+                disabled
                 placeholder="Tu nombre artístico"
                 maxLength={80}
+                className="bg-muted/50 cursor-not-allowed"
+                title="No se puede modificar: corresponde al artista verificado de tu cuenta"
               />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Este es el nombre artístico verificado de tu cuenta. Si necesitas cambiarlo, contacta con soporte.
+              </p>
             </div>
           </div>
 
