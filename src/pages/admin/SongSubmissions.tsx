@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Check, X, Clock, Play, Image as ImageIcon, Info, Ban, CalendarClock, ShieldCheck, ChevronDown, Megaphone, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
 import { parseRejectionReason } from '@/lib/parseRejectionReason';
