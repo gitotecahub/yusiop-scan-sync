@@ -29,6 +29,7 @@ import {
   fetchTopSongs,
   fetchQrStats,
   fetchNewUsers,
+  fetchMonetizationGross,
   RangeKey,
 } from '@/lib/adminAnalytics';
 
