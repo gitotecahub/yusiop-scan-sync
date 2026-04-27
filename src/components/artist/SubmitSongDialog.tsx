@@ -1209,7 +1209,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             onClick={handleSubmit}
             disabled={!!disabledReason}
           >
-            {uploading ? 'Guardando…' : isEdit ? 'Guardar y reenviar' : 'Enviar a revisión'}
+            {uploading
+              ? 'Guardando…'
+              : isEdit
+                ? 'Guardar y reenviar'
+                : promo.enabled && promo.plan
+                  ? 'Enviar y pagar promoción'
+                  : 'Enviar a revisión'}
           </Button>
         </DialogFooter>
       </DialogContent>
