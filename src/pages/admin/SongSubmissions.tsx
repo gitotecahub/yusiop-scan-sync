@@ -159,6 +159,19 @@ const SongSubmissions = () => {
       submissions.forEach((s) => {
         s.collaborators = bySubmission.get(s.id) ?? [];
       });
+
+      // Cargar campañas de promoción asociadas a estos envíos
+      const { data: campaigns } = await supabase
+        .from('ad_campaigns')
+        .select('id,title,subtitle,cta_text,duration_days,price_eur,start_date,status,payment_status,submission_id')
+        .in('submission_id', ids);
+      const promoBySubmission = new Map<string, PromoCampaign>();
+      (campaigns ?? []).forEach((c: any) => {
+        if (c.submission_id) promoBySubmission.set(c.submission_id, c as PromoCampaign);
+      });
+      submissions.forEach((s) => {
+        s.promo = promoBySubmission.get(s.id) ?? null;
+      });
     }
 
     setRows(submissions);
