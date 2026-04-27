@@ -425,15 +425,21 @@ const RevenueEngineTile = ({
   eur,
   count,
   loading,
+  highlight,
 }: {
   label: string;
   eur: number;
   count: number;
   loading?: boolean;
+  highlight?: boolean;
 }) => (
-  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+  <div className={`rounded-lg border p-3 ${highlight ? 'border-primary/40 bg-primary/10' : 'border-border/50 bg-muted/20'}`}>
     <p className="text-xs text-muted-foreground mb-1">{label}</p>
-    <p className="text-lg font-bold leading-tight">{loading ? '—' : formatEURNumber(eur)}</p>
-    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{count} {count === 1 ? 'pago' : 'pagos'}</p>
+    <p className={`font-bold leading-tight ${highlight ? 'text-2xl text-primary' : 'text-lg'}`}>{loading ? '—' : formatEURNumber(eur)}</p>
+    {!loading && (
+      <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+        {count > 0 ? `${count} ${count === 1 ? 'pago' : 'pagos'}` : formatXAFNumber(eur)}
+      </p>
+    )}
   </div>
 );
