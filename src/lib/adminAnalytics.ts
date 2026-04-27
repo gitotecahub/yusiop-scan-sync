@@ -240,3 +240,57 @@ export const fetchNewUsers = async (range: RangeKey) => {
     .gte('created_at', start.toISOString());
   return count ?? 0;
 };
+
+// Ingresos brutos de monetización (igual que la página /admin/monetization):
+// = créditos consumidos en descargas (valor por descarga según tipo de tarjeta)
+//   + ventas de tarjetas físicas activadas (XAF→EUR).
+// Se calcula sobre TODO el histórico, igual que la vista de Monetización.
+const STANDARD_PRICE_EUR = 5.0;
+const STANDARD_CREDITS = 4;
+const PREMIUM_PRICE_EUR = 10.0;
+const PREMIUM_CREDITS_DEFAULT = 10;
+const STANDARD_PER_DOWNLOAD = STANDARD_PRICE_EUR / STANDARD_CREDITS;
+const PHYSICAL_STANDARD_PRICE_XAF = 3000;
+const PHYSICAL_PREMIUM_PRICE_XAF = 7000;
+const XAF_TO_EUR = 655.957;
+
+export const fetchMonetizationGross = async () => {
+  const [{ data: dls }, { data: qrs }] = await Promise.all([
+    supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
+    supabase.from('qr_cards').select('id, card_type, download_credits, origin, is_activated'),
+  ]);
+  const qrMap = new Map<string, any>();
+  (qrs ?? []).forEach((q: any) => qrMap.set(q.id, q));
+
+  let downloadsGross = 0;
+  (dls ?? []).forEach((d: any) => {
+    let cardType = d.card_type;
+    let credits = 0;
+    if (d.qr_card_id) {
+      const qr = qrMap.get(d.qr_card_id);
+      if (qr) {
+        cardType = qr.card_type;
+        credits = qr.download_credits > 0 ? qr.download_credits : 0;
+      }
+    }
+    if (cardType === 'premium') {
+      const c = credits > 0 ? credits : PREMIUM_CREDITS_DEFAULT;
+      downloadsGross += PREMIUM_PRICE_EUR / c;
+    } else {
+      downloadsGross += STANDARD_PER_DOWNLOAD;
+    }
+  });
+
+  let physicalXaf = 0;
+  qrMap.forEach((qr: any) => {
+    if (qr.origin !== 'physical' || !qr.is_activated) return;
+    physicalXaf += qr.card_type === 'premium' ? PHYSICAL_PREMIUM_PRICE_XAF : PHYSICAL_STANDARD_PRICE_XAF;
+  });
+  const physicalEur = physicalXaf / XAF_TO_EUR;
+
+  return {
+    downloadsGross,
+    physicalSalesEur: physicalEur,
+    totalGross: downloadsGross + physicalEur,
+  };
+};

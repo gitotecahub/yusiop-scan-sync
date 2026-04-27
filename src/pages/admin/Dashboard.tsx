@@ -29,6 +29,7 @@ import {
   fetchTopSongs,
   fetchQrStats,
   fetchNewUsers,
+  fetchMonetizationGross,
   RangeKey,
 } from '@/lib/adminAnalytics';
 
@@ -80,18 +81,20 @@ const Dashboard = () => {
     giftRedemptionRate: 0,
   });
   const [newUsers, setNewUsers] = useState(0);
+  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, totalGross: 0 });
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const [rev, dls, top, qrStats, nu] = await Promise.all([
+        const [rev, dls, top, qrStats, nu, mg] = await Promise.all([
           fetchRevenueSeries(range),
           fetchDownloadsSeries(range),
           fetchTopSongs(range),
           fetchQrStats(),
           fetchNewUsers(range),
+          fetchMonetizationGross(),
         ]);
         if (cancelled) return;
         setRevenue(rev);
@@ -99,6 +102,7 @@ const Dashboard = () => {
         setTopSongs(top);
         setQr(qrStats);
         setNewUsers(nu);
+        setMonetGross(mg);
       } catch (err) {
         console.error('Dashboard load error:', err);
       } finally {
@@ -171,6 +175,24 @@ const Dashboard = () => {
           loading={loading}
         />
       </div>
+
+      {/* Ingresos brutos de monetización (igual que /admin/monetization) */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Euro className="h-4 w-4 text-primary" />
+            Ingresos brutos (Monetización)
+          </CardTitle>
+          <CardDescription>
+            Histórico total: créditos consumidos en descargas + ventas de tarjetas físicas activadas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <RevenueEngineTile label="Total bruto" eur={monetGross.totalGross} count={0} loading={loading} highlight />
+          <RevenueEngineTile label="Descargas (créditos)" eur={monetGross.downloadsGross} count={0} loading={loading} />
+          <RevenueEngineTile label="Tarjetas físicas" eur={monetGross.physicalSalesEur} count={0} loading={loading} />
+        </CardContent>
+      </Card>
 
       {/* Desglose por motor de ingresos */}
       {revenue.breakdown && (
@@ -403,15 +425,21 @@ const RevenueEngineTile = ({
   eur,
   count,
   loading,
+  highlight,
 }: {
   label: string;
   eur: number;
   count: number;
   loading?: boolean;
+  highlight?: boolean;
 }) => (
-  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+  <div className={`rounded-lg border p-3 ${highlight ? 'border-primary/40 bg-primary/10' : 'border-border/50 bg-muted/20'}`}>
     <p className="text-xs text-muted-foreground mb-1">{label}</p>
-    <p className="text-lg font-bold leading-tight">{loading ? '—' : formatEURNumber(eur)}</p>
-    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{count} {count === 1 ? 'pago' : 'pagos'}</p>
+    <p className={`font-bold leading-tight ${highlight ? 'text-2xl text-primary' : 'text-lg'}`}>{loading ? '—' : formatEURNumber(eur)}</p>
+    {!loading && (
+      <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+        {count > 0 ? `${count} ${count === 1 ? 'pago' : 'pagos'}` : formatXAFNumber(eur)}
+      </p>
+    )}
   </div>
 );
