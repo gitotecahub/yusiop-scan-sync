@@ -227,6 +227,11 @@ const Library = () => {
   };
 
   const handlePlay = (song: DownloadedSong, list?: DownloadedSong[]) => {
+    // Bloquear si estamos offline y la canción no está descargada localmente
+    if (!online && !offlineIds.has(song.id)) {
+      toast.error('Esta canción no está disponible offline');
+      return;
+    }
     if (currentSong?.id === song.id && !isPreview) {
       if (isPlaying) {
         pause();
@@ -240,6 +245,8 @@ const Library = () => {
       setQueue(queueList, startIdx >= 0 ? startIdx : 0, false);
       play();
     }
+    // Registrar reproducción (sync online o cola offline)
+    void recordPlayback(song.id);
   };
 
   const handleToggleFavorite = (song: DownloadedSong) => {
