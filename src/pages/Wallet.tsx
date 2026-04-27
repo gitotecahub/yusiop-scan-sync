@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowDownLeft, ArrowUpRight, Plus, Ticket, Wallet as WalletIcon, RefreshCw, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet, type WalletTransaction } from '@/hooks/useWallet';
 import { formatXAFFixed } from '@/lib/currency';
 import RedeemCodeDialog from '@/components/wallet/RedeemCodeDialog';
+import RechargeWalletDialog from '@/components/wallet/RechargeWalletDialog';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const formatDate = (iso: string) => {
@@ -33,6 +35,36 @@ const Wallet = () => {
   const navigate = useNavigate();
   const { wallet, transactions, loading, refresh } = useWallet();
   const [redeemOpen, setRedeemOpen] = useState(false);
+  const [rechargeOpen, setRechargeOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Manejar el retorno de Stripe Checkout
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status === 'success') {
+      toast({
+        title: '¡Recarga completada!',
+        description: 'Tu saldo se ha actualizado.',
+      });
+      // Refrescar varias veces porque el webhook puede tardar unos segundos
+      refresh();
+      const t1 = setTimeout(() => refresh(), 2000);
+      const t2 = setTimeout(() => refresh(), 5000);
+      searchParams.delete('status');
+      searchParams.delete('session_id');
+      setSearchParams(searchParams, { replace: true });
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    if (status === 'cancelled') {
+      toast({
+        title: 'Recarga cancelada',
+        description: 'No se ha realizado ningún cargo.',
+        variant: 'destructive',
+      });
+      searchParams.delete('status');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refresh]);
 
   const balance = wallet?.balance ?? 0;
 
@@ -105,13 +137,11 @@ const Wallet = () => {
             <span className="text-xs font-medium">Introducir código</span>
           </Button>
           <Button
-            onClick={() => {/* futuro: pago digital */}}
+            onClick={() => setRechargeOpen(true)}
             className="h-auto py-4 flex-col gap-1.5 rounded-2xl"
-            disabled
-            variant="outline"
           >
             <Plus className="h-5 w-5" />
-            <span className="text-xs font-medium">Recargar (próx.)</span>
+            <span className="text-xs font-medium">Recargar saldo</span>
           </Button>
         </div>
 
@@ -171,6 +201,7 @@ const Wallet = () => {
       </div>
 
       <RedeemCodeDialog open={redeemOpen} onOpenChange={setRedeemOpen} />
+      <RechargeWalletDialog open={rechargeOpen} onOpenChange={setRechargeOpen} />
     </div>
   );
 };

@@ -103,17 +103,6 @@ Deno.serve(async (req) => {
 
         console.log("Wallet recargado:", creditRes);
 
-        // Aplicar bonus si corresponde (no bloquear si falla)
-        try {
-          const { error: bonusErr } = await supabase.rpc(
-            "apply_recharge_bonus",
-            { p_amount_eur: amountEur },
-          );
-          if (bonusErr) console.warn("apply_recharge_bonus (no bloqueante)", bonusErr);
-        } catch (e) {
-          console.warn("bonus exception", e);
-        }
-
         return new Response(JSON.stringify({ received: true }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
