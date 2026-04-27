@@ -208,15 +208,19 @@ const Songs = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-yusiop-primary to-yusiop-accent rounded-lg flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0 relative">
                     {song.cover_url ? (
                       <img
                         src={song.cover_url}
                         alt={song.title}
-                        className="w-full h-full object-cover rounded-lg"
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                     ) : (
-                      <Play className="h-6 w-6 text-white" />
+                      <Play className="h-6 w-6 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1">
