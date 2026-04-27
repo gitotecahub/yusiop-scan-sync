@@ -2044,12 +2044,37 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: Json
       }
-      admin_generate_recharge_cards: {
+      admin_disable_recharge_card: {
+        Args: { p_card_id: string }
+        Returns: Json
+      }
+      admin_generate_recharge_cards:
+        | {
+            Args: {
+              p_amount: number
+              p_batch?: string
+              p_expires_at?: string
+              p_quantity: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_amount_xaf: number
+              p_batch?: string
+              p_expires_at?: string
+              p_notes?: string
+              p_quantity: number
+            }
+            Returns: Json
+          }
+      admin_list_recharge_cards: {
         Args: {
-          p_amount: number
           p_batch?: string
-          p_expires_at?: string
-          p_quantity: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_status?: string
         }
         Returns: Json
       }
@@ -2064,6 +2089,10 @@ export type Database = {
             }
             Returns: Json
           }
+      admin_reactivate_recharge_card: {
+        Args: { p_card_id: string }
+        Returns: Json
+      }
       admin_reject_ad_campaign: {
         Args: { p_campaign_id: string; p_reason?: string }
         Returns: undefined
