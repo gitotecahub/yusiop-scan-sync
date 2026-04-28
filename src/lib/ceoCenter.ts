@@ -46,7 +46,7 @@ export interface CeoKpis {
 }
 
 export interface RevenueEngine {
-  engine: 'cards' | 'subscriptions' | 'express';
+  engine: 'cards' | 'subscriptions' | 'express' | 'promotion';
   label: string;
   revenue: number;
   percent: number;
