@@ -35,6 +35,10 @@ if (isPreviewEnvironment && 'serviceWorker' in navigator) {
   if ('caches' in window) {
     void caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
   }
+} else {
+  // Producción: auto-actualizar el Service Worker para que los cambios
+  // publicados se apliquen sin que el usuario tenga que recargar a mano.
+  void import('./lib/swUpdate').then((m) => m.initSwAutoUpdate())
 }
 
 createRoot(document.getElementById("root")!).render(
