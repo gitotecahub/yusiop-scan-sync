@@ -77,18 +77,28 @@ const AppContent = () => {
   const online = useOnlineStatus();
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
-  // redirigir inmediatamente a /reset-password preservando el hash.
+  // redirigir inmediatamente a /reset-password preservando hash y query.
   // Se ejecuta SÍNCRONO antes del primer render para evitar que el flujo
   // normal de auth/onboarding intercepte la sesión de recuperación.
   if (typeof window !== 'undefined') {
     const hash = window.location.hash || '';
-    const isRecovery =
+    const search = window.location.search || '';
+    const path = window.location.pathname;
+    const isRecoveryHash =
       hash.includes('type=recovery') ||
       hash.includes('error_code=otp_expired') ||
-      (hash.includes('access_token=') && hash.includes('type=recovery')) ||
-      hash.includes('type=recovery');
-    if (isRecovery && window.location.pathname !== '/reset-password') {
-      window.location.replace(`/reset-password${hash}`);
+      (hash.includes('access_token=') && hash.includes('type=recovery'));
+    // Flujo PKCE moderno: ?code=...&type=recovery o solo ?code= viniendo del email
+    const isRecoveryQuery =
+      (search.includes('type=recovery') && search.includes('code=')) ||
+      search.includes('error_code=otp_expired');
+    // Heurística: si llega un ?code= a la raíz y el referer es del dominio de email,
+    // tratamos como recovery y dejamos que /reset-password gestione el intercambio.
+    const isBareCodeAtRoot =
+      path === '/' && /[?&]code=/.test(search);
+    const isRecovery = isRecoveryHash || isRecoveryQuery || isBareCodeAtRoot;
+    if (isRecovery && path !== '/reset-password') {
+      window.location.replace(`/reset-password${search}${hash}`);
     }
   }
 
