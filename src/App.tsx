@@ -92,10 +92,10 @@ const AppContent = () => {
     const isRecoveryQuery =
       (search.includes('type=recovery') && search.includes('code=')) ||
       search.includes('error_code=otp_expired');
-    // Heurística: si llega un ?code= a la raíz y el referer es del dominio de email,
-    // tratamos como recovery y dejamos que /reset-password gestione el intercambio.
+    // Heurística: si llega un ?code= sin state= a la raíz, es un enlace de
+    // recovery (Supabase). OAuth de Google SIEMPRE incluye state=.
     const isBareCodeAtRoot =
-      path === '/' && /[?&]code=/.test(search);
+      path === '/' && /[?&]code=/.test(search) && !/[?&]state=/.test(search);
     const isRecovery = isRecoveryHash || isRecoveryQuery || isBareCodeAtRoot;
     if (isRecovery && path !== '/reset-password') {
       window.location.replace(`/reset-password${search}${hash}`);
