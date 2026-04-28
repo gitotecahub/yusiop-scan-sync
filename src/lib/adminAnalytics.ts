@@ -254,39 +254,61 @@ const PHYSICAL_STANDARD_PRICE_XAF = 3000;
 const PHYSICAL_PREMIUM_PRICE_XAF = 7000;
 const XAF_TO_EUR = 655.957;
 
+// Ingresos REALES totales (histórico): pagos efectivos cobrados a usuarios.
+// Suma: tarjetas QR digitales (EUR) + Express (XAF→EUR) + Promo lanzamientos (EUR)
+// + Suscripciones activas (EUR) + tarjetas físicas activadas (XAF→EUR).
 export const fetchMonetizationGross = async () => {
-  const [{ data: dls }, { data: qrs }] = await Promise.all([
-    supabase.from('user_downloads').select('song_id, card_type, qr_card_id'),
-    supabase.from('qr_cards').select('id, card_type, download_credits, origin, is_activated'),
+  const [cardsRes, expressRes, promoRes, subsRes, qrsRes] = await Promise.all([
+    supabase
+      .from('card_purchases')
+      .select('amount_cents, status')
+      .eq('status', 'paid'),
+    supabase
+      .from('song_submissions')
+      .select('express_price_xaf, express_paid_at')
+      .not('express_paid_at', 'is', null),
+    supabase
+      .from('ad_campaigns')
+      .select('price_eur, price_xaf, payment_status, campaign_type')
+      .eq('payment_status', 'paid')
+      .neq('campaign_type', 'yusiop_service'),
+    supabase
+      .from('user_subscriptions')
+      .select('status, subscription_plans!inner(price_eur_cents)')
+      .in('status', ['active', 'cancelled', 'past_due']),
+    supabase
+      .from('qr_cards')
+      .select('card_type, origin, is_activated'),
   ]);
-  const qrMap = new Map<string, any>();
-  (qrs ?? []).forEach((q: any) => qrMap.set(q.id, q));
 
-  let downloadsGross = 0;
-  (dls ?? []).forEach((d: any) => {
-    let cardType = d.card_type;
-    let credits = 0;
-    if (d.qr_card_id) {
-      const qr = qrMap.get(d.qr_card_id);
-      if (qr) {
-        cardType = qr.card_type;
-        credits = qr.download_credits > 0 ? qr.download_credits : 0;
-      }
-    }
-    if (cardType === 'premium') {
-      const c = credits > 0 ? credits : PREMIUM_CREDITS_DEFAULT;
-      downloadsGross += PREMIUM_PRICE_EUR / c;
-    } else {
-      downloadsGross += STANDARD_PER_DOWNLOAD;
-    }
+  let cardsEur = 0;
+  (cardsRes.data ?? []).forEach((p: any) => {
+    cardsEur += (p.amount_cents ?? 0) / 100;
+  });
+
+  let expressEur = 0;
+  (expressRes.data ?? []).forEach((s: any) => {
+    expressEur += (Number(s.express_price_xaf) || 0) / XAF_TO_EUR;
+  });
+
+  let promoEur = 0;
+  (promoRes.data ?? []).forEach((c: any) => {
+    promoEur += (Number(c.price_eur) || 0) + (Number(c.price_xaf) || 0) / XAF_TO_EUR;
+  });
+
+  let subsEur = 0;
+  (subsRes.data ?? []).forEach((s: any) => {
+    subsEur += (Number(s.subscription_plans?.price_eur_cents) || 0) / 100;
   });
 
   let physicalXaf = 0;
-  qrMap.forEach((qr: any) => {
+  (qrsRes.data ?? []).forEach((qr: any) => {
     if (qr.origin !== 'physical' || !qr.is_activated) return;
     physicalXaf += qr.card_type === 'premium' ? PHYSICAL_PREMIUM_PRICE_XAF : PHYSICAL_STANDARD_PRICE_XAF;
   });
   const physicalEur = physicalXaf / XAF_TO_EUR;
+
+  const downloadsGross = cardsEur + expressEur + promoEur + subsEur;
 
   return {
     downloadsGross,
