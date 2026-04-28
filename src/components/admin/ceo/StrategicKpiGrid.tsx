@@ -37,6 +37,7 @@ export function StrategicKpiGrid({ data, isLoading }: Props) {
     { key: 'rev_cards', label: 'Ingresos tarjetas', value: formatCurrency(data.revenue_cards), delta: computeDelta(data.revenue_cards, data.revenue_cards_prev), icon: CreditCard, tone: 'neutral' },
     { key: 'rev_subs', label: 'Ingresos suscripciones', value: formatCurrency(data.revenue_subscriptions), delta: computeDelta(data.revenue_subscriptions, data.revenue_subscriptions_prev), icon: Sparkles, tone: 'neutral' },
     { key: 'rev_express', label: 'Ingresos express', value: formatCurrency(data.revenue_express), delta: computeDelta(data.revenue_express, data.revenue_express_prev), icon: Zap, tone: 'neutral' },
+    { key: 'rev_promo', label: 'Ingresos promoción', value: formatCurrency(data.revenue_promotion ?? 0), delta: computeDelta(data.revenue_promotion ?? 0, data.revenue_promotion_prev ?? 0), icon: Sparkles, tone: 'neutral' },
     { key: 'downloads', label: 'Descargas', value: formatNumber(data.downloads), delta: computeDelta(data.downloads, data.downloads_prev), icon: Download, tone: 'neutral' },
     { key: 'active_users', label: 'Usuarios activos', value: formatNumber(data.active_users), delta: computeDelta(data.active_users, data.active_users_prev), icon: Users, tone: 'neutral' },
     { key: 'active_artists', label: 'Artistas activos', value: formatNumber(data.active_artists), delta: null, icon: Music2, tone: 'neutral' },
