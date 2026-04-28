@@ -26,60 +26,86 @@ const ResetPassword = () => {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   useEffect(() => {
-    // 1) Comprobar errores en el hash (token caducado / inválido)
-    const hashParams = parseHash(window.location.hash);
-    const queryParams = new URLSearchParams(window.location.search);
-    const errorCode =
-      hashParams.get('error_code') || queryParams.get('error_code');
-    const errorDescription =
-      hashParams.get('error_description') || queryParams.get('error_description');
+    let cancelled = false;
 
-    if (errorCode) {
-      setStatus('invalid');
-      if (errorCode === 'otp_expired') {
-        setErrorMsg('El enlace ha caducado. Solicita uno nuevo abajo.');
-      } else {
-        setErrorMsg(
-          errorDescription?.replace(/\+/g, ' ') ||
-            'Este enlace ya no es válido. Solicita uno nuevo.',
-        );
+    const init = async () => {
+      const hashParams = parseHash(window.location.hash);
+      const queryParams = new URLSearchParams(window.location.search);
+
+      // 1) Errores en hash o query
+      const errorCode =
+        hashParams.get('error_code') || queryParams.get('error_code');
+      const errorDescription =
+        hashParams.get('error_description') || queryParams.get('error_description');
+
+      if (errorCode) {
+        setStatus('invalid');
+        if (errorCode === 'otp_expired') {
+          setErrorMsg('El enlace ha caducado. Solicita uno nuevo abajo.');
+        } else {
+          setErrorMsg(
+            errorDescription?.replace(/\+/g, ' ') ||
+              'Este enlace ya no es válido. Solicita uno nuevo.',
+          );
+        }
+        return;
       }
-      return;
-    }
 
-    // 2) Escuchar el evento PASSWORD_RECOVERY que dispara Supabase tras parsear el hash
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (event === 'PASSWORD_RECOVERY') {
+      // 2) Listener para PASSWORD_RECOVERY (flujo legacy con hash)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event) => {
+          if (event === 'PASSWORD_RECOVERY' && !cancelled) {
+            setStatus('ready');
+          }
+        },
+      );
+
+      // 3) Flujo PKCE moderno: ?code=... → intercambiar por sesión
+      const code = queryParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (cancelled) return;
+        if (error) {
+          setStatus('invalid');
+          setErrorMsg('El enlace ha caducado o ya se usó. Solicita uno nuevo.');
+        } else {
+          // Limpiar el code de la URL
+          window.history.replaceState({}, '', '/reset-password');
           setStatus('ready');
         }
-      },
-    );
+        return () => subscription.unsubscribe();
+      }
 
-    // 3) Validar si ya hay sesión de recuperación o token en el hash
-    const hasRecoveryToken =
-      hashParams.get('type') === 'recovery' && !!hashParams.get('access_token');
+      // 4) Flujo legacy: token en el hash o sesión ya creada por detectSessionInUrl
+      const hasRecoveryToken =
+        hashParams.get('type') === 'recovery' && !!hashParams.get('access_token');
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (session || hasRecoveryToken) {
         setStatus('ready');
       } else {
-        // Pequeño delay para dar tiempo a detectSessionInUrl
-        setTimeout(() => {
-          supabase.auth.getSession().then(({ data: { session: s2 } }) => {
-            if (s2) setStatus('ready');
-            else {
-              setStatus('invalid');
-              setErrorMsg(
-                'No se ha detectado un enlace de recuperación válido. Solicita uno nuevo.',
-              );
-            }
-          });
+        setTimeout(async () => {
+          if (cancelled) return;
+          const { data: { session: s2 } } = await supabase.auth.getSession();
+          if (s2) setStatus('ready');
+          else {
+            setStatus('invalid');
+            setErrorMsg(
+              'No se ha detectado un enlace de recuperación válido. Solicita uno nuevo.',
+            );
+          }
         }, 800);
       }
-    });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    };
+
+    const cleanupPromise = init();
+    return () => {
+      cancelled = true;
+      cleanupPromise.then((cleanup) => cleanup?.());
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
