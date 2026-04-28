@@ -14,6 +14,7 @@ const COLORS: Record<RevenueEngine['engine'], string> = {
   cards: 'from-violet-500 to-fuchsia-500',
   subscriptions: 'from-cyan-500 to-blue-500',
   express: 'from-amber-500 to-orange-500',
+  promotion: 'from-emerald-500 to-teal-500',
 };
 
 export function RevenueEnginesCard({ data, isLoading }: Props) {

@@ -32,6 +32,8 @@ export interface CeoKpis {
   revenue_subscriptions_prev: number;
   revenue_express: number;
   revenue_express_prev: number;
+  revenue_promotion: number;
+  revenue_promotion_prev: number;
   downloads: number;
   downloads_prev: number;
   active_users: number;
@@ -44,7 +46,7 @@ export interface CeoKpis {
 }
 
 export interface RevenueEngine {
-  engine: 'cards' | 'subscriptions' | 'express';
+  engine: 'cards' | 'subscriptions' | 'express' | 'promotion';
   label: string;
   revenue: number;
   percent: number;
