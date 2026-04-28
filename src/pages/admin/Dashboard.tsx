@@ -148,7 +148,7 @@ const Dashboard = () => {
           value={formatEur(monetGross.totalGross)}
           subValue={formatXaf(monetGross.totalGross)}
           icon={Euro}
-          hint="Descargas + tarjetas físicas (histórico)"
+          hint="Tarjetas + Express + Promo + Suscripciones (histórico)"
           loading={loading}
           accent
         />
