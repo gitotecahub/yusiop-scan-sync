@@ -155,7 +155,7 @@ export const ceoApi = {
 };
 
 export const formatCurrency = (n: number): string =>
-  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
 export const formatNumber = (n: number): string =>
   new Intl.NumberFormat('es-ES').format(n);
