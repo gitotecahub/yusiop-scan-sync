@@ -12,6 +12,16 @@ import { logger } from '@/lib/logger';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 import { saveSongOffline } from '@/lib/offlineStorage';
 import { useLanguageStore } from '@/stores/languageStore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Song {
   id: string;
