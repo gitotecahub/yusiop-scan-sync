@@ -132,6 +132,8 @@ export type TranslationKey =
   | 'catalog.noCredits' | 'catalog.buyCard' | 'catalog.upcomingTitle' | 'catalog.comingSoonBadge'
   | 'catalog.purchaseSuccess' | 'catalog.noResultsFor' | 'catalog.subtitle' | 'catalog.errorNoCredits'
   | 'catalog.errorMustLogin' | 'catalog.errorDownload' | 'catalog.downloadOk'
+  | 'catalog.confirmDownloadTitle' | 'catalog.confirmDownloadDesc' | 'catalog.confirmDownloadCost'
+  | 'catalog.confirmDownloadCta' | 'catalog.cancel' | 'catalog.downloading'
   // Store extras
   | 'store.subtitle' | 'store.giftBuy' | 'store.recipientPlaceholder'
   | 'store.messagePlaceholder' | 'store.payButton' | 'store.payAsGift'
