@@ -302,7 +302,12 @@ useEffect(() => {
     play();
   };
 
-  const handleDownload = async (song: Song) => {
+  const handleDownload = (song: Song) => {
+    setConfirmSong(song);
+  };
+
+  const performDownload = async (song: Song) => {
+    setIsDownloading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -344,6 +349,9 @@ useEffect(() => {
     } catch (error) {
       logger.error('Error downloading song');
       toast.error(t('catalog.errorDownload'));
+    } finally {
+      setIsDownloading(false);
+      setConfirmSong(null);
     }
   };
 
