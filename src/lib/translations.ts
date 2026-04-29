@@ -132,6 +132,8 @@ export type TranslationKey =
   | 'catalog.noCredits' | 'catalog.buyCard' | 'catalog.upcomingTitle' | 'catalog.comingSoonBadge'
   | 'catalog.purchaseSuccess' | 'catalog.noResultsFor' | 'catalog.subtitle' | 'catalog.errorNoCredits'
   | 'catalog.errorMustLogin' | 'catalog.errorDownload' | 'catalog.downloadOk'
+  | 'catalog.confirmDownloadTitle' | 'catalog.confirmDownloadDesc' | 'catalog.confirmDownloadCost'
+  | 'catalog.confirmDownloadCta' | 'catalog.cancel' | 'catalog.downloading'
   // Store extras
   | 'store.subtitle' | 'store.giftBuy' | 'store.recipientPlaceholder'
   | 'store.messagePlaceholder' | 'store.payButton' | 'store.payAsGift'
@@ -372,6 +374,12 @@ const es: Dict = {
   'catalog.errorMustLogin': 'Debes iniciar sesión para descargar canciones',
   'catalog.errorDownload': 'Error al descargar la canción',
   'catalog.downloadOk': 'se descargó correctamente',
+  'catalog.confirmDownloadTitle': 'Confirmar descarga',
+  'catalog.confirmDownloadDesc': '¿Seguro que quieres descargar esta canción?',
+  'catalog.confirmDownloadCost': 'Esta acción consumirá 1 crédito de tu saldo.',
+  'catalog.confirmDownloadCta': 'Sí, descargar',
+  'catalog.cancel': 'Cancelar',
+  'catalog.downloading': 'Descargando…',
   // Store extras
   'store.subtitle': 'Compra tarjetas digitales para descargar tu música',
   'store.giftBuy': 'Comprar como regalo',
@@ -663,6 +671,12 @@ const en: Dict = {
   'catalog.errorMustLogin': 'You must sign in to download songs',
   'catalog.errorDownload': 'Error downloading the song',
   'catalog.downloadOk': 'downloaded successfully',
+  'catalog.confirmDownloadTitle': 'Confirm download',
+  'catalog.confirmDownloadDesc': 'Are you sure you want to download this song?',
+  'catalog.confirmDownloadCost': 'This action will use 1 credit from your balance.',
+  'catalog.confirmDownloadCta': 'Yes, download',
+  'catalog.cancel': 'Cancel',
+  'catalog.downloading': 'Downloading…',
   'store.subtitle': 'Buy digital cards to download your music',
   'store.giftBuy': 'Buy as a gift',
   'store.recipientPlaceholder': 'friend@example.com',
@@ -948,6 +962,12 @@ const fr: Dict = {
   'catalog.errorMustLogin': 'Vous devez vous connecter pour télécharger',
   'catalog.errorDownload': 'Erreur lors du téléchargement',
   'catalog.downloadOk': 'téléchargée avec succès',
+  'catalog.confirmDownloadTitle': 'Confirmer le téléchargement',
+  'catalog.confirmDownloadDesc': 'Voulez-vous vraiment télécharger ce morceau ?',
+  'catalog.confirmDownloadCost': 'Cette action consommera 1 crédit de votre solde.',
+  'catalog.confirmDownloadCta': 'Oui, télécharger',
+  'catalog.cancel': 'Annuler',
+  'catalog.downloading': 'Téléchargement…',
   'store.subtitle': 'Achetez des cartes numériques pour télécharger votre musique',
   'store.giftBuy': 'Acheter en cadeau',
   'store.recipientPlaceholder': 'ami@exemple.com',
@@ -1233,6 +1253,12 @@ const pt: Dict = {
   'catalog.errorMustLogin': 'Você precisa entrar para baixar músicas',
   'catalog.errorDownload': 'Erro ao baixar a música',
   'catalog.downloadOk': 'baixada com sucesso',
+  'catalog.confirmDownloadTitle': 'Confirmar download',
+  'catalog.confirmDownloadDesc': 'Tem certeza de que deseja baixar esta música?',
+  'catalog.confirmDownloadCost': 'Esta ação consumirá 1 crédito do seu saldo.',
+  'catalog.confirmDownloadCta': 'Sim, baixar',
+  'catalog.cancel': 'Cancelar',
+  'catalog.downloading': 'Baixando…',
   'store.subtitle': 'Compre cartões digitais para baixar sua música',
   'store.giftBuy': 'Comprar como presente',
   'store.recipientPlaceholder': 'amigo@exemplo.com',
