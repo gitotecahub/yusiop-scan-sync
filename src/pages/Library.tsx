@@ -741,6 +741,15 @@ const Library = () => {
                         {t('library.share')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
+                      {!offlineIds.has(song.id) && online && (
+                        <DropdownMenuItem
+                          onClick={() => handleSaveOffline(song)}
+                          disabled={syncingOffline.has(song.id)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          {syncingOffline.has(song.id) ? 'Guardando…' : 'Guardar offline'}
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => handleDeleteRequest(song)}
                         className="text-destructive focus:text-destructive"
