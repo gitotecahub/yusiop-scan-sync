@@ -205,6 +205,110 @@ const Library = () => {
     return () => { cancelled = true; };
   }, [downloads.length]);
 
+  // Auto-sync: garantizar que TODAS las canciones descargadas estén disponibles
+  // offline en IndexedDB. Si alguna descarga existe en BD pero no tiene blob
+  // local (p. ej. fallo de red durante la descarga, dispositivo nuevo, o caché
+  // borrada), la rehidratamos en background usando get-song-stream (no consume
+  // crédito). Esto se ejecuta en silencio.
+  const [syncingOffline, setSyncingOffline] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!online || downloads.length === 0) return;
+    let cancelled = false;
+
+    (async () => {
+      // Determinar canciones que faltan offline
+      const missing: DownloadedSong[] = [];
+      for (const song of downloads) {
+        const has = await hasOfflineSong(song.id);
+        if (!has) missing.push(song);
+        if (cancelled) return;
+      }
+      if (missing.length === 0 || cancelled) return;
+
+      // Procesar de forma secuencial para no saturar la red
+      for (const song of missing) {
+        if (cancelled) return;
+        setSyncingOffline((prev) => new Set([...prev, song.id]));
+        try {
+          const { data: stream } = await supabase.functions.invoke('get-song-stream', {
+            body: { songId: song.id },
+          });
+          if (!stream?.signed_url) throw new Error('no signed url');
+          await saveSongOffline({
+            id: song.id,
+            title: song.title,
+            artist: song.artist,
+            duration_seconds: song.duration_seconds,
+            track_url: stream.signed_url,
+            cover_url: song.cover_url ?? null,
+          });
+          if (cancelled) return;
+          setOfflineIds((prev) => new Set([...prev, song.id]));
+        } catch (e) {
+          console.warn('No se pudo sincronizar offline', song.title, e);
+        } finally {
+          setSyncingOffline((prev) => {
+            const next = new Set(prev);
+            next.delete(song.id);
+            return next;
+          });
+        }
+      }
+
+      // Refrescar bytes ocupados
+      try {
+        const offline = await listOfflineSongs();
+        if (cancelled) return;
+        const bytes = offline.reduce(
+          (acc, r) => acc + (r.audio_blob?.size || 0) + (r.cover_blob?.size || 0),
+          0
+        );
+        setStorageBytes(bytes);
+      } catch {
+        // noop
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [online, downloads]);
+
+  const handleSaveOffline = async (song: DownloadedSong) => {
+    if (!online) {
+      toast.error('Necesitas conexión para guardar la canción offline');
+      return;
+    }
+    setSyncingOffline((prev) => new Set([...prev, song.id]));
+    try {
+      const { data: stream, error } = await supabase.functions.invoke('get-song-stream', {
+        body: { songId: song.id },
+      });
+      if (error || !stream?.signed_url) {
+        toast.error('No se pudo preparar el archivo');
+        return;
+      }
+      await saveSongOffline({
+        id: song.id,
+        title: song.title,
+        artist: song.artist,
+        duration_seconds: song.duration_seconds,
+        track_url: stream.signed_url,
+        cover_url: song.cover_url ?? null,
+      });
+      setOfflineIds((prev) => new Set([...prev, song.id]));
+      toast.success(`"${song.title}" disponible offline`);
+    } catch (e) {
+      console.error('saveOffline error', e);
+      toast.error('No se pudo guardar offline');
+    } finally {
+      setSyncingOffline((prev) => {
+        const next = new Set(prev);
+        next.delete(song.id);
+        return next;
+      });
+    }
+  };
+
   const formatBytes = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
