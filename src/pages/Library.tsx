@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { listOfflineSongs, deleteOfflineSong } from '@/lib/offlineStorage';
+import { listOfflineSongs, deleteOfflineSong, saveSongOffline, hasOfflineSong } from '@/lib/offlineStorage';
 import { useLanguageStore } from '@/stores/languageStore';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { recordPlayback } from '@/lib/playbackSync';
