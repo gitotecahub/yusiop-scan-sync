@@ -124,16 +124,49 @@ const MyCards = () => {
         return;
       }
       userId = user.id;
-      const { data, error } = await supabase
+
+      // 1) Tarjetas ya activadas o de las que es propietario
+      const ownedRes = await supabase
         .from('qr_cards')
         .select('id, code, card_type, download_credits, origin, is_gift, created_at')
         .or(`owner_user_id.eq.${user.id},activated_by.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        const hidden = new Set(getHiddenIds());
-        setCards((data as MyCard[]).filter((c) => !hidden.has(c.id)));
-      }
+      // 2) Tarjetas digitales compradas por el usuario pero aún sin activar
+      //    (no son regalo para otra persona). Se enlazan vía purchase_id -> card_purchases.buyer_user_id
+      const purchasedRes = await supabase
+        .from('card_purchases')
+        .select('qr_card_id, is_gift, qr_cards!inner(id, code, card_type, download_credits, origin, is_gift, created_at, is_activated, owner_user_id)')
+        .eq('buyer_user_id', user.id)
+        .eq('status', 'paid')
+        .eq('is_gift', false)
+        .not('qr_card_id', 'is', null);
+
+      const map = new Map<string, MyCard>();
+      (ownedRes.data ?? []).forEach((c: any) => map.set(c.id, c as MyCard));
+      (purchasedRes.data ?? []).forEach((p: any) => {
+        const c = p.qr_cards;
+        if (!c) return;
+        // Solo añadir si no está activada y no tiene dueño (sigue pendiente)
+        if (c.is_activated || c.owner_user_id) return;
+        if (!map.has(c.id)) {
+          map.set(c.id, {
+            id: c.id,
+            code: c.code,
+            card_type: c.card_type,
+            download_credits: c.download_credits,
+            origin: c.origin,
+            is_gift: c.is_gift,
+            created_at: c.created_at,
+          });
+        }
+      });
+
+      const hidden = new Set(getHiddenIds());
+      const merged = Array.from(map.values())
+        .filter((c) => !hidden.has(c.id))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setCards(merged);
       setLoading(false);
     };
 
