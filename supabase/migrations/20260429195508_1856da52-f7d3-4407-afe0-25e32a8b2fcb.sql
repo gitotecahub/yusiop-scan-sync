@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS trg_prevent_admin_card_ownership ON public.qr_cards;
