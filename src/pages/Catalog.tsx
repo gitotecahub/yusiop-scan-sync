@@ -544,6 +544,66 @@ useEffect(() => {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!confirmSong}
+        onOpenChange={(open) => {
+          if (!open && !isDownloading) setConfirmSong(null);
+        }}
+      >
+        <AlertDialogContent className="max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('catalog.confirmDownloadTitle')}</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 pt-1">
+                <p className="text-sm text-muted-foreground">
+                  {t('catalog.confirmDownloadDesc')}
+                </p>
+                {confirmSong && (
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
+                    {confirmSong.cover_url ? (
+                      <img
+                        src={confirmSong.cover_url}
+                        alt={confirmSong.title}
+                        className="h-12 w-12 rounded-lg object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <Music className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 text-left">
+                      <p className="font-semibold text-sm text-foreground truncate">
+                        {confirmSong.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {confirmSong.artist}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {t('catalog.confirmDownloadCost')}
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDownloading}>
+              {t('catalog.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDownloading}
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmSong) performDownload(confirmSong);
+              }}
+            >
+              {isDownloading ? t('catalog.downloading') : t('catalog.confirmDownloadCta')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
