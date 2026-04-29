@@ -329,23 +329,44 @@ useEffect(() => {
       await loadUserCredits();
       setDownloadedSongs(prev => new Set([...prev, song.id]));
 
-      // Guardar archivo (audio + portada) en IndexedDB para reproducción offline
-      try {
-        await saveSongOffline({
-          id: song.id,
-          title: song.title,
-          artist: song.artist,
-          duration_seconds: song.duration_seconds,
-          preview_start_seconds: song.preview_start_seconds,
-          track_url: data.signed_url,
-          cover_url: song.cover_url ?? null,
-        });
-      } catch (offlineErr) {
-        logger.error('Error saving song offline');
-        // No bloqueamos: el crédito ya se gastó y la descarga quedó registrada en BD
+      // Guardar archivo (audio + portada) en IndexedDB para reproducción offline.
+      // CRÍTICO: toda canción descargada DEBE quedar disponible offline.
+      // Reintentamos hasta 2 veces; si sigue fallando, avisamos al usuario para
+      // que la guarde manualmente desde Biblioteca (no se vuelve a cobrar).
+      let savedOffline = false;
+      for (let attempt = 0; attempt < 2 && !savedOffline; attempt++) {
+        try {
+          let trackUrl = data.signed_url as string;
+          // En el segundo intento pedimos una signed URL fresca de streaming
+          // (no consume crédito) por si la anterior caducó.
+          if (attempt > 0) {
+            const { data: stream } = await supabase.functions.invoke('get-song-stream', {
+              body: { songId: song.id },
+            });
+            if (stream?.signed_url) trackUrl = stream.signed_url;
+          }
+          await saveSongOffline({
+            id: song.id,
+            title: song.title,
+            artist: song.artist,
+            duration_seconds: song.duration_seconds,
+            preview_start_seconds: song.preview_start_seconds,
+            track_url: trackUrl,
+            cover_url: song.cover_url ?? null,
+          });
+          savedOffline = true;
+        } catch (offlineErr) {
+          logger.error('Error saving song offline (attempt ' + (attempt + 1) + ')');
+        }
       }
 
-      toast.success(`"${song.title}" ${t('catalog.downloadOk')}`);
+      if (savedOffline) {
+        toast.success(`"${song.title}" ${t('catalog.downloadOk')}`);
+      } else {
+        toast.warning(
+          `"${song.title}" descargada, pero no se pudo guardar offline. Ábrela desde Biblioteca con conexión para reintentarlo.`
+        );
+      }
     } catch (error) {
       logger.error('Error downloading song');
       toast.error(t('catalog.errorDownload'));
