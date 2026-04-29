@@ -699,12 +699,21 @@ const Library = () => {
                       <Download className="h-2.5 w-2.5" />
                       Offline
                     </span>
+                  ) : syncingOffline.has(song.id) ? (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground tracking-wide animate-pulse">
+                      <Download className="h-2.5 w-2.5" />
+                      Guardando…
+                    </span>
                   ) : !online ? (
                     <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-destructive/15 text-destructive tracking-wide">
                       <WifiOff className="h-2.5 w-2.5" />
                       No disponible
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 tracking-wide">
+                      Solo streaming
+                    </span>
+                  )}
                 </div>
               </div>
 
