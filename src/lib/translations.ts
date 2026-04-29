@@ -374,6 +374,12 @@ const es: Dict = {
   'catalog.errorMustLogin': 'Debes iniciar sesión para descargar canciones',
   'catalog.errorDownload': 'Error al descargar la canción',
   'catalog.downloadOk': 'se descargó correctamente',
+  'catalog.confirmDownloadTitle': 'Confirmar descarga',
+  'catalog.confirmDownloadDesc': '¿Seguro que quieres descargar esta canción?',
+  'catalog.confirmDownloadCost': 'Esta acción consumirá 1 crédito de tu saldo.',
+  'catalog.confirmDownloadCta': 'Sí, descargar',
+  'catalog.cancel': 'Cancelar',
+  'catalog.downloading': 'Descargando…',
   // Store extras
   'store.subtitle': 'Compra tarjetas digitales para descargar tu música',
   'store.giftBuy': 'Comprar como regalo',
