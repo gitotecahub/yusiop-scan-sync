@@ -138,12 +138,12 @@ export const useFriends = () => {
     return { error: error?.message || null };
   };
 
-  const searchUsers = async (query: string): Promise<FriendProfile[]> => {
+  const searchUsers = useCallback(async (query: string): Promise<FriendProfile[]> => {
     if (!query || query.trim().length < 2) return [];
     const { data, error } = await supabase.rpc('search_users_for_friends', { _query: query.trim() });
     if (error) return [];
     return (data as any[]) as FriendProfile[];
-  };
+  }, []);
 
   const shareItem = async (
     friendIds: string[],
