@@ -61,6 +61,7 @@ const MyCards = () => {
   const [giftUsername, setGiftUsername] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
   const [gifting, setGifting] = useState(false);
+  const [shareCardOpen, setShareCardOpen] = useState(false);
 
   const handleCopy = async (code: string) => {
     try {
