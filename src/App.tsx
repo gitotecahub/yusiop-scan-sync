@@ -12,6 +12,7 @@ import Catalog from '@/pages/Catalog';
 import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
 import Friends from '@/pages/Friends';
+import GuessSong from '@/pages/GuessSong';
 import Auth from '@/pages/Auth';
 import ResetPassword from '@/pages/ResetPassword';
 import Install from './pages/Install';
@@ -224,6 +225,7 @@ const AppContent = () => {
               <Route path="/popular" element={<OnlineOnlyRoute><Popular /></OnlineOnlyRoute>} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/friends" element={<OnlineOnlyRoute><Friends /></OnlineOnlyRoute>} />
+              <Route path="/games/guess-song" element={<OnlineOnlyRoute><GuessSong /></OnlineOnlyRoute>} />
               <Route path="/support" element={<OnlineOnlyRoute><Support /></OnlineOnlyRoute>} />
               <Route path="/artist/request" element={<OnlineOnlyRoute><ArtistRequest /></OnlineOnlyRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />

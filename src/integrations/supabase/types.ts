@@ -899,6 +899,80 @@ export type Database = {
         }
         Relationships: []
       }
+      game_answers: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          question_index: number
+          selected_song_id: string | null
+          session_id: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_index: number
+          selected_song_id?: string | null
+          session_id: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          question_index?: number
+          selected_song_id?: string | null
+          session_id?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "game_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          played_date: string
+          score: number
+          total_questions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          played_date?: string
+          score?: number
+          total_questions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          played_date?: string
+          score?: number
+          total_questions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gift_redemptions: {
         Row: {
           id: string

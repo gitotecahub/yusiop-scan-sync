@@ -259,6 +259,22 @@ const Index = () => {
         ) : null}
       </section>
 
+      {/* === MINI JUEGO: ADIVINA LA CANCIÓN === */}
+      <button
+        onClick={() => navigate('/games/guess-song')}
+        className="w-full p-4 rounded-2xl glass-strong flex items-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-transform text-left relative overflow-hidden group"
+      >
+        <div className="absolute inset-0 vapor-bg opacity-20 group-hover:opacity-30 transition-opacity" />
+        <div className="relative w-12 h-12 rounded-xl vapor-bg flex items-center justify-center shadow-glow">
+          <Sparkles className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="relative flex-1 min-w-0">
+          <div className="font-bold">Adivina la canción</div>
+          <div className="text-xs text-muted-foreground">Mini juego diario · 5 preguntas</div>
+        </div>
+        <ArrowRight className="relative h-5 w-5 text-muted-foreground" />
+      </button>
+
       {/* === BANNER SUSCRIPCIONES === */}
       <SubscriptionBanner />
 
