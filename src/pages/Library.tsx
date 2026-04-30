@@ -12,7 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive, Share2 } from 'lucide-react';
+import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
