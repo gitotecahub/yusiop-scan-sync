@@ -11,6 +11,7 @@ import QRScanner from '@/pages/QRScanner';
 import Catalog from '@/pages/Catalog';
 import Library from '@/pages/Library';
 import Profile from '@/pages/Profile';
+import Friends from '@/pages/Friends';
 import Auth from '@/pages/Auth';
 import ResetPassword from '@/pages/ResetPassword';
 import Install from './pages/Install';
