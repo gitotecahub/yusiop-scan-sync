@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2, Send, Loader2, ScanLine } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2, Send, Loader2, ScanLine, Share2 } from 'lucide-react';
+import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -60,6 +61,7 @@ const MyCards = () => {
   const [giftUsername, setGiftUsername] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
   const [gifting, setGifting] = useState(false);
+  const [shareCardOpen, setShareCardOpen] = useState(false);
 
   const handleCopy = async (code: string) => {
     try {
@@ -422,6 +424,18 @@ const MyCards = () => {
                   </Button>
                 )}
 
+                <Button
+                  onClick={() => setShareCardOpen(true)}
+                  variant="outline"
+                  className="w-full h-11 gap-2 mt-2 rounded-xl"
+                >
+                  <Share2 className="h-4 w-4" />
+                  {language === 'es' ? 'Compartir con amigos' :
+                   language === 'en' ? 'Share with friends' :
+                   language === 'fr' ? 'Partager avec des amis' :
+                   'Compartilhar com amigos'}
+                </Button>
+
                 {selected.download_credits <= 0 && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -599,6 +613,14 @@ const MyCards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ShareWithFriendsDialog
+        open={shareCardOpen}
+        onOpenChange={setShareCardOpen}
+        itemType="digital_card"
+        itemId={selected?.id || ''}
+        itemTitle={selected?.code}
+      />
     </>
   );
 };

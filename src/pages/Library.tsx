@@ -12,7 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive, Share2 } from 'lucide-react';
+import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +61,7 @@ const Library = () => {
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
+  const [recommendSong, setRecommendSong] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -740,6 +742,10 @@ const Library = () => {
                         <Send className="h-4 w-4 mr-2" />
                         {t('library.share')}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setRecommendSong(song)}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Recomendar a un amigo
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {!offlineIds.has(song.id) && online && (
                         <DropdownMenuItem
@@ -1095,6 +1101,14 @@ const Library = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareWithFriendsDialog
+        open={!!recommendSong}
+        onOpenChange={(o) => !o && setRecommendSong(null)}
+        itemType="song"
+        itemId={recommendSong?.id || ''}
+        itemTitle={recommendSong?.title}
+      />
     </div>
   );
 };

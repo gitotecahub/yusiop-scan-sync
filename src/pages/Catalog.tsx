@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock } from 'lucide-react';
+import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2 } from 'lucide-react';
+import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useCreditsStore } from '@/stores/creditsStore';
@@ -45,6 +46,7 @@ const Catalog = () => {
   const [downloadedSongs, setDownloadedSongs] = useState<Set<string>>(new Set());
   const [confirmSong, setConfirmSong] = useState<Song | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [shareSong, setShareSong] = useState<Song | null>(null);
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
@@ -548,6 +550,15 @@ useEffect(() => {
                     </Button>
                     <Button
                       size="icon"
+                      variant="ghost"
+                      onClick={() => setShareSong(song)}
+                      className="h-9 w-9 rounded-full hover:bg-muted"
+                      aria-label="Compartir con amigos"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
                       onClick={() => handleDownload(song)}
                       disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
                       className={`h-9 w-9 rounded-full border-0 ${
@@ -625,6 +636,14 @@ useEffect(() => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareWithFriendsDialog
+        open={!!shareSong}
+        onOpenChange={(o) => !o && setShareSong(null)}
+        itemType="song"
+        itemId={shareSong?.id || ''}
+        itemTitle={shareSong?.title}
+      />
     </div>
   );
 };

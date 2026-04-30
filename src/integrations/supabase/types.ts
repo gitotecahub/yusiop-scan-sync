@@ -851,6 +851,54 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["friend_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["friend_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["friend_request_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friends: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gift_redemptions: {
         Row: {
           id: string
@@ -1067,6 +1115,39 @@ export type Database = {
           status?: Database["public"]["Enums"]["recharge_card_status"]
           used_at?: string | null
           used_by?: string | null
+        }
+        Relationships: []
+      }
+      shared_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: Database["public"]["Enums"]["shared_item_type"]
+          message: string | null
+          receiver_id: string
+          sender_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: Database["public"]["Enums"]["shared_item_type"]
+          message?: string | null
+          receiver_id: string
+          sender_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: Database["public"]["Enums"]["shared_item_type"]
+          message?: string | null
+          receiver_id?: string
+          sender_id?: string
+          viewed_at?: string | null
         }
         Relationships: []
       }
@@ -2445,6 +2526,15 @@ export type Database = {
           success: boolean
         }[]
       }
+      search_users_for_friends: {
+        Args: { _query: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          user_id: string
+          username: string
+        }[]
+      }
       submit_ad_request: {
         Args: {
           p_ad_type: string
@@ -2574,8 +2664,10 @@ export type Database = {
         | "blocked"
         | "error"
       express_tier: "72h" | "48h" | "24h"
+      friend_request_status: "pending" | "accepted" | "rejected" | "blocked"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
+      shared_item_type: "song" | "artist" | "digital_card"
       song_submission_status:
         | "pending"
         | "approved"
@@ -2801,8 +2893,10 @@ export const Constants = {
         "error",
       ],
       express_tier: ["72h", "48h", "24h"],
+      friend_request_status: ["pending", "accepted", "rejected", "blocked"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
+      shared_item_type: ["song", "artist", "digital_card"],
       song_submission_status: [
         "pending",
         "approved",
