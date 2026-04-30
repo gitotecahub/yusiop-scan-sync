@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Languages,
   HelpCircle,
+  Users,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStaffAreas } from '@/hooks/useStaffAreas';
