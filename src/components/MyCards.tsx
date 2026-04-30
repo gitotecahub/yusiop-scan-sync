@@ -424,6 +424,18 @@ const MyCards = () => {
                   </Button>
                 )}
 
+                <Button
+                  onClick={() => setShareCardOpen(true)}
+                  variant="outline"
+                  className="w-full h-11 gap-2 mt-2 rounded-xl"
+                >
+                  <Share2 className="h-4 w-4" />
+                  {language === 'es' ? 'Compartir con amigos' :
+                   language === 'en' ? 'Share with friends' :
+                   language === 'fr' ? 'Partager avec des amis' :
+                   'Compartilhar com amigos'}
+                </Button>
+
                 {selected.download_credits <= 0 && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
