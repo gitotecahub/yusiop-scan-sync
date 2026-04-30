@@ -636,6 +636,14 @@ useEffect(() => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareWithFriendsDialog
+        open={!!shareSong}
+        onOpenChange={(o) => !o && setShareSong(null)}
+        itemType="song"
+        itemId={shareSong?.id || ''}
+        itemTitle={shareSong?.title}
+      />
     </div>
   );
 };
