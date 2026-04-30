@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2, Send, Loader2, ScanLine } from 'lucide-react';
+import { CreditCard, Calendar, Hash, Sparkles, Gift, Music, Copy, Check, Trash2, Send, Loader2, ScanLine, Share2 } from 'lucide-react';
+import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
