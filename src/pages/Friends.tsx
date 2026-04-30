@@ -54,7 +54,7 @@ const Friends = () => {
 
   return (
     <div className="min-h-screen pb-24">
-      <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-20 bg-background border-b border-border">
         <div className="flex items-center gap-3 px-4 h-14">
           <Button
             variant="ghost"
