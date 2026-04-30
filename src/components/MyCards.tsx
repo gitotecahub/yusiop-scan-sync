@@ -613,6 +613,14 @@ const MyCards = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ShareWithFriendsDialog
+        open={shareCardOpen}
+        onOpenChange={setShareCardOpen}
+        itemType="digital_card"
+        itemId={selected?.id || ''}
+        itemTitle={selected?.code}
+      />
     </>
   );
 };
