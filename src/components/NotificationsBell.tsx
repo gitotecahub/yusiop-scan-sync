@@ -135,6 +135,17 @@ const NotificationsBell = () => {
     } else if (n.type === 'support_ticket_created') {
       // Notificación para admins cuando un usuario crea un ticket
       navigate('/admin/support');
+    } else if (
+      n.type === 'friend_request_received' ||
+      n.type === 'friend_request_accepted'
+    ) {
+      navigate('/friends');
+    } else if (n.type === 'shared_song') {
+      navigate('/catalog');
+    } else if (n.type === 'shared_artist') {
+      navigate('/catalog');
+    } else if (n.type === 'shared_card') {
+      navigate('/store');
     }
     load();
   };
