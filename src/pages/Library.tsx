@@ -61,6 +61,7 @@ const Library = () => {
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
+  const [recommendSong, setRecommendSong] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
