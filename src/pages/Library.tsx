@@ -1101,6 +1101,14 @@ const Library = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareWithFriendsDialog
+        open={!!recommendSong}
+        onOpenChange={(o) => !o && setRecommendSong(null)}
+        itemType="song"
+        itemId={recommendSong?.id || ''}
+        itemTitle={recommendSong?.title}
+      />
     </div>
   );
 };
