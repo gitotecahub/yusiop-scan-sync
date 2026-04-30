@@ -742,6 +742,10 @@ const Library = () => {
                         <Send className="h-4 w-4 mr-2" />
                         {t('library.share')}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setRecommendSong(song)}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Recomendar a un amigo
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {!offlineIds.has(song.id) && online && (
                         <DropdownMenuItem
