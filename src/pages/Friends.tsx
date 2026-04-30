@@ -29,17 +29,23 @@ const Friends = () => {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults([]);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
     const t = setTimeout(async () => {
-      if (query.trim().length < 2) {
-        setResults([]);
-        return;
-      }
-      setSearching(true);
       const data = await searchUsers(query);
+      if (cancelled) return;
       setResults(data);
       setSearching(false);
     }, 350);
-    return () => clearTimeout(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [query, searchUsers]);
 
   const friendIds = new Set(friends.map((f) => f.user_id));
