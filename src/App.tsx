@@ -201,6 +201,12 @@ const AppContent = () => {
                 <Profile />
               </Layout>
             } />
+            <Route path="/friends" element={
+              <Layout>
+                <AudioPlayer />
+                <OnlineOnlyRoute><Friends /></OnlineOnlyRoute>
+              </Layout>
+            } />
             <Route path="*" element={<Navigate to="/artist" replace />} />
           </Routes>
         ) : (
