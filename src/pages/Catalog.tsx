@@ -550,6 +550,15 @@ useEffect(() => {
                     </Button>
                     <Button
                       size="icon"
+                      variant="ghost"
+                      onClick={() => setShareSong(song)}
+                      className="h-9 w-9 rounded-full hover:bg-muted"
+                      aria-label="Compartir con amigos"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
                       onClick={() => handleDownload(song)}
                       disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
                       className={`h-9 w-9 rounded-full border-0 ${
