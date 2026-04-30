@@ -199,7 +199,7 @@ const PlaybackControls = () => {
         <DrawerTrigger asChild>
           <button
             type="button"
-            className="w-full text-left glass-strong shadow-vapor max-w-md mx-auto p-3 block rounded-2xl relative overflow-hidden"
+            className="w-full text-left bg-card border border-border shadow-vapor max-w-md mx-auto p-3 block rounded-2xl relative overflow-hidden"
             aria-label="Abrir reproductor"
           >
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted/40">
