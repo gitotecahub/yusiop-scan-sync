@@ -217,6 +217,7 @@ const AppContent = () => {
               <Route path="/subscriptions" element={<OnlineOnlyRoute><Subscriptions /></OnlineOnlyRoute>} />
               <Route path="/popular" element={<OnlineOnlyRoute><Popular /></OnlineOnlyRoute>} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/friends" element={<OnlineOnlyRoute><Friends /></OnlineOnlyRoute>} />
               <Route path="/support" element={<OnlineOnlyRoute><Support /></OnlineOnlyRoute>} />
               <Route path="/artist/request" element={<OnlineOnlyRoute><ArtistRequest /></OnlineOnlyRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
