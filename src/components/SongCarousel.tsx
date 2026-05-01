@@ -1,6 +1,7 @@
 import { Play, Flame } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ReactNode } from 'react';
+import AiBadge, { type AiUsageType } from '@/components/AiBadge';
 
 export interface CarouselSong {
   id: string;
@@ -9,6 +10,7 @@ export interface CarouselSong {
   cover_url: string;
   badge?: ReactNode;
   rank?: number;
+  ai_type?: AiUsageType | null;
 }
 
 interface Props {
@@ -110,6 +112,11 @@ const SongCarousel = ({
                 <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
                   {song.artist}
                 </p>
+                {song.ai_type && song.ai_type !== 'none' && (
+                  <div className="mt-1">
+                    <AiBadge aiType={song.ai_type} size="xs" />
+                  </div>
+                )}
               </div>
             </button>
           ))}

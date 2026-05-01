@@ -20,6 +20,7 @@ import ApproveSubmissionDialog from '@/components/admin/ApproveSubmissionDialog'
 import { formatMadrid } from '@/lib/madridTime';
 import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import AiBadge, { type AiUsageType } from '@/components/AiBadge';
 
 interface SubmissionRow {
   id: string;
@@ -48,6 +49,8 @@ interface SubmissionRow {
   express_paid_at: string | null;
   express_requested_at: string | null;
   express_price_xaf: number | null;
+  ai_type: AiUsageType | null;
+  rights_confirmed: boolean | null;
   collaborators?: CollaboratorRow[];
   promo?: PromoCampaign | null;
 }
@@ -441,6 +444,12 @@ const SongSubmissions = () => {
                             ) : (
                               <AlertCircle className="h-3 w-3" />
                             )}
+                          </Badge>
+                        )}
+                        <AiBadge aiType={row.ai_type} />
+                        {row.rights_confirmed === false && (
+                          <Badge variant="destructive" className="text-[10px] gap-1">
+                            <AlertCircle className="h-3 w-3" /> Sin confirmación de derechos
                           </Badge>
                         )}
                       </CardTitle>

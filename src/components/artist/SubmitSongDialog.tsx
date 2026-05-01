@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
 import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
+import { AI_TYPE_OPTIONS, type AiUsageType } from '@/components/AiBadge';
 type ExpressTier = '72h' | '48h' | '24h';
 
 const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
@@ -195,6 +196,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Declaración de IA y derechos
+  const [aiType, setAiType] = useState<AiUsageType>('none');
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
+
   // Promoción de lanzamiento (banner Home)
   const [promo, setPromo] = useState<PromoData>({
     enabled: false,
@@ -239,6 +244,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         return `La fecha estándar requiere mínimo ${STANDARD_MIN_DAYS} días desde hoy. Activa "Lanzamiento Express" para acelerar.`;
       }
     }
+    if (!rightsConfirmed) return 'Debes confirmar que tienes los derechos para distribuir esta música';
     return null;
   };
   const disabledReason = getDisabledReason();
@@ -258,6 +264,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      setAiType(((editing as any).ai_type as AiUsageType) ?? 'none');
+      setRightsConfirmed(((editing as any).rights_confirmed as boolean) ?? false);
       // Express previo (si lo tenía)
       if (editing.express_tier) {
         setExpressEnabled(true);
@@ -307,6 +315,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressEnabled(false);
       setExpressTier(null);
       setExpressAck(false);
+      setAiType('none');
+      setRightsConfirmed(false);
       setPromo({
         enabled: false,
         plan: null,
@@ -458,6 +468,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       if (collaborators.some(c => !c.artist_name.trim())) return toast.error('Todos los colaboradores deben tener nombre artístico'), false;
       if (Math.abs(collabSum - 100) > 0.01) return toast.error(`La suma de splits debe ser 100% (actual: ${collabSum}%)`), false;
     }
+    if (!rightsConfirmed) return toast.error('Debes confirmar que tienes los derechos de distribución'), false;
     return true;
   };
 
@@ -528,6 +539,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
+          ai_type: aiType,
+          rights_confirmed: rightsConfirmed,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           // Si activa Express ahora (no lo tenía antes): marcar requested.
@@ -609,6 +622,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
           status: initialStatus,
+          ai_type: aiType,
+          rights_confirmed: rightsConfirmed,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
@@ -992,6 +1007,49 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               defaultTitle={formData.title || formData.artist_name}
             />
           )}
+
+          {/* Uso de Inteligencia Artificial */}
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-4">
+            <Label htmlFor="ai_type" className="flex items-center gap-2 text-sm font-semibold">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Uso de Inteligencia Artificial *
+            </Label>
+            <p className="text-[11px] text-muted-foreground">
+              Declara honestamente si has utilizado IA en la creación de esta canción. Esta información se mostrará al público.
+            </p>
+            <Select value={aiType} onValueChange={(v) => setAiType(v as AiUsageType)}>
+              <SelectTrigger id="ai_type" className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AI_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{opt.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{opt.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Confirmación de derechos */}
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={rightsConfirmed}
+              onChange={(e) => setRightsConfirmed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+            />
+            <div className="text-sm">
+              <span className="font-semibold">Declaro que tengo los derechos necesarios para distribuir esta música en YUSIOP *</span>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Eres legalmente responsable del contenido. Subir música sin derechos puede acarrear la retirada y suspensión de tu cuenta.
+              </p>
+            </div>
+          </label>
+
 
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Archivos</h3>

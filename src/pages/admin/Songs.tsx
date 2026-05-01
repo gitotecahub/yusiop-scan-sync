@@ -4,11 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Play, Edit, Trash2, Clock, ShieldCheck, ShieldAlert, ShieldX, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
 import EditSongDialog, { type Song, type Artist, type Album, type Collaborator } from '@/components/admin/EditSongDialog';
+import AiBadge from '@/components/AiBadge';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
+
+type ReviewStatus = 'pending_review' | 'approved' | 'rejected' | 'flagged';
+
+const REVIEW_OPTIONS: { value: ReviewStatus; label: string; icon: typeof ShieldCheck; className: string }[] = [
+  { value: 'approved', label: 'Aprobado', icon: ShieldCheck, className: 'text-emerald-500' },
+  { value: 'pending_review', label: 'En revisión', icon: AlertTriangle, className: 'text-amber-500' },
+  { value: 'flagged', label: 'Sospechoso', icon: ShieldAlert, className: 'text-orange-500' },
+  { value: 'rejected', label: 'Rechazado', icon: ShieldX, className: 'text-destructive' },
+];
 
 const Songs = () => {
   const [songs, setSongs] = useState<Song[]>([]);
@@ -141,6 +152,19 @@ const Songs = () => {
     }
   };
 
+  const updateReviewStatus = async (songId: string, status: ReviewStatus) => {
+    const { error } = await supabase
+      .from('songs')
+      .update({ review_status: status, reviewed_at: new Date().toISOString() } as any)
+      .eq('id', songId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Estado actualizado', description: REVIEW_OPTIONS.find(o => o.value === status)?.label });
+    setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, review_status: status } : s)));
+  };
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -245,6 +269,7 @@ const Songs = () => {
                           Programado · {formatMadrid(song.scheduled_release_at)} · {timeUntil(song.scheduled_release_at)}
                         </Badge>
                       )}
+                      <AiBadge aiType={(song as any).ai_type} />
                     </div>
                     {song.song_collaborators && song.song_collaborators.length > 0 && (
                       <div className="mt-2">
@@ -266,26 +291,49 @@ const Songs = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      setSelectedSong(song);
-                      setEditDialogOpen(true);
-                    }}
+                <div className="flex flex-col items-end space-y-2 shrink-0">
+                  <Select
+                    value={((song as any).review_status as ReviewStatus) ?? 'approved'}
+                    onValueChange={(v) => updateReviewStatus(song.id, v as ReviewStatus)}
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteSong(song.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
+                    <SelectTrigger className="h-8 w-[150px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REVIEW_OPTIONS.map((opt) => {
+                        const Icon = opt.icon;
+                        return (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            <span className="inline-flex items-center gap-2">
+                              <Icon className={`h-3.5 w-3.5 ${opt.className}`} />
+                              {opt.label}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSong(song);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteSong(song.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
