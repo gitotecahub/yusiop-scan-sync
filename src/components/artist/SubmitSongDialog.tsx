@@ -622,6 +622,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           cover_url: cover?.url ?? null,
           cover_path: cover?.path ?? null,
           status: initialStatus,
+          ai_type: aiType,
+          rights_confirmed: rightsConfirmed,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
