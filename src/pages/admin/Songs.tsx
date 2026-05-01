@@ -152,7 +152,19 @@ const Songs = () => {
     }
   };
 
-  const formatDuration = (seconds: number) => {
+  const updateReviewStatus = async (songId: string, status: ReviewStatus) => {
+    const { error } = await supabase
+      .from('songs')
+      .update({ review_status: status, reviewed_at: new Date().toISOString() } as any)
+      .eq('id', songId);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Estado actualizado', description: REVIEW_OPTIONS.find(o => o.value === status)?.label });
+    setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, review_status: status } : s)));
+  };
+
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
