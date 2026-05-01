@@ -446,6 +446,12 @@ const SongSubmissions = () => {
                             )}
                           </Badge>
                         )}
+                        <AiBadge aiType={row.ai_type} />
+                        {row.rights_confirmed === false && (
+                          <Badge variant="destructive" className="text-[10px] gap-1">
+                            <AlertCircle className="h-3 w-3" /> Sin confirmación de derechos
+                          </Badge>
+                        )}
                       </CardTitle>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {formatArtistsWithCollabs(row.artist_name, row.collaborators)}
