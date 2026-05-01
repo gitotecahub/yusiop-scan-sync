@@ -43,6 +43,8 @@ export interface Song {
   cover_url: string | null;
   created_at: string;
   scheduled_release_at: string | null;
+  ai_type?: 'none' | 'assisted' | 'ai_voice' | 'ai_generated' | null;
+  review_status?: 'pending_review' | 'approved' | 'rejected' | 'flagged' | null;
   artists?: { name: string };
   albums?: { title: string };
   song_collaborators?: Collaborator[];
