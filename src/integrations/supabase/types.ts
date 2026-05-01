@@ -1329,6 +1329,7 @@ export type Database = {
       }
       song_submissions: {
         Row: {
+          ai_type: Database["public"]["Enums"]["ai_usage_type"]
           album_title: string | null
           artist_name: string
           audio_hash: string | null
@@ -1355,6 +1356,7 @@ export type Database = {
           release_date: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          rights_confirmed: boolean
           scheduled_release_at: string | null
           status: Database["public"]["Enums"]["song_submission_status"]
           title: string
@@ -1364,6 +1366,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_type?: Database["public"]["Enums"]["ai_usage_type"]
           album_title?: string | null
           artist_name: string
           audio_hash?: string | null
@@ -1390,6 +1393,7 @@ export type Database = {
           release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rights_confirmed?: boolean
           scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title: string
@@ -1399,6 +1403,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_type?: Database["public"]["Enums"]["ai_usage_type"]
           album_title?: string | null
           artist_name?: string
           audio_hash?: string | null
@@ -1425,6 +1430,7 @@ export type Database = {
           release_date?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rights_confirmed?: boolean
           scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title?: string
@@ -1437,6 +1443,8 @@ export type Database = {
       }
       songs: {
         Row: {
+          ai_detection_score: number | null
+          ai_type: Database["public"]["Enums"]["ai_usage_type"]
           album_id: string | null
           artist_id: string
           cover_url: string | null
@@ -1446,12 +1454,18 @@ export type Database = {
           is_premium: boolean
           preview_start_seconds: number
           preview_url: string | null
+          review_notes: string | null
+          review_status: Database["public"]["Enums"]["song_review_status"]
+          reviewed_at: string | null
+          reviewed_by: string | null
           scheduled_release_at: string | null
           subscription_locked_until: string | null
           title: string
           track_url: string | null
         }
         Insert: {
+          ai_detection_score?: number | null
+          ai_type?: Database["public"]["Enums"]["ai_usage_type"]
           album_id?: string | null
           artist_id: string
           cover_url?: string | null
@@ -1461,12 +1475,18 @@ export type Database = {
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
+          review_notes?: string | null
+          review_status?: Database["public"]["Enums"]["song_review_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_release_at?: string | null
           subscription_locked_until?: string | null
           title: string
           track_url?: string | null
         }
         Update: {
+          ai_detection_score?: number | null
+          ai_type?: Database["public"]["Enums"]["ai_usage_type"]
           album_id?: string | null
           artist_id?: string
           cover_url?: string | null
@@ -1476,6 +1496,10 @@ export type Database = {
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
+          review_notes?: string | null
+          review_status?: Database["public"]["Enums"]["song_review_status"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_release_at?: string | null
           subscription_locked_until?: string | null
           title?: string
@@ -2703,6 +2727,7 @@ export type Database = {
         | "proposal_sent"
         | "converted"
         | "rejected"
+      ai_usage_type: "none" | "assisted" | "ai_voice" | "ai_generated"
       app_role: "admin" | "moderator" | "user" | "artist"
       artist_earning_status:
         | "pending_validation"
@@ -2742,6 +2767,7 @@ export type Database = {
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
       shared_item_type: "song" | "artist" | "digital_card"
+      song_review_status: "pending_review" | "approved" | "rejected" | "flagged"
       song_submission_status:
         | "pending"
         | "approved"
@@ -2928,6 +2954,7 @@ export const Constants = {
         "converted",
         "rejected",
       ],
+      ai_usage_type: ["none", "assisted", "ai_voice", "ai_generated"],
       app_role: ["admin", "moderator", "user", "artist"],
       artist_earning_status: [
         "pending_validation",
@@ -2971,6 +2998,7 @@ export const Constants = {
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
       shared_item_type: ["song", "artist", "digital_card"],
+      song_review_status: ["pending_review", "approved", "rejected", "flagged"],
       song_submission_status: [
         "pending",
         "approved",
