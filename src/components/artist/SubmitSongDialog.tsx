@@ -468,6 +468,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       if (collaborators.some(c => !c.artist_name.trim())) return toast.error('Todos los colaboradores deben tener nombre artístico'), false;
       if (Math.abs(collabSum - 100) > 0.01) return toast.error(`La suma de splits debe ser 100% (actual: ${collabSum}%)`), false;
     }
+    if (!rightsConfirmed) return toast.error('Debes confirmar que tienes los derechos de distribución'), false;
     return true;
   };
 
