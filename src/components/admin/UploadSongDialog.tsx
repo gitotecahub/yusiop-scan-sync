@@ -499,6 +499,27 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
             </div>
           </div>
 
+          {/* Uso de IA */}
+          <div className="space-y-2 rounded-lg border p-4">
+            <Label htmlFor="admin_ai_type" className="flex items-center gap-2 font-semibold">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Uso de Inteligencia Artificial
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Declara si esta canción usa IA. Se mostrará al público en el catálogo.
+            </p>
+            <Select value={aiType} onValueChange={(v) => setAiType(v as AiUsageType)}>
+              <SelectTrigger id="admin_ai_type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AI_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Colaboraciones / Reparto */}
           <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between">
