@@ -155,6 +155,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (session?.user) {
+        // Si estamos en la pantalla de recuperar contraseña, no aplicar
+        // single-device: la sesión es temporal para cambiar la contraseña
+        // y el dispositivo "activo" real puede ser otro.
+        const isRecoveryRoute =
+          typeof window !== 'undefined' &&
+          window.location.pathname.startsWith('/reset-password');
+        if (isRecoveryRoute) {
+          console.log('[single-device] skip on recovery route');
+          return;
+        }
+
         const { isCurrent } = await checkActiveSession(session.user.id);
         console.log('[single-device] init check', {
           userId: session.user.id,
