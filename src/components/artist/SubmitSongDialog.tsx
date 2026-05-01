@@ -264,6 +264,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioDuration(editing.duration_seconds || 0);
       setPreviewStart(editing.preview_start_seconds ?? 0);
       setAudioUrl(editing.track_url || null);
+      setAiType(((editing as any).ai_type as AiUsageType) ?? 'none');
+      setRightsConfirmed(((editing as any).rights_confirmed as boolean) ?? false);
       // Express previo (si lo tenía)
       if (editing.express_tier) {
         setExpressEnabled(true);
@@ -313,6 +315,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressEnabled(false);
       setExpressTier(null);
       setExpressAck(false);
+      setAiType('none');
+      setRightsConfirmed(false);
       setPromo({
         enabled: false,
         plan: null,
