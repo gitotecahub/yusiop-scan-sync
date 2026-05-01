@@ -131,7 +131,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           loading: false,
         });
 
+        const isRecoveryRoute =
+          typeof window !== 'undefined' &&
+          window.location.pathname.startsWith('/reset-password');
+
         if (event === 'SIGNED_IN' && session?.user) {
+          if (isRecoveryRoute) {
+            console.log('[single-device] skip SIGNED_IN on recovery route');
+            return;
+          }
           // Reclamar dispositivo y empezar a vigilar
           setTimeout(async () => {
             await claimActiveSession(session.user.id);
@@ -140,8 +148,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } else if (event === 'SIGNED_OUT') {
           stopDeviceWatch();
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          if (isRecoveryRoute) return;
           // Verificar tras refresh por si nos expulsaron mientras estábamos offline
           void verifyOrEvict(session.user.id, set);
+        } else if (event === 'PASSWORD_RECOVERY') {
+          // No tocar single-device durante recuperación
+          console.log('[single-device] PASSWORD_RECOVERY event — skip');
         }
       },
     );
@@ -155,6 +167,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (session?.user) {
+        // Si estamos en la pantalla de recuperar contraseña, no aplicar
+        // single-device: la sesión es temporal para cambiar la contraseña
+        // y el dispositivo "activo" real puede ser otro.
+        const isRecoveryRoute =
+          typeof window !== 'undefined' &&
+          window.location.pathname.startsWith('/reset-password');
+        if (isRecoveryRoute) {
+          console.log('[single-device] skip on recovery route');
+          return;
+        }
+
         const { isCurrent } = await checkActiveSession(session.user.id);
         console.log('[single-device] init check', {
           userId: session.user.id,
