@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
 import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
+import { AI_TYPE_OPTIONS, type AiUsageType } from '@/components/AiBadge';
 type ExpressTier = '72h' | '48h' | '24h';
 
 const EXPRESS_OPTIONS: { tier: ExpressTier; priceXaf: number; label: string; sub: string }[] = [
