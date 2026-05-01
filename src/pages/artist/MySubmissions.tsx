@@ -50,6 +50,26 @@ const MySubmissions = () => {
   const [open, setOpen] = useState(false);
   const [defaultName, setDefaultName] = useState('');
   const [editing, setEditing] = useState<EditingSubmission | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const handleRetryPayment = async (submissionId: string) => {
+    try {
+      setRetryingId(submissionId);
+      const { data: checkout, error } = await supabase.functions.invoke(
+        'create-submission-checkout',
+        { body: { submission_id: submissionId } },
+      );
+      if (error || !checkout?.url) {
+        toast.error('No se pudo abrir la pasarela de pago. Inténtalo de nuevo.');
+        setRetryingId(null);
+        return;
+      }
+      window.location.href = checkout.url;
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Error al abrir la pasarela');
+      setRetryingId(null);
+    }
+  };
 
   const dateLocale = language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US';
 
