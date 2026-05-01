@@ -244,6 +244,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         return `La fecha estándar requiere mínimo ${STANDARD_MIN_DAYS} días desde hoy. Activa "Lanzamiento Express" para acelerar.`;
       }
     }
+    if (!rightsConfirmed) return 'Debes confirmar que tienes los derechos para distribuir esta música';
     return null;
   };
   const disabledReason = getDisabledReason();
