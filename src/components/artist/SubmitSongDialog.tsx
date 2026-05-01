@@ -539,6 +539,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           rejection_reason: null,
           reviewed_at: null,
           reviewed_by: null,
+          ai_type: aiType,
+          rights_confirmed: rightsConfirmed,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           // Si activa Express ahora (no lo tenía antes): marcar requested.
