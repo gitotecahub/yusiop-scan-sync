@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
-import { Upload, Music, AlertCircle, Users, Plus, Trash2 } from 'lucide-react';
+import { Upload, Music, AlertCircle, Users, Plus, Trash2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { validateCoverDimensions, MIN_COVER_DIMENSION } from '@/lib/imageValidation';
+import { AI_TYPE_OPTIONS, type AiUsageType } from '@/components/AiBadge';
 
 interface Artist {
   id: string;
@@ -76,7 +77,10 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
   // Colaboraciones
   const [hasCollabs, setHasCollabs] = useState(false);
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
-  
+
+  // Declaración de IA
+  const [aiType, setAiType] = useState<AiUsageType>('none');
+
   const trackInputRef = useRef<HTMLInputElement>(null);
   const previewInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +101,7 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
     setUploadProgress(0);
     setHasCollabs(false);
     setCollaborators([]);
+    setAiType('none');
   };
 
   const enableCollabs = () => {
@@ -258,7 +263,9 @@ const UploadSongDialog = ({ open, onOpenChange, onSongUploaded, artists, albums 
           duration_seconds: duration,
           track_url: trackUrl,
           preview_url: previewUrl,
-          cover_url: coverUrl
+          cover_url: coverUrl,
+          ai_type: aiType,
+          review_status: 'approved',
         })
         .select('id')
         .single();
