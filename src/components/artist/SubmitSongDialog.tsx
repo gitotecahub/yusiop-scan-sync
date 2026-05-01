@@ -196,6 +196,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Declaración de IA y derechos
+  const [aiType, setAiType] = useState<AiUsageType>('none');
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
+
   // Promoción de lanzamiento (banner Home)
   const [promo, setPromo] = useState<PromoData>({
     enabled: false,
