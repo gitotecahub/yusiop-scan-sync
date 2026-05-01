@@ -141,9 +141,19 @@ const NotificationsBell = () => {
     ) {
       navigate('/friends');
     } else if (n.type === 'shared_song') {
-      navigate('/catalog');
+      const songId = n.data?.item_id as string | undefined;
+      if (songId) {
+        navigate('/catalog', { state: { highlightSongId: songId } });
+      } else {
+        navigate('/catalog');
+      }
     } else if (n.type === 'shared_artist') {
-      navigate('/catalog');
+      const artistId = n.data?.item_id as string | undefined;
+      if (artistId) {
+        navigate('/catalog', { state: { highlightArtistId: artistId } });
+      } else {
+        navigate('/catalog');
+      }
     } else if (n.type === 'shared_card') {
       navigate('/store');
     }
