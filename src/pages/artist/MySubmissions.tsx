@@ -21,7 +21,7 @@ interface SubmissionRow {
   album_title: string | null;
   genre: string | null;
   release_date: string | null;
-  status: 'pending' | 'approved' | 'rejected' | 'removed';
+  status: 'pending' | 'pending_payment' | 'approved' | 'rejected' | 'removed';
   rejection_reason: string | null;
   cover_url: string | null;
   cover_path: string | null;
