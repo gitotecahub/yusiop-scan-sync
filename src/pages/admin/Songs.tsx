@@ -269,6 +269,7 @@ const Songs = () => {
                           Programado · {formatMadrid(song.scheduled_release_at)} · {timeUntil(song.scheduled_release_at)}
                         </Badge>
                       )}
+                      <AiBadge aiType={(song as any).ai_type} />
                     </div>
                     {song.song_collaborators && song.song_collaborators.length > 0 && (
                       <div className="mt-2">
@@ -290,26 +291,49 @@ const Songs = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => {
-                      setSelectedSong(song);
-                      setEditDialogOpen(true);
-                    }}
+                <div className="flex flex-col items-end space-y-2 shrink-0">
+                  <Select
+                    value={((song as any).review_status as ReviewStatus) ?? 'approved'}
+                    onValueChange={(v) => updateReviewStatus(song.id, v as ReviewStatus)}
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteSong(song.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
+                    <SelectTrigger className="h-8 w-[150px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REVIEW_OPTIONS.map((opt) => {
+                        const Icon = opt.icon;
+                        return (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            <span className="inline-flex items-center gap-2">
+                              <Icon className={`h-3.5 w-3.5 ${opt.className}`} />
+                              {opt.label}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSong(song);
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteSong(song.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
