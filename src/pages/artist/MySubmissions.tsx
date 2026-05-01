@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap, CreditCard, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +21,7 @@ interface SubmissionRow {
   album_title: string | null;
   genre: string | null;
   release_date: string | null;
-  status: 'pending' | 'approved' | 'rejected' | 'removed';
+  status: 'pending' | 'pending_payment' | 'approved' | 'rejected' | 'removed';
   rejection_reason: string | null;
   cover_url: string | null;
   cover_path: string | null;
@@ -49,6 +50,26 @@ const MySubmissions = () => {
   const [open, setOpen] = useState(false);
   const [defaultName, setDefaultName] = useState('');
   const [editing, setEditing] = useState<EditingSubmission | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const handleRetryPayment = async (submissionId: string) => {
+    try {
+      setRetryingId(submissionId);
+      const { data: checkout, error } = await supabase.functions.invoke(
+        'create-submission-checkout',
+        { body: { submission_id: submissionId } },
+      );
+      if (error || !checkout?.url) {
+        toast.error('No se pudo abrir la pasarela de pago. Inténtalo de nuevo.');
+        setRetryingId(null);
+        return;
+      }
+      window.location.href = checkout.url;
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Error al abrir la pasarela');
+      setRetryingId(null);
+    }
+  };
 
   const dateLocale = language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : language === 'pt' ? 'pt-PT' : 'en-US';
 
@@ -199,6 +220,11 @@ const MySubmissions = () => {
                           <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />{t('artist.inReviewBadge')}</Badge>
                         )
                       )}
+                      {r.status === 'pending_payment' && (
+                        <Badge variant="outline" className="border-amber-500/50 text-amber-600 dark:text-amber-400">
+                          <CreditCard className="h-3 w-3 mr-1" />Pendiente de pago
+                        </Badge>
+                      )}
                       {r.status === 'approved' && (
                         r.scheduled_release_at ? (
                           <Badge variant="secondary" className="border border-primary/30">
@@ -231,7 +257,38 @@ const MySubmissions = () => {
                       <Pencil className="h-3.5 w-3.5 mr-1.5" /> {t('artist.editAndResend')}
                     </Button>
                   )}
+                  {r.status === 'pending_payment' && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleRetryPayment(r.id)}
+                      disabled={retryingId === r.id}
+                      className="flex-shrink-0"
+                    >
+                      {retryingId === r.id ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      Reintentar pago
+                    </Button>
+                  )}
                 </div>
+
+                {r.status === 'pending_payment' && (
+                  <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm flex-1">
+                        <p className="font-semibold text-amber-700 dark:text-amber-300">
+                          Pago pendiente
+                        </p>
+                        <p className="text-foreground/80 mt-1">
+                          Tu canción se enviará al equipo de revisión y se notificará a los colaboradores en cuanto se complete el pago.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {r.status === 'rejected' && r.rejection_reason && (() => {
                   const items = parseRejectionReason(r.rejection_reason);
