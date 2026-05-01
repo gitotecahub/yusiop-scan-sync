@@ -20,6 +20,7 @@ import ApproveSubmissionDialog from '@/components/admin/ApproveSubmissionDialog'
 import { formatMadrid } from '@/lib/madridTime';
 import CopyrightBadge, { type CopyrightStatus } from '@/components/copyright/CopyrightBadge';
 import CopyrightDetails, { type CopyrightMatch } from '@/components/copyright/CopyrightDetails';
+import AiBadge, { type AiUsageType } from '@/components/AiBadge';
 
 interface SubmissionRow {
   id: string;
@@ -48,6 +49,8 @@ interface SubmissionRow {
   express_paid_at: string | null;
   express_requested_at: string | null;
   express_price_xaf: number | null;
+  ai_type: AiUsageType | null;
+  rights_confirmed: boolean | null;
   collaborators?: CollaboratorRow[];
   promo?: PromoCampaign | null;
 }
