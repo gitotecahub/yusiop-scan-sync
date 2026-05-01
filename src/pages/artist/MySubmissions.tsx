@@ -257,7 +257,38 @@ const MySubmissions = () => {
                       <Pencil className="h-3.5 w-3.5 mr-1.5" /> {t('artist.editAndResend')}
                     </Button>
                   )}
+                  {r.status === 'pending_payment' && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleRetryPayment(r.id)}
+                      disabled={retryingId === r.id}
+                      className="flex-shrink-0"
+                    >
+                      {retryingId === r.id ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      Reintentar pago
+                    </Button>
+                  )}
                 </div>
+
+                {r.status === 'pending_payment' && (
+                  <div className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+                    <div className="flex items-start gap-2">
+                      <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                      <div className="text-sm flex-1">
+                        <p className="font-semibold text-amber-700 dark:text-amber-300">
+                          Pago pendiente
+                        </p>
+                        <p className="text-foreground/80 mt-1">
+                          Tu canción se enviará al equipo de revisión y se notificará a los colaboradores en cuanto se complete el pago.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {r.status === 'rejected' && r.rejection_reason && (() => {
                   const items = parseRejectionReason(r.rejection_reason);
