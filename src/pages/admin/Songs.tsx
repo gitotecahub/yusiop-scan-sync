@@ -4,11 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Play, Edit, Trash2, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Play, Edit, Trash2, Clock, ShieldCheck, ShieldAlert, ShieldX, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import UploadSongDialog from '@/components/admin/UploadSongDialog';
 import EditSongDialog, { type Song, type Artist, type Album, type Collaborator } from '@/components/admin/EditSongDialog';
+import AiBadge from '@/components/AiBadge';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
+
+type ReviewStatus = 'pending_review' | 'approved' | 'rejected' | 'flagged';
+
+const REVIEW_OPTIONS: { value: ReviewStatus; label: string; icon: typeof ShieldCheck; className: string }[] = [
+  { value: 'approved', label: 'Aprobado', icon: ShieldCheck, className: 'text-emerald-500' },
+  { value: 'pending_review', label: 'En revisión', icon: AlertTriangle, className: 'text-amber-500' },
+  { value: 'flagged', label: 'Sospechoso', icon: ShieldAlert, className: 'text-orange-500' },
+  { value: 'rejected', label: 'Rechazado', icon: ShieldX, className: 'text-destructive' },
+];
 
 const Songs = () => {
   const [songs, setSongs] = useState<Song[]>([]);
