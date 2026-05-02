@@ -836,6 +836,62 @@ const Profile = () => {
             </Select>
           </div>
 
+          {/* País / Región */}
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Globe className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">{t('settings.country')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.countryLabel')}</p>
+              </div>
+            </div>
+            <Select value={countryCode ?? ''} onValueChange={handleCountryChange}>
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue placeholder="—">
+                  <span className="text-xs">
+                    {currentCountry?.country_name ?? '—'}
+                  </span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[280px]">
+                {countries.map((c) => (
+                  <SelectItem key={c.country_code} value={c.country_code}>
+                    <span className="whitespace-nowrap">{c.country_name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Moneda preferida */}
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Coins className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">{t('settings.currency')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.currencyLabel')}</p>
+              </div>
+            </div>
+            <Select
+              value={currencyCode ?? ''}
+              onValueChange={handleCurrencyChange}
+              disabled={!countryCode}
+            >
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue placeholder="—">
+                  <span className="text-xs">{currencyCode ?? '—'}</span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from(new Set(countries.map((c) => c.default_currency))).map((cur) => (
+                  <SelectItem key={cur} value={cur}>
+                    <span className="whitespace-nowrap">{cur}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center justify-between py-4 border-b border-border">
             <div className="flex items-center gap-3">
               <Download className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
