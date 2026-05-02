@@ -45,6 +45,7 @@ import { useModeStore } from '@/stores/modeStore';
 import ModeSwitcher from '@/components/ModeSwitcher';
 import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
 import RequestAdButton from '@/components/ads/RequestAdButton';
+import RefineWithGpsButton from '@/components/locale/RefineWithGpsButton';
 
 interface ScannedCard {
   id: string;
@@ -860,7 +861,9 @@ const Profile = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+          </div>
+          <div className="flex justify-end pb-4 border-b border-border">
+            <RefineWithGpsButton />
           </div>
 
           {/* Moneda preferida */}
