@@ -1115,6 +1115,16 @@ const Library = () => {
         itemId={recommendSong?.id || ''}
         itemTitle={recommendSong?.title}
       />
+
+      {songToGift && (
+        <GiftSongDialog
+          open={!!songToGift}
+          onOpenChange={(o) => !o && setSongToGift(null)}
+          songId={songToGift.id}
+          songTitle={songToGift.title}
+          artistName={songToGift.artist}
+        />
+      )}
     </div>
   );
 };
