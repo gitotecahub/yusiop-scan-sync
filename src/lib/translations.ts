@@ -77,6 +77,8 @@ export type TranslationKey =
   | 'store.perks.priorityAccess' | 'store.tagline'
   // Configuración / Settings (admin general)
   | 'settings.title' | 'settings.language' | 'settings.languageLabel'
+  | 'settings.country' | 'settings.countryLabel' | 'settings.currency' | 'settings.currencyLabel'
+  | 'settings.detectAuto' | 'settings.localeSaved'
   | 'settings.notifications' | 'settings.theme' | 'settings.save'
   | 'settings.general' | 'settings.appearance'
   // Notificaciones
@@ -282,6 +284,9 @@ const es: Dict = {
   // Configuración
   'settings.title': 'Configuración', 'settings.language': 'Idioma',
   'settings.languageLabel': 'Selecciona tu idioma', 'settings.notifications': 'Notificaciones',
+  'settings.country': 'País', 'settings.countryLabel': 'Tu país o región',
+  'settings.currency': 'Moneda', 'settings.currencyLabel': 'Moneda en la que verás los precios',
+  'settings.detectAuto': 'Detectar automáticamente', 'settings.localeSaved': 'Preferencias guardadas',
   'settings.theme': 'Tema', 'settings.save': 'Guardar',
   'settings.general': 'General', 'settings.appearance': 'Apariencia',
   // Notificaciones
@@ -589,6 +594,9 @@ const en: Dict = {
   'store.tagline': 'Choose your card and start collecting',
   'settings.title': 'Settings', 'settings.language': 'Language',
   'settings.languageLabel': 'Select your language', 'settings.notifications': 'Notifications',
+  'settings.country': 'Country', 'settings.countryLabel': 'Your country or region',
+  'settings.currency': 'Currency', 'settings.currencyLabel': 'Currency used to display prices',
+  'settings.detectAuto': 'Auto-detect', 'settings.localeSaved': 'Preferences saved',
   'settings.theme': 'Theme', 'settings.save': 'Save',
   'settings.general': 'General', 'settings.appearance': 'Appearance',
   'notif.newSong': 'New song available', 'notif.gift': 'You received a gift card!',
@@ -880,6 +888,9 @@ const fr: Dict = {
   'store.tagline': 'Choisissez votre carte et commencez à collectionner',
   'settings.title': 'Paramètres', 'settings.language': 'Langue',
   'settings.languageLabel': 'Sélectionnez votre langue', 'settings.notifications': 'Notifications',
+  'settings.country': 'Pays', 'settings.countryLabel': 'Votre pays ou région',
+  'settings.currency': 'Devise', 'settings.currencyLabel': 'Devise utilisée pour afficher les prix',
+  'settings.detectAuto': 'Détection automatique', 'settings.localeSaved': 'Préférences enregistrées',
   'settings.theme': 'Thème', 'settings.save': 'Enregistrer',
   'settings.general': 'Général', 'settings.appearance': 'Apparence',
   'notif.newSong': 'Nouvelle chanson disponible', 'notif.gift': 'Vous avez reçu une carte cadeau !',
