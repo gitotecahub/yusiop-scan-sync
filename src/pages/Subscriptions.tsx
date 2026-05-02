@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSubscriptionVisibility } from '@/hooks/useSubscriptionVisibility';
 import { useSubscriptionPlans, useMySubscription, type SubscriptionPlan } from '@/hooks/useSubscriptionPlans';
 import { formatXAFFixed, formatEURNumber } from '@/lib/currency';
+import { formatPriceFromEur } from '@/lib/localizedPricing';
 import { cn } from '@/lib/utils';
 
 const planIcon = (code: string) => {
