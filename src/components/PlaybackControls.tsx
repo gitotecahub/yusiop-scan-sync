@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { Slider } from '@/components/ui/slider';
-import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2, Cast } from 'lucide-react';
+import { Play, Pause, ChevronDown, SkipBack, SkipForward, Shuffle, Repeat, Heart, Share2, Cast, Gift } from 'lucide-react';
+import GiftSongDialog from '@/components/gift/GiftSongDialog';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +19,7 @@ const PlaybackControls = () => {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
   const cast = useCastDevices();
 
   // Posición visual interpolada con requestAnimationFrame para un avance fluido
@@ -287,6 +289,16 @@ const PlaybackControls = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => setGiftOpen(true)}
+                className="h-9 w-9 rounded-full hover:bg-muted/40"
+                aria-label="Regalar canción"
+                title="Regalar canción"
+              >
+                <Gift className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={handleShare}
                 className="h-9 w-9 rounded-full hover:bg-muted/40"
                 aria-label="Compartir"
@@ -296,6 +308,16 @@ const PlaybackControls = () => {
               </Button>
             </div>
           </div>
+
+          {currentSong && (
+            <GiftSongDialog
+              open={giftOpen}
+              onOpenChange={setGiftOpen}
+              songId={currentSong.id}
+              songTitle={currentSong.title}
+              artistName={currentSong.artist || ''}
+            />
+          )}
 
           {/* Carátula */}
           <div className="flex items-center justify-center my-3">
