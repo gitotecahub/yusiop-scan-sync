@@ -253,6 +253,7 @@ const AppContent = () => {
         )
       } />
     </Routes>
+    </>
   );
 };
 
