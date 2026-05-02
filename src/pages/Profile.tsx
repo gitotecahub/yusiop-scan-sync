@@ -62,6 +62,14 @@ const Profile = () => {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguageStore();
   const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
+  const {
+    countries,
+    countryCode,
+    currencyCode,
+    currentCountry,
+    loadCountries,
+    setUserLocale,
+  } = useLocaleStore();
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
   const { areas, isSuperAdmin, loading: staffLoading } = useStaffAreas();
