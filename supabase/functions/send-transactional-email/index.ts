@@ -125,6 +125,58 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // ── Locale resolution ─────────────────────────────────────────────
+  // Priority:
+  //   1. templateData.locale (explicit override from the caller)
+  //   2. recipient profile language (resolved via country_settings.default_language
+  //      from profiles.country_code; falls back to 'es')
+  const SUPPORTED = new Set(['es', 'en', 'fr', 'pt'])
+  const normalizeLoc = (v: unknown): string | null => {
+    if (typeof v !== 'string') return null
+    const lower = v.toLowerCase().slice(0, 2)
+    return SUPPORTED.has(lower) ? lower : null
+  }
+
+  let resolvedLocale: string | null = normalizeLoc((templateData as any)?.locale)
+
+  if (!resolvedLocale) {
+    try {
+      const { data: userResp } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      })
+      const matched = userResp?.users?.find(
+        (u: any) => (u.email || '').toLowerCase() === effectiveRecipient.toLowerCase()
+      )
+      if (matched?.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('country_code')
+          .eq('user_id', matched.id)
+          .maybeSingle()
+        if (profile?.country_code) {
+          const { data: country } = await supabase
+            .from('country_settings')
+            .select('default_language')
+            .eq('country_code', profile.country_code)
+            .maybeSingle()
+          resolvedLocale = normalizeLoc(country?.default_language)
+        }
+      }
+    } catch (e) {
+      console.warn('Locale auto-resolution failed', { error: e })
+    }
+  }
+
+  if (!resolvedLocale) resolvedLocale = 'es'
+  templateData = { ...templateData, locale: resolvedLocale }
+  console.log('Email locale resolved', {
+    templateName,
+    effectiveRecipient,
+    locale: resolvedLocale,
+  })
+
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')

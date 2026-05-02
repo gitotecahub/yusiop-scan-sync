@@ -11,6 +11,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { normalizeLocale, t, tHtml, type EmailLocale } from './i18n.ts'
 
 const SITE_NAME = 'Yusiop'
 const BRAND_COLOR = '#9D5DFF'
@@ -22,6 +23,7 @@ interface Props {
   sharePercent?: number
   role?: string
   appUrl?: string
+  locale?: string
 }
 
 const CollaborationPublishedInvite = ({
@@ -29,57 +31,59 @@ const CollaborationPublishedInvite = ({
   primaryArtistName = 'un artista',
   collaboratorArtistName = 'tú',
   sharePercent = 0,
-  role = 'colaborador',
+  role = 'collaborator',
   appUrl = 'https://yusiop.com',
-}: Props) => (
-  <Html lang="es" dir="ltr">
-    <Head />
-    <Preview>{`${primaryArtistName} te incluyó en "${songTitle}" — regístrate para reclamar tu parte`}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>🎤 Estás en una colaboración en {SITE_NAME}</Heading>
-        <Text style={text}>
-          Hola <strong>{collaboratorArtistName}</strong>,
-        </Text>
-        <Text style={text}>
-          <strong>{primaryArtistName}</strong> te ha incluido como{' '}
-          <strong>{role}</strong> en su nueva canción{' '}
-          <strong>"{songTitle}"</strong>, que acaba de publicarse en {SITE_NAME}.
-        </Text>
-        <Text style={text}>
-          Te corresponde un <strong>{sharePercent}%</strong> de los splits, y
-          tu parte queda <strong>reservada en el pozo común</strong> hasta que
-          la reclames.
-        </Text>
-        <Text style={text}>
-          Para reclamarla y empezar a cobrar tu monetización, regístrate como
-          artista en {SITE_NAME}:
-        </Text>
-        <Section style={{ textAlign: 'center', margin: '30px 0' }}>
-          <Button href={`${appUrl}/auth`} style={button}>
-            Crear mi cuenta de artista
-          </Button>
-        </Section>
-        <Text style={text}>
-          Una vez verificado tu perfil de artista, podrás reclamar tu parte
-          desde tu panel de colaboraciones.
-        </Text>
-        <Text style={footer}>
-          Si no eres {collaboratorArtistName}, ignora este email.
-          <br />
-          El equipo de {SITE_NAME}
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-)
+  locale,
+}: Props) => {
+  const lang: EmailLocale = normalizeLocale(locale)
+  const roleLabel = t(lang, `role.${role}`) || role
+  const vars = {
+    songTitle,
+    primary: primaryArtistName,
+    role: roleLabel,
+    share: sharePercent,
+    site: SITE_NAME,
+    name: collaboratorArtistName,
+  }
+  return (
+    <Html lang={lang} dir="ltr">
+      <Head />
+      <Preview>{t(lang, 'collabInv.preview', vars)}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Heading style={h1}>{t(lang, 'collabInv.heading', vars)}</Heading>
+          <Text style={text}>
+            {t(lang, 'common.hello')} <strong>{collaboratorArtistName}</strong>,
+          </Text>
+          <Text style={text} dangerouslySetInnerHTML={tHtml(lang, 'collabInv.body1', vars)} />
+          <Text style={text} dangerouslySetInnerHTML={tHtml(lang, 'collabInv.body2', vars)} />
+          <Text style={text}>{t(lang, 'collabInv.body3', vars)}</Text>
+          <Section style={{ textAlign: 'center', margin: '30px 0' }}>
+            <Button href={`${appUrl}/auth`} style={button}>
+              {t(lang, 'collabInv.cta')}
+            </Button>
+          </Section>
+          <Text style={text}>{t(lang, 'collabInv.afterCta')}</Text>
+          <Text style={footer}>
+            {t(lang, 'collabInv.notYou', vars)}
+            <br />
+            {t(lang, 'common.team', { site: SITE_NAME })}
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export const template = {
   component: CollaborationPublishedInvite,
-  subject: (data: Record<string, any>) =>
-    data?.songTitle
-      ? `🎤 Te han incluido en "${data.songTitle}" — reclama tu parte en ${SITE_NAME}`
-      : `Tienes una colaboración esperándote en ${SITE_NAME}`,
+  subject: (data: Record<string, any>) => {
+    const lang: EmailLocale = normalizeLocale(data?.locale)
+    const vars = { songTitle: data?.songTitle ?? '', site: SITE_NAME }
+    return data?.songTitle
+      ? t(lang, 'collabInv.subject_with_title', vars)
+      : t(lang, 'collabInv.subject_default', vars)
+  },
   displayName: 'Colaboración publicada (invitación a registrarse)',
   previewData: {
     songTitle: 'Mi nueva canción',
@@ -88,6 +92,7 @@ export const template = {
     sharePercent: 30,
     role: 'featuring',
     appUrl: 'https://yusiop.com',
+    locale: 'es',
   },
 } satisfies TemplateEntry
 

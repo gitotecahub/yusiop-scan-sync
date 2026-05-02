@@ -11,6 +11,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { normalizeLocale, t, tHtml, type EmailLocale } from './i18n.ts'
 
 function parseReason(raw: string): string[] {
   const text = (raw ?? '').trim()
@@ -41,6 +42,7 @@ interface SongRejectedProps {
   artistName?: string
   reason?: string
   appUrl?: string
+  locale?: string
 }
 
 const SongRejectedEmail = ({
@@ -48,29 +50,28 @@ const SongRejectedEmail = ({
   artistName = 'Artista',
   reason = '',
   appUrl = 'https://yusiop.com',
+  locale,
 }: SongRejectedProps) => {
+  const lang: EmailLocale = normalizeLocale(locale)
+  const vars = { songTitle, site: SITE_NAME }
   return (
-    <Html lang="es" dir="ltr">
+    <Html lang={lang} dir="ltr">
       <Head />
-      <Preview>{`"${songTitle}" necesita correcciones antes de publicarse`}</Preview>
+      <Preview>{t(lang, 'songRejected.preview', vars)}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>Tu canción necesita correcciones</Heading>
+          <Heading style={h1}>{t(lang, 'songRejected.heading')}</Heading>
           <Text style={text}>
-            Hola <strong>{artistName}</strong>,
+            {t(lang, 'common.hello')} <strong>{artistName}</strong>,
           </Text>
-          <Text style={text}>
-            Hemos revisado <strong>"{songTitle}"</strong> y no podemos publicarla todavía.
-          </Text>
+          <Text style={text} dangerouslySetInnerHTML={tHtml(lang, 'songRejected.body', vars)} />
 
           {reason ? (() => {
             const items = parseReason(reason)
             const list = items.length > 0 ? items : [reason]
             return (
               <Section style={messageBox}>
-                <Text style={messageLabel}>
-                  Su lanzamiento no se puede llevar a cabo por los siguientes motivos:
-                </Text>
+                <Text style={messageLabel}>{t(lang, 'songRejected.reasonsLabel')}</Text>
                 <ul style={listStyle}>
                   {list.map((it, i) => (
                     <li key={i} style={listItem}>{it}</li>
@@ -80,20 +81,18 @@ const SongRejectedEmail = ({
             )
           })() : null}
 
-          <Text style={text}>
-            Puedes editar tu envío y volver a enviarlo a revisión desde el panel de artista.
-          </Text>
+          <Text style={text}>{t(lang, 'songRejected.editHint')}</Text>
 
           <Section style={{ textAlign: 'center', margin: '30px 0' }}>
             <Button href={`${appUrl}/artist/submissions`} style={button}>
-              Editar envío
+              {t(lang, 'songRejected.cta')}
             </Button>
           </Section>
 
           <Text style={footer}>
-            Gracias por usar {SITE_NAME}.
+            {t(lang, 'common.thanks_using')} {SITE_NAME}.
             <br />
-            El equipo de {SITE_NAME}
+            {t(lang, 'common.team', { site: SITE_NAME })}
           </Text>
         </Container>
       </Body>
@@ -103,16 +102,20 @@ const SongRejectedEmail = ({
 
 export const template = {
   component: SongRejectedEmail,
-  subject: (data: Record<string, any>) =>
-    data?.songTitle
-      ? `"${data.songTitle}" necesita correcciones`
-      : `Tu canción necesita correcciones`,
+  subject: (data: Record<string, any>) => {
+    const lang: EmailLocale = normalizeLocale(data?.locale)
+    const vars = { songTitle: data?.songTitle ?? '', site: SITE_NAME }
+    return data?.songTitle
+      ? t(lang, 'songRejected.subject_with_title', vars)
+      : t(lang, 'songRejected.subject_default', vars)
+  },
   displayName: 'Canción rechazada',
   previewData: {
     songTitle: 'Mi nueva canción',
     artistName: 'Artista',
     reason: 'La calidad del audio es baja, sube un archivo a 320 kbps.\nLa portada no cumple las dimensiones mínimas (mínimo 1000x1000).\nEl título contiene errores tipográficos.',
     appUrl: 'https://yusiop.com',
+    locale: 'es',
   },
 } satisfies TemplateEntry
 
@@ -138,12 +141,6 @@ const messageLabel: React.CSSProperties = {
   fontWeight: 600,
   margin: '0 0 6px',
   letterSpacing: '0.05em',
-}
-const messageText: React.CSSProperties = {
-  fontSize: '15px',
-  color: '#0F172A',
-  margin: 0,
-  lineHeight: '1.5',
 }
 const button: React.CSSProperties = {
   backgroundColor: BRAND_COLOR,

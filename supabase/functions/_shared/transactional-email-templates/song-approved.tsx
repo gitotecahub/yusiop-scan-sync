@@ -11,6 +11,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { normalizeLocale, t, tHtml, type EmailLocale } from './i18n.ts'
 
 const SITE_NAME = 'Yusiop'
 const BRAND_COLOR = '#9D5DFF'
@@ -19,35 +20,37 @@ interface SongApprovedProps {
   songTitle?: string
   artistName?: string
   appUrl?: string
+  locale?: string
 }
 
 const SongApprovedEmail = ({
   songTitle = 'tu canción',
   artistName = 'Artista',
   appUrl = 'https://yusiop.com',
+  locale,
 }: SongApprovedProps) => {
+  const lang: EmailLocale = normalizeLocale(locale)
+  const vars = { songTitle, site: SITE_NAME }
   return (
-    <Html lang="es" dir="ltr">
+    <Html lang={lang} dir="ltr">
       <Head />
-      <Preview>{`"${songTitle}" ya está publicada en ${SITE_NAME}`}</Preview>
+      <Preview>{t(lang, 'songApproved.preview', vars)}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>🎶 ¡Tu canción ha sido publicada!</Heading>
+          <Heading style={h1}>{t(lang, 'songApproved.heading')}</Heading>
           <Text style={text}>
-            Hola <strong>{artistName}</strong>,
+            {t(lang, 'common.hello')} <strong>{artistName}</strong>,
           </Text>
-          <Text style={text}>
-            Tu canción <strong>"{songTitle}"</strong> ha sido aprobada y ya está disponible en el catálogo de {SITE_NAME}.
-          </Text>
+          <Text style={text} dangerouslySetInnerHTML={tHtml(lang, 'songApproved.body', vars)} />
           <Section style={{ textAlign: 'center', margin: '30px 0' }}>
             <Button href={appUrl} style={button}>
-              Ver en Yusiop
+              {t(lang, 'songApproved.cta', vars)}
             </Button>
           </Section>
           <Text style={footer}>
-            Gracias por compartir tu música.
+            {t(lang, 'common.thanks_music')}
             <br />
-            El equipo de {SITE_NAME}
+            {t(lang, 'common.team', vars)}
           </Text>
         </Container>
       </Body>
@@ -57,15 +60,19 @@ const SongApprovedEmail = ({
 
 export const template = {
   component: SongApprovedEmail,
-  subject: (data: Record<string, any>) =>
-    data?.songTitle
-      ? `🎶 "${data.songTitle}" ha sido publicada en ${SITE_NAME}`
-      : `Tu canción ha sido publicada en ${SITE_NAME}`,
+  subject: (data: Record<string, any>) => {
+    const lang: EmailLocale = normalizeLocale(data?.locale)
+    const vars = { songTitle: data?.songTitle ?? '', site: SITE_NAME }
+    return data?.songTitle
+      ? t(lang, 'songApproved.subject_with_title', vars)
+      : t(lang, 'songApproved.subject_default', vars)
+  },
   displayName: 'Canción aprobada',
   previewData: {
     songTitle: 'Mi nueva canción',
     artistName: 'Artista',
     appUrl: 'https://yusiop.com',
+    locale: 'es',
   },
 } satisfies TemplateEntry
 
