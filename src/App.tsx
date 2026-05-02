@@ -69,6 +69,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { AuthProvider } from '@/hooks/useAuth';
+import { useLocaleDetection } from '@/hooks/useLocaleDetection';
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,9 @@ const AppContent = () => {
   const { loadForUser, profileChoiceMade, mode, loading: modeLoading, reset } = useModeStore();
   const [showSplash, setShowSplash] = useState(true);
   const online = useOnlineStatus();
+
+  // Detección automática de país/idioma/moneda al iniciar sesión
+  useLocaleDetection();
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
   // redirigir inmediatamente a /reset-password preservando hash y query.
