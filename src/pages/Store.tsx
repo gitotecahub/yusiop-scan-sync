@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
+import { formatPriceFromEur } from '@/lib/localizedPricing';
+import { useLocaleStore } from '@/stores/localeStore';
 
 type Tier = 'standard' | 'premium';
 
@@ -203,10 +205,10 @@ const Store = () => {
                   <span>{TIERS[t].label}</span>
                   <span className="flex flex-col items-end leading-tight">
                     <span className="text-2xl font-bold text-primary tabular-nums">
-                      {formatEURNumber(TIERS[t].priceEur)}
+                      {formatPriceFromEur(TIERS[t].priceEur)}
                     </span>
                     <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
-                      {formatXAFNumber(TIERS[t].priceEur)}
+                      {formatEURNumber(TIERS[t].priceEur)}
                     </span>
                   </span>
                 </CardTitle>
@@ -271,7 +273,7 @@ const Store = () => {
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <>Pagar {formatEURNumber(TIERS[selected].priceEur)} ({formatXAFNumber(TIERS[selected].priceEur)}){isGift ? ' como regalo' : ''}</>
+          <>Pagar {formatPriceFromEur(TIERS[selected].priceEur)}{isGift ? ' como regalo' : ''}</>
         )}
       </Button>
 
