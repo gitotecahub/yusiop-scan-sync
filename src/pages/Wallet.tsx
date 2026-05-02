@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet, type WalletTransaction } from '@/hooks/useWallet';
 import { formatXAFFixed } from '@/lib/currency';
+import { formatPriceFromXaf } from '@/lib/localizedPricing';
+import { useLocaleStore } from '@/stores/localeStore';
 import RedeemCodeDialog from '@/components/wallet/RedeemCodeDialog';
 import RechargeWalletDialog from '@/components/wallet/RechargeWalletDialog';
 import { toast } from '@/hooks/use-toast';
