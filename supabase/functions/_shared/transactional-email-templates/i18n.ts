@@ -330,10 +330,30 @@ const DICT: Record<EmailLocale, Dict> = {
   },
 }
 
-function interpolate(str: string, vars: Record<string, string | number>): string {
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+// Plain-text interpolation: returns raw values (no escaping).
+function interpolatePlain(str: string, vars: Record<string, string | number>): string {
   return str.replace(/\{\{(\w+)\}\}/g, (_, key) => {
     const v = vars[key]
     return v === undefined || v === null ? '' : String(v)
+  })
+}
+
+// HTML interpolation: escapes user-supplied vars but leaves the dictionary
+// HTML (the <strong>, <a> wrappers in our own translations) intact.
+function interpolateHtml(str: string, vars: Record<string, string | number>): string {
+  return str.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+    const v = vars[key]
+    if (v === undefined || v === null) return ''
+    return escapeHtml(String(v))
   })
 }
 
@@ -344,16 +364,23 @@ export function t(
 ): string {
   const lang = DICT[locale] ?? DICT.es
   const raw = lang[key] ?? DICT.es[key] ?? key
-  return interpolate(raw, vars)
+  // Strip any HTML in the dictionary string for plain-text usage and
+  // use raw vars (no escaping) — this is intended for subject lines,
+  // preview text and React text children where React itself escapes.
+  const noTags = raw.replace(/<[^>]+>/g, '')
+  return interpolatePlain(noTags, vars)
 }
 
-// Render an HTML string from a translation key into React using
+// Render an HTML string from a translation key, used with
 // dangerouslySetInnerHTML. The HTML is hard-coded in this dictionary
-// (no user input) so this is safe.
+// (no user input) and any user-supplied variables are escaped first,
+// so this is safe against XSS / HTML injection.
 export function tHtml(
   locale: EmailLocale,
   key: string,
   vars: Record<string, string | number> = {},
 ): { __html: string } {
-  return { __html: t(locale, key, vars) }
+  const lang = DICT[locale] ?? DICT.es
+  const raw = lang[key] ?? DICT.es[key] ?? key
+  return { __html: interpolateHtml(raw, vars) }
 }
