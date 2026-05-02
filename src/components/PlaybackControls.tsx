@@ -296,16 +296,6 @@ const PlaybackControls = () => {
               >
                 <Gift className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShare}
-                className="h-9 w-9 rounded-full hover:bg-muted/40"
-                aria-label="Compartir"
-                title="Compartir"
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 
