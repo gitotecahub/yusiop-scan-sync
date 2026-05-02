@@ -28,6 +28,8 @@ import {
   Hourglass,
   ShieldCheck,
   Languages,
+  Globe,
+  Coins,
   HelpCircle,
   Users,
 } from 'lucide-react';
@@ -36,6 +38,7 @@ import { useStaffAreas } from '@/hooks/useStaffAreas';
 import { useLanguageStore, LANGUAGES } from '@/stores/languageStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocaleStore } from '@/stores/localeStore';
 import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { useModeStore } from '@/stores/modeStore';
