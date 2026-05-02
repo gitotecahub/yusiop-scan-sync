@@ -137,7 +137,19 @@ const AppContent = () => {
   // Saltar splash en la pantalla de reset para no consumir tiempo del token
   if (showSplash && window.location.pathname !== '/reset-password') return <SplashScreen />;
 
+  // Gate bloqueante de localización: solo se muestra si hay sesión activa,
+  // ya pasó el splash y la detección automática terminó sin país.
+  const showLocaleGate =
+    !!session &&
+    !!user &&
+    localeDetectionPending &&
+    !['/auth', '/reset-password', '/install', '/unsubscribe'].includes(
+      window.location.pathname,
+    );
+
   return (
+    <>
+    {showLocaleGate && <LocaleFallbackGate />}
     <Routes>
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
