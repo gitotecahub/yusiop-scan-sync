@@ -126,6 +126,47 @@ const Profile = () => {
     gender: '' as string,
   });
 
+  // Cargar catálogo de países al abrir Perfil
+  useEffect(() => {
+    void loadCountries();
+  }, [loadCountries]);
+
+  const handleCountryChange = async (newCountry: string) => {
+    if (!user?.id) return;
+    const country = countries.find((c) => c.country_code === newCountry);
+    if (!country) return;
+
+    setUserLocale(newCountry, country.default_currency);
+
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          country_code: newCountry,
+          currency_code: country.default_currency,
+          locale_source: 'manual',
+        })
+        .eq('user_id', user.id);
+      toast.success(t('settings.localeSaved'));
+    } catch (err) {
+      console.warn('Failed to save country', err);
+    }
+  };
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    if (!user?.id || !countryCode) return;
+    setUserLocale(countryCode, newCurrency);
+    try {
+      await supabase
+        .from('profiles')
+        .update({ currency_code: newCurrency, locale_source: 'manual' })
+        .eq('user_id', user.id);
+      toast.success(t('settings.localeSaved'));
+    } catch (err) {
+      console.warn('Failed to save currency', err);
+    }
+  };
+
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return;
