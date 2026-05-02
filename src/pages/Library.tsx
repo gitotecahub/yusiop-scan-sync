@@ -740,10 +740,6 @@ const Library = () => {
                         <Heart className={cn('h-4 w-4 mr-2', song.is_favorite && 'fill-current text-primary')} />
                         {song.is_favorite ? 'Quitar de favoritos' : 'Me gusta'}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleShareRequest(song)}>
-                        <Send className="h-4 w-4 mr-2" />
-                        {t('library.share')}
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setRecommendSong(song)}>
                         <Share2 className="h-4 w-4 mr-2" />
                         Recomendar a un amigo
@@ -954,16 +950,6 @@ const Library = () => {
                 {selectedIds.size} {t('library.itemsSelected')}
               </p>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={selectedIds.size === 0}
-              onClick={() => { setBulkRecipient(''); setBulkShareOpen(true); }}
-              className="rounded-full"
-            >
-              <Send className="h-4 w-4 mr-1.5" />
-              {t('library.send')}
-            </Button>
             <Button
               size="sm"
               disabled={selectedIds.size === 0}
