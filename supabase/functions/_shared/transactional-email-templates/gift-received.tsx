@@ -11,6 +11,7 @@ import {
   Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { normalizeLocale, t, tHtml, type EmailLocale } from './i18n.ts'
 
 const SITE_NAME = 'Yusiop'
 const BRAND_COLOR = '#9D5DFF'
@@ -21,6 +22,7 @@ interface GiftReceivedProps {
   cardType?: 'standard' | 'premium'
   downloadCredits?: number
   redemptionUrl?: string
+  locale?: string
 }
 
 const GiftReceivedEmail = ({
@@ -29,43 +31,42 @@ const GiftReceivedEmail = ({
   cardType = 'standard',
   downloadCredits = 4,
   redemptionUrl = 'https://yusiop.com',
+  locale,
 }: GiftReceivedProps) => {
-  const fromLabel = senderName ? senderName : 'Alguien especial'
-  const cardLabel = cardType === 'premium' ? 'Premium' : 'Estándar'
+  const lang: EmailLocale = normalizeLocale(locale)
+  const fromLabel = senderName ? senderName : t(lang, 'gift.fromDefault')
+  const cardLabel =
+    cardType === 'premium' ? t(lang, 'gift.cardPremium') : t(lang, 'gift.cardStandard')
+  const vars = { from: fromLabel, site: SITE_NAME, cardLabel, credits: downloadCredits }
 
   return (
-    <Html lang="es" dir="ltr">
+    <Html lang={lang} dir="ltr">
       <Head />
-      <Preview>{`${fromLabel} te ha enviado una tarjeta ${SITE_NAME} ${cardLabel}`}</Preview>
+      <Preview>{t(lang, 'gift.preview', vars)}</Preview>
       <Body style={main}>
         <Container style={container}>
-          <Heading style={h1}>🎁 Has recibido un regalo</Heading>
-          <Text style={text}>
-            <strong>{fromLabel}</strong> te ha enviado una tarjeta {SITE_NAME}{' '}
-            <strong>{cardLabel}</strong> con <strong>{downloadCredits} descargas</strong>.
-          </Text>
+          <Heading style={h1}>{t(lang, 'gift.heading')}</Heading>
+          <Text style={text} dangerouslySetInnerHTML={tHtml(lang, 'gift.body', vars)} />
 
           {giftMessage ? (
             <Section style={messageBox}>
-              <Text style={messageLabel}>Mensaje:</Text>
+              <Text style={messageLabel}>{t(lang, 'gift.messageLabel')}</Text>
               <Text style={messageText}>"{giftMessage}"</Text>
             </Section>
           ) : null}
 
-          <Text style={text}>
-            Pulsa el botón para canjear tu regalo y empezar a descargar música.
-          </Text>
+          <Text style={text}>{t(lang, 'gift.cta_hint')}</Text>
 
           <Section style={{ textAlign: 'center', margin: '30px 0' }}>
             <Button href={redemptionUrl} style={button}>
-              Canjear regalo
+              {t(lang, 'gift.cta')}
             </Button>
           </Section>
 
           <Text style={footer}>
-            Si no esperabas este regalo, puedes ignorar este correo.
+            {t(lang, 'gift.unexpected')}
             <br />
-            Con cariño, el equipo de {SITE_NAME}
+            {t(lang, 'common.regards_love', { site: SITE_NAME })}
           </Text>
         </Container>
       </Body>
@@ -75,10 +76,13 @@ const GiftReceivedEmail = ({
 
 export const template = {
   component: GiftReceivedEmail,
-  subject: (data: Record<string, any>) =>
-    data?.senderName
-      ? `${data.senderName} te ha enviado una tarjeta ${SITE_NAME}`
-      : `Has recibido una tarjeta ${SITE_NAME}`,
+  subject: (data: Record<string, any>) => {
+    const lang: EmailLocale = normalizeLocale(data?.locale)
+    const vars = { from: data?.senderName ?? '', site: SITE_NAME }
+    return data?.senderName
+      ? t(lang, 'gift.subject_with_sender', vars)
+      : t(lang, 'gift.subject_default', vars)
+  },
   displayName: 'Regalo recibido',
   previewData: {
     senderName: 'Ana',
@@ -86,6 +90,7 @@ export const template = {
     cardType: 'premium',
     downloadCredits: 10,
     redemptionUrl: 'https://yusiop.com/redeem?token=demo',
+    locale: 'es',
   },
 } satisfies TemplateEntry
 
