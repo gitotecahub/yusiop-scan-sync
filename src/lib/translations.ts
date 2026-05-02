@@ -79,6 +79,10 @@ export type TranslationKey =
   | 'settings.title' | 'settings.language' | 'settings.languageLabel'
   | 'settings.country' | 'settings.countryLabel' | 'settings.currency' | 'settings.currencyLabel'
   | 'settings.detectAuto' | 'settings.localeSaved'
+  | 'settings.refineWithGps' | 'settings.gpsSuccess' | 'settings.gpsFailed'
+  | 'settings.gpsCountryUnsupported'
+  | 'localeGate.title' | 'localeGate.subtitle' | 'localeGate.country'
+  | 'localeGate.language' | 'localeGate.continue' | 'localeGate.retry'
   | 'settings.notifications' | 'settings.theme' | 'settings.save'
   | 'settings.general' | 'settings.appearance'
   // Notificaciones
@@ -287,6 +291,16 @@ const es: Dict = {
   'settings.country': 'País', 'settings.countryLabel': 'Tu país o región',
   'settings.currency': 'Moneda', 'settings.currencyLabel': 'Moneda en la que verás los precios',
   'settings.detectAuto': 'Detectar automáticamente', 'settings.localeSaved': 'Preferencias guardadas',
+  'settings.refineWithGps': 'Refinar con GPS',
+  'settings.gpsSuccess': 'Ubicación actualizada con GPS',
+  'settings.gpsFailed': 'No pudimos obtener tu ubicación',
+  'settings.gpsCountryUnsupported': 'Tu país aún no está disponible',
+  'localeGate.title': 'Bienvenido a Yusiop',
+  'localeGate.subtitle': 'No pudimos detectar tu país. Selecciónalo para continuar.',
+  'localeGate.country': 'País',
+  'localeGate.language': 'Idioma',
+  'localeGate.continue': 'Continuar',
+  'localeGate.retry': 'Reintentar detección',
   'settings.theme': 'Tema', 'settings.save': 'Guardar',
   'settings.general': 'General', 'settings.appearance': 'Apariencia',
   // Notificaciones
