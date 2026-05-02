@@ -861,6 +861,7 @@ const Profile = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
+            </Select>
           </div>
           <div className="flex justify-end pb-4 border-b border-border">
             <RefineWithGpsButton />
