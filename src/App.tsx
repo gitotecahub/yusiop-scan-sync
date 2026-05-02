@@ -70,6 +70,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { AuthProvider } from '@/hooks/useAuth';
 import { useLocaleDetection } from '@/hooks/useLocaleDetection';
+import { useLocaleStore } from '@/stores/localeStore';
+import LocaleFallbackGate from '@/components/locale/LocaleFallbackGate';
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,7 @@ const AppContent = () => {
 
   // Detección automática de país/idioma/moneda al iniciar sesión
   useLocaleDetection();
+  const localeDetectionPending = useLocaleStore((s) => s.detectionPending);
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
   // redirigir inmediatamente a /reset-password preservando hash y query.
@@ -134,7 +137,19 @@ const AppContent = () => {
   // Saltar splash en la pantalla de reset para no consumir tiempo del token
   if (showSplash && window.location.pathname !== '/reset-password') return <SplashScreen />;
 
+  // Gate bloqueante de localización: solo se muestra si hay sesión activa,
+  // ya pasó el splash y la detección automática terminó sin país.
+  const showLocaleGate =
+    !!session &&
+    !!user &&
+    localeDetectionPending &&
+    !['/auth', '/reset-password', '/install', '/unsubscribe'].includes(
+      window.location.pathname,
+    );
+
   return (
+    <>
+    {showLocaleGate && <LocaleFallbackGate />}
     <Routes>
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
@@ -238,6 +253,7 @@ const AppContent = () => {
         )
       } />
     </Routes>
+    </>
   );
 };
 

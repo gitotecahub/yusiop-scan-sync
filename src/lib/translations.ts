@@ -79,6 +79,10 @@ export type TranslationKey =
   | 'settings.title' | 'settings.language' | 'settings.languageLabel'
   | 'settings.country' | 'settings.countryLabel' | 'settings.currency' | 'settings.currencyLabel'
   | 'settings.detectAuto' | 'settings.localeSaved'
+  | 'settings.refineWithGps' | 'settings.gpsSuccess' | 'settings.gpsFailed'
+  | 'settings.gpsCountryUnsupported'
+  | 'localeGate.title' | 'localeGate.subtitle' | 'localeGate.country'
+  | 'localeGate.language' | 'localeGate.continue' | 'localeGate.retry'
   | 'settings.notifications' | 'settings.theme' | 'settings.save'
   | 'settings.general' | 'settings.appearance'
   // Notificaciones
@@ -287,6 +291,16 @@ const es: Dict = {
   'settings.country': 'País', 'settings.countryLabel': 'Tu país o región',
   'settings.currency': 'Moneda', 'settings.currencyLabel': 'Moneda en la que verás los precios',
   'settings.detectAuto': 'Detectar automáticamente', 'settings.localeSaved': 'Preferencias guardadas',
+  'settings.refineWithGps': 'Refinar con GPS',
+  'settings.gpsSuccess': 'Ubicación actualizada con GPS',
+  'settings.gpsFailed': 'No pudimos obtener tu ubicación',
+  'settings.gpsCountryUnsupported': 'Tu país aún no está disponible',
+  'localeGate.title': 'Bienvenido a Yusiop',
+  'localeGate.subtitle': 'No pudimos detectar tu país. Selecciónalo para continuar.',
+  'localeGate.country': 'País',
+  'localeGate.language': 'Idioma',
+  'localeGate.continue': 'Continuar',
+  'localeGate.retry': 'Reintentar detección',
   'settings.theme': 'Tema', 'settings.save': 'Guardar',
   'settings.general': 'General', 'settings.appearance': 'Apariencia',
   // Notificaciones
@@ -597,6 +611,16 @@ const en: Dict = {
   'settings.country': 'Country', 'settings.countryLabel': 'Your country or region',
   'settings.currency': 'Currency', 'settings.currencyLabel': 'Currency used to display prices',
   'settings.detectAuto': 'Auto-detect', 'settings.localeSaved': 'Preferences saved',
+  'settings.refineWithGps': 'Refine with GPS',
+  'settings.gpsSuccess': 'Location updated via GPS',
+  'settings.gpsFailed': 'Could not get your location',
+  'settings.gpsCountryUnsupported': 'Your country is not supported yet',
+  'localeGate.title': 'Welcome to Yusiop',
+  'localeGate.subtitle': "We couldn't detect your country. Pick one to continue.",
+  'localeGate.country': 'Country',
+  'localeGate.language': 'Language',
+  'localeGate.continue': 'Continue',
+  'localeGate.retry': 'Retry detection',
   'settings.theme': 'Theme', 'settings.save': 'Save',
   'settings.general': 'General', 'settings.appearance': 'Appearance',
   'notif.newSong': 'New song available', 'notif.gift': 'You received a gift card!',
@@ -891,6 +915,16 @@ const fr: Dict = {
   'settings.country': 'Pays', 'settings.countryLabel': 'Votre pays ou région',
   'settings.currency': 'Devise', 'settings.currencyLabel': 'Devise utilisée pour afficher les prix',
   'settings.detectAuto': 'Détection automatique', 'settings.localeSaved': 'Préférences enregistrées',
+  'settings.refineWithGps': 'Affiner avec GPS',
+  'settings.gpsSuccess': 'Position mise à jour via GPS',
+  'settings.gpsFailed': 'Impossible d’obtenir votre position',
+  'settings.gpsCountryUnsupported': 'Votre pays n’est pas encore disponible',
+  'localeGate.title': 'Bienvenue sur Yusiop',
+  'localeGate.subtitle': 'Nous n’avons pas pu détecter votre pays. Choisissez-en un pour continuer.',
+  'localeGate.country': 'Pays',
+  'localeGate.language': 'Langue',
+  'localeGate.continue': 'Continuer',
+  'localeGate.retry': 'Réessayer la détection',
   'settings.theme': 'Thème', 'settings.save': 'Enregistrer',
   'settings.general': 'Général', 'settings.appearance': 'Apparence',
   'notif.newSong': 'Nouvelle chanson disponible', 'notif.gift': 'Vous avez reçu une carte cadeau !',
@@ -1185,6 +1219,16 @@ const pt: Dict = {
   'settings.country': 'País', 'settings.countryLabel': 'Seu país ou região',
   'settings.currency': 'Moeda', 'settings.currencyLabel': 'Moeda usada para exibir preços',
   'settings.detectAuto': 'Detectar automaticamente', 'settings.localeSaved': 'Preferências salvas',
+  'settings.refineWithGps': 'Refinar com GPS',
+  'settings.gpsSuccess': 'Localização atualizada via GPS',
+  'settings.gpsFailed': 'Não foi possível obter sua localização',
+  'settings.gpsCountryUnsupported': 'Seu país ainda não é suportado',
+  'localeGate.title': 'Bem-vindo ao Yusiop',
+  'localeGate.subtitle': 'Não detectamos seu país. Escolha um para continuar.',
+  'localeGate.country': 'País',
+  'localeGate.language': 'Idioma',
+  'localeGate.continue': 'Continuar',
+  'localeGate.retry': 'Repetir detecção',
   'settings.theme': 'Tema', 'settings.save': 'Salvar',
   'settings.general': 'Geral', 'settings.appearance': 'Aparência',
   'notif.newSong': 'Nova música disponível', 'notif.gift': 'Você recebeu um cartão de presente!',

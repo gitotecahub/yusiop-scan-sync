@@ -1,11 +1,10 @@
 // Hook que se ejecuta tras el login. Si el usuario aún no tiene
 // `country_code` en su perfil, intenta detectarlo:
 //   1) Edge function detect-location (IP / cabeceras de proxy)
-//   2) Si falla, marca como pendiente y se mostrará el selector manual
+//   2) Si falla, marca detectionPending=true → se muestra el gate manual
 //
-// GPS es OPCIONAL y se pide solo si el usuario decide refinar manualmente
-// desde Perfil → Configuración (no se pide en el primer login para no
-// asustar con un permiso del navegador).
+// GPS es OPCIONAL — se ejecuta solo si el usuario lo pide desde Perfil
+// con el botón "Refinar con GPS".
 
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,7 @@ export function useLocaleDetection() {
   const userId = useAuthStore((s) => s.user?.id);
   const loadCountries = useLocaleStore((s) => s.loadCountries);
   const setUserLocale = useLocaleStore((s) => s.setUserLocale);
+  const setDetectionPending = useLocaleStore((s) => s.setDetectionPending);
 
   // Carga catálogo de países (cualquier usuario, también anónimo)
   useEffect(() => {
@@ -28,7 +28,6 @@ export function useLocaleDetection() {
 
     let cancelled = false;
     void (async () => {
-      // 1) Leer perfil
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('country_code, currency_code')
@@ -37,14 +36,12 @@ export function useLocaleDetection() {
 
       if (cancelled || error) return;
 
-      // Ya tiene país configurado: aplicarlo y salir
       if (profile?.country_code) {
         await loadCountries();
         setUserLocale(profile.country_code, profile.currency_code ?? undefined);
         return;
       }
 
-      // 2) Detectar por IP via edge function
       try {
         const { data: detection } = await supabase.functions.invoke(
           'detect-location',
@@ -67,15 +64,49 @@ export function useLocaleDetection() {
               })
               .eq('user_id', userId);
             setUserLocale(cc, country.default_currency);
+            return;
           }
         }
+        if (!cancelled) setDetectionPending(true);
       } catch (err) {
         console.warn('[locale] detect-location failed', err);
+        if (!cancelled) setDetectionPending(true);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [userId, loadCountries, setUserLocale]);
+  }, [userId, loadCountries, setUserLocale, setDetectionPending]);
+}
+
+/**
+ * Refinar país usando GPS del navegador + reverse geocode (BigDataCloud,
+ * sin API key). Devuelve el ISO-2 detectado o null.
+ */
+export async function detectCountryByGps(): Promise<string | null> {
+  if (!('geolocation' in navigator)) return null;
+
+  const pos = await new Promise<GeolocationPosition | null>((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve(p),
+      () => resolve(null),
+      { timeout: 10_000, enableHighAccuracy: false, maximumAge: 600_000 },
+    );
+  });
+  if (!pos) return null;
+
+  try {
+    const { latitude, longitude } = pos.coords;
+    const res = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const cc: string | undefined = data?.countryCode;
+    return cc ? cc.toUpperCase() : null;
+  } catch (err) {
+    console.warn('[locale] reverse geocode failed', err);
+    return null;
+  }
 }

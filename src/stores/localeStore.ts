@@ -20,8 +20,11 @@ interface LocaleState {
   countryCode: string | null;
   loading: boolean;
   loaded: boolean;
+  // true cuando la detección automática terminó sin obtener un country_code
+  detectionPending: boolean;
   loadCountries: () => Promise<void>;
   setUserLocale: (countryCode: string, currencyCode?: string) => void;
+  setDetectionPending: (pending: boolean) => void;
   reset: () => void;
 }
 
@@ -32,6 +35,9 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
   countryCode: null,
   loading: false,
   loaded: false,
+  detectionPending: false,
+
+  setDetectionPending: (pending) => set({ detectionPending: pending }),
 
   loadCountries: async () => {
     if (get().loaded || get().loading) return;
@@ -63,6 +69,7 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
       countryCode,
       currentCountry: country,
       currencyCode: currencyCode ?? country?.default_currency ?? null,
+      detectionPending: false,
     });
 
     // Sincronizar idioma de la app con el del país
