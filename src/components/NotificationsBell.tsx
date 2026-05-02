@@ -156,6 +156,17 @@ const NotificationsBell = () => {
       }
     } else if (n.type === 'shared_card') {
       navigate('/store');
+    } else if (n.type === 'song_gift_received') {
+      // Llevar a la biblioteca con la canción regalada destacada
+      const songId = n.data?.song_id as string | undefined;
+      navigate('/library', songId ? { state: { highlightSongId: songId } } : undefined);
+    } else if (
+      n.type === 'song_gift_sent' ||
+      n.type === 'song_gift_pending' ||
+      n.type === 'song_gift_claimed' ||
+      n.type === 'song_gift_failed'
+    ) {
+      navigate('/wallet');
     }
     load();
   };
