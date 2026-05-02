@@ -70,6 +70,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { AuthProvider } from '@/hooks/useAuth';
 import { useLocaleDetection } from '@/hooks/useLocaleDetection';
+import { useLocaleStore } from '@/stores/localeStore';
+import LocaleFallbackGate from '@/components/locale/LocaleFallbackGate';
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,7 @@ const AppContent = () => {
 
   // Detección automática de país/idioma/moneda al iniciar sesión
   useLocaleDetection();
+  const localeDetectionPending = useLocaleStore((s) => s.detectionPending);
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
   // redirigir inmediatamente a /reset-password preservando hash y query.
