@@ -36,6 +36,7 @@ const txMeta = (tx: WalletTransaction) => {
 const Wallet = () => {
   const navigate = useNavigate();
   const { wallet, transactions, loading, refresh } = useWallet();
+  const { currencyCode } = useLocaleStore();
   const [redeemOpen, setRedeemOpen] = useState(false);
   const [rechargeOpen, setRechargeOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -110,9 +111,16 @@ const Wallet = () => {
             {loading && !wallet ? (
               <Skeleton className="h-10 w-44 bg-white/20" />
             ) : (
-              <div className="text-4xl font-bold text-white tracking-tight tabular-nums animate-in fade-in slide-in-from-bottom-1 duration-500">
-                {formatXAFFixed(balance)}
-              </div>
+              <>
+                <div className="text-4xl font-bold text-white tracking-tight tabular-nums animate-in fade-in slide-in-from-bottom-1 duration-500">
+                  {formatXAFFixed(balance)}
+                </div>
+                {currencyCode && currencyCode !== 'XAF' && currencyCode !== 'XOF' && (
+                  <div className="text-[11px] text-white/70 mt-1 tabular-nums">
+                    ≈ {formatPriceFromXaf(balance)}
+                  </div>
+                )}
+              </>
             )}
 
             <div className="mt-6 flex items-center justify-between text-[11px] text-white/75">
