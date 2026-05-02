@@ -12,8 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive, Share2 } from 'lucide-react';
+import { Play, Pause, Trash2, Heart, Music, Library as LibraryIcon, ShoppingBag, Send, CheckSquare, Square, X, MoreVertical, CreditCard, Download, WifiOff, HardDrive, Share2, Gift } from 'lucide-react';
 import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
+import GiftSongDialog from '@/components/gift/GiftSongDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,7 @@ const Library = () => {
   const [songToDelete, setSongToDelete] = useState<DownloadedSong | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [songToShare, setSongToShare] = useState<DownloadedSong | null>(null);
+  const [songToGift, setSongToGift] = useState<DownloadedSong | null>(null);
   const [recommendSong, setRecommendSong] = useState<DownloadedSong | null>(null);
   const [recipientUsername, setRecipientUsername] = useState('');
   const [sharing, setSharing] = useState(false);
@@ -746,6 +748,10 @@ const Library = () => {
                         <Share2 className="h-4 w-4 mr-2" />
                         Recomendar a un amigo
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSongToGift(song)}>
+                        <Gift className="h-4 w-4 mr-2" />
+                        Regalar canción
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {!offlineIds.has(song.id) && online && (
                         <DropdownMenuItem
@@ -1109,6 +1115,16 @@ const Library = () => {
         itemId={recommendSong?.id || ''}
         itemTitle={recommendSong?.title}
       />
+
+      {songToGift && (
+        <GiftSongDialog
+          open={!!songToGift}
+          onOpenChange={(o) => !o && setSongToGift(null)}
+          songId={songToGift.id}
+          songTitle={songToGift.title}
+          artistName={songToGift.artist}
+        />
+      )}
     </div>
   );
 };

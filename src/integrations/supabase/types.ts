@@ -1270,6 +1270,57 @@ export type Database = {
         }
         Relationships: []
       }
+      song_gifts: {
+        Row: {
+          amount_xaf: number
+          artist_name_snapshot: string | null
+          claimed_at: string | null
+          created_at: string
+          download_id: string | null
+          id: string
+          message: string | null
+          recipient_email: string | null
+          recipient_user_id: string | null
+          sender_user_id: string
+          song_id: string
+          song_title_snapshot: string | null
+          status: Database["public"]["Enums"]["song_gift_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_xaf?: number
+          artist_name_snapshot?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          download_id?: string | null
+          id?: string
+          message?: string | null
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sender_user_id: string
+          song_id: string
+          song_title_snapshot?: string | null
+          status?: Database["public"]["Enums"]["song_gift_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_xaf?: number
+          artist_name_snapshot?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          download_id?: string | null
+          id?: string
+          message?: string | null
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          sender_user_id?: string
+          song_id?: string
+          song_title_snapshot?: string | null
+          status?: Database["public"]["Enums"]["song_gift_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       song_plays: {
         Row: {
           duration_ms: number | null
@@ -2321,6 +2372,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      claim_pending_song_gifts: {
+        Args: { p_email: string; p_user_id: string }
+        Returns: number
+      }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -2529,6 +2584,22 @@ export type Database = {
       }
       get_user_id_by_email: { Args: { p_email: string }; Returns: string }
       get_wallet_summary: { Args: { p_limit?: number }; Returns: Json }
+      gift_song: {
+        Args: {
+          p_message?: string
+          p_recipient_email?: string
+          p_recipient_user_id?: string
+          p_song_id: string
+        }
+        Returns: {
+          balance_after: number
+          gift_id: string
+          message: string
+          price_xaf: number
+          status: string
+          success: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2767,6 +2838,7 @@ export type Database = {
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
       shared_item_type: "song" | "artist" | "digital_card"
+      song_gift_status: "completed" | "pending_signup" | "failed" | "cancelled"
       song_review_status: "pending_review" | "approved" | "rejected" | "flagged"
       song_submission_status:
         | "pending"
@@ -2998,6 +3070,7 @@ export const Constants = {
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
       shared_item_type: ["song", "artist", "digital_card"],
+      song_gift_status: ["completed", "pending_signup", "failed", "cancelled"],
       song_review_status: ["pending_review", "approved", "rejected", "flagged"],
       song_submission_status: [
         "pending",
