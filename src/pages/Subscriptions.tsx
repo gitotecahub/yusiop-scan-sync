@@ -183,10 +183,10 @@ const Subscriptions = () => {
 
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold tabular-nums">{formatEURNumber(plan.price_eur_cents / 100)}</span>
+                    <span className="text-2xl font-bold tabular-nums">{formatPriceFromEur(plan.price_eur_cents / 100)}</span>
                     <span className="text-xs text-muted-foreground">/mes</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground tabular-nums">{formatXAFFixed(plan.price_xaf)}</p>
+                  <p className="text-[11px] text-muted-foreground tabular-nums">{formatEURNumber(plan.price_eur_cents / 100)}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{plan.description}</p>
                 </div>
 
