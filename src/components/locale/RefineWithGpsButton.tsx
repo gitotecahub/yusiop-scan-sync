@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useLocaleStore } from '@/stores/localeStore';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useLanguageStore } from '@/stores/languageStore';
 import { detectCountryByGps } from '@/hooks/useLocaleDetection';
 
 export default function RefineWithGpsButton() {
-  const { t } = useLanguage();
+  const t = useLanguageStore((s) => s.t);
   const userId = useAuthStore((s) => s.user?.id);
   const countries = useLocaleStore((s) => s.countries);
   const setUserLocale = useLocaleStore((s) => s.setUserLocale);
