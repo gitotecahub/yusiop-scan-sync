@@ -731,6 +731,45 @@ export type Database = {
           },
         ]
       }
+      country_settings: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          currency_symbol: string | null
+          decimals: number
+          default_currency: string
+          default_language: string
+          enabled: boolean
+          eur_to_currency_rate: number
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          currency_symbol?: string | null
+          decimals?: number
+          default_currency: string
+          default_language: string
+          enabled?: boolean
+          eur_to_currency_rate?: number
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          currency_symbol?: string | null
+          decimals?: number
+          default_currency?: string
+          default_language?: string
+          enabled?: boolean
+          eur_to_currency_rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1037,12 +1076,16 @@ export type Database = {
         Row: {
           avatar_url: string | null
           birth_year: number | null
+          country_code: string | null
           created_at: string
+          currency_code: string | null
           downloads_remaining: number | null
           full_name: string | null
           gender: string | null
           id: string
           last_used_mode: string
+          locale_detected_at: string | null
+          locale_source: string | null
           preferred_mode: string
           profile_choice_made: boolean
           updated_at: string
@@ -1052,12 +1095,16 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           birth_year?: number | null
+          country_code?: string | null
           created_at?: string
+          currency_code?: string | null
           downloads_remaining?: number | null
           full_name?: string | null
           gender?: string | null
           id?: string
           last_used_mode?: string
+          locale_detected_at?: string | null
+          locale_source?: string | null
           preferred_mode?: string
           profile_choice_made?: boolean
           updated_at?: string
@@ -1067,12 +1114,16 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           birth_year?: number | null
+          country_code?: string | null
           created_at?: string
+          currency_code?: string | null
           downloads_remaining?: number | null
           full_name?: string | null
           gender?: string | null
           id?: string
           last_used_mode?: string
+          locale_detected_at?: string | null
+          locale_source?: string | null
           preferred_mode?: string
           profile_choice_made?: boolean
           updated_at?: string

@@ -28,6 +28,8 @@ import {
   Hourglass,
   ShieldCheck,
   Languages,
+  Globe,
+  Coins,
   HelpCircle,
   Users,
 } from 'lucide-react';
@@ -36,6 +38,7 @@ import { useStaffAreas } from '@/hooks/useStaffAreas';
 import { useLanguageStore, LANGUAGES } from '@/stores/languageStore';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocaleStore } from '@/stores/localeStore';
 import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { useModeStore } from '@/stores/modeStore';
@@ -59,6 +62,14 @@ const Profile = () => {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguageStore();
   const currentLang = LANGUAGES.find((l) => l.code === language) ?? LANGUAGES[0];
+  const {
+    countries,
+    countryCode,
+    currencyCode,
+    currentCountry,
+    loadCountries,
+    setUserLocale,
+  } = useLocaleStore();
   const navigate = useNavigate();
   const { isArtist, artistRequestStatus } = useModeStore();
   const { areas, isSuperAdmin, loading: staffLoading } = useStaffAreas();
@@ -114,6 +125,47 @@ const Profile = () => {
     birthYear: '' as string,
     gender: '' as string,
   });
+
+  // Cargar catálogo de países al abrir Perfil
+  useEffect(() => {
+    void loadCountries();
+  }, [loadCountries]);
+
+  const handleCountryChange = async (newCountry: string) => {
+    if (!user?.id) return;
+    const country = countries.find((c) => c.country_code === newCountry);
+    if (!country) return;
+
+    setUserLocale(newCountry, country.default_currency);
+
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          country_code: newCountry,
+          currency_code: country.default_currency,
+          locale_source: 'manual',
+        })
+        .eq('user_id', user.id);
+      toast.success(t('settings.localeSaved'));
+    } catch (err) {
+      console.warn('Failed to save country', err);
+    }
+  };
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    if (!user?.id || !countryCode) return;
+    setUserLocale(countryCode, newCurrency);
+    try {
+      await supabase
+        .from('profiles')
+        .update({ currency_code: newCurrency, locale_source: 'manual' })
+        .eq('user_id', user.id);
+      toast.success(t('settings.localeSaved'));
+    } catch (err) {
+      console.warn('Failed to save currency', err);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -778,6 +830,62 @@ const Profile = () => {
                       <span>{l.flag}</span>
                       <span>{l.label}</span>
                     </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* País / Región */}
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Globe className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">{t('settings.country')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.countryLabel')}</p>
+              </div>
+            </div>
+            <Select value={countryCode ?? ''} onValueChange={handleCountryChange}>
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue placeholder="—">
+                  <span className="text-xs">
+                    {currentCountry?.country_name ?? '—'}
+                  </span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[280px]">
+                {countries.map((c) => (
+                  <SelectItem key={c.country_code} value={c.country_code}>
+                    <span className="whitespace-nowrap">{c.country_name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Moneda preferida */}
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Coins className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <div>
+                <p className="font-display font-semibold text-sm">{t('settings.currency')}</p>
+                <p className="text-xs text-muted-foreground">{t('settings.currencyLabel')}</p>
+              </div>
+            </div>
+            <Select
+              value={currencyCode ?? ''}
+              onValueChange={handleCurrencyChange}
+              disabled={!countryCode}
+            >
+              <SelectTrigger className="w-36 rounded-none border-border bg-transparent h-9">
+                <SelectValue placeholder="—">
+                  <span className="text-xs">{currencyCode ?? '—'}</span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from(new Set(countries.map((c) => c.default_currency))).map((cur) => (
+                  <SelectItem key={cur} value={cur}>
+                    <span className="whitespace-nowrap">{cur}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
