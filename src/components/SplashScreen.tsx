@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import yusiopLogo from '@/assets/yusiop-logo.svg';
+import yusiopLogo from '@/assets/yusiop-logo.png';
 
 const SplashScreen = () => {
   const [isExiting, setIsExiting] = useState(false);
