@@ -3,7 +3,7 @@ import { Music, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
-import yusiopLogo from '@/assets/yusiop-logo.svg';
+import yusiopLogo from '@/assets/yusiop-logo.png';
 import { toast } from 'sonner';
 
 const ProfileSelection = () => {
