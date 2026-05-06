@@ -144,6 +144,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           setTimeout(async () => {
             await claimActiveSession(session.user.id);
             startDeviceWatch(session.user.id, set);
+            // Welcome email (idempotent server-side)
+            try {
+              await supabase.functions.invoke('send-welcome-email');
+            } catch (e) {
+              console.warn('[welcome-email] invoke failed', e);
+            }
           }, 0);
         } else if (event === 'SIGNED_OUT') {
           stopDeviceWatch();
