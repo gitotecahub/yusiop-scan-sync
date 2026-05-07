@@ -6,9 +6,10 @@ const corsHeaders = {
 }
 
 const APP_URL = 'https://yusiop.lovable.app'
+const LOGO_URL = 'https://yusiop.lovable.app/yusiop-email-logo.png'
 
 function buildHtml(name: string) {
-  const greeting = name ? `Hola ${name},` : '¡Hola!'
+  const greeting = name ? `Hola ${name},` : 'Hola,'
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -17,30 +18,21 @@ function buildHtml(name: string) {
 <title>Bienvenido a YUSIOP</title>
 </head>
 <body style="margin:0;padding:0;background:#0B0F1A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#E6ECF5;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">Tu nueva forma de descubrir, comprar y disfrutar música ya está aquí.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">Una nueva forma de descubrir, comprar y disfrutar música.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0B0F1A;padding:40px 16px;">
   <tr><td align="center">
     <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#0F1424;border:1px solid rgba(255,255,255,0.06);border-radius:24px;overflow:hidden;">
-      <tr><td style="padding:48px 40px 24px;text-align:center;background:linear-gradient(135deg,#7B5CFF 0%,#5FA8FF 50%,#5FE1D9 100%);">
-        <div style="font-size:42px;font-weight:800;letter-spacing:0.04em;color:#ffffff;">YUSIOP</div>
-        <div style="font-size:12px;letter-spacing:0.3em;color:rgba(255,255,255,0.85);margin-top:6px;">SCAN · SYNC · PLAY</div>
+      <tr><td style="padding:48px 40px 32px;text-align:center;background:#000000;">
+        <img src="${LOGO_URL}" alt="YUSIOP" width="120" height="120" style="display:block;margin:0 auto 16px;width:120px;height:120px;border:0;outline:none;text-decoration:none;" />
+        <div style="font-size:12px;letter-spacing:0.3em;color:rgba(255,255,255,0.7);">SCAN · SYNC · PLAY</div>
       </td></tr>
       <tr><td style="padding:40px 40px 8px;">
         <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#ffffff;">Bienvenido a YUSIOP</h1>
         <p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:#B8C2D6;">${greeting}</p>
-        <p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:#B8C2D6;">Gracias por unirte a <strong style="color:#fff;">YUSIOP</strong>, la plataforma que conecta artistas y oyentes mediante una nueva forma de acceder a la música: escanear, sincronizar y reproducir.</p>
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.6;color:#B8C2D6;">Con YUSIOP podrás descubrir canciones, canjear tarjetas musicales, guardar tu biblioteca y disfrutar de tu música descargada incluso sin conexión.</p>
-      </td></tr>
-      <tr><td style="padding:0 40px 8px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          ${[['1','Escanea tu tarjeta'],['2','Elige tu música'],['3','Descarga y disfruta']].map(([n,t])=>`
-          <tr><td style="padding:10px 0;">
-            <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-              <td style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7B5CFF,#5FA8FF,#5FE1D9);text-align:center;color:#0B0F1A;font-weight:800;font-size:14px;line-height:36px;">${n}</td>
-              <td style="padding-left:14px;font-size:15px;color:#E6ECF5;">${t}</td>
-            </tr></table>
-          </td></tr>`).join('')}
-        </table>
+        <p style="margin:0 0 14px;font-size:15px;line-height:1.6;color:#B8C2D6;">Gracias por unirte a una nueva forma de descubrir, comprar y disfrutar música. En <strong style="color:#fff;">YUSIOP</strong> conectamos artistas y oyentes mediante tarjetas musicales, códigos QR y descargas digitales pensadas para una experiencia sencilla, moderna y accesible.</p>
+        <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#B8C2D6;">Desde ahora podrás escanear tus tarjetas, descubrir canciones, crear tu biblioteca y disfrutar de tu música descargada incluso sin conexión.</p>
+        <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#ffffff;font-weight:600;">Escanea. Sincroniza. Reproduce.</p>
+        <p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#B8C2D6;">Bienvenido a la revolución musical de YUSIOP.</p>
       </td></tr>
       <tr><td style="padding:32px 40px 48px;text-align:center;">
         <a href="${APP_URL}" style="display:inline-block;padding:14px 32px;border-radius:999px;background:linear-gradient(135deg,#7B5CFF 0%,#5FA8FF 50%,#5FE1D9 100%);color:#0B0F1A;font-weight:700;font-size:15px;text-decoration:none;">Entrar en YUSIOP</a>
@@ -89,7 +81,6 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
 
-    // Idempotency
     const { data: existing } = await admin
       .from('welcome_emails_sent')
       .select('user_id')
@@ -112,7 +103,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'YUSIOP <onboarding@resend.dev>',
+        from: 'YUSIOP <hola@yusiop.com>',
         to: [email],
         subject: 'Bienvenido a YUSIOP — Scan · Sync · Play',
         html: buildHtml(name),
