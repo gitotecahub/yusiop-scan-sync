@@ -75,7 +75,17 @@ const Library = () => {
   const [offlineIds, setOfflineIds] = useState<Set<string>>(new Set());
   const [storageBytes, setStorageBytes] = useState<number>(0);
   const online = useOnlineStatus();
-  const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause, stop } = usePlayerStore();
+  // Selectores individuales para evitar re-renders por cambios de `position`
+  // (el AudioPlayer dispara setPosition ~4 veces/seg, lo que provocaba parpadeo
+  // en las carátulas e imágenes de la biblioteca).
+  const currentSong = usePlayerStore((s) => s.currentSong);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const isPreview = usePlayerStore((s) => s.isPreview);
+  const setCurrentSong = usePlayerStore((s) => s.setCurrentSong);
+  const setQueue = usePlayerStore((s) => s.setQueue);
+  const play = usePlayerStore((s) => s.play);
+  const pause = usePlayerStore((s) => s.pause);
+  const stop = usePlayerStore((s) => s.stop);
 
   // Cargar canciones descargadas (online: BD; offline: IndexedDB)
   useEffect(() => {
