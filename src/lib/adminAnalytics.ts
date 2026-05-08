@@ -43,13 +43,15 @@ export type RevenueBreakdown = {
   promo_count: number;
   subs_eur: number;
   subs_count: number;
+  recharge_eur: number;
+  recharge_count: number;
 };
 
 export const fetchRevenueSeries = async (range: RangeKey) => {
   const start = startDateFor(range);
   const startIso = start.toISOString();
 
-  const [cardsRes, expressRes, promoRes, subsRes] = await Promise.all([
+  const [cardsRes, expressRes, promoRes, subsRes, rechargeRes] = await Promise.all([
     // 1) Card purchases (EUR cents)
     supabase
       .from('card_purchases')
@@ -75,12 +77,20 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
       .select('created_at, status, subscription_plans!inner(price_eur_cents)')
       .gte('created_at', startIso)
       .in('status', ['active', 'cancelled', 'past_due']),
+    // 5) Wallet recharge cards used (XAF)
+    supabase
+      .from('recharge_cards')
+      .select('amount, used_at, status')
+      .eq('status', 'used')
+      .not('used_at', 'is', null)
+      .gte('used_at', startIso),
   ]);
 
   if (cardsRes.error) throw cardsRes.error;
   if (expressRes.error) console.warn('[revenue] express error', expressRes.error);
   if (promoRes.error) console.warn('[revenue] promo error', promoRes.error);
   if (subsRes.error) console.warn('[revenue] subs error', subsRes.error);
+  if (rechargeRes.error) console.warn('[revenue] recharge error', rechargeRes.error);
 
   const grouped = new Map<string, number>();
   const breakdown: RevenueBreakdown = {
@@ -88,6 +98,7 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
     express_eur: 0, express_count: 0,
     promo_eur: 0, promo_count: 0,
     subs_eur: 0, subs_count: 0,
+    recharge_eur: 0, recharge_count: 0,
   };
   let totalEur = 0;
   let totalCount = 0;
@@ -130,6 +141,15 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
     addToDay(s.created_at, eur);
     breakdown.subs_eur += eur;
     breakdown.subs_count += 1;
+    totalEur += eur;
+    totalCount += 1;
+  });
+
+  (rechargeRes.data ?? []).forEach((r: any) => {
+    const eur = (Number(r.amount) || 0) / XAF_PER_EUR;
+    if (r.used_at) addToDay(r.used_at, eur);
+    breakdown.recharge_eur += eur;
+    breakdown.recharge_count += 1;
     totalEur += eur;
     totalCount += 1;
   });
@@ -258,7 +278,7 @@ const XAF_TO_EUR = 655.957;
 // Suma: tarjetas QR digitales (EUR) + Express (XAF→EUR) + Promo lanzamientos (EUR)
 // + Suscripciones activas (EUR) + tarjetas físicas activadas (XAF→EUR).
 export const fetchMonetizationGross = async () => {
-  const [cardsRes, expressRes, promoRes, subsRes, qrsRes] = await Promise.all([
+  const [cardsRes, expressRes, promoRes, subsRes, qrsRes, rechargeRes] = await Promise.all([
     supabase
       .from('card_purchases')
       .select('amount_cents, status')
@@ -279,6 +299,10 @@ export const fetchMonetizationGross = async () => {
     supabase
       .from('qr_cards')
       .select('card_type, origin, is_activated'),
+    supabase
+      .from('recharge_cards')
+      .select('amount, status')
+      .eq('status', 'used'),
   ]);
 
   let cardsEur = 0;
@@ -308,11 +332,19 @@ export const fetchMonetizationGross = async () => {
   });
   const physicalEur = physicalXaf / XAF_TO_EUR;
 
+  let rechargeXaf = 0;
+  (rechargeRes.data ?? []).forEach((r: any) => {
+    rechargeXaf += Number(r.amount) || 0;
+  });
+  const rechargeEur = rechargeXaf / XAF_TO_EUR;
+
   const downloadsGross = cardsEur + expressEur + promoEur + subsEur;
 
   return {
     downloadsGross,
     physicalSalesEur: physicalEur,
-    totalGross: downloadsGross + physicalEur,
+    rechargeEur,
+    totalGross: downloadsGross + physicalEur + rechargeEur,
   };
 };
+

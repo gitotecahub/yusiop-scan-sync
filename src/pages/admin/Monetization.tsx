@@ -20,6 +20,7 @@ import {
   PHYSICAL_STANDARD_PRICE_XAF,
   PHYSICAL_PREMIUM_PRICE_XAF,
 } from '@/lib/currency';
+import { fetchMonetizationGross } from '@/lib/adminAnalytics';
 
 // Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
 const STANDARD_PRICE_EUR = 5.00;
@@ -92,6 +93,7 @@ const Monetization = () => {
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [qrCards, setQrCards] = useState<Map<string, QrCardRow>>(new Map());
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
+  const [salesGross, setSalesGross] = useState<{ downloadsGross: number; physicalSalesEur: number; rechargeEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, rechargeEur: 0, totalGross: 0 });
   const [search, setSearch] = useState('');
   const [poolSearch, setPoolSearch] = useState('');
 
@@ -111,6 +113,12 @@ const Monetization = () => {
     (qrs ?? []).forEach((q: any) => map.set(q.id, q));
     setQrCards(map);
     setCollaborators((collabs as any) ?? []);
+    try {
+      const g = await fetchMonetizationGross();
+      setSalesGross(g);
+    } catch (e) {
+      console.warn('[Monetization] sales gross error', e);
+    }
     setLoading(false);
   };
 
@@ -436,15 +444,29 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Ingresos brutos</CardDescription>
+            <CardDescription>Consumido (base reparto 30/70)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Coins className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalGross)}
+              {formatEUR(totals.downloadsGross)}
             </CardTitle>
             <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
-              Descargas: {formatEURNumber(totals.downloadsGross)}
+              Créditos consumidos × precio por descarga.
               <br />
-              Tarjetas físicas: {formatEURNumber(totals.physicalSalesEur)}
+              El reparto a artistas se calcula sobre este importe.
+            </p>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Vendido (caja real, histórico)</CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-yusiop-primary" />
+              {formatEUR(salesGross.totalGross)}
+            </CardTitle>
+            <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
+              Tarjetas digitales + físicas + recargas wallet
+              <br />
+              + Express + Promo + Suscripciones.
             </p>
           </CardHeader>
         </Card>

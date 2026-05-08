@@ -63,6 +63,7 @@ const Dashboard = () => {
       express_eur: number; express_count: number;
       promo_eur: number; promo_count: number;
       subs_eur: number; subs_count: number;
+      recharge_eur: number; recharge_count: number;
     };
   }>({ series: [], totalEur: 0, count: 0, avgTicketEur: 0 });
   const [downloads, setDownloads] = useState<{
@@ -81,7 +82,7 @@ const Dashboard = () => {
     giftRedemptionRate: 0,
   });
   const [newUsers, setNewUsers] = useState(0);
-  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, totalGross: 0 });
+  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; rechargeEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, rechargeEur: 0, totalGross: 0 });
 
   useEffect(() => {
     let cancelled = false;
@@ -186,8 +187,9 @@ const Dashboard = () => {
             </CardTitle>
             <CardDescription>Por motor en el periodo seleccionado</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <RevenueEngineTile label="Tarjetas QR" eur={revenue.breakdown.cards_eur} count={revenue.breakdown.cards_count} loading={loading} />
+            <RevenueEngineTile label="Recargas wallet" eur={revenue.breakdown.recharge_eur} count={revenue.breakdown.recharge_count} loading={loading} />
             <RevenueEngineTile label="Express" eur={revenue.breakdown.express_eur} count={revenue.breakdown.express_count} loading={loading} />
             <RevenueEngineTile label="Promo lanzamientos" eur={revenue.breakdown.promo_eur} count={revenue.breakdown.promo_count} loading={loading} />
             <RevenueEngineTile label="Suscripciones" eur={revenue.breakdown.subs_eur} count={revenue.breakdown.subs_count} loading={loading} />
