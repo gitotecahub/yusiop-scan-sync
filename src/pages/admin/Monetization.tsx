@@ -93,6 +93,7 @@ const Monetization = () => {
   const [songs, setSongs] = useState<SongRow[]>([]);
   const [qrCards, setQrCards] = useState<Map<string, QrCardRow>>(new Map());
   const [collaborators, setCollaborators] = useState<CollaboratorRow[]>([]);
+  const [salesGross, setSalesGross] = useState<{ downloadsGross: number; physicalSalesEur: number; rechargeEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, rechargeEur: 0, totalGross: 0 });
   const [search, setSearch] = useState('');
   const [poolSearch, setPoolSearch] = useState('');
 
