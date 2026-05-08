@@ -113,6 +113,12 @@ const Monetization = () => {
     (qrs ?? []).forEach((q: any) => map.set(q.id, q));
     setQrCards(map);
     setCollaborators((collabs as any) ?? []);
+    try {
+      const g = await fetchMonetizationGross();
+      setSalesGross(g);
+    } catch (e) {
+      console.warn('[Monetization] sales gross error', e);
+    }
     setLoading(false);
   };
 
