@@ -77,12 +77,20 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
       .select('created_at, status, subscription_plans!inner(price_eur_cents)')
       .gte('created_at', startIso)
       .in('status', ['active', 'cancelled', 'past_due']),
+    // 5) Wallet recharge cards used (XAF)
+    supabase
+      .from('recharge_cards')
+      .select('amount, used_at, status')
+      .eq('status', 'used')
+      .not('used_at', 'is', null)
+      .gte('used_at', startIso),
   ]);
 
   if (cardsRes.error) throw cardsRes.error;
   if (expressRes.error) console.warn('[revenue] express error', expressRes.error);
   if (promoRes.error) console.warn('[revenue] promo error', promoRes.error);
   if (subsRes.error) console.warn('[revenue] subs error', subsRes.error);
+  if (rechargeRes.error) console.warn('[revenue] recharge error', rechargeRes.error);
 
   const grouped = new Map<string, number>();
   const breakdown: RevenueBreakdown = {
@@ -90,6 +98,7 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
     express_eur: 0, express_count: 0,
     promo_eur: 0, promo_count: 0,
     subs_eur: 0, subs_count: 0,
+    recharge_eur: 0, recharge_count: 0,
   };
   let totalEur = 0;
   let totalCount = 0;
