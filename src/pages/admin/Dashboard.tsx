@@ -63,6 +63,7 @@ const Dashboard = () => {
       express_eur: number; express_count: number;
       promo_eur: number; promo_count: number;
       subs_eur: number; subs_count: number;
+      recharge_eur: number; recharge_count: number;
     };
   }>({ series: [], totalEur: 0, count: 0, avgTicketEur: 0 });
   const [downloads, setDownloads] = useState<{
