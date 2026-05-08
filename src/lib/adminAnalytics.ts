@@ -43,13 +43,15 @@ export type RevenueBreakdown = {
   promo_count: number;
   subs_eur: number;
   subs_count: number;
+  recharge_eur: number;
+  recharge_count: number;
 };
 
 export const fetchRevenueSeries = async (range: RangeKey) => {
   const start = startDateFor(range);
   const startIso = start.toISOString();
 
-  const [cardsRes, expressRes, promoRes, subsRes] = await Promise.all([
+  const [cardsRes, expressRes, promoRes, subsRes, rechargeRes] = await Promise.all([
     // 1) Card purchases (EUR cents)
     supabase
       .from('card_purchases')
