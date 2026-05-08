@@ -278,7 +278,7 @@ const XAF_TO_EUR = 655.957;
 // Suma: tarjetas QR digitales (EUR) + Express (XAF→EUR) + Promo lanzamientos (EUR)
 // + Suscripciones activas (EUR) + tarjetas físicas activadas (XAF→EUR).
 export const fetchMonetizationGross = async () => {
-  const [cardsRes, expressRes, promoRes, subsRes, qrsRes] = await Promise.all([
+  const [cardsRes, expressRes, promoRes, subsRes, qrsRes, rechargeRes] = await Promise.all([
     supabase
       .from('card_purchases')
       .select('amount_cents, status')
@@ -299,6 +299,10 @@ export const fetchMonetizationGross = async () => {
     supabase
       .from('qr_cards')
       .select('card_type, origin, is_activated'),
+    supabase
+      .from('recharge_cards')
+      .select('amount, status')
+      .eq('status', 'used'),
   ]);
 
   let cardsEur = 0;
@@ -328,11 +332,19 @@ export const fetchMonetizationGross = async () => {
   });
   const physicalEur = physicalXaf / XAF_TO_EUR;
 
+  let rechargeXaf = 0;
+  (rechargeRes.data ?? []).forEach((r: any) => {
+    rechargeXaf += Number(r.amount) || 0;
+  });
+  const rechargeEur = rechargeXaf / XAF_TO_EUR;
+
   const downloadsGross = cardsEur + expressEur + promoEur + subsEur;
 
   return {
     downloadsGross,
     physicalSalesEur: physicalEur,
-    totalGross: downloadsGross + physicalEur,
+    rechargeEur,
+    totalGross: downloadsGross + physicalEur + rechargeEur,
   };
 };
+
