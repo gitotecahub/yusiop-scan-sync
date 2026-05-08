@@ -82,7 +82,7 @@ const Dashboard = () => {
     giftRedemptionRate: 0,
   });
   const [newUsers, setNewUsers] = useState(0);
-  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, totalGross: 0 });
+  const [monetGross, setMonetGross] = useState<{ downloadsGross: number; physicalSalesEur: number; rechargeEur: number; totalGross: number }>({ downloadsGross: 0, physicalSalesEur: 0, rechargeEur: 0, totalGross: 0 });
 
   useEffect(() => {
     let cancelled = false;
