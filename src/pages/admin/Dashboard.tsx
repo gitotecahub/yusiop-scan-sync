@@ -187,8 +187,9 @@ const Dashboard = () => {
             </CardTitle>
             <CardDescription>Por motor en el periodo seleccionado</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <RevenueEngineTile label="Tarjetas QR" eur={revenue.breakdown.cards_eur} count={revenue.breakdown.cards_count} loading={loading} />
+            <RevenueEngineTile label="Recargas wallet" eur={revenue.breakdown.recharge_eur} count={revenue.breakdown.recharge_count} loading={loading} />
             <RevenueEngineTile label="Express" eur={revenue.breakdown.express_eur} count={revenue.breakdown.express_count} loading={loading} />
             <RevenueEngineTile label="Promo lanzamientos" eur={revenue.breakdown.promo_eur} count={revenue.breakdown.promo_count} loading={loading} />
             <RevenueEngineTile label="Suscripciones" eur={revenue.breakdown.subs_eur} count={revenue.breakdown.subs_count} loading={loading} />
