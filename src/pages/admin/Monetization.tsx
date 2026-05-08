@@ -20,6 +20,7 @@ import {
   PHYSICAL_STANDARD_PRICE_XAF,
   PHYSICAL_PREMIUM_PRICE_XAF,
 } from '@/lib/currency';
+import { fetchMonetizationGross } from '@/lib/adminAnalytics';
 
 // Pricing rules (EUR) — must mirror supabase/functions/create-card-checkout/index.ts
 const STANDARD_PRICE_EUR = 5.00;
