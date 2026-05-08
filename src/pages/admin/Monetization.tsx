@@ -444,15 +444,29 @@ const Monetization = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Ingresos brutos</CardDescription>
+            <CardDescription>Consumido (base reparto 30/70)</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Coins className="h-5 w-5 text-yusiop-primary" />
-              {formatEUR(totals.totalGross)}
+              {formatEUR(totals.downloadsGross)}
             </CardTitle>
             <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
-              Descargas: {formatEURNumber(totals.downloadsGross)}
+              Créditos consumidos × precio por descarga.
               <br />
-              Tarjetas físicas: {formatEURNumber(totals.physicalSalesEur)}
+              El reparto a artistas se calcula sobre este importe.
+            </p>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Vendido (caja real, histórico)</CardDescription>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-yusiop-primary" />
+              {formatEUR(salesGross.totalGross)}
+            </CardTitle>
+            <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
+              Tarjetas digitales + físicas + recargas wallet
+              <br />
+              + Express + Promo + Suscripciones.
             </p>
           </CardHeader>
         </Card>
