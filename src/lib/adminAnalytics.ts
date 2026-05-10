@@ -300,9 +300,10 @@ export const fetchMonetizationGross = async () => {
       .from('qr_cards')
       .select('card_type, origin, is_activated'),
     supabase
-      .from('recharge_cards')
-      .select('amount, status')
-      .eq('status', 'used'),
+      .from('wallet_transactions')
+      .select('amount, status, type')
+      .eq('type', 'recharge')
+      .eq('status', 'completed'),
   ]);
 
   let cardsEur = 0;
