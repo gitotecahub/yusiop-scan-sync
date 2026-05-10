@@ -147,7 +147,7 @@ export const fetchRevenueSeries = async (range: RangeKey) => {
 
   (rechargeRes.data ?? []).forEach((r: any) => {
     const eur = (Number(r.amount) || 0) / XAF_PER_EUR;
-    if (r.used_at) addToDay(r.used_at, eur);
+    if (r.created_at) addToDay(r.created_at, eur);
     breakdown.recharge_eur += eur;
     breakdown.recharge_count += 1;
     totalEur += eur;
