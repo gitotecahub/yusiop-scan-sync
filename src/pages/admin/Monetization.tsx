@@ -17,6 +17,7 @@ import {
   formatXAFNumber,
   formatXAFFixed,
   eurToXaf,
+  XAF_PER_EUR,
   PHYSICAL_STANDARD_PRICE_XAF,
   PHYSICAL_PREMIUM_PRICE_XAF,
 } from '@/lib/currency';
@@ -139,22 +140,30 @@ const Monetization = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Compute revenue per download row based on the QR card it came from
+  // Compute revenue per download row (in EUR) based on the QR card it came from.
+  // - Digital cards: EUR price / credits (Standard 1.25€, Premium 1€).
+  // - Physical cards: fixed XAF price / credits, converted to EUR.
   const revenueForDownload = (row: DownloadRow): number => {
     let cardType = row.card_type;
     let credits = 0;
+    let origin: 'physical' | 'digital' = 'digital';
     if (row.qr_card_id) {
       const qr = qrCards.get(row.qr_card_id);
       if (qr) {
         cardType = qr.card_type;
         credits = qr.download_credits > 0 ? qr.download_credits : 0;
+        origin = qr.origin;
       }
+    }
+    if (origin === 'physical') {
+      const xaf = cardType === 'premium' ? PHYSICAL_PREMIUM_PRICE_XAF : PHYSICAL_STANDARD_PRICE_XAF;
+      const c = credits > 0 ? credits : (cardType === 'premium' ? PREMIUM_CREDITS_DEFAULT : STANDARD_CREDITS);
+      return (xaf / c) / XAF_PER_EUR;
     }
     if (cardType === 'premium') {
       const c = credits > 0 ? credits : PREMIUM_CREDITS_DEFAULT;
       return PREMIUM_PRICE_EUR / c;
     }
-    // default standard
     return STANDARD_PER_DOWNLOAD;
   };
 
