@@ -163,17 +163,36 @@ const Library = () => {
           return;
         }
 
-        const formattedSongs: DownloadedSong[] = downloadsData?.map(download => ({
-          id: download.songs.id,
-          title: download.songs.title,
-          artist: download.songs.artists.name,
-          duration_seconds: download.songs.duration_seconds,
-          cover_url: download.songs.cover_url || download.songs.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
-          downloaded_at: download.downloaded_at,
-          is_favorite: false, // TODO: implementar favoritos
-          track_url: download.songs.track_url,
-          preview_url: download.songs.preview_url
-        })) || [];
+        const songIds = (downloadsData || []).map((d: any) => d.songs.id);
+        const collabsBySong: Record<string, string[]> = {};
+        if (songIds.length > 0) {
+          const { data: collabs } = await supabase
+            .from('song_collaborators')
+            .select('song_id, artist_name, is_primary, share_percent')
+            .in('song_id', songIds);
+          (collabs || []).forEach((c: any) => {
+            if (c.is_primary) return;
+            if (!collabsBySong[c.song_id]) collabsBySong[c.song_id] = [];
+            collabsBySong[c.song_id].push(c.artist_name);
+          });
+        }
+
+        const formattedSongs: DownloadedSong[] = downloadsData?.map(download => {
+          const primary = download.songs.artists.name;
+          const feats = collabsBySong[download.songs.id] || [];
+          const artistDisplay = feats.length > 0 ? `${primary} ft ${feats.join(', ')}` : primary;
+          return {
+            id: download.songs.id,
+            title: download.songs.title,
+            artist: artistDisplay,
+            duration_seconds: download.songs.duration_seconds,
+            cover_url: download.songs.cover_url || download.songs.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+            downloaded_at: download.downloaded_at,
+            is_favorite: false,
+            track_url: download.songs.track_url,
+            preview_url: download.songs.preview_url
+          };
+        }) || [];
 
         setDownloads(formattedSongs);
         setFavorites(formattedSongs.filter(song => song.is_favorite));

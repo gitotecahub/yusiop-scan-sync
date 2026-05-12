@@ -56,15 +56,31 @@ const PopularSection = () => {
         setSongs([]);
       } else {
         const rows = (data || []) as PopularRow[];
+        const ids = rows.map((r) => r.song_id);
+        const featsBySong: Record<string, string[]> = {};
+        if (ids.length > 0) {
+          const { data: collabs } = await supabase
+            .from('song_collaborators')
+            .select('song_id, artist_name, is_primary')
+            .in('song_id', ids);
+          (collabs || []).forEach((c: any) => {
+            if (c.is_primary) return;
+            if (!featsBySong[c.song_id]) featsBySong[c.song_id] = [];
+            featsBySong[c.song_id].push(c.artist_name);
+          });
+        }
         setSongs(
-          rows.map((r, idx) => ({
-            id: r.song_id,
-            title: r.title,
-            artist: r.artist_name,
-            cover_url:
-              r.cover_url || `https://picsum.photos/300/300?random=${r.song_id}`,
-            rank: idx + 1,
-          }))
+          rows.map((r, idx) => {
+            const feats = featsBySong[r.song_id] || [];
+            return {
+              id: r.song_id,
+              title: r.title,
+              artist: feats.length > 0 ? `${r.artist_name} ft ${feats.join(', ')}` : r.artist_name,
+              cover_url:
+                r.cover_url || `https://picsum.photos/300/300?random=${r.song_id}`,
+              rank: idx + 1,
+            };
+          })
         );
       }
       setLoading(false);
