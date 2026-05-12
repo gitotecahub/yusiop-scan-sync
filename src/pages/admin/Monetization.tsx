@@ -145,24 +145,21 @@ const Monetization = () => {
   // - Physical cards: fixed XAF price / credits, converted to EUR.
   const revenueForDownload = (row: DownloadRow): number => {
     let cardType = row.card_type;
-    let credits = 0;
     let origin: 'physical' | 'digital' = 'digital';
     if (row.qr_card_id) {
       const qr = qrCards.get(row.qr_card_id);
       if (qr) {
         cardType = qr.card_type;
-        credits = qr.download_credits > 0 ? qr.download_credits : 0;
         origin = qr.origin;
       }
     }
+    const originalCredits = cardType === 'premium' ? PREMIUM_CREDITS_DEFAULT : STANDARD_CREDITS;
     if (origin === 'physical') {
       const xaf = cardType === 'premium' ? PHYSICAL_PREMIUM_PRICE_XAF : PHYSICAL_STANDARD_PRICE_XAF;
-      const c = credits > 0 ? credits : (cardType === 'premium' ? PREMIUM_CREDITS_DEFAULT : STANDARD_CREDITS);
-      return (xaf / c) / XAF_PER_EUR;
+      return (xaf / originalCredits) / XAF_PER_EUR;
     }
     if (cardType === 'premium') {
-      const c = credits > 0 ? credits : PREMIUM_CREDITS_DEFAULT;
-      return PREMIUM_PRICE_EUR / c;
+      return PREMIUM_PRICE_EUR / originalCredits;
     }
     return STANDARD_PER_DOWNLOAD;
   };
