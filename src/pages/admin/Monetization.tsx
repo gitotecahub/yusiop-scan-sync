@@ -16,7 +16,7 @@ import {
   formatEURNumber,
   formatXAFNumber,
   formatXAFFixed,
-  eurToXaf,
+  XAF_PER_EUR,
   PHYSICAL_STANDARD_PRICE_XAF,
   PHYSICAL_PREMIUM_PRICE_XAF,
 } from '@/lib/currency';
