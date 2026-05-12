@@ -207,10 +207,10 @@ const Store = () => {
                   <span>{TIERS[t].label}</span>
                   <span className="flex flex-col items-end leading-tight">
                     <span className="text-2xl font-bold text-primary tabular-nums">
-                      {formatPriceFromEur(TIERS[t].priceEur)}
+                      {formatEURNumber(TIERS[t].priceEur)}
                     </span>
                     <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
-                      {formatEURNumber(TIERS[t].priceEur)}
+                      {TIERS[t].priceXaf.toLocaleString('es-ES')} XAF
                     </span>
                   </span>
                 </CardTitle>
