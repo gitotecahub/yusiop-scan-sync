@@ -17,16 +17,18 @@ import { useLocaleStore } from '@/stores/localeStore';
 
 type Tier = 'standard' | 'premium';
 
-const TIERS: Record<Tier, { label: string; priceEur: number; credits: number; perks: string[] }> = {
+const TIERS: Record<Tier, { label: string; priceEur: number; priceXaf: number; credits: number; perks: string[] }> = {
   standard: {
     label: 'YUSIOP Estándar',
     priceEur: 5,
+    priceXaf: 3500,
     credits: 4,
     perks: ['4 descargas', 'Calidad máxima', 'Sin caducidad'],
   },
   premium: {
     label: 'YUSIOP Premium',
     priceEur: 10,
+    priceXaf: 7000,
     credits: 10,
     perks: ['10 descargas', 'Calidad máxima', 'Acceso prioritario'],
   },
@@ -205,10 +207,10 @@ const Store = () => {
                   <span>{TIERS[t].label}</span>
                   <span className="flex flex-col items-end leading-tight">
                     <span className="text-2xl font-bold text-primary tabular-nums">
-                      {formatPriceFromEur(TIERS[t].priceEur)}
+                      {formatEURNumber(TIERS[t].priceEur)}
                     </span>
                     <span className="text-[11px] font-normal text-muted-foreground tabular-nums">
-                      {formatEURNumber(TIERS[t].priceEur)}
+                      {TIERS[t].priceXaf.toLocaleString('es-ES')} XAF
                     </span>
                   </span>
                 </CardTitle>
