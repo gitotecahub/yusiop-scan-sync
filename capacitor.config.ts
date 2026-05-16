@@ -8,7 +8,14 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://1ea3bd26-6b64-4558-b44e-5e6d94a14cfb.lovableproject.com?forceHideBadge=true',
     cleartext: true
-  }
+  },
+  plugins: {
+    PrivacyScreen: {
+      enable: true,
+      imageName: 'Splash',
+      preventScreenshots: true,
+    },
+  },
 };
 
 export default config;
