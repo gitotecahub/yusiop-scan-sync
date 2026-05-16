@@ -62,6 +62,8 @@ import AuditLog from '@/pages/admin/AuditLog';
 import Layout from '@/components/Layout';
 import AudioPlayer from '@/components/AudioPlayer';
 import SplashScreen from '@/components/SplashScreen';
+import WatermarkOverlay from '@/components/WatermarkOverlay';
+import ScreenRecordingGuard from '@/components/ScreenRecordingGuard';
 import OnlineOnlyRoute from '@/components/OnlineOnlyRoute';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
@@ -150,6 +152,8 @@ const AppContent = () => {
   return (
     <>
     {showLocaleGate && <LocaleFallbackGate />}
+    <WatermarkOverlay />
+    <ScreenRecordingGuard />
     <Routes>
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminLayout />}>
