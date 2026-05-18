@@ -168,12 +168,12 @@ const Index = () => {
             ))}
             <span className="vapor-text">
               {language === 'es'
-                ? 'en alta fidelidad'
+                ? 'en alta calidad'
                 : language === 'en'
-                ? 'in high fidelity'
+                ? 'in high quality'
                 : language === 'fr'
-                ? 'en haute fidélité'
-                : 'em alta fidelidade'}
+                ? 'en haute qualité'
+                : 'em alta qualidade'}
             </span>
           </h1>
 
