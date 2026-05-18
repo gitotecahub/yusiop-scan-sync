@@ -40,9 +40,12 @@ const TIERS: Record<Tier, { label: string; priceEur: number; priceXaf: number; c
 const Store = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { friends } = useFriends();
   const [selected, setSelected] = useState<Tier>('standard');
   const [isGift, setIsGift] = useState(false);
+  const [giftMode, setGiftMode] = useState<'friend' | 'email'>('friend');
   const [recipient, setRecipient] = useState('');
+  const [recipientFriendId, setRecipientFriendId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
