@@ -132,5 +132,6 @@ export const WITHDRAWAL_ERROR_MAP: Record<string, string> = {
   insufficient_balance: 'Balance disponible insuficiente.',
   earnings_under_review: 'Tienes ingresos bajo revisión. No puedes retirar ahora.',
   not_authorized: 'No autorizado.',
+  age_restricted: 'Los retiros están disponibles a partir de los 18 años o con tutor verificado.',
   method_has_active_withdrawals: 'No puedes eliminar este método porque tiene retiros activos.',
 };
