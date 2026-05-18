@@ -86,6 +86,7 @@ const AppContent = () => {
 
   // Detección automática de país/idioma/moneda al iniciar sesión
   useLocaleDetection();
+  useNavHistoryTracker();
   const localeDetectionPending = useLocaleStore((s) => s.detectionPending);
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,
