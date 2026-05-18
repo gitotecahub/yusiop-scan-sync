@@ -15,7 +15,12 @@ interface AuthState {
   loading: boolean;
   initialize: () => void;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: any; alreadyRegistered?: boolean }>;
+  signUp: (
+    email: string,
+    password: string,
+    username: string,
+    extras?: { birthDate?: string; parentalEmail?: string; parentalToken?: string },
+  ) => Promise<{ error: any; alreadyRegistered?: boolean }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (newPassword: string) => Promise<{ error: any }>;
