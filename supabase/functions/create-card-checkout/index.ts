@@ -151,7 +151,8 @@ Deno.serve(async (req) => {
         card_type: body.card_type,
         download_credits: String(tier.credits),
         is_gift: body.is_gift ? "true" : "false",
-        gift_recipient_email: body.gift_recipient_email ?? "",
+        gift_recipient_email: resolvedGiftEmail,
+        gift_recipient_user_id: resolvedGiftUserId,
         gift_message: body.gift_message?.slice(0, 280) ?? "",
       },
       success_url: body.success_url ??
