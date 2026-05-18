@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Gift, Check, Loader2, Zap } from 'lucide-react';
+import { Sparkles, Gift, Check, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
@@ -184,6 +184,14 @@ const Store = () => {
         </div>
       )}
       <header className="mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="mb-3 -ml-2 h-9 px-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Atrás
+        </Button>
         <h1 className="text-3xl font-bold tracking-tight">Tienda</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Compra tarjetas digitales para descargar tu música
@@ -279,24 +287,8 @@ const Store = () => {
         )}
       </Button>
 
-      <Button
-        variant="outline"
-        className="w-full h-12 text-base font-semibold mt-3 border-dashed border-primary/40 text-primary hover:bg-primary/10"
-        onClick={handleSimulate}
-        disabled={loading}
-      >
-        {loading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <>
-            <Zap className="h-4 w-4 mr-2" />
-            Simular compra (sin pago)
-          </>
-        )}
-      </Button>
-
       <p className="text-xs text-muted-foreground text-center mt-3">
-        Pago seguro con Stripe · La simulación crea la tarjeta al instante
+        Pago seguro con Stripe
       </p>
     </div>
   );
