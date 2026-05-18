@@ -159,7 +159,7 @@ const Index = () => {
           }}
         />
         <div className="relative">
-          <h1 className="display-xl text-[2.2rem] sm:text-4xl">
+          <h1 className="display-xl text-[2.2rem] sm:text-4xl text-center">
             <span className="vapor-text">Scan - Sync - Play</span>
           </h1>
 
