@@ -266,16 +266,85 @@ const Store = () => {
 
           {isGift && (
             <div className="space-y-3 pt-2">
-              <div>
-                <Label htmlFor="recipient">Email del destinatario</Label>
-                <Input
-                  id="recipient"
-                  type="email"
-                  placeholder="amigo@ejemplo.com"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                />
-              </div>
+              <Tabs value={giftMode} onValueChange={(v) => setGiftMode(v as 'friend' | 'email')}>
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger value="friend">
+                    <Users className="h-3.5 w-3.5 mr-1.5" /> Amigo
+                  </TabsTrigger>
+                  <TabsTrigger value="email">
+                    <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="friend" className="mt-3">
+                  {friends.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Aún no tienes amigos en Yusiop.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/friends')}
+                      >
+                        Buscar amigos
+                      </Button>
+                    </div>
+                  ) : (
+                    <ScrollArea className="max-h-[220px] pr-2">
+                      <ul className="space-y-1">
+                        {friends.map((f) => {
+                          const checked = recipientFriendId === f.user_id;
+                          return (
+                            <li key={f.user_id}>
+                              <button
+                                type="button"
+                                onClick={() => setRecipientFriendId(checked ? null : f.user_id)}
+                                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
+                                  checked
+                                    ? 'bg-primary/10 ring-1 ring-primary/40'
+                                    : 'hover:bg-muted/50'
+                                }`}
+                              >
+                                <Avatar className="h-9 w-9">
+                                  <AvatarImage src={f.avatar_url || undefined} />
+                                  <AvatarFallback>
+                                    {(f.full_name || f.username || '?').charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0 text-left">
+                                  <p className="text-sm font-semibold truncate">
+                                    {f.full_name || f.username || 'Usuario'}
+                                  </p>
+                                  {f.username && (
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      @{f.username}
+                                    </p>
+                                  )}
+                                </div>
+                                {checked && <Check className="h-4 w-4 text-primary shrink-0" />}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </ScrollArea>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="email" className="mt-3">
+                  <Label htmlFor="recipient">Email del destinatario</Label>
+                  <Input
+                    id="recipient"
+                    type="email"
+                    placeholder="amigo@ejemplo.com"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                  />
+                </TabsContent>
+              </Tabs>
+
               <div>
                 <Label htmlFor="message">Mensaje (opcional)</Label>
                 <Textarea
