@@ -46,6 +46,7 @@ const Store = () => {
   const [giftMode, setGiftMode] = useState<'friend' | 'email'>('friend');
   const [recipient, setRecipient] = useState('');
   const [recipientFriendId, setRecipientFriendId] = useState<string | null>(null);
+  const [friendQuery, setFriendQuery] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
