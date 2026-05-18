@@ -19,6 +19,8 @@ import {
   WITHDRAWAL_ERROR_MAP,
   formatMethodSummary,
 } from '@/lib/withdrawalMethods';
+import { useAgeProfile } from '@/hooks/useAgeProfile';
+import AgeRestrictedAlert from '@/components/age/AgeRestrictedAlert';
 
 type Props = {
   open: boolean;
@@ -37,6 +39,7 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
   const [submitting, setSubmitting] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [loadingMethods, setLoadingMethods] = useState(false);
+  const { canWithdraw, isMinor, profile: ageProfileData } = useAgeProfile();
 
   const loadMethods = async () => {
     setLoadingMethods(true);
@@ -77,6 +80,7 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
   const netXaf = Math.max(0, amountNum - feeXaf);
 
   const canSubmit =
+    canWithdraw &&
     !!methodId &&
     selectedMethod?.verification_status === 'verified' &&
     amountNum >= minXaf &&
@@ -118,6 +122,13 @@ const WithdrawalRequestDialog = ({ open, onOpenChange, artistId, availableXaf, s
           </DialogHeader>
 
           <div className="space-y-4">
+            {isMinor && !canWithdraw && (
+              <AgeRestrictedAlert
+                feature="los retiros"
+                reason={ageProfileData.parentalEmail ? 'guardian_required' : 'adult_only'}
+              />
+            )}
+
             <Card className="p-3 bg-muted/40">
               <div className="text-xs text-muted-foreground">Balance disponible</div>
               <div className="text-2xl font-bold">{formatXAFFixed(availableXaf)}</div>
