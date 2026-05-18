@@ -74,6 +74,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import { useLocaleDetection } from '@/hooks/useLocaleDetection';
 import { useLocaleStore } from '@/stores/localeStore';
 import LocaleFallbackGate from '@/components/locale/LocaleFallbackGate';
+import { useNavHistoryTracker } from '@/hooks/useNavHistory';
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const AppContent = () => {
 
   // Detección automática de país/idioma/moneda al iniciar sesión
   useLocaleDetection();
+  useNavHistoryTracker();
   const localeDetectionPending = useLocaleStore((s) => s.detectionPending);
 
   // Si Supabase nos devuelve un enlace de recovery en cualquier ruta,

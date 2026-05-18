@@ -12,6 +12,7 @@ import RedeemCodeDialog from '@/components/wallet/RedeemCodeDialog';
 import RechargeWalletDialog from '@/components/wallet/RechargeWalletDialog';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getPreviousPath } from '@/hooks/useNavHistory';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -76,7 +77,20 @@ const Wallet = () => {
       {/* Header */}
       <div className="sticky top-0 z-10 backdrop-blur-xl bg-background/70 border-b border-border/40">
         <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const prev = getPreviousPath('/');
+              // Evitar volver a la propia /wallet (ej. tras redirección Stripe)
+              if (prev.startsWith('/wallet')) {
+                navigate('/', { replace: true });
+              } else {
+                navigate(prev);
+              }
+            }}
+            className="rounded-full"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-base font-semibold tracking-tight">Mi Saldo</h1>
