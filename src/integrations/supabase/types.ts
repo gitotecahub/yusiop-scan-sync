@@ -2495,6 +2495,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      consume_parental_token: { Args: { p_token: string }; Returns: Json }
       consume_subscription_credit: {
         Args: { p_song_id: string; p_user_id: string }
         Returns: {
