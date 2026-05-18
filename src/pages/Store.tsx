@@ -46,6 +46,7 @@ const Store = () => {
   const [giftMode, setGiftMode] = useState<'friend' | 'email'>('friend');
   const [recipient, setRecipient] = useState('');
   const [recipientFriendId, setRecipientFriendId] = useState<string | null>(null);
+  const [friendQuery, setFriendQuery] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -292,44 +293,98 @@ const Store = () => {
                       </Button>
                     </div>
                   ) : (
-                    <ScrollArea className="max-h-[220px] pr-2">
-                      <ul className="space-y-1">
-                        {friends.map((f) => {
-                          const checked = recipientFriendId === f.user_id;
-                          return (
-                            <li key={f.user_id}>
-                              <button
-                                type="button"
-                                onClick={() => setRecipientFriendId(checked ? null : f.user_id)}
-                                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
-                                  checked
-                                    ? 'bg-primary/10 ring-1 ring-primary/40'
-                                    : 'hover:bg-muted/50'
-                                }`}
-                              >
-                                <Avatar className="h-9 w-9">
-                                  <AvatarImage src={f.avatar_url || undefined} />
-                                  <AvatarFallback>
-                                    {(f.full_name || f.username || '?').charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0 text-left">
-                                  <p className="text-sm font-semibold truncate">
-                                    {f.full_name || f.username || 'Usuario'}
+                    (() => {
+                      const selectedFriend = friends.find((f) => f.user_id === recipientFriendId) || null;
+                      const q = friendQuery.trim().toLowerCase();
+                      const filtered = q
+                        ? friends.filter(
+                            (f) =>
+                              (f.username || '').toLowerCase().includes(q) ||
+                              (f.full_name || '').toLowerCase().includes(q),
+                          )
+                        : friends;
+                      return (
+                        <div className="space-y-2">
+                          {selectedFriend && (
+                            <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-primary/10 ring-1 ring-primary/40">
+                              <Avatar className="h-9 w-9">
+                                <AvatarImage src={selectedFriend.avatar_url || undefined} />
+                                <AvatarFallback>
+                                  {(selectedFriend.full_name || selectedFriend.username || '?').charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0 text-left">
+                                <p className="text-sm font-semibold truncate">
+                                  {selectedFriend.full_name || selectedFriend.username || 'Usuario'}
+                                </p>
+                                {selectedFriend.username && (
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    @{selectedFriend.username}
                                   </p>
-                                  {f.username && (
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      @{f.username}
-                                    </p>
-                                  )}
-                                </div>
-                                {checked && <Check className="h-4 w-4 text-primary shrink-0" />}
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </ScrollArea>
+                                )}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setRecipientFriendId(null)}
+                              >
+                                Cambiar
+                              </Button>
+                            </div>
+                          )}
+
+                          {!selectedFriend && (
+                            <>
+                              <Input
+                                placeholder="Buscar amigo por nombre o @usuario"
+                                value={friendQuery}
+                                onChange={(e) => setFriendQuery(e.target.value)}
+                              />
+                              {filtered.length === 0 ? (
+                                <p className="text-xs text-muted-foreground px-1 py-2">
+                                  No se encontraron amigos.
+                                </p>
+                              ) : (
+                                <ScrollArea className="max-h-[220px] pr-2">
+                                  <ul className="space-y-1">
+                                    {filtered.map((f) => (
+                                      <li key={f.user_id}>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setRecipientFriendId(f.user_id);
+                                            setFriendQuery('');
+                                          }}
+                                          className="w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors hover:bg-muted/50"
+                                        >
+                                          <Avatar className="h-9 w-9">
+                                            <AvatarImage src={f.avatar_url || undefined} />
+                                            <AvatarFallback>
+                                              {(f.full_name || f.username || '?').charAt(0).toUpperCase()}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div className="flex-1 min-w-0 text-left">
+                                            <p className="text-sm font-semibold truncate">
+                                              {f.full_name || f.username || 'Usuario'}
+                                            </p>
+                                            {f.username && (
+                                              <p className="text-xs text-muted-foreground truncate">
+                                                @{f.username}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </ScrollArea>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()
                   )}
                 </TabsContent>
 
