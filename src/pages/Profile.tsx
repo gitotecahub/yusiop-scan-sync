@@ -50,7 +50,7 @@ import { useAgeProfile } from '@/hooks/useAgeProfile';
 import MinorBadge from '@/components/age/MinorBadge';
 import BirthDateGate from '@/components/age/BirthDateGate';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 
 interface ScannedCard {
   id: string;
