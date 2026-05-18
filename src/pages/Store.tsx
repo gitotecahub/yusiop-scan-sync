@@ -7,12 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Gift, Check, Loader2, ArrowLeft } from 'lucide-react';
+import { Sparkles, Gift, Check, Loader2, ArrowLeft, Users, Mail } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 import { formatPriceFromEur } from '@/lib/localizedPricing';
+import { useFriends } from '@/hooks/useFriends';
 import { useLocaleStore } from '@/stores/localeStore';
 
 type Tier = 'standard' | 'premium';
