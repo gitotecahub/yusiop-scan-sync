@@ -114,9 +114,15 @@ const Store = () => {
   }, [location.search, navigate]);
 
   const handleCheckout = async () => {
-    if (isGift && !recipient.includes('@')) {
-      toast.error('Introduce un email válido para el destinatario.');
-      return;
+    if (isGift) {
+      if (giftMode === 'friend' && !recipientFriendId) {
+        toast.error('Selecciona un amigo destinatario.');
+        return;
+      }
+      if (giftMode === 'email' && !recipient.includes('@')) {
+        toast.error('Introduce un email válido para el destinatario.');
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -124,7 +130,10 @@ const Store = () => {
         body: {
           card_type: selected,
           is_gift: isGift,
-          gift_recipient_email: isGift ? recipient.trim() : undefined,
+          gift_recipient_user_id:
+            isGift && giftMode === 'friend' ? recipientFriendId ?? undefined : undefined,
+          gift_recipient_email:
+            isGift && giftMode === 'email' ? recipient.trim() : undefined,
           gift_message: isGift ? message.trim() : undefined,
         },
       });
@@ -142,6 +151,7 @@ const Store = () => {
       setLoading(false);
     }
   };
+
 
   const handleSimulate = async () => {
     if (isGift && !recipient.includes('@')) {
