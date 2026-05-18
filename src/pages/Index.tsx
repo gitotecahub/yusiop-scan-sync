@@ -160,11 +160,7 @@ const Index = () => {
         />
         <div className="relative">
           <h1 className="display-xl text-[2.2rem] sm:text-4xl">
-            {t('home.hero.title').split('\\n')[0]}
-            <br />
-            <span className="vapor-text">
-              {t('home.hero.title').split('\\n')[1] || t('home.heroHighlight')}
-            </span>
+            <span className="vapor-text">Scan - Sync - Play</span>
           </h1>
 
           <div className="grid grid-cols-2 gap-3 mt-5">
