@@ -160,20 +160,10 @@ const Index = () => {
         />
         <div className="relative">
           <h1 className="display-xl text-[2.2rem] sm:text-4xl">
-            {t('home.hero.title').split('\\n').map((line, i) => (
-              <span key={i}>
-                {line}
-                {i === 0 && <br />}
-              </span>
-            ))}
+            {t('home.hero.title').split('\\n')[0]}
+            <br />
             <span className="vapor-text">
-              {language === 'es'
-                ? 'en alta fidelidad'
-                : language === 'en'
-                ? 'in high fidelity'
-                : language === 'fr'
-                ? 'en haute fidélité'
-                : 'em alta fidelidade'}
+              {t('home.hero.title').split('\\n')[1] || t('home.heroHighlight')}
             </span>
           </h1>
 
