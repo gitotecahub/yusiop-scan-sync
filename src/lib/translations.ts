@@ -203,7 +203,7 @@ const es: Dict = {
   // Navegación
   'nav.home': 'Inicio', 'nav.qr': 'QR', 'nav.catalog': 'Catálogo', 'nav.library': 'Biblioteca', 'nav.profile': 'Perfil',
   // Home
-  'home.hero.title': 'Tu música,\nen alta fidelidad',
+  'home.hero.title': 'Tu música,\nen alta calidad',
   'home.hero.subtitle': 'Escanea, descubre y colecciona. Una experiencia sonora pensada para ti.',
   'home.hero.scan': 'Escanear tarjeta', 'home.hero.explore': 'Explorar música',
   'home.section.recent': 'Lanzamientos destacados', 'home.section.trending': 'Trending',
@@ -371,7 +371,7 @@ const es: Dict = {
   'common.from': 'Desde', 'common.to': 'Hasta', 'common.date': 'Fecha', 'common.time': 'Hora',
   'common.optional': 'opcional', 'common.required': 'requerido',
   // Index extras
-  'home.heroHighlight': 'en alta fidelidad', 'home.viewAll': 'Ver todo →',
+  'home.heroHighlight': 'en alta calidad', 'home.viewAll': 'Ver todo →',
   'home.new': 'NUEVO', 'home.mostPlayed': 'Lo más sonado',
   'home.collection': 'Colección', 'home.recommended': 'Recomendado',
   'home.shareMusic': 'Comparte música', 'home.shareMusicDesc': 'Regala canciones a tus amigos',
@@ -530,7 +530,7 @@ const es: Dict = {
 
 const en: Dict = {
   'nav.home': 'Home', 'nav.qr': 'QR', 'nav.catalog': 'Catalog', 'nav.library': 'Library', 'nav.profile': 'Profile',
-  'home.hero.title': 'Your music,\nin high fidelity',
+  'home.hero.title': 'Your music,\nin high quality',
   'home.hero.subtitle': 'Scan, discover and collect. A sound experience designed for you.',
   'home.hero.scan': 'Scan card', 'home.hero.explore': 'Explore music',
   'home.section.recent': 'Featured releases', 'home.section.trending': 'Trending',
@@ -682,7 +682,7 @@ const en: Dict = {
   'common.yes': 'Yes', 'common.no': 'No', 'common.all': 'All', 'common.none': 'None',
   'common.from': 'From', 'common.to': 'To', 'common.date': 'Date', 'common.time': 'Time',
   'common.optional': 'optional', 'common.required': 'required',
-  'home.heroHighlight': 'in high fidelity', 'home.viewAll': 'View all →',
+  'home.heroHighlight': 'in high quality', 'home.viewAll': 'View all →',
   'home.new': 'NEW', 'home.mostPlayed': 'Most played',
   'home.collection': 'Collection', 'home.recommended': 'Recommended',
   'home.shareMusic': 'Share music', 'home.shareMusicDesc': 'Gift songs to your friends',
@@ -834,7 +834,7 @@ const en: Dict = {
 
 const fr: Dict = {
   'nav.home': 'Accueil', 'nav.qr': 'QR', 'nav.catalog': 'Catalogue', 'nav.library': 'Bibliothèque', 'nav.profile': 'Profil',
-  'home.hero.title': 'Votre musique,\nen haute fidélité',
+  'home.hero.title': 'Votre musique,\nen haute qualité',
   'home.hero.subtitle': 'Scannez, découvrez et collectionnez. Une expérience sonore pensée pour vous.',
   'home.hero.scan': 'Scanner carte', 'home.hero.explore': 'Explorer',
   'home.section.recent': 'Sorties récentes', 'home.section.trending': 'Tendances',
@@ -986,7 +986,7 @@ const fr: Dict = {
   'common.yes': 'Oui', 'common.no': 'Non', 'common.all': 'Tout', 'common.none': 'Aucun',
   'common.from': 'De', 'common.to': 'À', 'common.date': 'Date', 'common.time': 'Heure',
   'common.optional': 'optionnel', 'common.required': 'requis',
-  'home.heroHighlight': 'en haute fidélité', 'home.viewAll': 'Voir tout →',
+  'home.heroHighlight': 'en haute qualité', 'home.viewAll': 'Voir tout →',
   'home.new': 'NOUVEAU', 'home.mostPlayed': 'Les plus écoutés',
   'home.collection': 'Collection', 'home.recommended': 'Recommandé',
   'home.shareMusic': 'Partagez musique', 'home.shareMusicDesc': 'Offrez des chansons à vos amis',
@@ -1138,7 +1138,7 @@ const fr: Dict = {
 
 const pt: Dict = {
   'nav.home': 'Início', 'nav.qr': 'QR', 'nav.catalog': 'Catálogo', 'nav.library': 'Biblioteca', 'nav.profile': 'Perfil',
-  'home.hero.title': 'Sua música,\nem alta fidelidade',
+  'home.hero.title': 'Sua música,\nem alta qualidade',
   'home.hero.subtitle': 'Escaneie, descubra e colecione. Uma experiência sonora pensada para você.',
   'home.hero.scan': 'Escanear cartão', 'home.hero.explore': 'Explorar música',
   'home.section.recent': 'Lançamentos em destaque', 'home.section.trending': 'Em alta',
@@ -1290,7 +1290,7 @@ const pt: Dict = {
   'common.yes': 'Sim', 'common.no': 'Não', 'common.all': 'Todos', 'common.none': 'Nenhum',
   'common.from': 'De', 'common.to': 'Até', 'common.date': 'Data', 'common.time': 'Hora',
   'common.optional': 'opcional', 'common.required': 'obrigatório',
-  'home.heroHighlight': 'em alta fidelidade', 'home.viewAll': 'Ver tudo →',
+  'home.heroHighlight': 'em alta qualidade', 'home.viewAll': 'Ver tudo →',
   'home.new': 'NOVO', 'home.mostPlayed': 'Mais tocadas',
   'home.collection': 'Coleção', 'home.recommended': 'Recomendado',
   'home.shareMusic': 'Compartilhar música', 'home.shareMusicDesc': 'Presenteie amigos com músicas',
@@ -1443,7 +1443,7 @@ const pt: Dict = {
 // Traducciones simplificadas para idiomas adicionales (basadas en inglés con ajustes)
 const de: Dict = { ...en,
   'nav.home': 'Start', 'nav.qr': 'QR', 'nav.catalog': 'Katalog', 'nav.library': 'Bibliothek', 'nav.profile': 'Profil',
-  'home.hero.title': 'Deine Musik\nin High Fidelity', 'home.hero.subtitle': 'Scannen, entdecken und sammeln. Ein Klang-Erlebnis nur für dich.',
+  'home.hero.title': 'Deine Musik\nin High Quality', 'home.hero.subtitle': 'Scannen, entdecken und sammeln. Ein Klang-Erlebnis nur für dich.',
   'home.hero.scan': 'Karte scannen', 'home.hero.explore': 'Musik erkunden',
   'profile.title': 'Mein Profil', 'profile.cards': 'Meine Karten', 'profile.history': 'Verlauf', 'profile.settings': 'Einstellungen',
   'profile.logout': 'Abmelden', 'profile.artistMode': 'Künstler-Modus',
@@ -1462,7 +1462,7 @@ const de: Dict = { ...en,
 
 const it: Dict = { ...en,
   'nav.home': 'Home', 'nav.qr': 'QR', 'nav.catalog': 'Catalogo', 'nav.library': 'Libreria', 'nav.profile': 'Profilo',
-  'home.hero.title': 'La tua musica\nin alta fedeltà', 'home.hero.subtitle': 'Scannerizza, scopri e colleziona. Un\'esperienza sonora pensata per te.',
+  'home.hero.title': 'La tua musica\nin alta qualità', 'home.hero.subtitle': 'Scannerizza, scopri e colleziona. Un\'esperienza sonora pensata per te.',
   'home.hero.scan': 'Scansiona carta', 'home.hero.explore': 'Esplora musica',
   'profile.title': 'Il mio profilo', 'profile.cards': 'Le mie carte', 'profile.history': 'Cronologia', 'profile.settings': 'Impostazioni',
   'profile.logout': 'Disconnetti', 'profile.artistMode': 'Modalità artista',
@@ -1481,7 +1481,7 @@ const it: Dict = { ...en,
 
 const nl: Dict = { ...en,
   'nav.home': 'Home', 'nav.qr': 'QR', 'nav.catalog': 'Catalogus', 'nav.library': 'Bibliotheek', 'nav.profile': 'Profiel',
-  'home.hero.title': 'Jouw muziek\nin high fidelity', 'home.hero.subtitle': 'Scan, ontdek en verzamel. Een geluidservaring gemaakt voor jou.',
+  'home.hero.title': 'Jouw muziek\nin high quality', 'home.hero.subtitle': 'Scan, ontdek en verzamel. Een geluidservaring gemaakt voor jou.',
   'home.hero.scan': 'Scan kaart', 'home.hero.explore': 'Ontdek muziek',
   'profile.title': 'Mijn profiel', 'profile.cards': 'Mijn kaarten', 'profile.history': 'Geschiedenis', 'profile.settings': 'Instellingen',
   'profile.logout': 'Afmelden', 'profile.artistMode': 'Artiest modus',
