@@ -184,6 +184,14 @@ const Store = () => {
         </div>
       )}
       <header className="mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="mb-3 -ml-2 h-9 px-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Atrás
+        </Button>
         <h1 className="text-3xl font-bold tracking-tight">Tienda</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Compra tarjetas digitales para descargar tu música
