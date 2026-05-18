@@ -1074,7 +1074,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_group: string | null
           avatar_url: string | null
+          birth_date: string | null
           birth_year: number | null
           country_code: string | null
           created_at: string
@@ -1086,6 +1088,10 @@ export type Database = {
           last_used_mode: string
           locale_detected_at: string | null
           locale_source: string | null
+          parental_email: string | null
+          parental_verification_token: string | null
+          parental_verified: boolean
+          parental_verified_at: string | null
           preferred_mode: string
           profile_choice_made: boolean
           updated_at: string
@@ -1093,7 +1099,9 @@ export type Database = {
           username: string
         }
         Insert: {
+          age_group?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
           birth_year?: number | null
           country_code?: string | null
           created_at?: string
@@ -1105,6 +1113,10 @@ export type Database = {
           last_used_mode?: string
           locale_detected_at?: string | null
           locale_source?: string | null
+          parental_email?: string | null
+          parental_verification_token?: string | null
+          parental_verified?: boolean
+          parental_verified_at?: string | null
           preferred_mode?: string
           profile_choice_made?: boolean
           updated_at?: string
@@ -1112,7 +1124,9 @@ export type Database = {
           username: string
         }
         Update: {
+          age_group?: string | null
           avatar_url?: string | null
+          birth_date?: string | null
           birth_year?: number | null
           country_code?: string | null
           created_at?: string
@@ -1124,6 +1138,10 @@ export type Database = {
           last_used_mode?: string
           locale_detected_at?: string | null
           locale_source?: string | null
+          parental_email?: string | null
+          parental_verification_token?: string | null
+          parental_verified?: boolean
+          parental_verified_at?: string | null
           preferred_mode?: string
           profile_choice_made?: boolean
           updated_at?: string
@@ -1449,6 +1467,7 @@ export type Database = {
           express_tier: Database["public"]["Enums"]["express_tier"] | null
           genre: string | null
           id: string
+          is_explicit_declared: boolean
           nationality: string | null
           preview_path: string | null
           preview_start_seconds: number
@@ -1486,6 +1505,7 @@ export type Database = {
           express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
+          is_explicit_declared?: boolean
           nationality?: string | null
           preview_path?: string | null
           preview_start_seconds?: number
@@ -1523,6 +1543,7 @@ export type Database = {
           express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
+          is_explicit_declared?: boolean
           nationality?: string | null
           preview_path?: string | null
           preview_start_seconds?: number
@@ -1553,6 +1574,7 @@ export type Database = {
           created_at: string
           duration_seconds: number
           id: string
+          is_explicit: boolean
           is_premium: boolean
           preview_start_seconds: number
           preview_url: string | null
@@ -1574,6 +1596,7 @@ export type Database = {
           created_at?: string
           duration_seconds: number
           id?: string
+          is_explicit?: boolean
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
@@ -1595,6 +1618,7 @@ export type Database = {
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_explicit?: boolean
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
@@ -2445,6 +2469,7 @@ export type Database = {
         Args: { p_email: string; p_user_id: string }
         Returns: number
       }
+      compute_age_group: { Args: { _birth_date: string }; Returns: string }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -2651,6 +2676,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_user_age_group: { Args: { _user_id: string }; Returns: string }
       get_user_id_by_email: { Args: { p_email: string }; Returns: string }
       get_wallet_summary: { Args: { p_limit?: number }; Returns: Json }
       gift_song: {
@@ -2823,6 +2849,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      user_can_use_app: { Args: { _user_id: string }; Returns: boolean }
+      user_can_withdraw: { Args: { _user_id: string }; Returns: boolean }
       user_owns_artist: {
         Args: { _artist_id: string; _user_id: string }
         Returns: boolean
