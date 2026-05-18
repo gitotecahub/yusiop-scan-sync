@@ -12,6 +12,7 @@ interface NotifyGiftArgs {
   credits: number;
   buyerEmail: string;
   origin: string;
+  recipientUserId?: string | null;
 }
 
 export async function notifyGiftRecipient(args: NotifyGiftArgs) {
@@ -25,30 +26,33 @@ export async function notifyGiftRecipient(args: NotifyGiftArgs) {
     credits,
     buyerEmail,
     origin,
+    recipientUserId,
   } = args;
 
   const redemptionUrl = `${origin}/redeem/${redemptionToken}`;
   const normalizedEmail = giftEmail.toLowerCase().trim();
 
-  // 1) Buscar al destinatario en auth.users (paginado, máx 1000 por página)
-  let recipientId: string | null = null;
-  try {
-    let page = 1;
-    while (page <= 10 && !recipientId) {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-      if (error) {
-        console.error("notifyGift: listUsers error", error);
-        break;
+  // 1) Resolver el destinatario: usar el user_id precomputado si viene, si no, buscar por email
+  let recipientId: string | null = recipientUserId || null;
+  if (!recipientId) {
+    try {
+      let page = 1;
+      while (page <= 10 && !recipientId) {
+        const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) {
+          console.error("notifyGift: listUsers error", error);
+          break;
+        }
+        const match = data.users.find(
+          (u) => (u.email ?? "").toLowerCase() === normalizedEmail,
+        );
+        if (match) recipientId = match.id;
+        if (data.users.length < 1000) break;
+        page++;
       }
-      const match = data.users.find(
-        (u) => (u.email ?? "").toLowerCase() === normalizedEmail,
-      );
-      if (match) recipientId = match.id;
-      if (data.users.length < 1000) break;
-      page++;
+    } catch (e) {
+      console.error("notifyGift: error buscando destinatario", e);
     }
-  } catch (e) {
-    console.error("notifyGift: error buscando destinatario", e);
   }
 
   // 2) Crear notificación in-app si está registrado
