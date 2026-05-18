@@ -1,5 +1,5 @@
 // Conversión fija EUR ⇄ XAF (Franco CFA - paridad oficial)
-export const XAF_PER_EUR = 655.957;
+export const XAF_PER_EUR = 700;
 
 export const eurToXaf = (eur: number): number => Math.round(eur * XAF_PER_EUR);
 
