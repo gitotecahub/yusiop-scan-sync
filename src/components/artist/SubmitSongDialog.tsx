@@ -199,6 +199,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   // Declaración de IA y derechos
   const [aiType, setAiType] = useState<AiUsageType>('none');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [isExplicitDeclared, setIsExplicitDeclared] = useState(false);
 
   // Promoción de lanzamiento (banner Home)
   const [promo, setPromo] = useState<PromoData>({
@@ -266,6 +267,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioUrl(editing.track_url || null);
       setAiType(((editing as any).ai_type as AiUsageType) ?? 'none');
       setRightsConfirmed(((editing as any).rights_confirmed as boolean) ?? false);
+      setIsExplicitDeclared(((editing as any).is_explicit_declared as boolean) ?? false);
       // Express previo (si lo tenía)
       if (editing.express_tier) {
         setExpressEnabled(true);
@@ -317,6 +319,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressAck(false);
       setAiType('none');
       setRightsConfirmed(false);
+      setIsExplicitDeclared(false);
       setPromo({
         enabled: false,
         plan: null,
@@ -624,6 +627,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           status: initialStatus,
           ai_type: aiType,
           rights_confirmed: rightsConfirmed,
+          is_explicit_declared: isExplicitDeclared,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
