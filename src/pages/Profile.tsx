@@ -46,6 +46,11 @@ import ModeSwitcher from '@/components/ModeSwitcher';
 import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
 import RequestAdButton from '@/components/ads/RequestAdButton';
 import RefineWithGpsButton from '@/components/locale/RefineWithGpsButton';
+import { useAgeProfile } from '@/hooks/useAgeProfile';
+import MinorBadge from '@/components/age/MinorBadge';
+import BirthDateGate from '@/components/age/BirthDateGate';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ShieldCheck, ShieldAlert } from 'lucide-react';
 
 interface ScannedCard {
   id: string;

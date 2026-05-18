@@ -1038,6 +1038,22 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </Select>
           </div>
 
+          {/* Contenido explícito */}
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={isExplicitDeclared}
+              onChange={(e) => setIsExplicitDeclared(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+            />
+            <div className="text-sm">
+              <span className="font-semibold">Esta canción contiene contenido explícito 🅴</span>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Marca esto si la letra incluye lenguaje fuerte, violencia o referencias sexuales. Se ocultará a usuarios menores de edad. El equipo de revisión podrá ajustar esta marca.
+              </p>
+            </div>
+          </label>
+
           {/* Confirmación de derechos */}
           <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 cursor-pointer hover:bg-muted/50 transition-colors">
             <input
