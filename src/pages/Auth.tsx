@@ -84,7 +84,20 @@ const Auth = () => {
       return;
     }
 
-    const { error, alreadyRegistered } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
+    const parentalToken = needsParent
+      ? (crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, ''))
+      : undefined;
+
+    const { error, alreadyRegistered } = await signUp(
+      parsed.data.email,
+      parsed.data.password,
+      parsed.data.username,
+      {
+        birthDate,
+        parentalEmail: needsParent ? parentalEmail.trim() : undefined,
+        parentalToken,
+      },
+    );
     if (error) {
       if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
         toast.error(t('auth.emailRegistered'));
