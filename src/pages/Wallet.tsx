@@ -12,6 +12,7 @@ import RedeemCodeDialog from '@/components/wallet/RedeemCodeDialog';
 import RechargeWalletDialog from '@/components/wallet/RechargeWalletDialog';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getPreviousPath } from '@/hooks/useNavHistory';
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
