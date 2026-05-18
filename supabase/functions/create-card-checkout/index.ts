@@ -78,8 +78,38 @@ Deno.serve(async (req) => {
       });
     }
 
+    let resolvedGiftEmail = body.gift_recipient_email?.trim() ?? "";
+    let resolvedGiftUserId = body.gift_recipient_user_id?.trim() ?? "";
+
     if (body.is_gift) {
-      if (!body.gift_recipient_email || !body.gift_recipient_email.includes("@")) {
+      if (resolvedGiftUserId) {
+        // Validar amistad y resolver email del destinatario usando service role
+        const admin = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          { auth: { persistSession: false } },
+        );
+        const { data: friendship } = await admin
+          .from("friends")
+          .select("friend_id")
+          .eq("user_id", userId)
+          .eq("friend_id", resolvedGiftUserId)
+          .maybeSingle();
+        if (!friendship) {
+          return new Response(
+            JSON.stringify({ error: "Solo puedes regalar tarjetas a tus amigos" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        const { data: recipient, error: rErr } = await admin.auth.admin.getUserById(resolvedGiftUserId);
+        if (rErr || !recipient?.user?.email) {
+          return new Response(
+            JSON.stringify({ error: "No se pudo obtener el email del amigo destinatario" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        resolvedGiftEmail = recipient.user.email;
+      } else if (!resolvedGiftEmail || !resolvedGiftEmail.includes("@")) {
         return new Response(
           JSON.stringify({ error: "Email del destinatario inválido" }),
           {
