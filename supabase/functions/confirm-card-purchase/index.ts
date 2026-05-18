@@ -117,6 +117,7 @@ Deno.serve(async (req) => {
     const credits = parseInt(meta.download_credits ?? (cardType === "premium" ? "10" : "4"), 10);
     const isGift = meta.is_gift === "true";
     const giftEmail = meta.gift_recipient_email || null;
+    const giftUserId = meta.gift_recipient_user_id || null;
     const giftMessage = meta.gift_message || null;
 
     // 3) Insertar card_purchases (si no existía)
@@ -196,6 +197,7 @@ Deno.serve(async (req) => {
         credits,
         buyerEmail,
         origin,
+        recipientUserId: giftUserId,
       });
     }
 

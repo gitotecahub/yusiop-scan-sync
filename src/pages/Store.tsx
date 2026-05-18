@@ -7,12 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Gift, Check, Loader2, ArrowLeft } from 'lucide-react';
+import { Sparkles, Gift, Check, Loader2, ArrowLeft, Users, Mail } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import DigitalCard from '@/components/DigitalCard';
 import { formatEURNumber, formatXAFNumber } from '@/lib/currency';
 import { formatPriceFromEur } from '@/lib/localizedPricing';
+import { useFriends } from '@/hooks/useFriends';
 import { useLocaleStore } from '@/stores/localeStore';
 
 type Tier = 'standard' | 'premium';
@@ -37,9 +40,12 @@ const TIERS: Record<Tier, { label: string; priceEur: number; priceXaf: number; c
 const Store = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { friends } = useFriends();
   const [selected, setSelected] = useState<Tier>('standard');
   const [isGift, setIsGift] = useState(false);
+  const [giftMode, setGiftMode] = useState<'friend' | 'email'>('friend');
   const [recipient, setRecipient] = useState('');
+  const [recipientFriendId, setRecipientFriendId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -108,9 +114,15 @@ const Store = () => {
   }, [location.search, navigate]);
 
   const handleCheckout = async () => {
-    if (isGift && !recipient.includes('@')) {
-      toast.error('Introduce un email válido para el destinatario.');
-      return;
+    if (isGift) {
+      if (giftMode === 'friend' && !recipientFriendId) {
+        toast.error('Selecciona un amigo destinatario.');
+        return;
+      }
+      if (giftMode === 'email' && !recipient.includes('@')) {
+        toast.error('Introduce un email válido para el destinatario.');
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -118,7 +130,10 @@ const Store = () => {
         body: {
           card_type: selected,
           is_gift: isGift,
-          gift_recipient_email: isGift ? recipient.trim() : undefined,
+          gift_recipient_user_id:
+            isGift && giftMode === 'friend' ? recipientFriendId ?? undefined : undefined,
+          gift_recipient_email:
+            isGift && giftMode === 'email' ? recipient.trim() : undefined,
           gift_message: isGift ? message.trim() : undefined,
         },
       });
@@ -136,6 +151,7 @@ const Store = () => {
       setLoading(false);
     }
   };
+
 
   const handleSimulate = async () => {
     if (isGift && !recipient.includes('@')) {
@@ -250,16 +266,85 @@ const Store = () => {
 
           {isGift && (
             <div className="space-y-3 pt-2">
-              <div>
-                <Label htmlFor="recipient">Email del destinatario</Label>
-                <Input
-                  id="recipient"
-                  type="email"
-                  placeholder="amigo@ejemplo.com"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                />
-              </div>
+              <Tabs value={giftMode} onValueChange={(v) => setGiftMode(v as 'friend' | 'email')}>
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger value="friend">
+                    <Users className="h-3.5 w-3.5 mr-1.5" /> Amigo
+                  </TabsTrigger>
+                  <TabsTrigger value="email">
+                    <Mail className="h-3.5 w-3.5 mr-1.5" /> Email
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="friend" className="mt-3">
+                  {friends.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Aún no tienes amigos en Yusiop.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/friends')}
+                      >
+                        Buscar amigos
+                      </Button>
+                    </div>
+                  ) : (
+                    <ScrollArea className="max-h-[220px] pr-2">
+                      <ul className="space-y-1">
+                        {friends.map((f) => {
+                          const checked = recipientFriendId === f.user_id;
+                          return (
+                            <li key={f.user_id}>
+                              <button
+                                type="button"
+                                onClick={() => setRecipientFriendId(checked ? null : f.user_id)}
+                                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
+                                  checked
+                                    ? 'bg-primary/10 ring-1 ring-primary/40'
+                                    : 'hover:bg-muted/50'
+                                }`}
+                              >
+                                <Avatar className="h-9 w-9">
+                                  <AvatarImage src={f.avatar_url || undefined} />
+                                  <AvatarFallback>
+                                    {(f.full_name || f.username || '?').charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0 text-left">
+                                  <p className="text-sm font-semibold truncate">
+                                    {f.full_name || f.username || 'Usuario'}
+                                  </p>
+                                  {f.username && (
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      @{f.username}
+                                    </p>
+                                  )}
+                                </div>
+                                {checked && <Check className="h-4 w-4 text-primary shrink-0" />}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </ScrollArea>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="email" className="mt-3">
+                  <Label htmlFor="recipient">Email del destinatario</Label>
+                  <Input
+                    id="recipient"
+                    type="email"
+                    placeholder="amigo@ejemplo.com"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                  />
+                </TabsContent>
+              </Tabs>
+
               <div>
                 <Label htmlFor="message">Mensaje (opcional)</Label>
                 <Textarea
