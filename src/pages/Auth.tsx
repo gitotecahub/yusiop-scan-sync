@@ -20,7 +20,26 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [parentalEmail, setParentalEmail] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
+
+  // Detectar grupo de edad en vivo
+  const computeAgeGroup = (iso: string): 'child' | 'teen' | 'adult' | null => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    if (age < 0 || age > 120) return null;
+    if (age < 14) return 'child';
+    if (age < 18) return 'teen';
+    return 'adult';
+  };
+  const ageGroup = computeAgeGroup(birthDate);
+  const needsParent = ageGroup === 'child';
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +62,19 @@ const Auth = () => {
 
     if (password !== confirmPassword) {
       toast.error(t('auth.passwordsDontMatch'));
+      return;
+    }
+
+    if (!birthDate) {
+      toast.error('La fecha de nacimiento es obligatoria');
+      return;
+    }
+    if (!ageGroup) {
+      toast.error('Fecha de nacimiento inválida');
+      return;
+    }
+    if (needsParent && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(parentalEmail)) {
+      toast.error('Necesitas el email de un tutor para autorizar la cuenta');
       return;
     }
 
