@@ -197,6 +197,7 @@ Deno.serve(async (req) => {
         credits,
         buyerEmail,
         origin,
+        recipientUserId: giftUserId,
       });
     }
 
