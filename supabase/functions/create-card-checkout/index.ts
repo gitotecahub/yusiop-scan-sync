@@ -14,6 +14,7 @@ interface CheckoutBody {
   card_type: "standard" | "premium";
   is_gift?: boolean;
   gift_recipient_email?: string;
+  gift_recipient_user_id?: string;
   gift_message?: string;
   success_url?: string;
   cancel_url?: string;
