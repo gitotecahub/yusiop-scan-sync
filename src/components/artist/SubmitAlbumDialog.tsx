@@ -119,6 +119,11 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
     cta_text: 'Escuchar ahora', start_date: new Date().toISOString().split('T')[0],
   });
 
+  // Prepayment (pago previo)
+  const [paidPrepaymentId, setPaidPrepaymentId] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
+  const LS_KEY = 'yusiop:prepay:album';
+
   const coverInputRef = useRef<HTMLInputElement>(null);
   const tracksInputRef = useRef<HTMLInputElement>(null);
 
