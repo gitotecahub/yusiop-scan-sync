@@ -523,20 +523,13 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
       if (paidPrepaymentId && insertedIds[0]) {
         const { error: rpcErr } = await supabase.rpc('consume_submission_prepayment', {
           p_prepayment_id: paidPrepaymentId,
-          p_submission_id: insertedIds[0],
+          p_submission_ids: insertedIds,
           p_campaign_id: campaignId,
         });
         if (rpcErr) {
           console.error('consume_submission_prepayment failed', rpcErr);
           toast.error('El álbum se envió pero no se pudo aplicar el pago automáticamente. Contacta soporte.');
         } else {
-          // Si era un álbum con Express, marcar el resto de pistas también como pagadas
-          if (expressOpt && insertedIds.length > 1) {
-            await (supabase as any)
-              .from('song_submissions')
-              .update({ express_paid_at: nowIso, status: 'pending' })
-              .in('id', insertedIds.slice(1));
-          }
           toast.success(`Álbum "${info.title}" enviado a revisión con ${tracks.length} pistas.`);
           localStorage.removeItem(LS_KEY);
         }
