@@ -196,6 +196,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Prepayment (pago previo)
+  const [paidPrepaymentId, setPaidPrepaymentId] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
+  const LS_KEY = 'yusiop:prepay:single';
+
   // Declaración de IA y derechos
   const [aiType, setAiType] = useState<AiUsageType>('none');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
