@@ -1019,6 +1019,8 @@ const Profile = () => {
 
         <p className="eyebrow text-center mt-8">© Yusiop · MMXXVI</p>
       </div>
+
+      <BirthDateGate open={birthGateOpen} onOpenChange={setBirthGateOpen} />
     </div>
   );
 };
