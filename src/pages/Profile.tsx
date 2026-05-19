@@ -88,7 +88,7 @@ const Profile = () => {
   const [scannedCards, setScannedCards] = useState<ScannedCard[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
   const [birthGateOpen, setBirthGateOpen] = useState(false);
-  const { profile: ageProfile, isMinor, isAdult, needsBirthDate } = useAgeProfile();
+  const { profile: ageProfile, isMinor, needsBirthDate } = useAgeProfile();
 
   // Construye el historial unificando user_credits (legacy) + qr_cards (sistema actual)
   const buildScannedCards = (
