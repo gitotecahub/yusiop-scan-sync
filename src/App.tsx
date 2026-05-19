@@ -82,7 +82,16 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   const { session, user, initialize } = useAuthStore();
   const { loadForUser, profileChoiceMade, mode, loading: modeLoading, reset } = useModeStore();
-  const [showSplash, setShowSplash] = useState(true);
+  // Splash solo en la primera carga de la sesión del navegador. Si el SW o
+  // cualquier otra cosa recarga la página, no volvemos a mostrarlo para
+  // evitar interrumpir al usuario (formularios, subida de archivos, etc.).
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && !sessionStorage.getItem('yusiop:splashShown');
+    } catch {
+      return true;
+    }
+  });
   const online = useOnlineStatus();
 
   // Detección automática de país/idioma/moneda al iniciar sesión
