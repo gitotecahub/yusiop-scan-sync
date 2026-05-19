@@ -111,7 +111,7 @@ const ArtistDashboard = () => {
           {t('artist.dashboardSubtitle')}
         </p>
         <div className="mt-4 flex gap-2 flex-wrap">
-          <Button onClick={() => setSubmitOpen(true)}>
+          <Button onClick={() => setTypePickerOpen(true)}>
             <Upload className="h-4 w-4 mr-2" /> {t('artist.uploadMusic')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/artist/submissions')}>
@@ -179,9 +179,26 @@ const ArtistDashboard = () => {
         </Card>
       </div>
 
+      <UploadTypeDialog
+        open={typePickerOpen}
+        onOpenChange={setTypePickerOpen}
+        onChoose={(type) => {
+          setTypePickerOpen(false);
+          if (type === 'single') setSubmitOpen(true);
+          else setAlbumOpen(true);
+        }}
+      />
+
       <SubmitSongDialog
         open={submitOpen}
         onOpenChange={setSubmitOpen}
+        defaultArtistName={artistName}
+        onSubmitted={loadPending}
+      />
+
+      <SubmitAlbumDialog
+        open={albumOpen}
+        onOpenChange={setAlbumOpen}
         defaultArtistName={artistName}
         onSubmitted={loadPending}
       />
