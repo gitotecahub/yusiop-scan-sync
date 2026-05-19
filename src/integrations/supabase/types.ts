@@ -1261,6 +1261,60 @@ export type Database = {
         }
         Relationships: []
       }
+      releases: {
+        Row: {
+          artist_id: string | null
+          artist_name: string
+          cover_path: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          genre: string | null
+          id: string
+          release_date: string | null
+          release_type: Database["public"]["Enums"]["release_type"]
+          status: Database["public"]["Enums"]["release_status"]
+          title: string
+          total_tracks: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_id?: string | null
+          artist_name: string
+          cover_path?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          genre?: string | null
+          id?: string
+          release_date?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
+          status?: Database["public"]["Enums"]["release_status"]
+          title: string
+          total_tracks?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_id?: string | null
+          artist_name?: string
+          cover_path?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          genre?: string | null
+          id?: string
+          release_date?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
+          status?: Database["public"]["Enums"]["release_status"]
+          title?: string
+          total_tracks?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shared_items: {
         Row: {
           created_at: string
@@ -1467,6 +1521,7 @@ export type Database = {
           express_tier: Database["public"]["Enums"]["express_tier"] | null
           genre: string | null
           id: string
+          is_explicit: boolean
           is_explicit_declared: boolean
           nationality: string | null
           preview_path: string | null
@@ -1475,12 +1530,15 @@ export type Database = {
           published_song_id: string | null
           rejection_reason: string | null
           release_date: string | null
+          release_id: string | null
+          release_type: Database["public"]["Enums"]["release_type"]
           reviewed_at: string | null
           reviewed_by: string | null
           rights_confirmed: boolean
           scheduled_release_at: string | null
           status: Database["public"]["Enums"]["song_submission_status"]
           title: string
+          track_number: number | null
           track_path: string | null
           track_url: string
           updated_at: string
@@ -1505,6 +1563,7 @@ export type Database = {
           express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
+          is_explicit?: boolean
           is_explicit_declared?: boolean
           nationality?: string | null
           preview_path?: string | null
@@ -1513,12 +1572,15 @@ export type Database = {
           published_song_id?: string | null
           rejection_reason?: string | null
           release_date?: string | null
+          release_id?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
           reviewed_at?: string | null
           reviewed_by?: string | null
           rights_confirmed?: boolean
           scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title: string
+          track_number?: number | null
           track_path?: string | null
           track_url: string
           updated_at?: string
@@ -1543,6 +1605,7 @@ export type Database = {
           express_tier?: Database["public"]["Enums"]["express_tier"] | null
           genre?: string | null
           id?: string
+          is_explicit?: boolean
           is_explicit_declared?: boolean
           nationality?: string | null
           preview_path?: string | null
@@ -1551,18 +1614,29 @@ export type Database = {
           published_song_id?: string | null
           rejection_reason?: string | null
           release_date?: string | null
+          release_id?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
           reviewed_at?: string | null
           reviewed_by?: string | null
           rights_confirmed?: boolean
           scheduled_release_at?: string | null
           status?: Database["public"]["Enums"]["song_submission_status"]
           title?: string
+          track_number?: number | null
           track_path?: string | null
           track_url?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "song_submissions_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       songs: {
         Row: {
@@ -1578,6 +1652,8 @@ export type Database = {
           is_premium: boolean
           preview_start_seconds: number
           preview_url: string | null
+          release_id: string | null
+          release_type: Database["public"]["Enums"]["release_type"]
           review_notes: string | null
           review_status: Database["public"]["Enums"]["song_review_status"]
           reviewed_at: string | null
@@ -1585,6 +1661,7 @@ export type Database = {
           scheduled_release_at: string | null
           subscription_locked_until: string | null
           title: string
+          track_number: number | null
           track_url: string | null
         }
         Insert: {
@@ -1600,6 +1677,8 @@ export type Database = {
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
+          release_id?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
           review_notes?: string | null
           review_status?: Database["public"]["Enums"]["song_review_status"]
           reviewed_at?: string | null
@@ -1607,6 +1686,7 @@ export type Database = {
           scheduled_release_at?: string | null
           subscription_locked_until?: string | null
           title: string
+          track_number?: number | null
           track_url?: string | null
         }
         Update: {
@@ -1622,6 +1702,8 @@ export type Database = {
           is_premium?: boolean
           preview_start_seconds?: number
           preview_url?: string | null
+          release_id?: string | null
+          release_type?: Database["public"]["Enums"]["release_type"]
           review_notes?: string | null
           review_status?: Database["public"]["Enums"]["song_review_status"]
           reviewed_at?: string | null
@@ -1629,6 +1711,7 @@ export type Database = {
           scheduled_release_at?: string | null
           subscription_locked_until?: string | null
           title?: string
+          track_number?: number | null
           track_url?: string | null
         }
         Relationships: [
@@ -1644,6 +1727,13 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "songs_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "releases"
             referencedColumns: ["id"]
           },
         ]
@@ -2935,6 +3025,8 @@ export type Database = {
       friend_request_status: "pending" | "accepted" | "rejected" | "blocked"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
+      release_status: "draft" | "pending_review" | "published" | "rejected"
+      release_type: "single" | "album"
       shared_item_type: "song" | "artist" | "digital_card"
       song_gift_status: "completed" | "pending_signup" | "failed" | "cancelled"
       song_review_status: "pending_review" | "approved" | "rejected" | "flagged"
@@ -3167,6 +3259,8 @@ export const Constants = {
       friend_request_status: ["pending", "accepted", "rejected", "blocked"],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
+      release_status: ["draft", "pending_review", "published", "rejected"],
+      release_type: ["single", "album"],
       shared_item_type: ["song", "artist", "digital_card"],
       song_gift_status: ["completed", "pending_signup", "failed", "cancelled"],
       song_review_status: ["pending_review", "approved", "rejected", "flagged"],
