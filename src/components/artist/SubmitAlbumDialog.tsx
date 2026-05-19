@@ -119,6 +119,11 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
     cta_text: 'Escuchar ahora', start_date: new Date().toISOString().split('T')[0],
   });
 
+  // Prepayment (pago previo)
+  const [paidPrepaymentId, setPaidPrepaymentId] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
+  const LS_KEY = 'yusiop:prepay:album';
+
   const coverInputRef = useRef<HTMLInputElement>(null);
   const tracksInputRef = useRef<HTMLInputElement>(null);
 
@@ -134,6 +139,53 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
       enabled: false, plan: null, ad_text: '',
       cta_text: 'Escuchar ahora', start_date: new Date().toISOString().split('T')[0],
     });
+    setPaidPrepaymentId(null);
+
+    // Restaurar tras volver del Stripe Checkout (prepayment)
+    (async () => {
+      try {
+        const url = new URL(window.location.href);
+        const status = url.searchParams.get('prepayment');
+        const pid = url.searchParams.get('pid');
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (status === 'success' && pid && saved.prepayment_id === pid) {
+          const { data: pp } = await supabase
+            .from('submission_prepayments')
+            .select('status')
+            .eq('id', pid)
+            .maybeSingle();
+          if (pp?.status === 'paid') {
+            setInfo(saved.info);
+            setExpressEnabled(!!saved.expressEnabled);
+            setExpressTier(saved.expressTier ?? null);
+            setExpressAck(true);
+            setPromo(saved.promo);
+            setRightsConfirmed(!!saved.rightsConfirmed);
+            setPaidPrepaymentId(pid);
+            setStep(2);
+            toast.success('Pago confirmado. Sube ahora las pistas y la portada para enviar el álbum.');
+            url.searchParams.delete('prepayment');
+            url.searchParams.delete('pid');
+            window.history.replaceState({}, '', url.toString());
+          }
+        } else if (status === 'cancelled' && pid && saved.prepayment_id === pid) {
+          toast.info('Pago cancelado. Tu progreso del álbum se mantiene.');
+          url.searchParams.delete('prepayment');
+          url.searchParams.delete('pid');
+          window.history.replaceState({}, '', url.toString());
+          setInfo(saved.info);
+          setExpressEnabled(!!saved.expressEnabled);
+          setExpressTier(saved.expressTier ?? null);
+          setExpressAck(true);
+          setPromo(saved.promo);
+          setRightsConfirmed(!!saved.rightsConfirmed);
+        }
+      } catch (e) {
+        console.warn('album prepayment restore failed', e);
+      }
+    })();
   }, [open, defaultArtistName]);
 
   const handleCover = async (f: File | null) => {

@@ -196,6 +196,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   const [expressTier, setExpressTier] = useState<ExpressTier | null>(null);
   const [expressAck, setExpressAck] = useState(false);
 
+  // Prepayment (pago previo)
+  const [paidPrepaymentId, setPaidPrepaymentId] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
+  const LS_KEY = 'yusiop:prepay:single';
+
   // Declaración de IA y derechos
   const [aiType, setAiType] = useState<AiUsageType>('none');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
@@ -331,7 +336,65 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setTrackFile(null);
     setCoverFile(null);
     setProgress(0);
+    setPaidPrepaymentId(null);
     stopPreview();
+
+    // Restaurar tras volver del Stripe Checkout (prepayment)
+    if (!editing) {
+      (async () => {
+        try {
+          const url = new URL(window.location.href);
+          const status = url.searchParams.get('prepayment');
+          const pid = url.searchParams.get('pid');
+          const raw = localStorage.getItem(LS_KEY);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          if (status === 'success' && pid && saved.prepayment_id === pid) {
+            const { data: pp } = await supabase
+              .from('submission_prepayments')
+              .select('status')
+              .eq('id', pid)
+              .maybeSingle();
+            if (pp?.status === 'paid') {
+              setFormData(saved.formData);
+              setExpressEnabled(!!saved.expressEnabled);
+              setExpressTier(saved.expressTier ?? null);
+              setExpressAck(true);
+              setPromo(saved.promo);
+              setHasCollabs(!!saved.hasCollabs);
+              setCollaborators(saved.collaborators ?? []);
+              setAiType(saved.aiType ?? 'none');
+              setIsExplicitDeclared(!!saved.isExplicitDeclared);
+              setRightsConfirmed(!!saved.rightsConfirmed);
+              setPaidPrepaymentId(pid);
+              toast.success('Pago confirmado. Selecciona los archivos y pulsa "Enviar canción".');
+              // limpiar URL
+              url.searchParams.delete('prepayment');
+              url.searchParams.delete('pid');
+              window.history.replaceState({}, '', url.toString());
+            }
+          } else if (status === 'cancelled' && pid && saved.prepayment_id === pid) {
+            toast.info('Pago cancelado. Tu progreso se mantiene, puedes reintentar.');
+            url.searchParams.delete('prepayment');
+            url.searchParams.delete('pid');
+            window.history.replaceState({}, '', url.toString());
+            // restaurar también los datos para que no pierda el progreso
+            setFormData(saved.formData);
+            setExpressEnabled(!!saved.expressEnabled);
+            setExpressTier(saved.expressTier ?? null);
+            setExpressAck(true);
+            setPromo(saved.promo);
+            setHasCollabs(!!saved.hasCollabs);
+            setCollaborators(saved.collaborators ?? []);
+            setAiType(saved.aiType ?? 'none');
+            setIsExplicitDeclared(!!saved.isExplicitDeclared);
+            setRightsConfirmed(!!saved.rightsConfirmed);
+          }
+        } catch (e) {
+          console.warn('prepayment restore failed', e);
+        }
+      })();
+    }
   }, [open, editing, defaultArtistName]);
 
   const enableCollabs = () => {
@@ -491,6 +554,75 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (error) throw error;
   };
 
+  // ===== Pago previo (Express + Promo) =====
+  const needsPrepayment = (() => {
+    const expressPay = expressEnabled && expressTier && !isElite;
+    const promoPay = !!(promo.enabled && promo.plan);
+    return !!expressPay || promoPay;
+  })();
+  const prepaymentReady = !needsPrepayment || !!paidPrepaymentId;
+
+  const handlePay = async () => {
+    if (!user) return;
+    if (!formData.title.trim() || !formData.artist_name.trim()) {
+      toast.error('Indica al menos el título y el artista antes de pagar.');
+      return;
+    }
+    if (expressEnabled && !expressTier) {
+      toast.error('Selecciona un nivel de Lanzamiento Express.');
+      return;
+    }
+    if (promo.enabled && !promo.plan) {
+      toast.error('Selecciona un plan de Promoción.');
+      return;
+    }
+    setPaying(true);
+    try {
+      // Guardar todo el estado del formulario para restaurarlo tras volver
+      const draft = {
+        prepayment_id: null as string | null,
+        formData,
+        expressEnabled,
+        expressTier,
+        promo,
+        hasCollabs,
+        collaborators,
+        aiType,
+        isExplicitDeclared,
+        rightsConfirmed,
+      };
+
+      const returnUrl = window.location.origin + window.location.pathname;
+      const { data, error } = await supabase.functions.invoke(
+        'create-prepayment-checkout',
+        {
+          body: {
+            kind: 'single',
+            context_title: formData.title.trim(),
+            context_artist_name: formData.artist_name.trim(),
+            express_tier: expressEnabled && !isElite ? expressTier : null,
+            promo_plan: promo.enabled ? promo.plan : null,
+            promo_ad_text: promo.ad_text || null,
+            promo_cta_text: promo.cta_text || null,
+            promo_start_date: promo.start_date || null,
+            success_url: returnUrl,
+            cancel_url: returnUrl,
+          },
+        },
+      );
+      if (error || !data?.url) {
+        throw new Error(error?.message ?? 'No se pudo iniciar el pago');
+      }
+      draft.prepayment_id = data.prepayment_id;
+      localStorage.setItem(LS_KEY, JSON.stringify(draft));
+      window.location.href = data.url;
+    } catch (e: any) {
+      console.error('handlePay error', e);
+      toast.error(e?.message ?? 'Error al iniciar el pago');
+      setPaying(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validate() || !user) return;
     stopPreview();
@@ -602,13 +734,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           .catch((e) => console.warn('Copyright check failed (background):', e));
       } else {
         if (!trackUp) throw new Error('Falta archivo de audio');
-        // Express necesita pago si NO es Elite y hay tier seleccionado con precio > 0
         const expressNeedsPayment = !!expressOpt && !isElite && (expressOpt.priceXaf > 0);
         const promoEnabled = !!(promo.enabled && promo.plan);
-        // Si hay algo que pagar, la canción se queda en "pending_payment"
-        // y NO aparecerá al admin hasta que Stripe confirme el pago.
         const requiresPayment = expressNeedsPayment || promoEnabled;
-        const initialStatus = requiresPayment ? 'pending_payment' : 'pending';
+        // Si ya pagó por adelantado (paidPrepaymentId), la canción entra directamente
+        // como "pending" (visible al admin); si no, queda en "pending_payment".
+        const initialStatus = (requiresPayment && !paidPrepaymentId) ? 'pending_payment' : 'pending';
+        const expressAlreadyPaid = !!expressOpt && (!expressNeedsPayment || !!paidPrepaymentId);
 
         const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
           user_id: user.id,
@@ -631,16 +763,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
-          // Solo marcar como pagado si es Elite (incluido) o si no hay coste
-          express_paid_at: expressOpt && !expressNeedsPayment ? nowIso : null,
+          express_paid_at: expressAlreadyPaid ? nowIso : null,
         } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) {
           await persistCollaborators(inserted.id);
-          // Solo lanzar análisis y notificaciones si NO requiere pago.
-          // Si requiere pago, esto se hará tras la confirmación del webhook
-          // (o quedará pendiente; el admin no la verá hasta entonces).
-          if (!requiresPayment) {
+          if (!requiresPayment || paidPrepaymentId) {
             supabase.functions
               .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
               .catch((e) => console.warn('Copyright check failed (background):', e));
@@ -659,64 +787,63 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         }
         setProgress(100);
 
-        // ===== Pago combinado: Express + Promoción =====
-        // Si hay algo que pagar, redirigir SIEMPRE a la pasarela.
-        // La canción quedó en pending_payment y NO se enviará al admin
-        // hasta que Stripe confirme el pago vía webhook.
-        if (requiresPayment && inserted?.id) {
-          let campaignId: string | null = null;
-
-          // Crear la campaña promocional si procede (queda pending_payment)
-          if (promoEnabled) {
-            const plan = PROMO_PLANS.find(p => p.id === promo.plan);
-            if (plan) {
-              const coverImg = cover?.url ?? editing?.cover_url ?? null;
-              const { data: campaign, error: campErr } = await supabase
-                .from('ad_campaigns')
-                .insert({
-                  user_id: user.id,
-                  submission_id: inserted.id,
-                  campaign_type: 'artist_release',
-                  title: promo.ad_text.trim() || formData.title.trim(),
-                  subtitle: formData.artist_name.trim(),
-                  image_url: coverImg,
-                  cta_text: promo.cta_text.trim() || 'Escuchar ahora',
-                  cta_url: `/catalog?song=${inserted.id}`,
-                  duration_days: plan.days,
-                  price_eur: plan.priceEur,
-                  start_date: promo.start_date ? new Date(promo.start_date).toISOString() : null,
-                  status: 'pending_payment',
-                  payment_status: 'unpaid',
-                  placement: 'home_top_banner',
-                } as any)
-                .select('id')
-                .single();
-              if (campErr) {
-                console.error('Promo campaign creation failed', campErr);
-                toast.error('No se pudo crear la promoción: ' + campErr.message);
-              } else {
-                campaignId = campaign.id;
-              }
+        // Crear campaña si procede (siempre que haya promo)
+        let campaignId: string | null = null;
+        if (promoEnabled && inserted?.id) {
+          const plan = PROMO_PLANS.find(p => p.id === promo.plan);
+          if (plan) {
+            const coverImg = cover?.url ?? null;
+            const { data: campaign, error: campErr } = await supabase
+              .from('ad_campaigns')
+              .insert({
+                user_id: user.id,
+                submission_id: inserted.id,
+                campaign_type: 'artist_release',
+                title: promo.ad_text.trim() || formData.title.trim(),
+                subtitle: formData.artist_name.trim(),
+                image_url: coverImg,
+                cta_text: promo.cta_text.trim() || 'Escuchar ahora',
+                cta_url: `/catalog?song=${inserted.id}`,
+                duration_days: plan.days,
+                price_eur: plan.priceEur,
+                start_date: promo.start_date ? new Date(promo.start_date).toISOString() : null,
+                status: 'pending_payment',
+                payment_status: 'unpaid',
+                placement: 'home_top_banner',
+              } as any)
+              .select('id')
+              .single();
+            if (campErr) {
+              console.error('Promo campaign creation failed', campErr);
+              toast.error('No se pudo crear la promoción: ' + campErr.message);
+            } else {
+              campaignId = campaign.id;
             }
           }
+        }
 
+        // Si hay prepayment pagado, consumirlo (marca Express y/o campaña como pagados)
+        if (paidPrepaymentId && inserted?.id) {
+          const { error: rpcErr } = await supabase.rpc('consume_submission_prepayment', {
+            p_prepayment_id: paidPrepaymentId,
+            p_submission_ids: [inserted.id],
+            p_campaign_id: campaignId,
+          });
+          if (rpcErr) {
+            console.error('consume prepayment failed', rpcErr);
+            toast.error('Pago consumido con error: ' + rpcErr.message);
+          }
+          localStorage.removeItem(LS_KEY);
+          toast.success('Canción enviada con pago confirmado.');
+        } else if (requiresPayment && inserted?.id) {
+          // Camino legacy (sin prepayment): redirigir a Stripe ahora
           const { data: checkout, error: chkErr } = await supabase.functions.invoke(
             'create-submission-checkout',
-            {
-              body: {
-                submission_id: inserted.id,
-                campaign_id: campaignId,
-              },
-            },
+            { body: { submission_id: inserted.id, campaign_id: campaignId } },
           );
-
           if (chkErr || !checkout?.url) {
-            toast.error('No se pudo abrir la pasarela de pago. Tu canción quedó guardada como "pendiente de pago" — puedes reintentarlo desde "Mis envíos".');
+            toast.error('No se pudo abrir la pasarela. Tu canción quedó como "pendiente de pago".');
           } else {
-            const parts: string[] = [];
-            if (expressNeedsPayment) parts.push(`Express ${expressOpt?.tier}`);
-            if (promoEnabled) parts.push('Promoción');
-            toast.success(`Redirigiendo a la pasarela: ${parts.join(' + ')}. Tu canción se enviará al admin tras confirmar el pago.`);
             onOpenChange(false);
             onSubmitted?.();
             window.location.href = checkout.url;
@@ -725,9 +852,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         } else {
           toast.success(expressOpt
             ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
-            : 'Canción enviada a revisión. Analizando copyright…');
+            : 'Canción enviada a revisión.');
         }
       }
+
 
       onOpenChange(false);
       onSubmitted?.();
@@ -1326,22 +1454,35 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               {disabledReason}
             </p>
           )}
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading || paying}>
             Cancelar
           </Button>
+          {!isEdit && needsPrepayment && !paidPrepaymentId && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handlePay}
+              disabled={paying || uploading}
+            >
+              {paying ? 'Abriendo pasarela…' : (() => {
+                const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
+                const pr = promo.enabled && promo.plan ? 'Promoción' : null;
+                return `Pagar ${[ex, pr].filter(Boolean).join(' + ')}`;
+              })()}
+            </Button>
+          )}
+          {!isEdit && paidPrepaymentId && (
+            <span className="text-xs text-emerald-500 sm:self-center">✓ Pago confirmado</span>
+          )}
           <Button
             onClick={handleSubmit}
-            disabled={!!disabledReason}
+            disabled={!!disabledReason || !prepaymentReady}
+            title={!prepaymentReady ? 'Primero completa el pago' : undefined}
           >
             {(() => {
               if (uploading) return 'Guardando…';
               if (isEdit) return 'Guardar y reenviar';
-              const expressPaid = expressEnabled && expressTier && !isElite;
-              const promoPaid = promo.enabled && promo.plan;
-              if (expressPaid && promoPaid) return 'Enviar y pagar Express + Promoción';
-              if (expressPaid) return 'Enviar y pagar Express';
-              if (promoPaid) return 'Enviar y pagar promoción';
-              return 'Enviar a revisión';
+              return 'Enviar canción';
             })()}
           </Button>
         </DialogFooter>

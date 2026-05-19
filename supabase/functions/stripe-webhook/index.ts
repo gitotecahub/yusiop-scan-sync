@@ -108,6 +108,27 @@ Deno.serve(async (req) => {
         });
       }
 
+      // ----- Prepayment (pago previo a la subida de música) -----
+      if (session.metadata?.purpose === "prepayment") {
+        const prepaymentId = session.metadata.prepayment_id;
+        if (prepaymentId) {
+          const { error: ppErr } = await supabase
+            .from("submission_prepayments")
+            .update({
+              status: "paid",
+              paid_at: new Date().toISOString(),
+              stripe_payment_intent: (session.payment_intent as string) ?? null,
+            })
+            .eq("id", prepaymentId)
+            .eq("status", "pending");
+          if (ppErr) console.error("prepayment update failed", ppErr);
+          else console.log(`Prepayment paid: ${prepaymentId}`);
+        }
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // ----- Pago combinado de envío de canción (Express + Promoción) -----
       if (session.metadata?.purpose === "submission_payment") {
         const meta = session.metadata;
