@@ -1762,6 +1762,75 @@ export type Database = {
         }
         Relationships: []
       }
+      submission_prepayments: {
+        Row: {
+          context_artist_name: string | null
+          context_title: string | null
+          created_at: string
+          expires_at: string
+          express_price_xaf: number
+          express_tier: string | null
+          id: string
+          kind: string
+          paid_at: string | null
+          promo_ad_text: string | null
+          promo_cta_text: string | null
+          promo_plan: string | null
+          promo_price_eur: number
+          promo_start_date: string | null
+          status: Database["public"]["Enums"]["submission_prepayment_status"]
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          context_artist_name?: string | null
+          context_title?: string | null
+          created_at?: string
+          expires_at?: string
+          express_price_xaf?: number
+          express_tier?: string | null
+          id?: string
+          kind: string
+          paid_at?: string | null
+          promo_ad_text?: string | null
+          promo_cta_text?: string | null
+          promo_plan?: string | null
+          promo_price_eur?: number
+          promo_start_date?: string | null
+          status?: Database["public"]["Enums"]["submission_prepayment_status"]
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          context_artist_name?: string | null
+          context_title?: string | null
+          created_at?: string
+          expires_at?: string
+          express_price_xaf?: number
+          express_tier?: string | null
+          id?: string
+          kind?: string
+          paid_at?: string | null
+          promo_ad_text?: string | null
+          promo_cta_text?: string | null
+          promo_plan?: string | null
+          promo_price_eur?: number
+          promo_start_date?: string | null
+          status?: Database["public"]["Enums"]["submission_prepayment_status"]
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscription_download_attempts: {
         Row: {
           created_at: string
@@ -2586,6 +2655,14 @@ export type Database = {
         }[]
       }
       consume_parental_token: { Args: { p_token: string }; Returns: Json }
+      consume_submission_prepayment: {
+        Args: {
+          p_campaign_id?: string
+          p_prepayment_id: string
+          p_submission_ids: string[]
+        }
+        Returns: Json
+      }
       consume_subscription_credit: {
         Args: { p_song_id: string; p_user_id: string }
         Returns: {
@@ -3043,6 +3120,12 @@ export type Database = {
         | "qr_cards"
         | "monetization"
         | "settings"
+      submission_prepayment_status:
+        | "pending"
+        | "paid"
+        | "used"
+        | "expired"
+        | "cancelled"
       subscription_plan_code: "plus" | "pro" | "elite"
       subscription_visibility: "off" | "soft_launch" | "on"
       support_message_sender: "user" | "ai" | "admin"
@@ -3278,6 +3361,13 @@ export const Constants = {
         "qr_cards",
         "monetization",
         "settings",
+      ],
+      submission_prepayment_status: [
+        "pending",
+        "paid",
+        "used",
+        "expired",
+        "cancelled",
       ],
       subscription_plan_code: ["plus", "pro", "elite"],
       subscription_visibility: ["off", "soft_launch", "on"],
