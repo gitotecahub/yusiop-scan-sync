@@ -244,12 +244,6 @@ const MySubmissions = () => {
                     (r.status === 'rejected' || r.status === 'removed' ? 'border-destructive/40 ' : '') +
                     (r.release_type === 'album' ? 'border-l-4 border-l-primary/40' : '')
                   }>
-
-            <Card key={r.id} className={
-              r.status === 'rejected' || r.status === 'removed'
-                ? 'border-destructive/40'
-                : ''
-            }>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-md bg-muted overflow-hidden flex-shrink-0">
@@ -258,6 +252,12 @@ const MySubmissions = () => {
                     ) : null}
                   </div>
                   <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {r.release_type === 'album' && r.track_number != null && (
+                        <span className="text-xs font-mono text-muted-foreground">
+                          #{r.track_number}
+                        </span>
+                      )}
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
