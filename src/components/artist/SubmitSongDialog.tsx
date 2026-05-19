@@ -734,13 +734,13 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           .catch((e) => console.warn('Copyright check failed (background):', e));
       } else {
         if (!trackUp) throw new Error('Falta archivo de audio');
-        // Express necesita pago si NO es Elite y hay tier seleccionado con precio > 0
         const expressNeedsPayment = !!expressOpt && !isElite && (expressOpt.priceXaf > 0);
         const promoEnabled = !!(promo.enabled && promo.plan);
-        // Si hay algo que pagar, la canción se queda en "pending_payment"
-        // y NO aparecerá al admin hasta que Stripe confirme el pago.
         const requiresPayment = expressNeedsPayment || promoEnabled;
-        const initialStatus = requiresPayment ? 'pending_payment' : 'pending';
+        // Si ya pagó por adelantado (paidPrepaymentId), la canción entra directamente
+        // como "pending" (visible al admin); si no, queda en "pending_payment".
+        const initialStatus = (requiresPayment && !paidPrepaymentId) ? 'pending_payment' : 'pending';
+        const expressAlreadyPaid = !!expressOpt && (!expressNeedsPayment || !!paidPrepaymentId);
 
         const { data: inserted, error: dbError } = await supabase.from('song_submissions').insert({
           user_id: user.id,
@@ -763,16 +763,12 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
-          // Solo marcar como pagado si es Elite (incluido) o si no hay coste
-          express_paid_at: expressOpt && !expressNeedsPayment ? nowIso : null,
+          express_paid_at: expressAlreadyPaid ? nowIso : null,
         } as any).select('id').single();
         if (dbError) throw dbError;
         if (inserted?.id) {
           await persistCollaborators(inserted.id);
-          // Solo lanzar análisis y notificaciones si NO requiere pago.
-          // Si requiere pago, esto se hará tras la confirmación del webhook
-          // (o quedará pendiente; el admin no la verá hasta entonces).
-          if (!requiresPayment) {
+          if (!requiresPayment || paidPrepaymentId) {
             supabase.functions
               .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
               .catch((e) => console.warn('Copyright check failed (background):', e));
@@ -791,64 +787,63 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         }
         setProgress(100);
 
-        // ===== Pago combinado: Express + Promoción =====
-        // Si hay algo que pagar, redirigir SIEMPRE a la pasarela.
-        // La canción quedó en pending_payment y NO se enviará al admin
-        // hasta que Stripe confirme el pago vía webhook.
-        if (requiresPayment && inserted?.id) {
-          let campaignId: string | null = null;
-
-          // Crear la campaña promocional si procede (queda pending_payment)
-          if (promoEnabled) {
-            const plan = PROMO_PLANS.find(p => p.id === promo.plan);
-            if (plan) {
-              const coverImg = cover?.url ?? editing?.cover_url ?? null;
-              const { data: campaign, error: campErr } = await supabase
-                .from('ad_campaigns')
-                .insert({
-                  user_id: user.id,
-                  submission_id: inserted.id,
-                  campaign_type: 'artist_release',
-                  title: promo.ad_text.trim() || formData.title.trim(),
-                  subtitle: formData.artist_name.trim(),
-                  image_url: coverImg,
-                  cta_text: promo.cta_text.trim() || 'Escuchar ahora',
-                  cta_url: `/catalog?song=${inserted.id}`,
-                  duration_days: plan.days,
-                  price_eur: plan.priceEur,
-                  start_date: promo.start_date ? new Date(promo.start_date).toISOString() : null,
-                  status: 'pending_payment',
-                  payment_status: 'unpaid',
-                  placement: 'home_top_banner',
-                } as any)
-                .select('id')
-                .single();
-              if (campErr) {
-                console.error('Promo campaign creation failed', campErr);
-                toast.error('No se pudo crear la promoción: ' + campErr.message);
-              } else {
-                campaignId = campaign.id;
-              }
+        // Crear campaña si procede (siempre que haya promo)
+        let campaignId: string | null = null;
+        if (promoEnabled && inserted?.id) {
+          const plan = PROMO_PLANS.find(p => p.id === promo.plan);
+          if (plan) {
+            const coverImg = cover?.url ?? null;
+            const { data: campaign, error: campErr } = await supabase
+              .from('ad_campaigns')
+              .insert({
+                user_id: user.id,
+                submission_id: inserted.id,
+                campaign_type: 'artist_release',
+                title: promo.ad_text.trim() || formData.title.trim(),
+                subtitle: formData.artist_name.trim(),
+                image_url: coverImg,
+                cta_text: promo.cta_text.trim() || 'Escuchar ahora',
+                cta_url: `/catalog?song=${inserted.id}`,
+                duration_days: plan.days,
+                price_eur: plan.priceEur,
+                start_date: promo.start_date ? new Date(promo.start_date).toISOString() : null,
+                status: 'pending_payment',
+                payment_status: 'unpaid',
+                placement: 'home_top_banner',
+              } as any)
+              .select('id')
+              .single();
+            if (campErr) {
+              console.error('Promo campaign creation failed', campErr);
+              toast.error('No se pudo crear la promoción: ' + campErr.message);
+            } else {
+              campaignId = campaign.id;
             }
           }
+        }
 
+        // Si hay prepayment pagado, consumirlo (marca Express y/o campaña como pagados)
+        if (paidPrepaymentId && inserted?.id) {
+          const { error: rpcErr } = await supabase.rpc('consume_submission_prepayment', {
+            p_prepayment_id: paidPrepaymentId,
+            p_submission_ids: [inserted.id],
+            p_campaign_id: campaignId,
+          });
+          if (rpcErr) {
+            console.error('consume prepayment failed', rpcErr);
+            toast.error('Pago consumido con error: ' + rpcErr.message);
+          }
+          localStorage.removeItem(LS_KEY);
+          toast.success('Canción enviada con pago confirmado.');
+        } else if (requiresPayment && inserted?.id) {
+          // Camino legacy (sin prepayment): redirigir a Stripe ahora
           const { data: checkout, error: chkErr } = await supabase.functions.invoke(
             'create-submission-checkout',
-            {
-              body: {
-                submission_id: inserted.id,
-                campaign_id: campaignId,
-              },
-            },
+            { body: { submission_id: inserted.id, campaign_id: campaignId } },
           );
-
           if (chkErr || !checkout?.url) {
-            toast.error('No se pudo abrir la pasarela de pago. Tu canción quedó guardada como "pendiente de pago" — puedes reintentarlo desde "Mis envíos".');
+            toast.error('No se pudo abrir la pasarela. Tu canción quedó como "pendiente de pago".');
           } else {
-            const parts: string[] = [];
-            if (expressNeedsPayment) parts.push(`Express ${expressOpt?.tier}`);
-            if (promoEnabled) parts.push('Promoción');
-            toast.success(`Redirigiendo a la pasarela: ${parts.join(' + ')}. Tu canción se enviará al admin tras confirmar el pago.`);
             onOpenChange(false);
             onSubmitted?.();
             window.location.href = checkout.url;
@@ -857,9 +852,10 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         } else {
           toast.success(expressOpt
             ? `Canción enviada · Revisión prioritaria ${expressOpt.tier} activada`
-            : 'Canción enviada a revisión. Analizando copyright…');
+            : 'Canción enviada a revisión.');
         }
       }
+
 
       onOpenChange(false);
       onSubmitted?.();
