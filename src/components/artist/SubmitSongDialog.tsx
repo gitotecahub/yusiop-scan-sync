@@ -1457,31 +1457,19 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading || paying}>
             Cancelar
           </Button>
-          {!isEdit && needsPrepayment && !paidPrepaymentId && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handlePay}
-              disabled={paying || uploading}
-            >
-              {paying ? 'Abriendo pasarela…' : (() => {
-                const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
-                const pr = promo.enabled && promo.plan ? 'Promoción' : null;
-                return `Pagar ${[ex, pr].filter(Boolean).join(' + ')}`;
-              })()}
-            </Button>
-          )}
-          {!isEdit && paidPrepaymentId && (
-            <span className="text-xs text-emerald-500 sm:self-center">✓ Pago confirmado</span>
-          )}
           <Button
             onClick={handleSubmit}
-            disabled={!!disabledReason || !prepaymentReady}
-            title={!prepaymentReady ? 'Primero completa el pago' : undefined}
+            disabled={!!disabledReason || uploading}
           >
             {(() => {
               if (uploading) return 'Guardando…';
               if (isEdit) return 'Guardar y reenviar';
+              if (!paidPrepaymentId && needsPrepayment) {
+                const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
+                const pr = promo.enabled && promo.plan ? 'Promoción' : null;
+                const tag = [ex, pr].filter(Boolean).join(' + ');
+                return `Pagar ${tag} y enviar canción`;
+              }
               return 'Enviar canción';
             })()}
           </Button>
