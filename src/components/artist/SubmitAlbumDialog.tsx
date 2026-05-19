@@ -430,7 +430,9 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
       const expressNeedsPayment = !!expressOpt && !isElite && expressOpt.priceXaf > 0;
       const promoEnabled = !!(promo.enabled && promo.plan);
       const requiresPayment = expressNeedsPayment || promoEnabled;
-      const initialStatus = requiresPayment ? 'pending_payment' : 'pending';
+      // Si ya pagó por adelantado, las pistas entran como pending directamente
+      const initialStatus = (requiresPayment && !paidPrepaymentId) ? 'pending_payment' : 'pending';
+      const expressAlreadyPaid = !!expressOpt && (!expressNeedsPayment || !!paidPrepaymentId);
 
       const insertedIds: string[] = [];
       const total = tracks.length;
