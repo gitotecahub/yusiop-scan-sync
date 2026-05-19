@@ -20,7 +20,26 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [parentalEmail, setParentalEmail] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
+
+  // Detectar grupo de edad en vivo
+  const computeAgeGroup = (iso: string): 'child' | 'teen' | 'adult' | null => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    if (age < 0 || age > 120) return null;
+    if (age < 14) return 'child';
+    if (age < 18) return 'teen';
+    return 'adult';
+  };
+  const ageGroup = computeAgeGroup(birthDate);
+  const needsParent = ageGroup === 'child';
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,13 +65,39 @@ const Auth = () => {
       return;
     }
 
+    if (!birthDate) {
+      toast.error('La fecha de nacimiento es obligatoria');
+      return;
+    }
+    if (!ageGroup) {
+      toast.error('Fecha de nacimiento inválida');
+      return;
+    }
+    if (needsParent && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(parentalEmail)) {
+      toast.error('Necesitas el email de un tutor para autorizar la cuenta');
+      return;
+    }
+
     const parsed = signUpSchema.safeParse({ email, password, username });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
 
-    const { error, alreadyRegistered } = await signUp(parsed.data.email, parsed.data.password, parsed.data.username);
+    const parentalToken = needsParent
+      ? (crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, ''))
+      : undefined;
+
+    const { error, alreadyRegistered } = await signUp(
+      parsed.data.email,
+      parsed.data.password,
+      parsed.data.username,
+      {
+        birthDate,
+        parentalEmail: needsParent ? parentalEmail.trim() : undefined,
+        parentalToken,
+      },
+    );
     if (error) {
       if (error.message?.toLowerCase().includes('already') || error.message?.toLowerCase().includes('registered')) {
         toast.error(t('auth.emailRegistered'));
@@ -155,6 +200,42 @@ const Auth = () => {
                   <Label htmlFor="confirm-password" className="eyebrow">{t('auth.confirmPassword')}</Label>
                   <PasswordField id="confirm-password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className="rounded-2xl border-border bg-input h-12" />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="birth-date" className="eyebrow">Fecha de nacimiento *</Label>
+                  <Input
+                    id="birth-date"
+                    type="date"
+                    max={new Date().toISOString().split('T')[0]}
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    required
+                    className="rounded-2xl border-border bg-input h-12"
+                  />
+                  {ageGroup && (
+                    <p className="text-[11px] text-muted-foreground">
+                      {ageGroup === 'adult' && '✓ Cuenta adulta · acceso completo'}
+                      {ageGroup === 'teen' && '⚠ Cuenta de menor (14-17). Algunas funciones requieren tutor.'}
+                      {ageGroup === 'child' && '⚠ Menor de 14: necesitas autorización de un tutor.'}
+                    </p>
+                  )}
+                </div>
+                {needsParent && (
+                  <div className="space-y-2">
+                    <Label htmlFor="parental-email" className="eyebrow">Email del tutor *</Label>
+                    <Input
+                      id="parental-email"
+                      type="email"
+                      placeholder="tutor@ejemplo.com"
+                      value={parentalEmail}
+                      onChange={(e) => setParentalEmail(e.target.value)}
+                      required
+                      className="rounded-2xl border-border bg-input h-12"
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Tu tutor recibirá un enlace para autorizar la cuenta. Hasta entonces el acceso quedará limitado.
+                    </p>
+                  </div>
+                )}
                 <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
                   {loading ? t('auth.signingUp') : t('auth.signupBtn')}
                 </Button>

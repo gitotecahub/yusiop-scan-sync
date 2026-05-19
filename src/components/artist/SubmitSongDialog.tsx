@@ -199,6 +199,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
   // Declaración de IA y derechos
   const [aiType, setAiType] = useState<AiUsageType>('none');
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [isExplicitDeclared, setIsExplicitDeclared] = useState(false);
 
   // Promoción de lanzamiento (banner Home)
   const [promo, setPromo] = useState<PromoData>({
@@ -266,6 +267,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setAudioUrl(editing.track_url || null);
       setAiType(((editing as any).ai_type as AiUsageType) ?? 'none');
       setRightsConfirmed(((editing as any).rights_confirmed as boolean) ?? false);
+      setIsExplicitDeclared(((editing as any).is_explicit_declared as boolean) ?? false);
       // Express previo (si lo tenía)
       if (editing.express_tier) {
         setExpressEnabled(true);
@@ -317,6 +319,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       setExpressAck(false);
       setAiType('none');
       setRightsConfirmed(false);
+      setIsExplicitDeclared(false);
       setPromo({
         enabled: false,
         plan: null,
@@ -624,6 +627,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
           status: initialStatus,
           ai_type: aiType,
           rights_confirmed: rightsConfirmed,
+          is_explicit_declared: isExplicitDeclared,
           express_tier: expressOpt?.tier ?? null,
           express_price_xaf: expressOpt?.priceXaf ?? null,
           express_requested_at: expressOpt ? nowIso : null,
@@ -1033,6 +1037,22 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               </SelectContent>
             </Select>
           </div>
+
+          {/* Contenido explícito */}
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <input
+              type="checkbox"
+              checked={isExplicitDeclared}
+              onChange={(e) => setIsExplicitDeclared(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+            />
+            <div className="text-sm">
+              <span className="font-semibold">Esta canción contiene contenido explícito 🅴</span>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Marca esto si la letra incluye lenguaje fuerte, violencia o referencias sexuales. Se ocultará a usuarios menores de edad. El equipo de revisión podrá ajustar esta marca.
+              </p>
+            </div>
+          </label>
 
           {/* Confirmación de derechos */}
           <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 cursor-pointer hover:bg-muted/50 transition-colors">

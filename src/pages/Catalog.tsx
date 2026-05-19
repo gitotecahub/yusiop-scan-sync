@@ -13,6 +13,7 @@ import { logger } from '@/lib/logger';
 import { formatMadrid, timeUntil } from '@/lib/madridTime';
 import { saveSongOffline } from '@/lib/offlineStorage';
 import { useLanguageStore } from '@/stores/languageStore';
+import { useAgeProfile } from '@/hooks/useAgeProfile';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,7 @@ const Catalog = () => {
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, setLoading: setCreditsLoading } = useCreditsStore();
   const { t } = useLanguageStore();
+  const { isAdult, isMinor } = useAgeProfile();
   
 
   // Function to load credits (from both user_credits and qr_cards owned by user)
@@ -166,22 +168,24 @@ const Catalog = () => {
             });
           }
 
-          const formattedSongs = songsData.map(song => {
-            const primary = song.artists.name;
-            const feats = collabsBySong.get(song.id) ?? [];
-            const artistDisplay = feats.length > 0 ? `${primary} ft ${feats.join(', ')}` : primary;
-            return {
-              id: song.id,
-              title: song.title,
-              artist: artistDisplay,
-              album: song.albums?.title,
-              duration_seconds: song.duration_seconds,
-              cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
-              preview_url: song.preview_url,
-              track_url: song.track_url,
-              preview_start_seconds: (song as any).preview_start_seconds ?? 0,
-            };
-          });
+          const formattedSongs = songsData
+            .filter((s: any) => isAdult || !s.is_explicit) // Hide explicit content for minors
+            .map(song => {
+              const primary = song.artists.name;
+              const feats = collabsBySong.get(song.id) ?? [];
+              const artistDisplay = feats.length > 0 ? `${primary} ft ${feats.join(', ')}` : primary;
+              return {
+                id: song.id,
+                title: song.title,
+                artist: artistDisplay,
+                album: song.albums?.title,
+                duration_seconds: song.duration_seconds,
+                cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
+                preview_url: song.preview_url,
+                track_url: song.track_url,
+                preview_start_seconds: (song as any).preview_start_seconds ?? 0,
+              };
+            });
           setSongs(formattedSongs);
           setFilteredSongs(formattedSongs);
         }
@@ -209,7 +213,7 @@ const Catalog = () => {
     };
 
     fetchData();
-  }, [setUserCredits]);
+  }, [setUserCredits, isAdult]);
 
 // Refresh credits and downloads when user navigates to catalog (e.g., after QR scan)
 useEffect(() => {

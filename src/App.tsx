@@ -20,6 +20,7 @@ import Store from '@/pages/Store';
 import Redeem from '@/pages/Redeem';
 import Wallet from '@/pages/Wallet';
 import Unsubscribe from '@/pages/Unsubscribe';
+import ParentalConsent from '@/pages/ParentalConsent';
 import NotFound from "./pages/NotFound";
 import ProfileSelection from '@/pages/ProfileSelection';
 import ArtistRequest from '@/pages/ArtistRequest';
@@ -187,6 +188,7 @@ const AppContent = () => {
       <Route path="/install" element={<Install />} />
       <Route path="/redeem/:token" element={<Redeem />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
+      <Route path="/parental-consent" element={<ParentalConsent />} />
 
       <Route path="/*" element={
         !session ? (

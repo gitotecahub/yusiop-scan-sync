@@ -46,6 +46,11 @@ import ModeSwitcher from '@/components/ModeSwitcher';
 import SubscriptionLevelBadge from '@/components/SubscriptionLevelBadge';
 import RequestAdButton from '@/components/ads/RequestAdButton';
 import RefineWithGpsButton from '@/components/locale/RefineWithGpsButton';
+import { useAgeProfile } from '@/hooks/useAgeProfile';
+import MinorBadge from '@/components/age/MinorBadge';
+import BirthDateGate from '@/components/age/BirthDateGate';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ShieldAlert } from 'lucide-react';
 
 interface ScannedCard {
   id: string;
@@ -82,6 +87,8 @@ const Profile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [scannedCards, setScannedCards] = useState<ScannedCard[]>([]);
   const [loadingCards, setLoadingCards] = useState(true);
+  const [birthGateOpen, setBirthGateOpen] = useState(false);
+  const { profile: ageProfile, isMinor, needsBirthDate } = useAgeProfile();
 
   // Construye el historial unificando user_credits (legacy) + qr_cards (sistema actual)
   const buildScannedCards = (
@@ -540,11 +547,47 @@ const Profile = () => {
 
           <div className="flex-1 min-w-0">
             <p className="eyebrow mb-1">{t('profile.username')}</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-display text-2xl font-bold leading-tight truncate">{profile.fullName}</h2>
               <SubscriptionLevelBadge size="md" />
+              <MinorBadge ageGroup={ageProfile.ageGroup} parentalVerified={ageProfile.parentalVerified} />
             </div>
             <p className="text-xs text-muted-foreground mt-1">@{profile.username}</p>
+            {needsBirthDate && (
+              <Alert className="mt-3 border-amber-500/40 bg-amber-500/5">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <AlertDescription className="flex items-center gap-2 text-xs">
+                  <span>Aún no nos has indicado tu fecha de nacimiento.</span>
+                  <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => setBirthGateOpen(true)}>
+                    Añadirla
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+            {isMinor && ageProfile.parentalVerificationToken && !ageProfile.parentalVerified && (
+              <Alert className="mt-3 border-amber-500/40 bg-amber-500/5">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <AlertDescription className="text-xs space-y-2">
+                  <p>Tu tutor aún no ha confirmado tu cuenta. Comparte este enlace con él:</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="h-7 text-xs"
+                    onClick={async () => {
+                      const link = `${window.location.origin}/parental-consent?token=${ageProfile.parentalVerificationToken}`;
+                      try {
+                        await navigator.clipboard.writeText(link);
+                        toast.success('Enlace copiado');
+                      } catch {
+                        toast.message(link);
+                      }
+                    }}
+                  >
+                    Copiar enlace de autorización
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
             <Button
               size="sm"
               variant="ghost"
@@ -976,6 +1019,8 @@ const Profile = () => {
 
         <p className="eyebrow text-center mt-8">© Yusiop · MMXXVI</p>
       </div>
+
+      <BirthDateGate open={birthGateOpen} onOpenChange={setBirthGateOpen} />
     </div>
   );
 };
