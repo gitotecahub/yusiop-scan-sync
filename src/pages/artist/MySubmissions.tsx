@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap, CreditCard, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap, CreditCard, Loader2, Disc3, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,9 @@ interface SubmissionRow {
   copyright_matches: CopyrightMatch[] | null;
   express_tier: '72h' | '48h' | '24h' | null;
   express_price_xaf: number | null;
+  release_id: string | null;
+  release_type: 'single' | 'album';
+  track_number: number | null;
 }
 
 const MySubmissions = () => {
@@ -78,7 +81,7 @@ const MySubmissions = () => {
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches,express_tier,express_price_xaf')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches,express_tier,express_price_xaf,release_id,release_type,track_number')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setRows((data ?? []) as unknown as SubmissionRow[]);
@@ -194,12 +197,53 @@ const MySubmissions = () => {
         </Card>
       ) : (
         <div className="grid gap-3">
-          {rows.map((r) => (
-            <Card key={r.id} className={
-              r.status === 'rejected' || r.status === 'removed'
-                ? 'border-destructive/40'
-                : ''
-            }>
+          {(() => {
+            // Reordenar: agrupar tracks de álbum por release_id ordenados por track_number,
+            // manteniendo singles intercalados según created_at desc.
+            const seen = new Set<string>();
+            const ordered: SubmissionRow[] = [];
+            for (const r of rows) {
+              if (r.release_id && r.release_type === 'album') {
+                if (seen.has(r.release_id)) continue;
+                seen.add(r.release_id);
+                const grp = rows
+                  .filter(x => x.release_id === r.release_id)
+                  .sort((a, b) => (a.track_number ?? 0) - (b.track_number ?? 0));
+                ordered.push(...grp);
+              } else {
+                ordered.push(r);
+              }
+            }
+            const headerShown = new Set<string>();
+            return ordered.map((r) => {
+              const showAlbumHeader =
+                r.release_id && r.release_type === 'album' && !headerShown.has(r.release_id);
+              if (showAlbumHeader) headerShown.add(r.release_id!);
+              const tracksInAlbum = r.release_id
+                ? rows.filter(x => x.release_id === r.release_id).length
+                : 0;
+              return (
+                <div key={r.id}>
+                  {showAlbumHeader && (
+                    <div className="flex items-center gap-3 mt-2 mb-1 px-1">
+                      <Disc3 className="h-4 w-4 text-primary" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs uppercase tracking-wide text-primary font-semibold">
+                          Álbum
+                        </p>
+                        <p className="text-sm font-semibold truncate">
+                          {r.album_title || r.title}{' '}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            · {tracksInAlbum} pistas
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <Card className={
+                    (r.status === 'rejected' || r.status === 'removed' ? 'border-destructive/40 ' : '') +
+                    (r.release_type === 'album' ? 'border-l-4 border-l-primary/40' : '')
+                  }>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-md bg-muted overflow-hidden flex-shrink-0">
@@ -209,6 +253,11 @@ const MySubmissions = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
+                      {r.release_type === 'album' && r.track_number != null && (
+                        <span className="text-xs font-mono text-muted-foreground">
+                          #{r.track_number}
+                        </span>
+                      )}
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
                         r.express_tier ? (
@@ -353,7 +402,10 @@ const MySubmissions = () => {
                 />
               </CardContent>
             </Card>
-          ))}
+                </div>
+              );
+            });
+          })()}
         </div>
       )}
 

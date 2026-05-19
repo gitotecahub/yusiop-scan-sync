@@ -7,8 +7,11 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { supabase } from '@/integrations/supabase/client';
 import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
+import SubmitAlbumDialog from '@/components/artist/SubmitAlbumDialog';
+import UploadTypeDialog from '@/components/artist/UploadTypeDialog';
 import DesktopUploadNotice from '@/components/artist/DesktopUploadNotice';
 import { useLanguageStore } from '@/stores/languageStore';
+
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
@@ -16,7 +19,9 @@ const ArtistDashboard = () => {
   const { isArtist, setMode } = useModeStore();
   const { t } = useLanguageStore();
   const [artistName, setArtistName] = useState<string>('');
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
+  const [albumOpen, setAlbumOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
   const loadPending = async () => {
@@ -106,7 +111,7 @@ const ArtistDashboard = () => {
           {t('artist.dashboardSubtitle')}
         </p>
         <div className="mt-4 flex gap-2 flex-wrap">
-          <Button onClick={() => setSubmitOpen(true)}>
+          <Button onClick={() => setTypePickerOpen(true)}>
             <Upload className="h-4 w-4 mr-2" /> {t('artist.uploadMusic')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/artist/submissions')}>
@@ -174,9 +179,26 @@ const ArtistDashboard = () => {
         </Card>
       </div>
 
+      <UploadTypeDialog
+        open={typePickerOpen}
+        onOpenChange={setTypePickerOpen}
+        onChoose={(type) => {
+          setTypePickerOpen(false);
+          if (type === 'single') setSubmitOpen(true);
+          else setAlbumOpen(true);
+        }}
+      />
+
       <SubmitSongDialog
         open={submitOpen}
         onOpenChange={setSubmitOpen}
+        defaultArtistName={artistName}
+        onSubmitted={loadPending}
+      />
+
+      <SubmitAlbumDialog
+        open={albumOpen}
+        onOpenChange={setAlbumOpen}
         defaultArtistName={artistName}
         onSubmitted={loadPending}
       />
