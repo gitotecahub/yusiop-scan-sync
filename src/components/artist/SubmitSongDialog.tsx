@@ -1454,22 +1454,35 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               {disabledReason}
             </p>
           )}
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading || paying}>
             Cancelar
           </Button>
+          {!isEdit && needsPrepayment && !paidPrepaymentId && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handlePay}
+              disabled={paying || uploading}
+            >
+              {paying ? 'Abriendo pasarela…' : (() => {
+                const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
+                const pr = promo.enabled && promo.plan ? 'Promoción' : null;
+                return `Pagar ${[ex, pr].filter(Boolean).join(' + ')}`;
+              })()}
+            </Button>
+          )}
+          {!isEdit && paidPrepaymentId && (
+            <span className="text-xs text-emerald-500 sm:self-center">✓ Pago confirmado</span>
+          )}
           <Button
             onClick={handleSubmit}
-            disabled={!!disabledReason}
+            disabled={!!disabledReason || !prepaymentReady}
+            title={!prepaymentReady ? 'Primero completa el pago' : undefined}
           >
             {(() => {
               if (uploading) return 'Guardando…';
               if (isEdit) return 'Guardar y reenviar';
-              const expressPaid = expressEnabled && expressTier && !isElite;
-              const promoPaid = promo.enabled && promo.plan;
-              if (expressPaid && promoPaid) return 'Enviar y pagar Express + Promoción';
-              if (expressPaid) return 'Enviar y pagar Express';
-              if (promoPaid) return 'Enviar y pagar promoción';
-              return 'Enviar a revisión';
+              return 'Enviar canción';
             })()}
           </Button>
         </DialogFooter>
