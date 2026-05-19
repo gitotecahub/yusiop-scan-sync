@@ -958,32 +958,23 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
               Continuar
             </Button>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              {needsPrepayment && !paidPrepaymentId && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handlePay}
-                  disabled={paying || submitting}
-                >
-                  {paying ? 'Abriendo pasarela…' : (() => {
+            <Button
+              onClick={handleSubmit}
+              disabled={step1Valid && step2Valid && rightsConfirmed && expressOk && !submitting ? false : true}
+            >
+              {submitting ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando…</>
+              ) : (
+                <><Upload className="h-4 w-4 mr-2" /> {
+                  (!paidPrepaymentId && needsPrepayment) ? (() => {
                     const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
                     const pr = promo.enabled && promo.plan ? 'Promoción' : null;
-                    return `Pagar ${[ex, pr].filter(Boolean).join(' + ')}`;
-                  })()}
-                </Button>
+                    const tag = [ex, pr].filter(Boolean).join(' + ');
+                    return `Pagar ${tag} y enviar álbum`;
+                  })() : 'Enviar álbum'
+                }</>
               )}
-              {paidPrepaymentId && (
-                <span className="text-xs text-emerald-500 sm:self-center">✓ Pago confirmado</span>
-              )}
-              <Button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                title={!prepaymentReady ? 'Primero completa el pago' : undefined}
-              >
-                {submitting ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando…</>) : (<><Upload className="h-4 w-4 mr-2" /> Enviar álbum</>)}
-              </Button>
-            </div>
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>
