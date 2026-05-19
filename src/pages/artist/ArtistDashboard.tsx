@@ -19,7 +19,9 @@ const ArtistDashboard = () => {
   const { isArtist, setMode } = useModeStore();
   const { t } = useLanguageStore();
   const [artistName, setArtistName] = useState<string>('');
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
+  const [albumOpen, setAlbumOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
 
   const loadPending = async () => {
