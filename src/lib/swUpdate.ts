@@ -1,9 +1,13 @@
 // Auto-update del Service Worker.
-// Cuando hay una versión nueva publicada, recarga la app automáticamente
-// para que el usuario vea los cambios sin tener que hacer hard reload.
 //
-// Solo se ejecuta en entornos de producción (no en el preview de Lovable
-// ni en iframes), porque main.tsx ya desregistra el SW en esos casos.
+// Estrategia: NO forzamos recarga de la página cuando hay una versión nueva,
+// porque eso interrumpe al usuario (formularios a medias, subidas de archivos,
+// envíos de música, etc.) y provoca el "splash screen aleatorio" que reinicia
+// la app perdiendo el estado.
+//
+// En su lugar, registramos el SW para que se descargue e instale en segundo
+// plano. La nueva versión tomará control en la siguiente navegación normal
+// (cuando el usuario abra otra pestaña, cierre y vuelva, o recargue a mano).
 
 export const initSwAutoUpdate = async () => {
   if (typeof window === 'undefined') return;
@@ -24,39 +28,22 @@ export const initSwAutoUpdate = async () => {
   try {
     const { registerSW } = await import('virtual:pwa-register');
 
-    let reloading = false;
-    const reloadOnce = () => {
-      if (reloading) return;
-      reloading = true;
-      window.location.reload();
-    };
-
+    // Registrar SW sin auto-recarga. La actualización quedará "waiting" y
+    // se activará la próxima vez que el usuario cargue la app de forma natural.
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
-        // Hay un SW nuevo esperando: refrescamos para activarlo.
-        void updateSW(true).then(() => reloadOnce());
-        // Fallback: si el evento controllerchange no llega, recargar de todos modos.
-        setTimeout(reloadOnce, 1500);
+        // No hacemos nada. La versión nueva queda lista para la próxima carga.
       },
       onOfflineReady() {
         // No-op
       },
     });
 
-    // Cuando el SW activo cambia (nueva versión toma control), recargar.
-    navigator.serviceWorker.addEventListener('controllerchange', reloadOnce);
-
-    // Comprobar actualizaciones al volver a la pestaña / recuperar conexión.
+    // Comprobación periódica silenciosa cada 60 minutos para descargar nuevas
+    // versiones en segundo plano (sin recargar nunca al usuario).
     const checkForUpdates = () => { void updateSW(); };
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') checkForUpdates();
-    });
-    window.addEventListener('focus', checkForUpdates);
-    window.addEventListener('online', checkForUpdates);
-
-    // Comprobación periódica cada 30 minutos por si la pestaña queda abierta.
-    setInterval(checkForUpdates, 30 * 60 * 1000);
+    setInterval(checkForUpdates, 60 * 60 * 1000);
   } catch (err) {
     console.warn('[sw-update] no se pudo inicializar:', err);
   }
