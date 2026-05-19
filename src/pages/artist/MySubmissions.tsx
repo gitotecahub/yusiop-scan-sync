@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap, CreditCard, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle2, XCircle, Pencil, AlertTriangle, Ban, CalendarClock, Zap, CreditCard, Loader2, Disc3, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,9 @@ interface SubmissionRow {
   copyright_matches: CopyrightMatch[] | null;
   express_tier: '72h' | '48h' | '24h' | null;
   express_price_xaf: number | null;
+  release_id: string | null;
+  release_type: 'single' | 'album';
+  track_number: number | null;
 }
 
 const MySubmissions = () => {
