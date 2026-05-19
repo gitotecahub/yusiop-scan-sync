@@ -135,9 +135,13 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2500);
+    if (!showSplash) return;
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+      try { sessionStorage.setItem('yusiop:splashShown', '1'); } catch {}
+    }, 2500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showSplash]);
 
   // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra
   useEffect(() => {
