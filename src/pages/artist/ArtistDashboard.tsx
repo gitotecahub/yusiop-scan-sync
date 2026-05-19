@@ -7,8 +7,11 @@ import { useAuthStore } from '@/stores/authStore';
 import { useModeStore } from '@/stores/modeStore';
 import { supabase } from '@/integrations/supabase/client';
 import SubmitSongDialog from '@/components/artist/SubmitSongDialog';
+import SubmitAlbumDialog from '@/components/artist/SubmitAlbumDialog';
+import UploadTypeDialog from '@/components/artist/UploadTypeDialog';
 import DesktopUploadNotice from '@/components/artist/DesktopUploadNotice';
 import { useLanguageStore } from '@/stores/languageStore';
+
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
