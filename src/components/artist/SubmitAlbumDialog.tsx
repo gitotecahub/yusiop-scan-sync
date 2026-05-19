@@ -301,7 +301,70 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
   const expressNeedsAck = expressEnabled && !isElite && !expressAck;
   const expressOk = !expressEnabled || (expressTier !== null && !expressNeedsAck);
 
-  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && !submitting;
+  // ===== Pago previo (Express + Promo) =====
+  const needsPrepayment = (() => {
+    const expressPay = expressEnabled && expressTier && !isElite;
+    const promoPay = !!(promo.enabled && promo.plan);
+    return !!expressPay || promoPay;
+  })();
+  const prepaymentReady = !needsPrepayment || !!paidPrepaymentId;
+
+  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && prepaymentReady && !submitting;
+
+  const handlePay = async () => {
+    if (!user) return;
+    if (!info.title.trim() || !info.artist_name.trim()) {
+      toast.error('Indica el título y el artista del álbum antes de pagar.');
+      return;
+    }
+    if (expressEnabled && !expressTier) {
+      toast.error('Selecciona un nivel de Lanzamiento Express.');
+      return;
+    }
+    if (promo.enabled && !promo.plan) {
+      toast.error('Selecciona un plan de Promoción.');
+      return;
+    }
+    setPaying(true);
+    try {
+      const draft = {
+        prepayment_id: null as string | null,
+        info,
+        expressEnabled,
+        expressTier,
+        promo,
+        rightsConfirmed,
+      };
+      const returnUrl = window.location.origin + window.location.pathname;
+      const { data, error } = await supabase.functions.invoke(
+        'create-prepayment-checkout',
+        {
+          body: {
+            kind: 'album',
+            context_title: info.title.trim(),
+            context_artist_name: info.artist_name.trim(),
+            express_tier: expressEnabled && !isElite ? expressTier : null,
+            promo_plan: promo.enabled ? promo.plan : null,
+            promo_ad_text: promo.ad_text || null,
+            promo_cta_text: promo.cta_text || null,
+            promo_start_date: promo.start_date || null,
+            success_url: returnUrl,
+            cancel_url: returnUrl,
+          },
+        },
+      );
+      if (error || !data?.url) {
+        throw new Error(error?.message ?? 'No se pudo iniciar el pago');
+      }
+      draft.prepayment_id = data.prepayment_id;
+      localStorage.setItem(LS_KEY, JSON.stringify(draft));
+      window.location.href = data.url;
+    } catch (e: any) {
+      console.error('album handlePay error', e);
+      toast.error(e?.message ?? 'Error al iniciar el pago');
+      setPaying(false);
+    }
+  };
 
   // ---- Submit ----
   const uploadFile = async (file: File, path: string): Promise<{ path: string; url: string }> => {
@@ -367,7 +430,9 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
       const expressNeedsPayment = !!expressOpt && !isElite && expressOpt.priceXaf > 0;
       const promoEnabled = !!(promo.enabled && promo.plan);
       const requiresPayment = expressNeedsPayment || promoEnabled;
-      const initialStatus = requiresPayment ? 'pending_payment' : 'pending';
+      // Si ya pagó por adelantado, las pistas entran como pending directamente
+      const initialStatus = (requiresPayment && !paidPrepaymentId) ? 'pending_payment' : 'pending';
+      const expressAlreadyPaid = !!expressOpt && (!expressNeedsPayment || !!paidPrepaymentId);
 
       const insertedIds: string[] = [];
       const total = tracks.length;
@@ -382,7 +447,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
         const trackExpressPrice = expressOpt
           ? (isFirst ? expressPriceXaf : 0)
           : null;
-        const expressPaidAt = expressOpt && !expressNeedsPayment ? nowIso : null;
+        const expressPaidAt = expressAlreadyPaid ? nowIso : null;
 
         const { data: inserted, error: subErr } = await (supabase as any)
           .from('song_submissions')
@@ -454,8 +519,21 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
       }
       setProgress(90);
 
-      // 5) Pasarela si hay pago pendiente
-      if (requiresPayment && insertedIds[0]) {
+      // 5) Si pagó por adelantado, consumir prepayment para marcar express/promo como pagados
+      if (paidPrepaymentId && insertedIds[0]) {
+        const { error: rpcErr } = await supabase.rpc('consume_submission_prepayment', {
+          p_prepayment_id: paidPrepaymentId,
+          p_submission_ids: insertedIds,
+          p_campaign_id: campaignId,
+        });
+        if (rpcErr) {
+          console.error('consume_submission_prepayment failed', rpcErr);
+          toast.error('El álbum se envió pero no se pudo aplicar el pago automáticamente. Contacta soporte.');
+        } else {
+          toast.success(`Álbum "${info.title}" enviado a revisión con ${tracks.length} pistas.`);
+          localStorage.removeItem(LS_KEY);
+        }
+      } else if (requiresPayment && insertedIds[0]) {
         const { data: checkout, error: chkErr } = await supabase.functions.invoke(
           'create-submission-checkout',
           { body: { submission_id: insertedIds[0], campaign_id: campaignId } },
@@ -526,9 +604,104 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
               </div>
               <div>
                 <Label>Fecha de lanzamiento</Label>
-                <Input type="date" value={info.release_date} onChange={(e) => setInfo({ ...info, release_date: e.target.value })} />
+                <div className="flex gap-2">
+                  <Input type="date" value={info.release_date} onChange={(e) => setInfo({ ...info, release_date: e.target.value })} className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpressEnabled((v) => !v);
+                      if (expressEnabled) { setExpressTier(null); setExpressAck(false); }
+                    }}
+                    className={`text-[10px] uppercase tracking-wider font-bold px-2 rounded-md transition-all inline-flex items-center gap-1 whitespace-nowrap ${
+                      expressEnabled
+                        ? 'bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white shadow-[0_0_18px_hsl(265_85%_60%/0.55)]'
+                        : 'border border-primary/40 text-primary hover:bg-primary/10'
+                    }`}
+                    title="Acelerar el lanzamiento del álbum"
+                  >
+                    <Zap className="h-3 w-3" />
+                    {expressEnabled ? 'Express' : 'Express'}
+                    {isElite && !expressEnabled && <Crown className="h-3 w-3 text-[hsl(45,95%,60%)]" />}
+                  </button>
+                </div>
               </div>
             </div>
+
+            {/* Lanzamiento Express del álbum (configuración) */}
+            {expressEnabled && (
+              <div className="relative rounded-xl p-[1px] bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)]">
+                <div className="rounded-[11px] bg-background p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-primary" /> Lanzamiento Express (todo el álbum)
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Pago único por todo el álbum. Cada pista entra en cola prioritaria.
+                  </p>
+                  {!isElite && (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-start gap-2">
+                      <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="text-xs flex-1 space-y-1.5">
+                        <p className="font-semibold">Gratis con YUSIOP Elite</p>
+                        <Button
+                          type="button" size="sm"
+                          onClick={() => { onOpenChange(false); navigate('/subscriptions'); }}
+                          className="h-7 text-[11px] bg-gradient-to-r from-[hsl(280,85%,45%)] via-[hsl(250,95%,45%)] to-[hsl(188,85%,45%)] text-white"
+                        >
+                          <Crown className="h-3 w-3 mr-1" /> Mejorar a Elite
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid gap-2">
+                    {EXPRESS_OPTIONS.map((opt) => {
+                      const selected = expressTier === opt.tier;
+                      return (
+                        <button
+                          key={opt.tier}
+                          type="button"
+                          onClick={() => setExpressTier(opt.tier)}
+                          className={`relative text-left rounded-lg p-3 transition-all border ${
+                            selected
+                              ? 'border-transparent bg-gradient-to-r from-[hsl(220,90%,55%)]/15 via-[hsl(265,85%,60%)]/15 to-[hsl(180,80%,50%)]/15 ring-2 ring-[hsl(265,85%,60%)]'
+                              : 'border-border bg-muted/30 hover:border-primary/40'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`h-9 w-9 rounded-md flex items-center justify-center text-sm font-bold ${
+                                selected ? 'bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white' : 'bg-muted text-foreground'
+                              }`}>{opt.tier}</div>
+                              <div>
+                                <div className="font-semibold text-sm">{opt.label}</div>
+                                <div className="text-[11px] text-muted-foreground">{opt.sub}</div>
+                              </div>
+                            </div>
+                            <div className={`flex flex-col items-end leading-tight whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
+                              {isElite ? (
+                                <span className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">Incluido</span>
+                              ) : (
+                                <>
+                                  <span className="text-sm font-bold tabular-nums">{formatXafAsEur(opt.priceXaf)}</span>
+                                  <span className="text-[10px] font-normal text-muted-foreground tabular-nums">{formatXAFFixed(opt.priceXaf)}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {!isElite && (
+                    <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                      <input type="checkbox" checked={expressAck} onChange={(e) => setExpressAck(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
+                      <span className="text-xs font-medium">He leído y acepto las condiciones del Lanzamiento Express.</span>
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
             <div>
               <Label>Descripción (opcional)</Label>
               <Textarea value={info.description} onChange={(e) => setInfo({ ...info, description: e.target.value })} rows={3} placeholder="Cuenta la historia del álbum…" />
@@ -745,100 +918,15 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
               ))}
             </div>
 
-            {/* Lanzamiento Express del álbum */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-sm font-semibold flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary" /> Lanzamiento Express (todo el álbum)
-                </Label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setExpressEnabled((v) => !v);
-                    if (expressEnabled) { setExpressTier(null); setExpressAck(false); }
-                  }}
-                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full transition-all inline-flex items-center gap-1 ${
-                    expressEnabled
-                      ? 'bg-gradient-to-r from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white shadow-[0_0_18px_hsl(265_85%_60%/0.55)]'
-                      : 'border border-primary/40 text-primary hover:bg-primary/10'
-                  }`}
-                >
-                  <Zap className="h-3 w-3" />
-                  {expressEnabled ? 'Express activado' : 'Activar prioridad'}
-                  {isElite && !expressEnabled && <Crown className="h-3 w-3 text-[hsl(45,95%,60%)]" />}
-                </button>
+            {expressEnabled && expressTier && (
+              <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary flex-shrink-0" />
+                <span>
+                  Lanzamiento <strong>Express {expressTier}</strong> activado para todo el álbum
+                  {isElite ? ' (incluido en Elite)' : ` — ${formatXafAsEur(expressPriceXaf)} (${formatXAFFixed(expressPriceXaf)})`}.
+                </span>
               </div>
-
-              {expressEnabled && (
-                <div className="relative rounded-xl p-[1px] bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)]">
-                  <div className="rounded-[11px] bg-background p-4 space-y-3">
-                    <p className="text-xs text-muted-foreground">
-                      Pago único por todo el álbum. La revisión de cada pista se realiza por separado, pero todas entran en cola prioritaria.
-                    </p>
-                    {!isElite && (
-                      <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-start gap-2">
-                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <div className="text-xs flex-1 space-y-1.5">
-                          <p className="font-semibold">Gratis con YUSIOP Elite</p>
-                          <Button
-                            type="button" size="sm"
-                            onClick={() => { onOpenChange(false); navigate('/subscriptions'); }}
-                            className="h-7 text-[11px] bg-gradient-to-r from-[hsl(280,85%,45%)] via-[hsl(250,95%,45%)] to-[hsl(188,85%,45%)] text-white"
-                          >
-                            <Crown className="h-3 w-3 mr-1" /> Mejorar a Elite
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    <div className="grid gap-2">
-                      {EXPRESS_OPTIONS.map((opt) => {
-                        const selected = expressTier === opt.tier;
-                        return (
-                          <button
-                            key={opt.tier}
-                            type="button"
-                            onClick={() => setExpressTier(opt.tier)}
-                            className={`relative text-left rounded-lg p-3 transition-all border ${
-                              selected
-                                ? 'border-transparent bg-gradient-to-r from-[hsl(220,90%,55%)]/15 via-[hsl(265,85%,60%)]/15 to-[hsl(180,80%,50%)]/15 ring-2 ring-[hsl(265,85%,60%)]'
-                                : 'border-border bg-muted/30 hover:border-primary/40'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3">
-                                <div className={`h-9 w-9 rounded-md flex items-center justify-center text-sm font-bold ${
-                                  selected ? 'bg-gradient-to-br from-[hsl(220,90%,55%)] via-[hsl(265,85%,60%)] to-[hsl(180,80%,50%)] text-white' : 'bg-muted text-foreground'
-                                }`}>{opt.tier}</div>
-                                <div>
-                                  <div className="font-semibold text-sm">{opt.label}</div>
-                                  <div className="text-[11px] text-muted-foreground">{opt.sub}</div>
-                                </div>
-                              </div>
-                              <div className={`flex flex-col items-end leading-tight whitespace-nowrap ${selected ? 'text-primary' : 'text-foreground'}`}>
-                                {isElite ? (
-                                  <span className="text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-[hsl(220,90%,65%)] via-[hsl(265,85%,70%)] to-[hsl(180,80%,55%)] bg-clip-text text-transparent">Incluido</span>
-                                ) : (
-                                  <>
-                                    <span className="text-sm font-bold tabular-nums">{formatXafAsEur(opt.priceXaf)}</span>
-                                    <span className="text-[10px] font-normal text-muted-foreground tabular-nums">{formatXAFFixed(opt.priceXaf)}</span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {!isElite && (
-                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
-                        <input type="checkbox" checked={expressAck} onChange={(e) => setExpressAck(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
-                        <span className="text-xs font-medium">He leído y acepto las condiciones del Lanzamiento Express.</span>
-                      </label>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Impulsa tu lanzamiento */}
             <PromoteReleaseBlock
@@ -861,8 +949,8 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
           </div>
         )}
 
-        <DialogFooter className="flex-row justify-between gap-2">
-          <Button variant="ghost" onClick={() => step === 1 ? onOpenChange(false) : setStep(step - 1)} disabled={submitting}>
+        <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
+          <Button variant="ghost" onClick={() => step === 1 ? onOpenChange(false) : setStep(step - 1)} disabled={submitting || paying}>
             {step === 1 ? 'Cancelar' : 'Atrás'}
           </Button>
           {step < 3 ? (
@@ -870,9 +958,32 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
               Continuar
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={!canSubmit}>
-              {submitting ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando…</>) : (<><Upload className="h-4 w-4 mr-2" /> Enviar álbum a revisión</>)}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              {needsPrepayment && !paidPrepaymentId && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handlePay}
+                  disabled={paying || submitting}
+                >
+                  {paying ? 'Abriendo pasarela…' : (() => {
+                    const ex = expressEnabled && expressTier && !isElite ? `Express ${expressTier}` : null;
+                    const pr = promo.enabled && promo.plan ? 'Promoción' : null;
+                    return `Pagar ${[ex, pr].filter(Boolean).join(' + ')}`;
+                  })()}
+                </Button>
+              )}
+              {paidPrepaymentId && (
+                <span className="text-xs text-emerald-500 sm:self-center">✓ Pago confirmado</span>
+              )}
+              <Button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                title={!prepaymentReady ? 'Primero completa el pago' : undefined}
+              >
+                {submitting ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando…</>) : (<><Upload className="h-4 w-4 mr-2" /> Enviar álbum</>)}
+              </Button>
+            </div>
           )}
         </DialogFooter>
       </DialogContent>

@@ -74,6 +74,19 @@ const ArtistDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  // Reabrir el diálogo adecuado cuando el usuario vuelve de Stripe (prepayment)
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.get('prepayment') || !url.searchParams.get('pid')) return;
+    const pid = url.searchParams.get('pid');
+    try {
+      const single = localStorage.getItem('yusiop:prepay:single');
+      if (single && JSON.parse(single).prepayment_id === pid) { setSubmitOpen(true); return; }
+      const album = localStorage.getItem('yusiop:prepay:album');
+      if (album && JSON.parse(album).prepayment_id === pid) { setAlbumOpen(true); return; }
+    } catch {}
+  }, []);
+
   if (!isArtist) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
