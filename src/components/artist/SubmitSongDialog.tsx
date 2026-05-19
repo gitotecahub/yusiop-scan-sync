@@ -993,16 +993,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             </p>
           </div>
 
-          <div>
-            <Label htmlFor="album">Álbum (opcional)</Label>
-            <Input
-              id="album"
-              value={formData.album_title}
-              onChange={(e) => setFormData((p) => ({ ...p, album_title: e.target.value }))}
-              placeholder="Título del álbum si pertenece a uno"
-              maxLength={120}
-            />
-          </div>
+          {/* Campo "Álbum" eliminado del flujo Single. Para subir un álbum usa el botón "Subir música" → Álbum. */}
 
           {!isEdit && (
             <PromoteReleaseBlock
