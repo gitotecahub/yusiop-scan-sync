@@ -2,12 +2,14 @@ import { ReactNode } from 'react';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import OfflineBanner from './OfflineBanner';
+import { usePageSwipe } from '@/hooks/usePageSwipe';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  usePageSwipe();
   return (
     <div className="fixed inset-0 flex flex-col bg-background overflow-hidden grain">
       {/* Ambient blobs */}
