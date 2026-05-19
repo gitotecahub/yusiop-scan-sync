@@ -48,18 +48,24 @@ Deno.serve(async (req) => {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!serviceRoleKey) {
+      return new Response(JSON.stringify({ error: "SUPABASE_SERVICE_ROLE_KEY no configurada" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const supabase = createClient(
+    const userSupabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-    const { data: userData, error: userErr } = await supabase.auth.getUser(
+    const { data: userData, error: userErr } = await userSupabase.auth.getUser(
       authHeader.replace("Bearer ", ""),
     );
     if (userErr || !userData?.user) {
@@ -69,6 +75,11 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
     const userEmail = userData.user.email as string;
+    const adminSupabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      serviceRoleKey,
+      { auth: { persistSession: false } },
+    );
 
     const body = (await req.json()) as Body;
     if (!body.kind || !["single", "album"].includes(body.kind)) {
@@ -136,7 +147,7 @@ Deno.serve(async (req) => {
     }
 
     // Crear fila de prepayment (status=pending)
-    const { data: pp, error: ppErr } = await supabase
+    const { data: pp, error: ppErr } = await adminSupabase
       .from("submission_prepayments")
       .insert({
         user_id: userId,
@@ -185,7 +196,7 @@ Deno.serve(async (req) => {
     });
 
     // Guardar session id
-    await supabase
+    await adminSupabase
       .from("submission_prepayments")
       .update({ stripe_session_id: session.id })
       .eq("id", pp.id);
