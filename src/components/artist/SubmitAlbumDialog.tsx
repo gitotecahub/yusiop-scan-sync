@@ -309,7 +309,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
   })();
   const prepaymentReady = !needsPrepayment || !!paidPrepaymentId;
 
-  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && prepaymentReady && !submitting;
+  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && !submitting;
 
   const handlePay = async () => {
     if (!user) return;
