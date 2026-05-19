@@ -132,11 +132,40 @@ const AppContent = () => {
 
   // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra
   useEffect(() => {
-    if (user?.id) {
-      loadForUser(user.id);
-    } else {
+    if (!user?.id) {
       reset();
+      return;
     }
+    loadForUser(user.id);
+
+    // Realtime: si admin aprueba/rechaza, refrescar el estado al instante
+    import('@/integrations/supabase/client').then(({ supabase }) => {
+      // canal único por usuario
+      const channel = supabase
+        .channel(`mode-sync-${user.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'artist_requests', filter: `user_id=eq.${user.id}` },
+          () => loadForUser(user.id),
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'user_roles', filter: `user_id=eq.${user.id}` },
+          () => loadForUser(user.id),
+        )
+        .subscribe();
+      (window as any).__modeSyncChannel = channel;
+    });
+
+    return () => {
+      const ch = (window as any).__modeSyncChannel;
+      if (ch) {
+        import('@/integrations/supabase/client').then(({ supabase }) => {
+          supabase.removeChannel(ch);
+        });
+        (window as any).__modeSyncChannel = null;
+      }
+    };
   }, [user?.id, loadForUser, reset]);
 
   // Saltar splash en la pantalla de reset para no consumir tiempo del token
