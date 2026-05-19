@@ -15,6 +15,8 @@ project_id = "wbzwdihdayasmikmqvgp"
     verify_jwt = true
   [functions.create-card-checkout]
     verify_jwt = true
+  [functions.create-prepayment-checkout]
+    verify_jwt = true
   [functions.create-subscription-checkout]
     verify_jwt = true
   [functions.generate-song-access]
