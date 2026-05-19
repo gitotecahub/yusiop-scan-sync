@@ -554,6 +554,75 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (error) throw error;
   };
 
+  // ===== Pago previo (Express + Promo) =====
+  const needsPrepayment = (() => {
+    const expressPay = expressEnabled && expressTier && !isElite;
+    const promoPay = !!(promo.enabled && promo.plan);
+    return !!expressPay || promoPay;
+  })();
+  const prepaymentReady = !needsPrepayment || !!paidPrepaymentId;
+
+  const handlePay = async () => {
+    if (!user) return;
+    if (!formData.title.trim() || !formData.artist_name.trim()) {
+      toast.error('Indica al menos el título y el artista antes de pagar.');
+      return;
+    }
+    if (expressEnabled && !expressTier) {
+      toast.error('Selecciona un nivel de Lanzamiento Express.');
+      return;
+    }
+    if (promo.enabled && !promo.plan) {
+      toast.error('Selecciona un plan de Promoción.');
+      return;
+    }
+    setPaying(true);
+    try {
+      // Guardar todo el estado del formulario para restaurarlo tras volver
+      const draft = {
+        prepayment_id: null as string | null,
+        formData,
+        expressEnabled,
+        expressTier,
+        promo,
+        hasCollabs,
+        collaborators,
+        aiType,
+        isExplicitDeclared,
+        rightsConfirmed,
+      };
+
+      const returnUrl = window.location.origin + window.location.pathname;
+      const { data, error } = await supabase.functions.invoke(
+        'create-prepayment-checkout',
+        {
+          body: {
+            kind: 'single',
+            context_title: formData.title.trim(),
+            context_artist_name: formData.artist_name.trim(),
+            express_tier: expressEnabled && !isElite ? expressTier : null,
+            promo_plan: promo.enabled ? promo.plan : null,
+            promo_ad_text: promo.ad_text || null,
+            promo_cta_text: promo.cta_text || null,
+            promo_start_date: promo.start_date || null,
+            success_url: returnUrl,
+            cancel_url: returnUrl,
+          },
+        },
+      );
+      if (error || !data?.url) {
+        throw new Error(error?.message ?? 'No se pudo iniciar el pago');
+      }
+      draft.prepayment_id = data.prepayment_id;
+      localStorage.setItem(LS_KEY, JSON.stringify(draft));
+      window.location.href = data.url;
+    } catch (e: any) {
+      console.error('handlePay error', e);
+      toast.error(e?.message ?? 'Error al iniciar el pago');
+      setPaying(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validate() || !user) return;
     stopPreview();
