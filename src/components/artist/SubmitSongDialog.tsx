@@ -336,7 +336,65 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     setTrackFile(null);
     setCoverFile(null);
     setProgress(0);
+    setPaidPrepaymentId(null);
     stopPreview();
+
+    // Restaurar tras volver del Stripe Checkout (prepayment)
+    if (!editing) {
+      (async () => {
+        try {
+          const url = new URL(window.location.href);
+          const status = url.searchParams.get('prepayment');
+          const pid = url.searchParams.get('pid');
+          const raw = localStorage.getItem(LS_KEY);
+          if (!raw) return;
+          const saved = JSON.parse(raw);
+          if (status === 'success' && pid && saved.prepayment_id === pid) {
+            const { data: pp } = await supabase
+              .from('submission_prepayments')
+              .select('status')
+              .eq('id', pid)
+              .maybeSingle();
+            if (pp?.status === 'paid') {
+              setFormData(saved.formData);
+              setExpressEnabled(!!saved.expressEnabled);
+              setExpressTier(saved.expressTier ?? null);
+              setExpressAck(true);
+              setPromo(saved.promo);
+              setHasCollabs(!!saved.hasCollabs);
+              setCollaborators(saved.collaborators ?? []);
+              setAiType(saved.aiType ?? 'none');
+              setIsExplicitDeclared(!!saved.isExplicitDeclared);
+              setRightsConfirmed(!!saved.rightsConfirmed);
+              setPaidPrepaymentId(pid);
+              toast.success('Pago confirmado. Selecciona los archivos y pulsa "Enviar canción".');
+              // limpiar URL
+              url.searchParams.delete('prepayment');
+              url.searchParams.delete('pid');
+              window.history.replaceState({}, '', url.toString());
+            }
+          } else if (status === 'cancelled' && pid && saved.prepayment_id === pid) {
+            toast.info('Pago cancelado. Tu progreso se mantiene, puedes reintentar.');
+            url.searchParams.delete('prepayment');
+            url.searchParams.delete('pid');
+            window.history.replaceState({}, '', url.toString());
+            // restaurar también los datos para que no pierda el progreso
+            setFormData(saved.formData);
+            setExpressEnabled(!!saved.expressEnabled);
+            setExpressTier(saved.expressTier ?? null);
+            setExpressAck(true);
+            setPromo(saved.promo);
+            setHasCollabs(!!saved.hasCollabs);
+            setCollaborators(saved.collaborators ?? []);
+            setAiType(saved.aiType ?? 'none');
+            setIsExplicitDeclared(!!saved.isExplicitDeclared);
+            setRightsConfirmed(!!saved.rightsConfirmed);
+          }
+        } catch (e) {
+          console.warn('prepayment restore failed', e);
+        }
+      })();
+    }
   }, [open, editing, defaultArtistName]);
 
   const enableCollabs = () => {
