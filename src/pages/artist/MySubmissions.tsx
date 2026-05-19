@@ -81,7 +81,7 @@ const MySubmissions = () => {
     setLoading(true);
     const { data } = await supabase
       .from('song_submissions')
-      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches,express_tier,express_price_xaf')
+      .select('id,title,artist_name,album_title,genre,release_date,status,rejection_reason,cover_url,cover_path,preview_url,preview_path,track_url,track_path,duration_seconds,scheduled_release_at,created_at,reviewed_at,copyright_status,copyright_score,copyright_matches,express_tier,express_price_xaf,release_id,release_type,track_number')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setRows((data ?? []) as unknown as SubmissionRow[]);
