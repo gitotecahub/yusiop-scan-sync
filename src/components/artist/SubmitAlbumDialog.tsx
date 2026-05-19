@@ -447,7 +447,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
         const trackExpressPrice = expressOpt
           ? (isFirst ? expressPriceXaf : 0)
           : null;
-        const expressPaidAt = expressOpt && !expressNeedsPayment ? nowIso : null;
+        const expressPaidAt = expressAlreadyPaid ? nowIso : null;
 
         const { data: inserted, error: subErr } = await (supabase as any)
           .from('song_submissions')
