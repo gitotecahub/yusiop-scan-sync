@@ -301,7 +301,70 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
   const expressNeedsAck = expressEnabled && !isElite && !expressAck;
   const expressOk = !expressEnabled || (expressTier !== null && !expressNeedsAck);
 
-  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && !submitting;
+  // ===== Pago previo (Express + Promo) =====
+  const needsPrepayment = (() => {
+    const expressPay = expressEnabled && expressTier && !isElite;
+    const promoPay = !!(promo.enabled && promo.plan);
+    return !!expressPay || promoPay;
+  })();
+  const prepaymentReady = !needsPrepayment || !!paidPrepaymentId;
+
+  const canSubmit = step1Valid && step2Valid && rightsConfirmed && expressOk && prepaymentReady && !submitting;
+
+  const handlePay = async () => {
+    if (!user) return;
+    if (!info.title.trim() || !info.artist_name.trim()) {
+      toast.error('Indica el título y el artista del álbum antes de pagar.');
+      return;
+    }
+    if (expressEnabled && !expressTier) {
+      toast.error('Selecciona un nivel de Lanzamiento Express.');
+      return;
+    }
+    if (promo.enabled && !promo.plan) {
+      toast.error('Selecciona un plan de Promoción.');
+      return;
+    }
+    setPaying(true);
+    try {
+      const draft = {
+        prepayment_id: null as string | null,
+        info,
+        expressEnabled,
+        expressTier,
+        promo,
+        rightsConfirmed,
+      };
+      const returnUrl = window.location.origin + window.location.pathname;
+      const { data, error } = await supabase.functions.invoke(
+        'create-prepayment-checkout',
+        {
+          body: {
+            kind: 'album',
+            context_title: info.title.trim(),
+            context_artist_name: info.artist_name.trim(),
+            express_tier: expressEnabled && !isElite ? expressTier : null,
+            promo_plan: promo.enabled ? promo.plan : null,
+            promo_ad_text: promo.ad_text || null,
+            promo_cta_text: promo.cta_text || null,
+            promo_start_date: promo.start_date || null,
+            success_url: returnUrl,
+            cancel_url: returnUrl,
+          },
+        },
+      );
+      if (error || !data?.url) {
+        throw new Error(error?.message ?? 'No se pudo iniciar el pago');
+      }
+      draft.prepayment_id = data.prepayment_id;
+      localStorage.setItem(LS_KEY, JSON.stringify(draft));
+      window.location.href = data.url;
+    } catch (e: any) {
+      console.error('album handlePay error', e);
+      toast.error(e?.message ?? 'Error al iniciar el pago');
+      setPaying(false);
+    }
+  };
 
   // ---- Submit ----
   const uploadFile = async (file: File, path: string): Promise<{ path: string; url: string }> => {
