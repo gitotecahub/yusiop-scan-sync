@@ -258,7 +258,6 @@ const MySubmissions = () => {
                           #{r.track_number}
                         </span>
                       )}
-                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold truncate">{r.title}</h3>
                       {r.status === 'pending' && (
                         r.express_tier ? (
@@ -403,7 +402,10 @@ const MySubmissions = () => {
                 />
               </CardContent>
             </Card>
-          ))}
+                </div>
+              );
+            });
+          })()}
         </div>
       )}
 
