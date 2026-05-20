@@ -818,7 +818,28 @@ const SalesSimulator = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Coins className="h-4 w-4 text-yusiop-primary" />
+              Otras fuentes / año
+            </CardTitle>
+            <CardDescription>
+              Suscripciones · Express · Promo · Recargas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">
+              {formatXAFNumber(totals.othersGrossXAF)}
+            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              ≈ {formatEURNumber(totals.othersGrossXAF)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
 
 
 
