@@ -238,9 +238,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (hasCollabs) {
       if (collaborators.length < 2) return 'Añade al menos 2 artistas en la colaboración';
       if (collaborators.some(c => !c.artist_name.trim())) return 'Todos los colaboradores necesitan un nombre artístico';
-      const missingEmail = collaborators.find(c => !c.is_primary && !c.contact_email.trim());
-      if (missingEmail) return `Falta el email de ${missingEmail.artist_name || 'un colaborador'}`;
-      const badEmail = collaborators.find(c => !c.is_primary && c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
+      const missingEmail = collaborators.find(c => !c.is_primary && !c.picked_user_id && !c.contact_email.trim());
+      if (missingEmail) return `Falta el email o etiqueta @ de ${missingEmail.artist_name || 'un colaborador'}`;
+      const badEmail = collaborators.find(c => !c.is_primary && !c.picked_user_id && c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
       if (badEmail) return `Email inválido: ${badEmail.contact_email}`;
       if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
     }
