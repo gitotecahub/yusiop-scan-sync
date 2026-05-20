@@ -171,7 +171,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
             window.history.replaceState({}, '', url.toString());
           }
         } else if (status === 'cancelled' && pid && saved.prepayment_id === pid) {
-          toast.info('Pago cancelado. Tu progreso del álbum se mantiene.');
+          toast.error('Pago fallido. Tu progreso del álbum se mantiene.');
           url.searchParams.delete('prepayment');
           url.searchParams.delete('pid');
           window.history.replaceState({}, '', url.toString());

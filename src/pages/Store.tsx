@@ -109,7 +109,7 @@ const Store = () => {
       confirm();
       return () => { cancelled = true; };
     } else if (status === 'cancelled') {
-      toast.info('Compra cancelada.');
+      toast.error('Pago fallido. No se ha realizado ningún cargo.');
       navigate('/store', { replace: true });
     }
   }, [location.search, navigate]);

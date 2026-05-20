@@ -61,8 +61,8 @@ const Wallet = () => {
     }
     if (status === 'cancelled') {
       toast({
-        title: 'Recarga cancelada',
-        description: 'No se ha realizado ningún cargo.',
+        title: 'Pago fallido',
+        description: 'No se completó la recarga. No se ha realizado ningún cargo.',
         variant: 'destructive',
       });
       searchParams.delete('status');

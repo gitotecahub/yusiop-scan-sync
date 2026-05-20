@@ -374,7 +374,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
               window.history.replaceState({}, '', url.toString());
             }
           } else if (status === 'cancelled' && pid && saved.prepayment_id === pid) {
-            toast.info('Pago cancelado. Tu progreso se mantiene, puedes reintentar.');
+            toast.error('Pago fallido. Tu progreso se mantiene, puedes reintentar.');
             url.searchParams.delete('prepayment');
             url.searchParams.delete('pid');
             window.history.replaceState({}, '', url.toString());

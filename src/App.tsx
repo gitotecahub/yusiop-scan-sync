@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Pages
 import Index from "./pages/Index";
@@ -76,6 +76,7 @@ import { useLocaleDetection } from '@/hooks/useLocaleDetection';
 import { useLocaleStore } from '@/stores/localeStore';
 import LocaleFallbackGate from '@/components/locale/LocaleFallbackGate';
 import { useNavHistoryTracker } from '@/hooks/useNavHistory';
+import { usePlayerStore } from '@/stores/playerStore';
 
 const queryClient = new QueryClient();
 
@@ -143,8 +144,18 @@ const AppContent = () => {
     return () => clearTimeout(timer);
   }, [showSplash]);
 
-  // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra
+  // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra.
+  // También detener el reproductor al cambiar de usuario para que la canción
+  // del usuario anterior no continúe sonando en la sesión del nuevo perfil.
+  const previousUserIdRef = useRef<string | null>(null);
   useEffect(() => {
+    const prev = previousUserIdRef.current;
+    const curr = user?.id ?? null;
+    if (prev !== curr) {
+      // Detener cualquier reproducción residual al cambiar (login/logout/switch)
+      try { usePlayerStore.getState().stop(); } catch {}
+      previousUserIdRef.current = curr;
+    }
     if (!user?.id) {
       reset();
       return;
