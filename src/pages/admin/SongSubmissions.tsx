@@ -418,7 +418,104 @@ const SongSubmissions = () => {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {rows.map((row) => (
+          {(() => {
+            // Agrupar pistas por release_id cuando pertenezcan a un álbum/EP
+            const groups: AlbumGroup[] = [];
+            const groupIdx = new Map<string, number>();
+            const singles: SubmissionRow[] = [];
+            const orderedKeys: Array<{ kind: 'album'; key: string } | { kind: 'single'; row: SubmissionRow }> = [];
+
+            for (const row of rows) {
+              const isAlbum = !!row.release_id && row.release_type !== 'single';
+              if (isAlbum && row.release_id) {
+                if (!groupIdx.has(row.release_id)) {
+                  groupIdx.set(row.release_id, groups.length);
+                  groups.push({
+                    releaseId: row.release_id,
+                    title: row.album_title || row.title,
+                    artist: row.artist_name,
+                    cover: row.cover_url,
+                    releaseDate: row.release_date,
+                    tracks: [],
+                    pendingCount: 0,
+                  });
+                  orderedKeys.push({ kind: 'album', key: row.release_id });
+                }
+                const g = groups[groupIdx.get(row.release_id)!];
+                g.tracks.push(row);
+                if (row.status === 'pending') g.pendingCount++;
+              } else {
+                singles.push(row);
+                orderedKeys.push({ kind: 'single', row });
+              }
+            }
+            // Ordenar pistas dentro de cada álbum por track_number
+            groups.forEach((g) => g.tracks.sort((a, b) => (a.track_number ?? 0) - (b.track_number ?? 0)));
+
+            return orderedKeys.map((it) => {
+              if (it.kind === 'single') return renderSubmissionCard(it.row);
+              const g = groups[groupIdx.get(it.key)!];
+              const isOpen = expandedAlbums[g.releaseId] ?? true;
+              return (
+                <Card key={`album-${g.releaseId}`} className="border-primary/30 bg-primary/5">
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedAlbums((s) => ({ ...s, [g.releaseId]: !isOpen }))}
+                      className="flex items-start gap-3 min-w-0 flex-1 text-left"
+                    >
+                      <div className="w-16 h-16 rounded-md bg-muted overflow-hidden flex items-center justify-center flex-shrink-0 ring-2 ring-primary/30">
+                        {g.cover ? (
+                          <img src={g.cover} alt={g.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="flex items-center gap-2 flex-wrap text-base">
+                          <span className="truncate">📀 {g.title}</span>
+                          <Badge variant="outline" className="text-[10px]">
+                            Álbum · {g.tracks.length} {g.tracks.length === 1 ? 'pista' : 'pistas'}
+                          </Badge>
+                          {g.pendingCount > 0 && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {g.pendingCount} pendiente{g.pendingCount === 1 ? '' : 's'}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
+                          {g.artist}
+                          {g.releaseDate && <> · 🎯 {new Date(g.releaseDate).toLocaleDateString('es-ES')}</>}
+                        </p>
+                      </div>
+                    </button>
+                    <div className="flex gap-2 flex-shrink-0 items-center">
+                      {g.pendingCount > 0 && (
+                        <Button size="sm" onClick={() => openApproveAlbum(g)}>
+                          <Check className="h-4 w-4 mr-1" /> Aprobar álbum
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label="Mostrar pistas"
+                        onClick={() => setExpandedAlbums((s) => ({ ...s, [g.releaseId]: !isOpen }))}
+                      >
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  {isOpen && (
+                    <CardContent className="space-y-3 pt-0">
+                      {g.tracks.map((t) => renderSubmissionCard(t, true))}
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            });
+          })()}
+          {false && rows.map((row) => (
             <Collapsible key={row.id} asChild>
               <Card>
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
