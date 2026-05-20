@@ -55,6 +55,16 @@ const DEFAULT_VPREM_PRICE_EUR = 10;
 const DEFAULT_VSTD_CREDITS = 4;
 const DEFAULT_VPREM_CREDITS = 10;
 
+// Defaults otras fuentes de ingresos
+const DEFAULT_SUBS_MONTHLY = 50;          // suscriptores activos / mes
+const DEFAULT_SUBS_PRICE_EUR = 4.99;      // precio mensual EUR
+const DEFAULT_EXPRESS_YEARLY = 100;       // canciones express / año
+const DEFAULT_EXPRESS_PRICE_XAF = 5000;   // precio express por canción XAF
+const DEFAULT_PROMO_YEARLY = 30;          // campañas promo / año
+const DEFAULT_PROMO_PRICE_EUR = 25;       // precio medio campaña EUR
+const DEFAULT_RECHARGE_YEARLY = 200;      // recargas wallet / año
+const DEFAULT_RECHARGE_AVG_XAF = 2500;    // recarga media XAF
+
 const SalesSimulator = () => {
   // Pricing inputs
   const [stdPrice, setStdPrice] = useState(DEFAULT_STD_PRICE_XAF);
