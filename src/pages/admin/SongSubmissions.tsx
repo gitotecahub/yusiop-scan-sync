@@ -51,8 +51,21 @@ interface SubmissionRow {
   express_price_xaf: number | null;
   ai_type: AiUsageType | null;
   rights_confirmed: boolean | null;
+  release_id: string | null;
+  release_type: 'single' | 'album' | 'ep' | null;
+  track_number: number | null;
   collaborators?: CollaboratorRow[];
   promo?: PromoCampaign | null;
+}
+
+interface AlbumGroup {
+  releaseId: string;
+  title: string;
+  artist: string;
+  cover: string | null;
+  releaseDate: string | null;
+  tracks: SubmissionRow[];
+  pendingCount: number;
 }
 
 interface PromoCampaign {
