@@ -1289,20 +1289,33 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                     </div>
 
                     <div className="grid grid-cols-12 gap-2">
-                      <Input
-                        className="col-span-12 sm:col-span-6"
-                        placeholder="Nombre artístico"
-                        value={c.artist_name}
-                        onChange={(e) => {
-                          updateCollab(i, { artist_name: e.target.value });
-                          // Si edito el principal aquí, también actualizo el campo de arriba
-                          if (c.is_primary) {
-                            setFormData((p) => ({ ...p, artist_name: e.target.value }));
-                          }
-                        }}
-                        maxLength={80}
-                        disabled={c.is_primary}
-                      />
+                      <div className="col-span-12 sm:col-span-6">
+                        {c.is_primary ? (
+                          <Input
+                            placeholder="Nombre artístico"
+                            value={c.artist_name}
+                            onChange={(e) => {
+                              updateCollab(i, { artist_name: e.target.value });
+                              setFormData((p) => ({ ...p, artist_name: e.target.value }));
+                            }}
+                            maxLength={80}
+                            disabled
+                          />
+                        ) : (
+                          <ArtistMentionInput
+                            value={c.artist_name}
+                            pickedUserId={c.picked_user_id ?? null}
+                            onChange={(v, picked) =>
+                              updateCollab(i, {
+                                artist_name: v,
+                                picked_user_id: picked?.user_id ?? null,
+                                // Si se etiqueta a un usuario @, el email no es necesario
+                                ...(picked ? { contact_email: '' } : {}),
+                              })
+                            }
+                          />
+                        )}
+                      </div>
 
                       <div className="col-span-7 sm:col-span-4">
                         {c.is_primary ? (
@@ -1339,7 +1352,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                       </div>
                     </div>
 
-                    {!c.is_primary && (
+                    {!c.is_primary && !c.picked_user_id && (
                       <div className="space-y-1">
                         <Input
                           type="email"
@@ -1353,6 +1366,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                           Le avisaremos por email cuando se publique la canción para que pueda reclamar su parte. Si aún no tiene cuenta, le invitaremos a registrarse.
                         </p>
                       </div>
+                    )}
+                    {!c.is_primary && c.picked_user_id && (
+                      <p className="text-[11px] text-primary">
+                        Artista etiquetado en Yusiop. Recibirá notificación en la app y por email.
+                      </p>
                     )}
                   </div>
                 ))}
