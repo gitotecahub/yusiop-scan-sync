@@ -226,7 +226,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     collaborators.length >= 2 &&
     Math.abs(collabSum - 100) < 0.01 &&
     collaborators.every(c => c.artist_name.trim().length > 0) &&
-    collaborators.every(c => c.is_primary || (c.contact_email.trim().length > 0 && emailRe.test(c.contact_email.trim())))
+    collaborators.every(c => c.is_primary || !!c.picked_user_id || (c.contact_email.trim().length > 0 && emailRe.test(c.contact_email.trim())))
   );
 
   // Razón por la que el botón "Enviar a revisión" está deshabilitado (para mostrar al usuario)
