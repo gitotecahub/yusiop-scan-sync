@@ -4,7 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2 } from 'lucide-react';
+import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2, Disc3 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
@@ -30,12 +32,23 @@ interface Song {
   title: string;
   artist: string;
   album?: string;
+  album_id?: string | null;
+  album_cover?: string | null;
   duration_seconds: number;
   cover_url?: string;
   preview_url?: string;
   track_url?: string;
   preview_start_seconds?: number;
 }
+
+interface AlbumGroup {
+  id: string;
+  title: string;
+  cover_url: string;
+  artist: string;
+  songs: Song[];
+}
+
 
 const Catalog = () => {
   const location = useLocation();
@@ -50,6 +63,8 @@ const Catalog = () => {
   const [shareSong, setShareSong] = useState<Song | null>(null);
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<AlbumGroup | null>(null);
+
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, setLoading: setCreditsLoading } = useCreditsStore();
   const { t } = useLanguageStore();
@@ -179,12 +194,15 @@ const Catalog = () => {
                 title: song.title,
                 artist: artistDisplay,
                 album: song.albums?.title,
+                album_id: song.album_id ?? null,
+                album_cover: song.albums?.cover_url ?? null,
                 duration_seconds: song.duration_seconds,
                 cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
                 preview_url: song.preview_url,
                 track_url: song.track_url,
                 preview_start_seconds: (song as any).preview_start_seconds ?? 0,
               };
+
             });
           setSongs(formattedSongs);
           setFilteredSongs(formattedSongs);
@@ -383,7 +401,71 @@ useEffect(() => {
   };
 
 
+  const renderSongRow = (song: Song, idx: number) => {
+    const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+    const isDownloaded = downloadedSongs.has(song.id);
+    const isHighlighted = highlightedSongId === song.id;
+    return (
+      <div
+        key={song.id}
+        id={`song-${song.id}`}
+        className={`flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-all ${
+          isHighlighted
+            ? 'bg-primary/10 border-primary/50 shadow-glow'
+            : 'bg-card/40 border-border hover:border-primary/30 hover:bg-card'
+        }`}
+      >
+        <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
+          {String(idx + 1).padStart(2, '0')}
+        </span>
+        <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-muted border border-border/50">
+          {song.cover_url ? (
+            <img
+              src={song.cover_url}
+              alt={`Portada de ${song.title}`}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+              <Music className="h-5 w-5" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
+            {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button size="icon" variant="ghost" onClick={() => handlePlayPreview(song)} className="h-9 w-9 rounded-full hover:bg-muted">
+            {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+          </Button>
+          <Button size="icon" variant="ghost" onClick={() => setShareSong(song)} className="h-9 w-9 rounded-full hover:bg-muted" aria-label="Compartir con amigos">
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            onClick={() => handleDownload(song)}
+            disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
+            className={`h-9 w-9 rounded-full border-0 ${
+              isDownloaded ? 'bg-muted text-primary' : 'vapor-bg text-primary-foreground hover:opacity-90 shadow-glow'
+            }`}
+          >
+            {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
+
     return (
       <div className="space-y-6">
         <div>
@@ -488,98 +570,121 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Songs List */}
-      <div>
+      {/* Derive albums + standalone songs */}
+      {(() => null)()}
+      {(() => {
+        return null;
+      })()}
 
-        {filteredSongs.length === 0 && searchTerm ? (
-          <div className="vapor-card p-10 text-center">
-            <p className="text-muted-foreground text-sm">
-              {t('catalog.noResultsFor')} "{searchTerm}"
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredSongs.map((song, idx) => {
-              const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
-              const isDownloaded = downloadedSongs.has(song.id);
-              const isHighlighted = highlightedSongId === song.id;
-
-              return (
-                <div
-                  key={song.id}
-                  id={`song-${song.id}`}
-                  className={`flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-all ${
-                    isHighlighted
-                      ? 'bg-primary/10 border-primary/50 shadow-glow'
-                      : 'bg-card/40 border-border hover:border-primary/30 hover:bg-card'
-                  }`}
+      {/* Álbumes (carrusel) */}
+      {!searchTerm && (() => {
+        const map = new Map<string, AlbumGroup>();
+        songs.forEach((s) => {
+          if (!s.album_id || !s.album) return;
+          const existing = map.get(s.album_id);
+          if (existing) {
+            existing.songs.push(s);
+          } else {
+            map.set(s.album_id, {
+              id: s.album_id,
+              title: s.album!,
+              cover_url: s.album_cover || s.cover_url || '',
+              artist: s.artist,
+              songs: [s],
+            });
+          }
+        });
+        const albums = Array.from(map.values());
+        if (albums.length === 0) return null;
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Disc3 className="h-4 w-4 text-primary" />
+              <h2 className="font-display text-sm font-bold uppercase tracking-wider">
+                {t('catalog.title') ? 'Álbumes' : 'Álbumes'}
+              </h2>
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+              {albums.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => setSelectedAlbum(a)}
+                  className="snap-start shrink-0 w-40 rounded-2xl border border-border bg-card/40 overflow-hidden text-left hover:border-primary/40 transition-all"
                 >
-                  <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-muted border border-border/50">
-                    {song.cover_url ? (
-                      <img
-                        src={song.cover_url}
-                        alt={`Portada de ${song.title}`}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
+                  <div className="relative aspect-square bg-muted">
+                    {a.cover_url ? (
+                      <img src={a.cover_url} alt={a.title} className="w-full h-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        <Music className="h-5 w-5" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Disc3 className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
+                    <span className="absolute top-2 left-2 inline-block rounded-full bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                      Álbum
+                    </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
-                      {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
-                    </p>
+                  <div className="p-2.5">
+                    <p className="font-display font-bold text-sm truncate">{a.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{a.artist}</p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">{a.songs.length} {a.songs.length === 1 ? 'tema' : 'temas'}</p>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handlePlayPreview(song)}
-                      className="h-9 w-9 rounded-full hover:bg-muted"
-                    >
-                      {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => setShareSong(song)}
-                      className="h-9 w-9 rounded-full hover:bg-muted"
-                      aria-label="Compartir con amigos"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      onClick={() => handleDownload(song)}
-                      disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
-                      className={`h-9 w-9 rounded-full border-0 ${
-                        isDownloaded
-                          ? 'bg-muted text-primary'
-                          : 'vapor-bg text-primary-foreground hover:opacity-90 shadow-glow'
-                      }`}
-                    >
-                      {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-                    </Button>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Songs List (excluye temas de álbum cuando no hay búsqueda) */}
+      <div>
+        {(() => {
+          const visibleSongs = searchTerm
+            ? filteredSongs
+            : filteredSongs.filter((s) => !s.album_id);
+
+          if (visibleSongs.length === 0 && searchTerm) {
+            return (
+              <div className="vapor-card p-10 text-center">
+                <p className="text-muted-foreground text-sm">
+                  {t('catalog.noResultsFor')} "{searchTerm}"
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="space-y-2">
+              {visibleSongs.map((song, idx) => renderSongRow(song, idx))}
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Album dialog */}
+      <Dialog open={!!selectedAlbum} onOpenChange={(o) => !o && setSelectedAlbum(null)}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[85vh] overflow-y-auto">
+          {selectedAlbum && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  {selectedAlbum.cover_url && (
+                    <img src={selectedAlbum.cover_url} alt={selectedAlbum.title} className="h-16 w-16 rounded-xl object-cover" />
+                  )}
+                  <div className="min-w-0 text-left">
+                    <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Álbum</p>
+                    <DialogTitle className="truncate">{selectedAlbum.title}</DialogTitle>
+                    <p className="text-xs text-muted-foreground truncate">{selectedAlbum.artist} · {selectedAlbum.songs.length} {selectedAlbum.songs.length === 1 ? 'tema' : 'temas'}</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </DialogHeader>
+              <div className="space-y-2 mt-2">
+                {selectedAlbum.songs.map((song, idx) => renderSongRow(song, idx))}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
 
       <AlertDialog
         open={!!confirmSong}
