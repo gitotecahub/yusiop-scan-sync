@@ -52,6 +52,7 @@ interface CollabRow {
   is_primary: boolean;
   role: CollabRole;
   contact_email: string;
+  picked_user_id?: string | null;
 }
 
 interface TrackDraft {
