@@ -108,18 +108,14 @@ serve(async (req) => {
     if (qrCard.is_activated) {
       console.log('QR card already activated, checking ownership')
 
-      // Caso 1: la tarjeta ya pertenece al usuario actual (compra digital o activación previa)
+      // Caso 1: la tarjeta ya pertenece al usuario actual → bloquear nuevo canje
       if (qrCard.owner_user_id === user.id || qrCard.activated_by === user.id) {
-        console.log('Card already belongs to this user')
+        console.log('Card already activated by this user — blocking re-redeem')
         return new Response(
           JSON.stringify({
-            success: true,
-            credits: qrCard.download_credits,
-            cardType: qrCard.card_type,
-            message: 'Esta tarjeta ya está en tu biblioteca',
-            alreadyOwned: true,
+            error: 'Esta tarjeta ya está activada y no puede canjearse de nuevo.',
           }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
