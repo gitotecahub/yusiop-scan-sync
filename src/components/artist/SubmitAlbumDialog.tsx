@@ -480,7 +480,18 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
         if (subErr) throw subErr;
         const sid = inserted.id as string;
         insertedIds.push(sid);
-        if (t.has_collabs) await persistTrackCollabs(sid, t.collaborators);
+        if (t.has_collabs) {
+          await persistTrackCollabs(sid, t.collaborators);
+          supabase.functions
+            .invoke('notify-collaborators', {
+              body: {
+                submission_id: sid,
+                phase: 'submitted',
+                app_url: window.location.origin,
+              },
+            })
+            .catch((e) => console.warn('notify-collaborators (album submitted) failed:', e));
+        }
 
         setProgress(25 + Math.floor(((i + 1) / total) * 60));
       }

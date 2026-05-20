@@ -768,21 +768,21 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
         if (dbError) throw dbError;
         if (inserted?.id) {
           await persistCollaborators(inserted.id);
+          if (hasCollabs) {
+            supabase.functions
+              .invoke('notify-collaborators', {
+                body: {
+                  submission_id: inserted.id,
+                  phase: 'submitted',
+                  app_url: window.location.origin,
+                },
+              })
+              .catch((e) => console.warn('notify-collaborators (submitted) failed:', e));
+          }
           if (!requiresPayment || paidPrepaymentId) {
             supabase.functions
               .invoke('analyze-copyright', { body: { submission_id: inserted.id } })
               .catch((e) => console.warn('Copyright check failed (background):', e));
-            if (hasCollabs) {
-              supabase.functions
-                .invoke('notify-collaborators', {
-                  body: {
-                    submission_id: inserted.id,
-                    phase: 'submitted',
-                    app_url: window.location.origin,
-                  },
-                })
-                .catch((e) => console.warn('notify-collaborators (submitted) failed:', e));
-            }
           }
         }
         setProgress(100);
