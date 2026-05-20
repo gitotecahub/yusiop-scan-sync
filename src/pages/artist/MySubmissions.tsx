@@ -62,8 +62,22 @@ const MySubmissions = () => {
         'create-submission-checkout',
         { body: { submission_id: submissionId } },
       );
-      if (error || !checkout?.url) {
-        toast.error('No se pudo abrir la pasarela de pago. Inténtalo de nuevo.');
+      // El SDK mete los detalles del error 4xx/5xx en error.context (Response)
+      const backendError =
+        (checkout as any)?.error ||
+        (error as any)?.context?.error ||
+        (error as any)?.message;
+      if (!checkout?.url) {
+        let msg = backendError || 'No se pudo abrir la pasarela de pago. Inténtalo de nuevo.';
+        // Si el SDK devolvió un Response, intentamos leerlo
+        try {
+          const ctx = (error as any)?.context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.json();
+            if (body?.error) msg = body.error;
+          }
+        } catch { /* ignore */ }
+        toast.error(msg);
         setRetryingId(null);
         return;
       }

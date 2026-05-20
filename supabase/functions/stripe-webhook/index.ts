@@ -143,24 +143,37 @@ Deno.serve(async (req) => {
         // la submission de "pending_payment" a "pending" para que el admin
         // pueda revisarla.
         if (submissionId) {
-          const updates: Record<string, any> = {};
-          if (includesExpress) updates.express_paid_at = nowIso;
-
-          // Si la submission estaba en pending_payment, pasarla a pending
+          // Cargar la submission para saber si pertenece a un álbum
           const { data: subRow } = await supabase
             .from("song_submissions")
-            .select("status")
+            .select("status, release_id")
             .eq("id", submissionId)
             .maybeSingle();
-          if (subRow?.status === "pending_payment") {
-            updates.status = "pending";
+
+          if (includesExpress) {
+            // Marcar express pagado en la pista que originó el pago
+            await supabase
+              .from("song_submissions")
+              .update({ express_paid_at: nowIso })
+              .eq("id", submissionId);
           }
-          if (Object.keys(updates).length > 0) {
-            await supabase.from("song_submissions").update(updates).eq("id", submissionId);
-            console.log(
-              `Submission ${submissionId} updated after payment:`,
-              updates,
-            );
+
+          // Si pertenece a un álbum, mover TODAS las pistas del release de
+          // pending_payment → pending. Si es single, sólo esta submission.
+          if (subRow?.release_id) {
+            const { error: relErr } = await supabase
+              .from("song_submissions")
+              .update({ status: "pending" })
+              .eq("release_id", subRow.release_id)
+              .eq("status", "pending_payment");
+            if (relErr) console.error("album tracks update failed", relErr);
+            else console.log(`Album ${subRow.release_id} tracks moved to pending`);
+          } else if (subRow?.status === "pending_payment") {
+            await supabase
+              .from("song_submissions")
+              .update({ status: "pending" })
+              .eq("id", submissionId);
+            console.log(`Submission ${submissionId} moved to pending`);
           }
         }
 
