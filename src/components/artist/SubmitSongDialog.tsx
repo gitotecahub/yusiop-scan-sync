@@ -289,7 +289,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary,role,contact_email')
+          .select('id,artist_name,share_percent,is_primary,role,contact_email,claimed_by_user_id')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
@@ -301,6 +301,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             is_primary: !!d.is_primary,
             role: (d.role as CollabRole) ?? 'featuring',
             contact_email: d.contact_email ?? '',
+            picked_user_id: d.claimed_by_user_id ?? null,
           })));
         } else {
           setHasCollabs(false);
