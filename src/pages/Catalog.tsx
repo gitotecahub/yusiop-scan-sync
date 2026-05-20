@@ -190,12 +190,15 @@ const Catalog = () => {
                 title: song.title,
                 artist: artistDisplay,
                 album: song.albums?.title,
+                album_id: song.album_id ?? null,
+                album_cover: song.albums?.cover_url ?? null,
                 duration_seconds: song.duration_seconds,
                 cover_url: song.cover_url || song.albums?.cover_url || 'https://picsum.photos/300/300?random=1',
                 preview_url: song.preview_url,
                 track_url: song.track_url,
                 preview_start_seconds: (song as any).preview_start_seconds ?? 0,
               };
+
             });
           setSongs(formattedSongs);
           setFilteredSongs(formattedSongs);
