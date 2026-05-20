@@ -144,8 +144,18 @@ const AppContent = () => {
     return () => clearTimeout(timer);
   }, [showSplash]);
 
-  // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra
+  // Cargar modo del usuario cuando hay sesión, resetear cuando se cierra.
+  // También detener el reproductor al cambiar de usuario para que la canción
+  // del usuario anterior no continúe sonando en la sesión del nuevo perfil.
+  const previousUserIdRef = useRef<string | null>(null);
   useEffect(() => {
+    const prev = previousUserIdRef.current;
+    const curr = user?.id ?? null;
+    if (prev !== curr) {
+      // Detener cualquier reproducción residual al cambiar (login/logout/switch)
+      try { usePlayerStore.getState().stop(); } catch {}
+      previousUserIdRef.current = curr;
+    }
     if (!user?.id) {
       reset();
       return;
