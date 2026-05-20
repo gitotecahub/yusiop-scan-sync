@@ -51,8 +51,21 @@ interface SubmissionRow {
   express_price_xaf: number | null;
   ai_type: AiUsageType | null;
   rights_confirmed: boolean | null;
+  release_id: string | null;
+  release_type: 'single' | 'album' | 'ep' | null;
+  track_number: number | null;
   collaborators?: CollaboratorRow[];
   promo?: PromoCampaign | null;
+}
+
+interface AlbumGroup {
+  releaseId: string;
+  title: string;
+  artist: string;
+  cover: string | null;
+  releaseDate: string | null;
+  tracks: SubmissionRow[];
+  pendingCount: number;
 }
 
 interface PromoCampaign {
@@ -108,6 +121,9 @@ const SongSubmissions = () => {
   const [detailsTarget, setDetailsTarget] = useState<SubmissionRow | null>(null);
   const [approveOpen, setApproveOpen] = useState(false);
   const [approveTarget, setApproveTarget] = useState<SubmissionRow | null>(null);
+  const [approveAlbum, setApproveAlbum] = useState<AlbumGroup | null>(null);
+  const [expandedAlbums, setExpandedAlbums] = useState<Record<string, boolean>>({});
+  const [bulkApproving, setBulkApproving] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
   const [reanalyzing, setReanalyzing] = useState<Record<string, boolean>>({});
@@ -214,37 +230,73 @@ const SongSubmissions = () => {
 
   const openApprove = (row: SubmissionRow) => {
     setApproveTarget(row);
+    setApproveAlbum(null);
     setApproveOpen(true);
   };
 
-  const confirmApprove = async (releaseAtIso: string | null): Promise<void> => {
-    if (!approveTarget) return;
+  const openApproveAlbum = (group: AlbumGroup) => {
+    setApproveAlbum(group);
+    setApproveTarget(null);
+    setApproveOpen(true);
+  };
+
+  const approveSingleSubmission = async (sub: SubmissionRow, releaseAtIso: string | null) => {
     const { data, error } = await supabase.rpc('approve_song_submission_scheduled', {
-      p_submission_id: approveTarget.id,
+      p_submission_id: sub.id,
       p_release_at: releaseAtIso,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) throw new Error(error.message);
     const result = (data as any)?.[0];
-    if (result?.success) {
-      toast.success(result.message);
-      sendEmailNotification('approved', approveTarget);
-      // Notificar a los colaboradores no principales (si tienen email)
+    if (!result?.success) throw new Error(result?.message ?? 'Error al aprobar');
+    sendEmailNotification('approved', sub);
+    try {
+      await supabase.functions.invoke('notify-collaborators', {
+        body: {
+          submission_id: sub.id,
+          song_id: result.song_id ?? null,
+          app_url: window.location.origin,
+        },
+      });
+    } catch (e) {
+      console.error('Error notificando colaboradores', e);
+    }
+    return result;
+  };
+
+  const confirmApprove = async (releaseAtIso: string | null): Promise<void> => {
+    if (approveAlbum) {
+      setBulkApproving(true);
       try {
-        await supabase.functions.invoke('notify-collaborators', {
-          body: {
-            submission_id: approveTarget.id,
-            song_id: result.song_id ?? null,
-            app_url: window.location.origin,
-          },
-        });
-      } catch (e) {
-        console.error('Error notificando colaboradores', e);
+        const pending = approveAlbum.tracks.filter((t) => t.status === 'pending');
+        let ok = 0;
+        const errors: string[] = [];
+        for (const t of pending) {
+          try {
+            await approveSingleSubmission(t, releaseAtIso);
+            ok++;
+          } catch (e: any) {
+            errors.push(`${t.title}: ${e.message}`);
+          }
+        }
+        if (ok > 0) toast.success(`Álbum aprobado · ${ok}/${pending.length} pistas`);
+        if (errors.length) toast.error(errors.join('\n'));
+        setApproveOpen(false);
+        load();
+        window.dispatchEvent(new CustomEvent('song-submissions-changed'));
+      } finally {
+        setBulkApproving(false);
       }
+      return;
+    }
+    if (!approveTarget) return;
+    try {
+      const result = await approveSingleSubmission(approveTarget, releaseAtIso);
+      toast.success(result.message);
       setApproveOpen(false);
       load();
       window.dispatchEvent(new CustomEvent('song-submissions-changed'));
-    } else {
-      toast.error(result?.message ?? 'Error');
+    } catch (e: any) {
+      toast.error(e.message);
     }
   };
 
@@ -330,43 +382,7 @@ const SongSubmissions = () => {
     }
   };
 
-  return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Envíos de canciones</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Revisa, aprueba o rechaza las canciones enviadas por los artistas.
-        </p>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        {(['pending', 'approved', 'rejected', 'removed', 'all'] as const).map((f) => (
-          <Button
-            key={f}
-            size="sm"
-            variant={filter === f ? 'default' : 'outline'}
-            onClick={() => setFilter(f)}
-          >
-            {f === 'pending' && 'Pendientes'}
-            {f === 'approved' && 'Aprobadas'}
-            {f === 'rejected' && 'Rechazadas'}
-            {f === 'removed' && 'Eliminadas'}
-            {f === 'all' && 'Todas'}
-          </Button>
-        ))}
-      </div>
-
-      {loading ? (
-        <p className="text-muted-foreground">Cargando…</p>
-      ) : rows.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            No hay envíos en este filtro.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {rows.map((row) => (
+  const renderSubmissionCard = (row: SubmissionRow, _inAlbum: boolean = false) => (
             <Collapsible key={row.id} asChild>
               <Card>
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -662,7 +678,141 @@ const SongSubmissions = () => {
                 </CollapsibleContent>
               </Card>
             </Collapsible>
-          ))}
+  );
+
+  return (
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Envíos de canciones</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Revisa, aprueba o rechaza las canciones enviadas por los artistas.
+        </p>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {(['pending', 'approved', 'rejected', 'removed', 'all'] as const).map((f) => (
+          <Button
+            key={f}
+            size="sm"
+            variant={filter === f ? 'default' : 'outline'}
+            onClick={() => setFilter(f)}
+          >
+            {f === 'pending' && 'Pendientes'}
+            {f === 'approved' && 'Aprobadas'}
+            {f === 'rejected' && 'Rechazadas'}
+            {f === 'removed' && 'Eliminadas'}
+            {f === 'all' && 'Todas'}
+          </Button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p className="text-muted-foreground">Cargando…</p>
+      ) : rows.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-muted-foreground">
+            No hay envíos en este filtro.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {(() => {
+            // Agrupar pistas por release_id cuando pertenezcan a un álbum/EP
+            const groups: AlbumGroup[] = [];
+            const groupIdx = new Map<string, number>();
+            const singles: SubmissionRow[] = [];
+            const orderedKeys: Array<{ kind: 'album'; key: string } | { kind: 'single'; row: SubmissionRow }> = [];
+
+            for (const row of rows) {
+              const isAlbum = !!row.release_id && row.release_type !== 'single';
+              if (isAlbum && row.release_id) {
+                if (!groupIdx.has(row.release_id)) {
+                  groupIdx.set(row.release_id, groups.length);
+                  groups.push({
+                    releaseId: row.release_id,
+                    title: row.album_title || row.title,
+                    artist: row.artist_name,
+                    cover: row.cover_url,
+                    releaseDate: row.release_date,
+                    tracks: [],
+                    pendingCount: 0,
+                  });
+                  orderedKeys.push({ kind: 'album', key: row.release_id });
+                }
+                const g = groups[groupIdx.get(row.release_id)!];
+                g.tracks.push(row);
+                if (row.status === 'pending') g.pendingCount++;
+              } else {
+                singles.push(row);
+                orderedKeys.push({ kind: 'single', row });
+              }
+            }
+            // Ordenar pistas dentro de cada álbum por track_number
+            groups.forEach((g) => g.tracks.sort((a, b) => (a.track_number ?? 0) - (b.track_number ?? 0)));
+
+            return orderedKeys.map((it) => {
+              if (it.kind === 'single') return renderSubmissionCard(it.row);
+              const g = groups[groupIdx.get(it.key)!];
+              const isOpen = expandedAlbums[g.releaseId] ?? true;
+              return (
+                <Card key={`album-${g.releaseId}`} className="border-primary/30 bg-primary/5">
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedAlbums((s) => ({ ...s, [g.releaseId]: !isOpen }))}
+                      className="flex items-start gap-3 min-w-0 flex-1 text-left"
+                    >
+                      <div className="w-16 h-16 rounded-md bg-muted overflow-hidden flex items-center justify-center flex-shrink-0 ring-2 ring-primary/30">
+                        {g.cover ? (
+                          <img src={g.cover} alt={g.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="flex items-center gap-2 flex-wrap text-base">
+                          <span className="truncate">📀 {g.title}</span>
+                          <Badge variant="outline" className="text-[10px]">
+                            Álbum · {g.tracks.length} {g.tracks.length === 1 ? 'pista' : 'pistas'}
+                          </Badge>
+                          {g.pendingCount > 0 && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {g.pendingCount} pendiente{g.pendingCount === 1 ? '' : 's'}
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
+                          {g.artist}
+                          {g.releaseDate && <> · 🎯 {new Date(g.releaseDate).toLocaleDateString('es-ES')}</>}
+                        </p>
+                      </div>
+                    </button>
+                    <div className="flex gap-2 flex-shrink-0 items-center">
+                      {g.pendingCount > 0 && (
+                        <Button size="sm" onClick={() => openApproveAlbum(g)}>
+                          <Check className="h-4 w-4 mr-1" /> Aprobar álbum
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label="Mostrar pistas"
+                        onClick={() => setExpandedAlbums((s) => ({ ...s, [g.releaseId]: !isOpen }))}
+                      >
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  {isOpen && (
+                    <CardContent className="space-y-3 pt-0">
+                      {g.tracks.map((t) => renderSubmissionCard(t, true))}
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            });
+          })()}
         </div>
       )}
 
