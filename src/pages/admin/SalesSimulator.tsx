@@ -773,7 +773,8 @@ const SalesSimulator = () => {
       </Card>
 
       {/* Resumen ingresos por origen */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
