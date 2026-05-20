@@ -143,7 +143,7 @@ const ArtistDashboard = () => {
             </p>
           </CardContent>
         </Card>
-        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => {}}>
+        <Card className="hover:shadow-glow transition-shadow cursor-pointer" onClick={() => navigate('/artist/submissions?type=album')}>
           <CardContent className="p-6">
             <Disc3 className="h-8 w-8 text-primary mb-3" />
             <h3 className="font-display font-bold text-lg">{t('artist.albumsTitle')}</h3>
