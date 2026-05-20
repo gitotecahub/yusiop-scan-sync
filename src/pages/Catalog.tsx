@@ -30,12 +30,23 @@ interface Song {
   title: string;
   artist: string;
   album?: string;
+  album_id?: string | null;
+  album_cover?: string | null;
   duration_seconds: number;
   cover_url?: string;
   preview_url?: string;
   track_url?: string;
   preview_start_seconds?: number;
 }
+
+interface AlbumGroup {
+  id: string;
+  title: string;
+  cover_url: string;
+  artist: string;
+  songs: Song[];
+}
+
 
 const Catalog = () => {
   const location = useLocation();
