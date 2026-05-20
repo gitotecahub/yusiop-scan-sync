@@ -889,6 +889,12 @@ const SalesSimulator = () => {
             <Row label="Virtuales Premium (EUR)" value={formatEURRaw(totals.vPremGrossEUR)} />
             <Row label="Total virtuales" value={formatEURRaw(totals.virtualGrossEUR)} bold />
             <Separator />
+            <Row label="Suscripciones" value={formatEURRaw(totals.subsGrossEUR)} />
+            <Row label="Publicación Express" value={formatEUR(totals.expressGrossXAF)} />
+            <Row label="Promoción de lanzamientos" value={formatEURRaw(totals.promoGrossEUR)} />
+            <Row label="Recargas de wallet" value={formatEUR(totals.rechargeGrossXAF)} />
+            <Row label="Total otras fuentes" value={formatEUR(totals.othersGrossXAF)} bold />
+            <Separator />
             <Row label="Total combinado" value={formatEUR(totals.totalGross)} bold highlight />
             <Separator />
             <Row label="Bolsa artistas físicas" value={formatEUR(totals.stdArtist + totals.premArtist)} />
@@ -900,7 +906,7 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Plataforma bruto (${platformShare}%)`}
+              label={`Plataforma (tarjetas ${platformShare}% + otras 100%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
             />
