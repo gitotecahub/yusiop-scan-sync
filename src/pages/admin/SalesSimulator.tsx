@@ -570,6 +570,149 @@ const SalesSimulator = () => {
         </CardContent>
       </Card>
 
+      {/* Otras fuentes de ingresos */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Otras fuentes de ingresos</CardTitle>
+          <CardDescription>
+            Suscripciones, publicación express, promoción de lanzamientos y recargas de wallet.
+            Estos ingresos van íntegramente a la plataforma (no reparten con artistas).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Suscripciones */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <UsersIcon className="h-4 w-4" /> Suscripciones
+              </h3>
+              <div className="space-y-2">
+                <Label>Suscriptores activos / mes</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={subsMonthly}
+                  onChange={(e) => setSubsMonthly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio mensual (EUR)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={subsPriceEUR}
+                  onChange={(e) => setSubsPriceEUR(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.subsGrossEUR)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Express */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Publicación Express
+              </h3>
+              <div className="space-y-2">
+                <Label>Canciones express / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={expressYearly}
+                  onChange={(e) => setExpressYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio por canción (XAF)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={expressPriceXAF}
+                  onChange={(e) => setExpressPriceXAF(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEUR(totals.expressGrossXAF)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Promo lanzamientos */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <LineChart className="h-4 w-4" /> Promoción de lanzamientos
+              </h3>
+              <div className="space-y-2">
+                <Label>Campañas / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={promoYearly}
+                  onChange={(e) => setPromoYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio medio por campaña (EUR)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={promoPriceEUR}
+                  onChange={(e) => setPromoPriceEUR(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.promoGrossEUR)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Recargas wallet */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Coins className="h-4 w-4" /> Recargas de wallet
+              </h3>
+              <div className="space-y-2">
+                <Label>Recargas / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={rechargeYearly}
+                  onChange={(e) => setRechargeYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Recarga media (XAF)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={rechargeAvgXAF}
+                  onChange={(e) => setRechargeAvgXAF(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEUR(totals.rechargeGrossXAF)}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-lg border bg-muted/30 p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Total otras fuentes / año</span>
+            <span className="text-lg font-semibold tabular-nums">
+              {formatEUR(totals.othersGrossXAF)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+
+
       {/* Reparto global */}
       <Card>
         <CardHeader>
