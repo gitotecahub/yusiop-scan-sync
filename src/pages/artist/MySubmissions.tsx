@@ -212,6 +212,20 @@ const MySubmissions = () => {
       ) : (
         <div className="grid gap-3">
           {(() => {
+            const filterType = searchParams.get('type');
+            const baseRows = filterType === 'album'
+              ? rows.filter(r => r.release_type === 'album')
+              : rows;
+            if (filterType === 'album' && baseRows.length === 0) {
+              return (
+                <Card>
+                  <CardContent className="py-10 text-center text-muted-foreground">
+                    Aún no has enviado ningún álbum.
+                  </CardContent>
+                </Card>
+              );
+            }
+
             // Reordenar: agrupar tracks de álbum por release_id ordenados por track_number,
             // manteniendo singles intercalados según created_at desc.
             const seen = new Set<string>();
