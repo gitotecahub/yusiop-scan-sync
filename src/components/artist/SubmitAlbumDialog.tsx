@@ -20,6 +20,7 @@ import { validateCoverDimensions } from '@/lib/imageValidation';
 import { useMySubscription } from '@/hooks/useSubscriptionPlans';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
 import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
+import ArtistMentionInput from './ArtistMentionInput';
 
 interface Props {
   open: boolean;
