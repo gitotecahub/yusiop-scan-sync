@@ -145,19 +145,65 @@ Deno.serve(async (req) => {
   console.log('notify-collaborators: collabs found', { count: collabs?.length ?? 0, songTitle, primaryArtistName, resolvedSongId, submissionId })
 
   for (const c of collabs ?? []) {
-    if (!c.contact_email) {
-      console.log('Skipping collaborator without contact_email', { id: c.id, artist_name: c.artist_name })
+    // Resolver email + user_id del colaborador. Si se etiquetó por @ (claimed_by_user_id)
+    // y no hay contact_email, resolvemos el email desde auth.
+    let recipientEmail: string | null = c.contact_email ?? null
+    let recipientUserId: string | null = (c as any).claimed_by_user_id ?? null
+
+    if (!recipientEmail && recipientUserId) {
+      try {
+        const { data: au } = await supabase.auth.admin.getUserById(recipientUserId)
+        recipientEmail = au?.user?.email ?? null
+      } catch (e) {
+        console.warn('auth.admin.getUserById failed', e)
+      }
+    }
+    if (!recipientUserId && recipientEmail) {
+      const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
+        p_email: recipientEmail,
+      })
+      if (existingUserId) recipientUserId = existingUserId as string
+    }
+
+    // Notificación in-app si el colaborador es usuario registrado.
+    if (recipientUserId) {
+      const notifType = phase === 'submitted' ? 'collab_submitted' : 'collab_published'
+      const title = phase === 'submitted'
+        ? `Te han incluido en una colaboración`
+        : `¡Tu colaboración ya está publicada!`
+      const body = phase === 'submitted'
+        ? `${primaryArtistName} ha enviado "${songTitle}" a revisión contigo (${Number(c.share_percent)}%).`
+        : `"${songTitle}" de ${primaryArtistName} ya está disponible. Reclama tu ${Number(c.share_percent)}%.`
+      try {
+        await supabase.from('notifications').insert({
+          user_id: recipientUserId,
+          type: notifType,
+          title,
+          body,
+          data: {
+            collaborator_id: c.id,
+            song_id: resolvedSongId,
+            submission_id: submissionId ?? null,
+            share_percent: Number(c.share_percent),
+            role: c.role,
+          },
+        })
+      } catch (e) {
+        console.warn('notifications insert failed', e)
+      }
+    }
+
+    if (!recipientEmail) {
+      console.log('Skipping email (no resolvable recipient)', { id: c.id, artist_name: c.artist_name })
+      results.push({ email: '', template: '', ok: true })
       continue
     }
+
     let templateName: string
     if (phase === 'submitted') {
       templateName = 'collaboration-submitted'
     } else {
-      // Resolver si ya tiene cuenta para elegir invite vs registered
-      const { data: existingUserId } = await supabase.rpc('get_user_id_by_email', {
-        p_email: c.contact_email,
-      })
-      const isRegistered = !!existingUserId
+      const isRegistered = !!recipientUserId
       templateName = isRegistered
         ? 'collaboration-published-registered'
         : 'collaboration-published-invite'
@@ -165,8 +211,6 @@ Deno.serve(async (req) => {
 
     const idempotencyKey = `collab-notify-${phase}-${c.id}-${templateName}`
 
-    // Llamar directamente vía fetch con service role para evitar problemas de auth
-    // entre edge functions (functions.invoke usa el JWT del cliente original).
     let invokeErrMsg: string | null = null
     try {
       const resp = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
@@ -178,7 +222,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           templateName,
-          recipientEmail: c.contact_email,
+          recipientEmail,
           idempotencyKey,
           templateData: {
             songTitle,
@@ -196,7 +240,7 @@ Deno.serve(async (req) => {
         console.error('send-transactional-email failed', invokeErrMsg)
       } else {
         const json = await resp.json().catch(() => ({}))
-        console.log('send-transactional-email OK', { email: c.contact_email, template: templateName, json })
+        console.log('send-transactional-email OK', { email: recipientEmail, template: templateName, json })
       }
     } catch (e: any) {
       invokeErrMsg = e?.message ?? 'unknown_error'
@@ -204,7 +248,7 @@ Deno.serve(async (req) => {
     }
 
     results.push({
-      email: c.contact_email,
+      email: recipientEmail,
       template: templateName,
       ok: !invokeErrMsg,
       ...(invokeErrMsg ? { error: invokeErrMsg } : {}),
