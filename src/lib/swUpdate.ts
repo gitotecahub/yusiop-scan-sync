@@ -1,13 +1,18 @@
-// Auto-update del Service Worker.
+// Auto-update del Service Worker en tiempo real.
 //
-// Estrategia: NO forzamos recarga de la página cuando hay una versión nueva,
-// porque eso interrumpe al usuario (formularios a medias, subidas de archivos,
-// envíos de música, etc.) y provoca el "splash screen aleatorio" que reinicia
-// la app perdiendo el estado.
+// Estrategia: cuando se publica una versión nueva, descargamos el SW en
+// segundo plano y, en cuanto está listo, mostramos un toast persistente
+// "Nueva versión disponible — Actualizar". Al pulsar, activamos el SW
+// nuevo (skipWaiting) y recargamos la app para aplicar los cambios al
+// instante, igual que ocurre en el editor.
 //
-// En su lugar, registramos el SW para que se descargue e instale en segundo
-// plano. La nueva versión tomará control en la siguiente navegación normal
-// (cuando el usuario abra otra pestaña, cierre y vuelva, o recargue a mano).
+// Comprobaciones:
+//  - Al cargar la app (immediate: true)
+//  - Cada 5 minutos en segundo plano
+//  - Cuando la pestaña vuelve a primer plano (visibilitychange)
+//  - Cuando el navegador recupera conexión
+
+import { toast } from 'sonner';
 
 export const initSwAutoUpdate = async () => {
   if (typeof window === 'undefined') return;
@@ -28,22 +33,45 @@ export const initSwAutoUpdate = async () => {
   try {
     const { registerSW } = await import('virtual:pwa-register');
 
-    // Registrar SW sin auto-recarga. La actualización quedará "waiting" y
-    // se activará la próxima vez que el usuario cargue la app de forma natural.
+    let toastShown = false;
+
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
-        // No hacemos nada. La versión nueva queda lista para la próxima carga.
+        if (toastShown) return;
+        toastShown = true;
+        toast('Nueva versión disponible', {
+          description: 'Hay una actualización lista. Pulsa para aplicarla.',
+          duration: Infinity,
+          action: {
+            label: 'Actualizar',
+            onClick: () => {
+              // Activa el SW en espera y recarga la app con la nueva versión.
+              void updateSW(true);
+            },
+          },
+        });
       },
       onOfflineReady() {
         // No-op
       },
-    });
+      onRegisteredSW(_swUrl, registration) {
+        if (!registration) return;
 
-    // Comprobación periódica silenciosa cada 60 minutos para descargar nuevas
-    // versiones en segundo plano (sin recargar nunca al usuario).
-    const checkForUpdates = () => { void updateSW(); };
-    setInterval(checkForUpdates, 60 * 60 * 1000);
+        const check = () => { void registration.update().catch(() => {}); };
+
+        // Comprobación periódica cada 5 minutos.
+        setInterval(check, 5 * 60 * 1000);
+
+        // Comprobar cuando la pestaña vuelve a estar visible.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') check();
+        });
+
+        // Comprobar al recuperar conexión.
+        window.addEventListener('online', check);
+      },
+    });
   } catch (err) {
     console.warn('[sw-update] no se pudo inicializar:', err);
   }
