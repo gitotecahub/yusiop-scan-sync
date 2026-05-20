@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
   // Cargar colaboradores (preferimos los del song publicado; fallback a submission)
   let collabsQuery = supabase
     .from('song_collaborators')
-    .select('id, artist_name, share_percent, is_primary, role, contact_email')
+    .select('id, artist_name, share_percent, is_primary, role, contact_email, claimed_by_user_id')
     .eq('is_primary', false)
 
   if (resolvedSongId) {
