@@ -49,9 +49,28 @@ const QRScanner = () => {
         }
       });
 
+      // Intentar extraer el motivo real del error desde la respuesta del edge function
+      let serverReason: string | null = null;
       if (error) {
-        console.error('Edge function error:', error);
-        toast.error(error.message || t('qr.error'));
+        try {
+          const ctx: any = (error as any).context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.json();
+            serverReason = body?.error ?? body?.message ?? null;
+          } else if (ctx && typeof ctx.text === 'function') {
+            const txt = await ctx.text();
+            try {
+              const parsed = JSON.parse(txt);
+              serverReason = parsed?.error ?? parsed?.message ?? txt;
+            } catch {
+              serverReason = txt;
+            }
+          }
+        } catch (e) {
+          console.warn('No se pudo leer el motivo del error', e);
+        }
+        console.error('Edge function error:', error, 'reason:', serverReason);
+        toast.error(serverReason || error.message || t('qr.error'));
         return;
       }
 
@@ -60,10 +79,6 @@ const QRScanner = () => {
         return;
       }
 
-      if (data.error) {
-        toast.error(data.error);
-        return;
-      }
 
       // Éxito - mostrar mensaje
       toast.success(`${t('qr.success')} ${data.credits} ${t('qr.creditsAvailable')}`);
