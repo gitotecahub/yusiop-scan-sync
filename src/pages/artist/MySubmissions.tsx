@@ -230,11 +230,11 @@ const MySubmissions = () => {
             // manteniendo singles intercalados según created_at desc.
             const seen = new Set<string>();
             const ordered: SubmissionRow[] = [];
-            for (const r of rows) {
+            for (const r of baseRows) {
               if (r.release_id && r.release_type === 'album') {
                 if (seen.has(r.release_id)) continue;
                 seen.add(r.release_id);
-                const grp = rows
+                const grp = baseRows
                   .filter(x => x.release_id === r.release_id)
                   .sort((a, b) => (a.track_number ?? 0) - (b.track_number ?? 0));
                 ordered.push(...grp);
@@ -248,7 +248,9 @@ const MySubmissions = () => {
                 r.release_id && r.release_type === 'album' && !headerShown.has(r.release_id);
               if (showAlbumHeader) headerShown.add(r.release_id!);
               const tracksInAlbum = r.release_id
-                ? rows.filter(x => x.release_id === r.release_id).length
+                ? baseRows.filter(x => x.release_id === r.release_id).length
+                : 0;
+
                 : 0;
               return (
                 <div key={r.id}>
