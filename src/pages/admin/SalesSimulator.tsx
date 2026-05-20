@@ -90,6 +90,16 @@ const SalesSimulator = () => {
   const [vStdYearly, setVStdYearly] = useState(500);
   const [vPremYearly, setVPremYearly] = useState(100);
 
+  // ----- Otras fuentes de ingresos -----
+  const [subsMonthly, setSubsMonthly] = useState(DEFAULT_SUBS_MONTHLY);
+  const [subsPriceEUR, setSubsPriceEUR] = useState(DEFAULT_SUBS_PRICE_EUR);
+  const [expressYearly, setExpressYearly] = useState(DEFAULT_EXPRESS_YEARLY);
+  const [expressPriceXAF, setExpressPriceXAF] = useState(DEFAULT_EXPRESS_PRICE_XAF);
+  const [promoYearly, setPromoYearly] = useState(DEFAULT_PROMO_YEARLY);
+  const [promoPriceEUR, setPromoPriceEUR] = useState(DEFAULT_PROMO_PRICE_EUR);
+  const [rechargeYearly, setRechargeYearly] = useState(DEFAULT_RECHARGE_YEARLY);
+  const [rechargeAvgXAF, setRechargeAvgXAF] = useState(DEFAULT_RECHARGE_AVG_XAF);
+
   const totals = useMemo(() => {
     // ----- Físicas (XAF) -----
     const stdGross = stdPrice * stdYearly;
