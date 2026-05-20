@@ -251,7 +251,6 @@ const MySubmissions = () => {
                 ? baseRows.filter(x => x.release_id === r.release_id).length
                 : 0;
 
-                : 0;
               return (
                 <div key={r.id}>
                   {showAlbumHeader && (
