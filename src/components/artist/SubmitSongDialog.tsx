@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { formatXAFFixed, formatXafAsEur } from '@/lib/currency';
 import PromoteReleaseBlock, { PromoData, PROMO_PLANS } from './PromoteReleaseBlock';
+import ArtistMentionInput from './ArtistMentionInput';
 import { AI_TYPE_OPTIONS, type AiUsageType } from '@/components/AiBadge';
 type ExpressTier = '72h' | '48h' | '24h';
 
@@ -52,6 +53,7 @@ interface CollaboratorRow {
   is_primary: boolean;
   role: CollabRole;
   contact_email: string;
+  picked_user_id?: string | null; // si se etiqueta a un usuario @ de Yusiop
 }
 
 /**
@@ -224,7 +226,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     collaborators.length >= 2 &&
     Math.abs(collabSum - 100) < 0.01 &&
     collaborators.every(c => c.artist_name.trim().length > 0) &&
-    collaborators.every(c => c.is_primary || (c.contact_email.trim().length > 0 && emailRe.test(c.contact_email.trim())))
+    collaborators.every(c => c.is_primary || !!c.picked_user_id || (c.contact_email.trim().length > 0 && emailRe.test(c.contact_email.trim())))
   );
 
   // Razón por la que el botón "Enviar a revisión" está deshabilitado (para mostrar al usuario)
@@ -236,9 +238,9 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
     if (hasCollabs) {
       if (collaborators.length < 2) return 'Añade al menos 2 artistas en la colaboración';
       if (collaborators.some(c => !c.artist_name.trim())) return 'Todos los colaboradores necesitan un nombre artístico';
-      const missingEmail = collaborators.find(c => !c.is_primary && !c.contact_email.trim());
-      if (missingEmail) return `Falta el email de ${missingEmail.artist_name || 'un colaborador'}`;
-      const badEmail = collaborators.find(c => !c.is_primary && c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
+      const missingEmail = collaborators.find(c => !c.is_primary && !c.picked_user_id && !c.contact_email.trim());
+      if (missingEmail) return `Falta el email o etiqueta @ de ${missingEmail.artist_name || 'un colaborador'}`;
+      const badEmail = collaborators.find(c => !c.is_primary && !c.picked_user_id && c.contact_email.trim() && !emailRe.test(c.contact_email.trim()));
       if (badEmail) return `Email inválido: ${badEmail.contact_email}`;
       if (Math.abs(collabSum - 100) > 0.01) return `La suma de splits debe ser 100% (actual: ${collabSum}%)`;
     }
@@ -287,7 +289,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       (async () => {
         const { data } = await supabase
           .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary,role,contact_email')
+          .select('id,artist_name,share_percent,is_primary,role,contact_email,claimed_by_user_id')
           .eq('submission_id', editing.id)
           .order('is_primary', { ascending: false });
         if (data && data.length > 0) {
@@ -299,6 +301,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
             is_primary: !!d.is_primary,
             role: (d.role as CollabRole) ?? 'featuring',
             contact_email: d.contact_email ?? '',
+            picked_user_id: d.claimed_by_user_id ?? null,
           })));
         } else {
           setHasCollabs(false);
@@ -548,7 +551,8 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       share_percent: c.share_percent,
       is_primary: c.is_primary,
       role: c.role,
-      contact_email: c.is_primary ? null : c.contact_email.trim().toLowerCase(),
+      contact_email: c.is_primary ? null : (c.contact_email.trim().toLowerCase() || null),
+      claimed_by_user_id: c.is_primary ? null : (c.picked_user_id ?? null),
     }));
     const { error } = await supabase.from('song_collaborators').insert(rows);
     if (error) throw error;
@@ -1285,20 +1289,33 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                     </div>
 
                     <div className="grid grid-cols-12 gap-2">
-                      <Input
-                        className="col-span-12 sm:col-span-6"
-                        placeholder="Nombre artístico"
-                        value={c.artist_name}
-                        onChange={(e) => {
-                          updateCollab(i, { artist_name: e.target.value });
-                          // Si edito el principal aquí, también actualizo el campo de arriba
-                          if (c.is_primary) {
-                            setFormData((p) => ({ ...p, artist_name: e.target.value }));
-                          }
-                        }}
-                        maxLength={80}
-                        disabled={c.is_primary}
-                      />
+                      <div className="col-span-12 sm:col-span-6">
+                        {c.is_primary ? (
+                          <Input
+                            placeholder="Nombre artístico"
+                            value={c.artist_name}
+                            onChange={(e) => {
+                              updateCollab(i, { artist_name: e.target.value });
+                              setFormData((p) => ({ ...p, artist_name: e.target.value }));
+                            }}
+                            maxLength={80}
+                            disabled
+                          />
+                        ) : (
+                          <ArtistMentionInput
+                            value={c.artist_name}
+                            pickedUserId={c.picked_user_id ?? null}
+                            onChange={(v, picked) =>
+                              updateCollab(i, {
+                                artist_name: v,
+                                picked_user_id: picked?.user_id ?? null,
+                                // Si se etiqueta a un usuario @, el email no es necesario
+                                ...(picked ? { contact_email: '' } : {}),
+                              })
+                            }
+                          />
+                        )}
+                      </div>
 
                       <div className="col-span-7 sm:col-span-4">
                         {c.is_primary ? (
@@ -1335,7 +1352,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                       </div>
                     </div>
 
-                    {!c.is_primary && (
+                    {!c.is_primary && !c.picked_user_id && (
                       <div className="space-y-1">
                         <Input
                           type="email"
@@ -1349,6 +1366,11 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
                           Le avisaremos por email cuando se publique la canción para que pueda reclamar su parte. Si aún no tiene cuenta, le invitaremos a registrarse.
                         </p>
                       </div>
+                    )}
+                    {!c.is_primary && c.picked_user_id && (
+                      <p className="text-[11px] text-primary">
+                        Artista etiquetado en Yusiop. Recibirá notificación en la app y por email.
+                      </p>
                     )}
                   </div>
                 ))}

@@ -126,7 +126,9 @@ const NotificationsBell = () => {
       n.type === 'collab_auto_assigned' ||
       n.type === 'collab_claim_pending' ||
       n.type === 'collab_claim_approved' ||
-      n.type === 'collab_claim_rejected'
+      n.type === 'collab_claim_rejected' ||
+      n.type === 'collab_submitted' ||
+      n.type === 'collab_published'
     ) {
       await goArtist('/artist/collaborations');
     } else if (n.type === 'support_reply' || n.type === 'support_ticket_updated') {
