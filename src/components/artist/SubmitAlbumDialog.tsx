@@ -291,7 +291,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
     const sum = t.collaborators.reduce((a, c) => a + (Number(c.share_percent) || 0), 0);
     if (Math.abs(sum - 100) > 0.01) return false;
     if (t.collaborators.some(c => !c.artist_name.trim())) return false;
-    if (t.collaborators.some(c => !c.is_primary && (!c.contact_email.trim() || !emailRe.test(c.contact_email.trim())))) return false;
+    if (t.collaborators.some(c => !c.is_primary && !c.picked_user_id && (!c.contact_email.trim() || !emailRe.test(c.contact_email.trim())))) return false;
     return true;
   });
   const step2Valid = tracksBaseValid && trackCollabValid;
