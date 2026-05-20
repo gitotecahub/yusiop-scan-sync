@@ -837,13 +837,29 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
                                 )}
                               </div>
                               <div className="grid grid-cols-12 gap-1.5">
-                                <Input
-                                  className="col-span-12 sm:col-span-6 h-8 text-xs"
-                                  placeholder="Nombre artístico"
-                                  value={c.artist_name}
-                                  onChange={(e) => updateCollab(i, ci, { artist_name: e.target.value })}
-                                  disabled={c.is_primary}
-                                />
+                                <div className="col-span-12 sm:col-span-6">
+                                  {c.is_primary ? (
+                                    <Input
+                                      className="h-8 text-xs"
+                                      placeholder="Nombre artístico"
+                                      value={c.artist_name}
+                                      disabled
+                                    />
+                                  ) : (
+                                    <ArtistMentionInput
+                                      className="text-xs"
+                                      value={c.artist_name}
+                                      pickedUserId={c.picked_user_id ?? null}
+                                      onChange={(v, picked) =>
+                                        updateCollab(i, ci, {
+                                          artist_name: v,
+                                          picked_user_id: picked?.user_id ?? null,
+                                          ...(picked ? { contact_email: '' } : {}),
+                                        })
+                                      }
+                                    />
+                                  )}
+                                </div>
                                 <div className="col-span-7 sm:col-span-4">
                                   {c.is_primary ? (
                                     <div className="h-8 flex items-center px-2 rounded-md border border-input bg-muted/40 text-xs text-muted-foreground">Principal</div>
@@ -865,7 +881,7 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
                                   />
                                   <span className="text-xs text-muted-foreground">%</span>
                                 </div>
-                                {!c.is_primary && (
+                                {!c.is_primary && !c.picked_user_id && (
                                   <Input
                                     type="email"
                                     className="col-span-12 h-8 text-xs"
@@ -873,6 +889,11 @@ const SubmitAlbumDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmi
                                     value={c.contact_email}
                                     onChange={(e) => updateCollab(i, ci, { contact_email: e.target.value })}
                                   />
+                                )}
+                                {!c.is_primary && c.picked_user_id && (
+                                  <p className="col-span-12 text-[10px] text-primary">
+                                    Artista etiquetado en Yusiop. Recibirá aviso en la app y por email.
+                                  </p>
                                 )}
                               </div>
                             </div>
