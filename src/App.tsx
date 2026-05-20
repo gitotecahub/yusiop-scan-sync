@@ -76,6 +76,7 @@ import { useLocaleDetection } from '@/hooks/useLocaleDetection';
 import { useLocaleStore } from '@/stores/localeStore';
 import LocaleFallbackGate from '@/components/locale/LocaleFallbackGate';
 import { useNavHistoryTracker } from '@/hooks/useNavHistory';
+import { usePlayerStore } from '@/stores/playerStore';
 
 const queryClient = new QueryClient();
 
