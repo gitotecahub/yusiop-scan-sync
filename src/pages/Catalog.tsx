@@ -401,7 +401,71 @@ useEffect(() => {
   };
 
 
+  const renderSongRow = (song: Song, idx: number) => {
+    const isCurrentlyPlaying = currentSong?.id === song.id && isPlaying;
+    const isDownloaded = downloadedSongs.has(song.id);
+    const isHighlighted = highlightedSongId === song.id;
+    return (
+      <div
+        key={song.id}
+        id={`song-${song.id}`}
+        className={`flex items-center gap-3 p-2.5 pr-3 rounded-2xl border transition-all ${
+          isHighlighted
+            ? 'bg-primary/10 border-primary/50 shadow-glow'
+            : 'bg-card/40 border-border hover:border-primary/30 hover:bg-card'
+        }`}
+      >
+        <span className="font-display text-[10px] font-bold text-muted-foreground tabular-nums w-5 shrink-0 text-center">
+          {String(idx + 1).padStart(2, '0')}
+        </span>
+        <div className="relative w-12 h-12 rounded-xl shrink-0 overflow-hidden bg-muted border border-border/50">
+          {song.cover_url ? (
+            <img
+              src={song.cover_url}
+              alt={`Portada de ${song.title}`}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+              <Music className="h-5 w-5" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display font-bold text-sm text-foreground truncate leading-tight">{song.title}</h3>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{song.artist}</p>
+          <p className="text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums tracking-wider">
+            {formatDuration(song.duration_seconds)}{song.album ? ` · ${song.album}` : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button size="icon" variant="ghost" onClick={() => handlePlayPreview(song)} className="h-9 w-9 rounded-full hover:bg-muted">
+            {isCurrentlyPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+          </Button>
+          <Button size="icon" variant="ghost" onClick={() => setShareSong(song)} className="h-9 w-9 rounded-full hover:bg-muted" aria-label="Compartir con amigos">
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            onClick={() => handleDownload(song)}
+            disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
+            className={`h-9 w-9 rounded-full border-0 ${
+              isDownloaded ? 'bg-muted text-primary' : 'vapor-bg text-primary-foreground hover:opacity-90 shadow-glow'
+            }`}
+          >
+            {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
+
     return (
       <div className="space-y-6">
         <div>
