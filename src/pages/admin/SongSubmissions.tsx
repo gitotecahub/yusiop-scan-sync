@@ -230,37 +230,73 @@ const SongSubmissions = () => {
 
   const openApprove = (row: SubmissionRow) => {
     setApproveTarget(row);
+    setApproveAlbum(null);
     setApproveOpen(true);
   };
 
-  const confirmApprove = async (releaseAtIso: string | null): Promise<void> => {
-    if (!approveTarget) return;
+  const openApproveAlbum = (group: AlbumGroup) => {
+    setApproveAlbum(group);
+    setApproveTarget(null);
+    setApproveOpen(true);
+  };
+
+  const approveSingleSubmission = async (sub: SubmissionRow, releaseAtIso: string | null) => {
     const { data, error } = await supabase.rpc('approve_song_submission_scheduled', {
-      p_submission_id: approveTarget.id,
+      p_submission_id: sub.id,
       p_release_at: releaseAtIso,
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) throw new Error(error.message);
     const result = (data as any)?.[0];
-    if (result?.success) {
-      toast.success(result.message);
-      sendEmailNotification('approved', approveTarget);
-      // Notificar a los colaboradores no principales (si tienen email)
+    if (!result?.success) throw new Error(result?.message ?? 'Error al aprobar');
+    sendEmailNotification('approved', sub);
+    try {
+      await supabase.functions.invoke('notify-collaborators', {
+        body: {
+          submission_id: sub.id,
+          song_id: result.song_id ?? null,
+          app_url: window.location.origin,
+        },
+      });
+    } catch (e) {
+      console.error('Error notificando colaboradores', e);
+    }
+    return result;
+  };
+
+  const confirmApprove = async (releaseAtIso: string | null): Promise<void> => {
+    if (approveAlbum) {
+      setBulkApproving(true);
       try {
-        await supabase.functions.invoke('notify-collaborators', {
-          body: {
-            submission_id: approveTarget.id,
-            song_id: result.song_id ?? null,
-            app_url: window.location.origin,
-          },
-        });
-      } catch (e) {
-        console.error('Error notificando colaboradores', e);
+        const pending = approveAlbum.tracks.filter((t) => t.status === 'pending');
+        let ok = 0;
+        const errors: string[] = [];
+        for (const t of pending) {
+          try {
+            await approveSingleSubmission(t, releaseAtIso);
+            ok++;
+          } catch (e: any) {
+            errors.push(`${t.title}: ${e.message}`);
+          }
+        }
+        if (ok > 0) toast.success(`Álbum aprobado · ${ok}/${pending.length} pistas`);
+        if (errors.length) toast.error(errors.join('\n'));
+        setApproveOpen(false);
+        load();
+        window.dispatchEvent(new CustomEvent('song-submissions-changed'));
+      } finally {
+        setBulkApproving(false);
       }
+      return;
+    }
+    if (!approveTarget) return;
+    try {
+      const result = await approveSingleSubmission(approveTarget, releaseAtIso);
+      toast.success(result.message);
       setApproveOpen(false);
       load();
       window.dispatchEvent(new CustomEvent('song-submissions-changed'));
-    } else {
-      toast.error(result?.message ?? 'Error');
+    } catch (e: any) {
+      toast.error(e.message);
     }
   };
 
