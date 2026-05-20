@@ -55,6 +55,16 @@ const DEFAULT_VPREM_PRICE_EUR = 10;
 const DEFAULT_VSTD_CREDITS = 4;
 const DEFAULT_VPREM_CREDITS = 10;
 
+// Defaults otras fuentes de ingresos
+const DEFAULT_SUBS_MONTHLY = 50;          // suscriptores activos / mes
+const DEFAULT_SUBS_PRICE_EUR = 4.99;      // precio mensual EUR
+const DEFAULT_EXPRESS_YEARLY = 100;       // canciones express / año
+const DEFAULT_EXPRESS_PRICE_XAF = 5000;   // precio express por canción XAF
+const DEFAULT_PROMO_YEARLY = 30;          // campañas promo / año
+const DEFAULT_PROMO_PRICE_EUR = 25;       // precio medio campaña EUR
+const DEFAULT_RECHARGE_YEARLY = 200;      // recargas wallet / año
+const DEFAULT_RECHARGE_AVG_XAF = 2500;    // recarga media XAF
+
 const SalesSimulator = () => {
   // Pricing inputs
   const [stdPrice, setStdPrice] = useState(DEFAULT_STD_PRICE_XAF);
@@ -80,6 +90,16 @@ const SalesSimulator = () => {
   const [vStdYearly, setVStdYearly] = useState(500);
   const [vPremYearly, setVPremYearly] = useState(100);
 
+  // ----- Otras fuentes de ingresos -----
+  const [subsMonthly, setSubsMonthly] = useState(DEFAULT_SUBS_MONTHLY);
+  const [subsPriceEUR, setSubsPriceEUR] = useState(DEFAULT_SUBS_PRICE_EUR);
+  const [expressYearly, setExpressYearly] = useState(DEFAULT_EXPRESS_YEARLY);
+  const [expressPriceXAF, setExpressPriceXAF] = useState(DEFAULT_EXPRESS_PRICE_XAF);
+  const [promoYearly, setPromoYearly] = useState(DEFAULT_PROMO_YEARLY);
+  const [promoPriceEUR, setPromoPriceEUR] = useState(DEFAULT_PROMO_PRICE_EUR);
+  const [rechargeYearly, setRechargeYearly] = useState(DEFAULT_RECHARGE_YEARLY);
+  const [rechargeAvgXAF, setRechargeAvgXAF] = useState(DEFAULT_RECHARGE_AVG_XAF);
+
   const totals = useMemo(() => {
     // ----- Físicas (XAF) -----
     const stdGross = stdPrice * stdYearly;
@@ -94,7 +114,19 @@ const SalesSimulator = () => {
     const vPremGrossXAF = vPremGrossEUR * XAF_PER_EUR;
     const virtualGrossXAF = virtualGrossEUR * XAF_PER_EUR;
 
-    const totalGross = physicalGross + virtualGrossXAF;
+    // ----- Otras fuentes (todas a la plataforma, sin reparto a artistas) -----
+    const subsGrossEUR = subsMonthly * subsPriceEUR * 12;
+    const subsGrossXAF = subsGrossEUR * XAF_PER_EUR;
+    const expressGrossXAF = expressYearly * expressPriceXAF;
+    const promoGrossEUR = promoYearly * promoPriceEUR;
+    const promoGrossXAF = promoGrossEUR * XAF_PER_EUR;
+    const rechargeGrossXAF = rechargeYearly * rechargeAvgXAF;
+    const othersGrossXAF = subsGrossXAF + expressGrossXAF + promoGrossXAF + rechargeGrossXAF;
+
+    // Bruto de tarjetas (donde aplica reparto a artistas)
+    const cardsGrossXAF = physicalGross + virtualGrossXAF;
+
+    const totalGross = cardsGrossXAF + othersGrossXAF;
 
     const artistPct = artistShare / 100;
     const platformPct = platformShare / 100;
@@ -103,11 +135,12 @@ const SalesSimulator = () => {
     const premArtist = premGross * artistPct;
     const vStdArtist = vStdGrossXAF * artistPct;
     const vPremArtist = vPremGrossXAF * artistPct;
+    // Solo las tarjetas reparten con los artistas; el resto va 100% a plataforma.
     const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
-    const totalPlatform = totalGross * platformPct;
+    const totalPlatform = cardsGrossXAF * platformPct + othersGrossXAF;
 
-    // Las virtuales no tienen costes de producción
+    // Las virtuales y otras fuentes no tienen costes de producción
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
 
@@ -140,6 +173,14 @@ const SalesSimulator = () => {
       vStdGrossXAF,
       vPremGrossXAF,
       virtualGrossXAF,
+      cardsGrossXAF,
+      subsGrossEUR,
+      subsGrossXAF,
+      expressGrossXAF,
+      promoGrossEUR,
+      promoGrossXAF,
+      rechargeGrossXAF,
+      othersGrossXAF,
       totalGross,
       stdArtist,
       premArtist,
@@ -179,6 +220,14 @@ const SalesSimulator = () => {
     vPremCredits,
     vStdYearly,
     vPremYearly,
+    subsMonthly,
+    subsPriceEUR,
+    expressYearly,
+    expressPriceXAF,
+    promoYearly,
+    promoPriceEUR,
+    rechargeYearly,
+    rechargeAvgXAF,
   ]);
 
   const resetDefaults = () => {
@@ -192,6 +241,14 @@ const SalesSimulator = () => {
     setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
     setVStdCredits(DEFAULT_VSTD_CREDITS);
     setVPremCredits(DEFAULT_VPREM_CREDITS);
+    setSubsMonthly(DEFAULT_SUBS_MONTHLY);
+    setSubsPriceEUR(DEFAULT_SUBS_PRICE_EUR);
+    setExpressYearly(DEFAULT_EXPRESS_YEARLY);
+    setExpressPriceXAF(DEFAULT_EXPRESS_PRICE_XAF);
+    setPromoYearly(DEFAULT_PROMO_YEARLY);
+    setPromoPriceEUR(DEFAULT_PROMO_PRICE_EUR);
+    setRechargeYearly(DEFAULT_RECHARGE_YEARLY);
+    setRechargeAvgXAF(DEFAULT_RECHARGE_AVG_XAF);
   };
 
   return (
@@ -513,12 +570,156 @@ const SalesSimulator = () => {
         </CardContent>
       </Card>
 
+      {/* Otras fuentes de ingresos */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Otras fuentes de ingresos</CardTitle>
+          <CardDescription>
+            Suscripciones, publicación express, promoción de lanzamientos y recargas de wallet.
+            Estos ingresos van íntegramente a la plataforma (no reparten con artistas).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Suscripciones */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <UsersIcon className="h-4 w-4" /> Suscripciones
+              </h3>
+              <div className="space-y-2">
+                <Label>Suscriptores activos / mes</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={subsMonthly}
+                  onChange={(e) => setSubsMonthly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio mensual (EUR)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={subsPriceEUR}
+                  onChange={(e) => setSubsPriceEUR(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.subsGrossEUR)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Express */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Publicación Express
+              </h3>
+              <div className="space-y-2">
+                <Label>Canciones express / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={expressYearly}
+                  onChange={(e) => setExpressYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio por canción (XAF)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={expressPriceXAF}
+                  onChange={(e) => setExpressPriceXAF(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEUR(totals.expressGrossXAF)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Promo lanzamientos */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <LineChart className="h-4 w-4" /> Promoción de lanzamientos
+              </h3>
+              <div className="space-y-2">
+                <Label>Campañas / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={promoYearly}
+                  onChange={(e) => setPromoYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Precio medio por campaña (EUR)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={promoPriceEUR}
+                  onChange={(e) => setPromoPriceEUR(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEURRaw(totals.promoGrossEUR)}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Recargas wallet */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Coins className="h-4 w-4" /> Recargas de wallet
+              </h3>
+              <div className="space-y-2">
+                <Label>Recargas / año</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={rechargeYearly}
+                  onChange={(e) => setRechargeYearly(Number(e.target.value) || 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Recarga media (XAF)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={rechargeAvgXAF}
+                  onChange={(e) => setRechargeAvgXAF(Number(e.target.value) || 0)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingreso anual:{' '}
+                  <span className="font-semibold">{formatEUR(totals.rechargeGrossXAF)}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="rounded-lg border bg-muted/30 p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Total otras fuentes / año</span>
+            <span className="text-lg font-semibold tabular-nums">
+              {formatEUR(totals.othersGrossXAF)}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+
+
       {/* Reparto global */}
       <Card>
         <CardHeader>
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
-            Aplica al total combinado (físicas + virtuales). Por defecto: 30% artistas,
+            Aplica solo al total de tarjetas (físicas + virtuales). Las suscripciones,
+            express, promo y recargas van 100% a la plataforma. Por defecto: 30% artistas,
             70% plataforma.
           </CardDescription>
         </CardHeader>
@@ -573,7 +774,8 @@ const SalesSimulator = () => {
       </Card>
 
       {/* Resumen ingresos por origen */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -617,7 +819,28 @@ const SalesSimulator = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Coins className="h-4 w-4 text-yusiop-primary" />
+              Otras fuentes / año
+            </CardTitle>
+            <CardDescription>
+              Suscripciones · Express · Promo · Recargas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums">
+              {formatXAFNumber(totals.othersGrossXAF)}
+            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">
+              ≈ {formatEURNumber(totals.othersGrossXAF)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
 
 
 
@@ -667,6 +890,12 @@ const SalesSimulator = () => {
             <Row label="Virtuales Premium (EUR)" value={formatEURRaw(totals.vPremGrossEUR)} />
             <Row label="Total virtuales" value={formatEURRaw(totals.virtualGrossEUR)} bold />
             <Separator />
+            <Row label="Suscripciones" value={formatEURRaw(totals.subsGrossEUR)} />
+            <Row label="Publicación Express" value={formatEUR(totals.expressGrossXAF)} />
+            <Row label="Promoción de lanzamientos" value={formatEURRaw(totals.promoGrossEUR)} />
+            <Row label="Recargas de wallet" value={formatEUR(totals.rechargeGrossXAF)} />
+            <Row label="Total otras fuentes" value={formatEUR(totals.othersGrossXAF)} bold />
+            <Separator />
             <Row label="Total combinado" value={formatEUR(totals.totalGross)} bold highlight />
             <Separator />
             <Row label="Bolsa artistas físicas" value={formatEUR(totals.stdArtist + totals.premArtist)} />
@@ -678,7 +907,7 @@ const SalesSimulator = () => {
             />
             <Separator />
             <Row
-              label={`Plataforma bruto (${platformShare}%)`}
+              label={`Plataforma (tarjetas ${platformShare}% + otras 100%)`}
               value={formatEUR(totals.totalPlatform)}
               bold
             />
