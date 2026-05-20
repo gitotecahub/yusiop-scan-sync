@@ -45,7 +45,7 @@ const Subscriptions = () => {
       refresh();
       navigate('/subscriptions', { replace: true });
     } else if (status === 'cancelled') {
-      toast.info('Suscripción cancelada antes de pagar.');
+      toast.error('Pago fallido. No se activó la suscripción.');
       navigate('/subscriptions', { replace: true });
     }
   }, [location.search, navigate, refresh]);
