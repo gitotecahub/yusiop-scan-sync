@@ -63,6 +63,8 @@ const Catalog = () => {
   const [shareSong, setShareSong] = useState<Song | null>(null);
   const [highlightedSongId, setHighlightedSongId] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Array<{ id: string; title: string; artist_name: string; cover_url: string | null; scheduled_release_at: string }>>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<AlbumGroup | null>(null);
+
   const { currentSong, isPlaying, isPreview, setCurrentSong, setQueue, play, pause } = usePlayerStore();
   const { userCredits, setUserCredits, setLoading: setCreditsLoading } = useCreditsStore();
   const { t } = useLanguageStore();
