@@ -718,7 +718,8 @@ const SalesSimulator = () => {
         <CardHeader>
           <CardTitle>Reparto de ingresos brutos</CardTitle>
           <CardDescription>
-            Aplica al total combinado (físicas + virtuales). Por defecto: 30% artistas,
+            Aplica solo al total de tarjetas (físicas + virtuales). Las suscripciones,
+            express, promo y recargas van 100% a la plataforma. Por defecto: 30% artistas,
             70% plataforma.
           </CardDescription>
         </CardHeader>
