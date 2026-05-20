@@ -108,6 +108,9 @@ const SongSubmissions = () => {
   const [detailsTarget, setDetailsTarget] = useState<SubmissionRow | null>(null);
   const [approveOpen, setApproveOpen] = useState(false);
   const [approveTarget, setApproveTarget] = useState<SubmissionRow | null>(null);
+  const [approveAlbum, setApproveAlbum] = useState<AlbumGroup | null>(null);
+  const [expandedAlbums, setExpandedAlbums] = useState<Record<string, boolean>>({});
+  const [bulkApproving, setBulkApproving] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, { track?: string; preview?: string }>>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, 'track' | 'preview' | null>>({});
   const [reanalyzing, setReanalyzing] = useState<Record<string, boolean>>({});
