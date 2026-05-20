@@ -72,21 +72,35 @@ Deno.serve(async (req) => {
     }
 
     // Cargar la submission (RLS garantiza ownership)
-    const { data: submission, error: sErr } = await supabase
+    const { data: submissionRaw, error: sErr } = await supabase
       .from("song_submissions")
-      .select("id, user_id, title, artist_name, express_tier, express_price_xaf, express_paid_at")
+      .select("id, user_id, title, artist_name, express_tier, express_price_xaf, express_paid_at, release_id, release_type, track_number")
       .eq("id", body.submission_id)
       .maybeSingle();
 
-    if (sErr || !submission) {
+    if (sErr || !submissionRaw) {
       return new Response(JSON.stringify({ error: "Submission no encontrada" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (submission.user_id !== userId) {
+    if (submissionRaw.user_id !== userId) {
       return new Response(JSON.stringify({ error: "No autorizado" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Si pertenece a un álbum, los importes y la campaña están vinculados a la
+    // primera pista del release. Resolvemos esa pista para que el reintento
+    // funcione desde cualquier track del álbum.
+    let submission: any = submissionRaw;
+    if (submissionRaw.release_id && submissionRaw.track_number !== 1) {
+      const { data: firstTrack } = await supabase
+        .from("song_submissions")
+        .select("id, user_id, title, artist_name, express_tier, express_price_xaf, express_paid_at, release_id, release_type, track_number")
+        .eq("release_id", submissionRaw.release_id)
+        .eq("track_number", 1)
+        .maybeSingle();
+      if (firstTrack) submission = firstTrack;
     }
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -120,12 +134,27 @@ Deno.serve(async (req) => {
     }
 
     // ---- Campaña promocional ----
+    // Si no se pasa campaign_id explícito, intentamos descubrirla a partir
+    // de la submission (campañas vinculadas a la primera pista del release).
+    let resolvedCampaignId: string | null = body.campaign_id ?? null;
+    if (!resolvedCampaignId) {
+      const { data: linked } = await supabase
+        .from("ad_campaigns")
+        .select("id")
+        .eq("submission_id", submission.id)
+        .neq("payment_status", "paid")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (linked) resolvedCampaignId = linked.id;
+    }
+
     let campaign: any = null;
-    if (body.campaign_id) {
+    if (resolvedCampaignId) {
       const { data: c, error: cErr } = await supabase
         .from("ad_campaigns")
         .select("id, user_id, title, subtitle, price_eur, duration_days, payment_status")
-        .eq("id", body.campaign_id)
+        .eq("id", resolvedCampaignId)
         .maybeSingle();
 
       if (cErr || !c) {
@@ -163,7 +192,9 @@ Deno.serve(async (req) => {
 
     if (lineItems.length === 0) {
       return new Response(
-        JSON.stringify({ error: "No hay servicios pendientes de pago" }),
+        JSON.stringify({
+          error: "No hay servicios pendientes de pago para este envío. Es posible que ya esté pagado o que la promoción fuese eliminada.",
+        }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
