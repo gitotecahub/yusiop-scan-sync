@@ -4,7 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2 } from 'lucide-react';
+import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2, Disc3 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
 import { toast } from 'sonner';
 import { usePlayerStore } from '@/stores/playerStore';
