@@ -114,7 +114,19 @@ const SalesSimulator = () => {
     const vPremGrossXAF = vPremGrossEUR * XAF_PER_EUR;
     const virtualGrossXAF = virtualGrossEUR * XAF_PER_EUR;
 
-    const totalGross = physicalGross + virtualGrossXAF;
+    // ----- Otras fuentes (todas a la plataforma, sin reparto a artistas) -----
+    const subsGrossEUR = subsMonthly * subsPriceEUR * 12;
+    const subsGrossXAF = subsGrossEUR * XAF_PER_EUR;
+    const expressGrossXAF = expressYearly * expressPriceXAF;
+    const promoGrossEUR = promoYearly * promoPriceEUR;
+    const promoGrossXAF = promoGrossEUR * XAF_PER_EUR;
+    const rechargeGrossXAF = rechargeYearly * rechargeAvgXAF;
+    const othersGrossXAF = subsGrossXAF + expressGrossXAF + promoGrossXAF + rechargeGrossXAF;
+
+    // Bruto de tarjetas (donde aplica reparto a artistas)
+    const cardsGrossXAF = physicalGross + virtualGrossXAF;
+
+    const totalGross = cardsGrossXAF + othersGrossXAF;
 
     const artistPct = artistShare / 100;
     const platformPct = platformShare / 100;
@@ -123,11 +135,12 @@ const SalesSimulator = () => {
     const premArtist = premGross * artistPct;
     const vStdArtist = vStdGrossXAF * artistPct;
     const vPremArtist = vPremGrossXAF * artistPct;
+    // Solo las tarjetas reparten con los artistas; el resto va 100% a plataforma.
     const totalArtist = stdArtist + premArtist + vStdArtist + vPremArtist;
 
-    const totalPlatform = totalGross * platformPct;
+    const totalPlatform = cardsGrossXAF * platformPct + othersGrossXAF;
 
-    // Las virtuales no tienen costes de producción
+    // Las virtuales y otras fuentes no tienen costes de producción
     const totalCosts = stdCostXAF * stdYearly + premCostXAF * premYearly;
     const platformNet = totalPlatform - totalCosts;
 
@@ -160,6 +173,14 @@ const SalesSimulator = () => {
       vStdGrossXAF,
       vPremGrossXAF,
       virtualGrossXAF,
+      cardsGrossXAF,
+      subsGrossEUR,
+      subsGrossXAF,
+      expressGrossXAF,
+      promoGrossEUR,
+      promoGrossXAF,
+      rechargeGrossXAF,
+      othersGrossXAF,
       totalGross,
       stdArtist,
       premArtist,
@@ -199,6 +220,14 @@ const SalesSimulator = () => {
     vPremCredits,
     vStdYearly,
     vPremYearly,
+    subsMonthly,
+    subsPriceEUR,
+    expressYearly,
+    expressPriceXAF,
+    promoYearly,
+    promoPriceEUR,
+    rechargeYearly,
+    rechargeAvgXAF,
   ]);
 
   const resetDefaults = () => {
@@ -212,6 +241,14 @@ const SalesSimulator = () => {
     setVPremPriceEUR(DEFAULT_VPREM_PRICE_EUR);
     setVStdCredits(DEFAULT_VSTD_CREDITS);
     setVPremCredits(DEFAULT_VPREM_CREDITS);
+    setSubsMonthly(DEFAULT_SUBS_MONTHLY);
+    setSubsPriceEUR(DEFAULT_SUBS_PRICE_EUR);
+    setExpressYearly(DEFAULT_EXPRESS_YEARLY);
+    setExpressPriceXAF(DEFAULT_EXPRESS_PRICE_XAF);
+    setPromoYearly(DEFAULT_PROMO_YEARLY);
+    setPromoPriceEUR(DEFAULT_PROMO_PRICE_EUR);
+    setRechargeYearly(DEFAULT_RECHARGE_YEARLY);
+    setRechargeAvgXAF(DEFAULT_RECHARGE_AVG_XAF);
   };
 
   return (
