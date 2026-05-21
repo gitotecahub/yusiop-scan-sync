@@ -54,51 +54,85 @@ const Index = () => {
         const [popularRes, recentRes] = await Promise.all([
           supabase
             .from('user_downloads')
-            .select(`song_id, songs!inner(id, title, cover_url, artists!inner(name), albums(cover_url))`)
+            .select(`song_id, songs!inner(id, title, cover_url, album_id, artists!inner(name), albums(title, cover_url))`)
             .limit(150),
           supabase
             .from('songs')
-            .select(`id, title, cover_url, created_at, artists!inner(name), albums(cover_url)`)
+            .select(`id, title, cover_url, created_at, album_id, artists!inner(name), albums(title, cover_url)`)
             .order('created_at', { ascending: false })
-            .limit(20),
+            .limit(40),
         ]);
 
-        // Trending agregado por descargas (contextual, todo el histórico)
+        // Trending agregado por descargas (agrupado por álbum cuando aplica)
         const counts: Record<string, { song: any; count: number }> = {};
         popularRes.data?.forEach((d: any) => {
-          if (!counts[d.song_id]) counts[d.song_id] = { song: d.songs, count: 0 };
-          counts[d.song_id].count++;
+          const s = d.songs;
+          const key = s.album_id ? `album:${s.album_id}` : s.id;
+          if (!counts[key]) counts[key] = { song: s, count: 0 };
+          counts[key].count++;
         });
         const trending: CarouselSong[] = Object.values(counts)
           .sort((a, b) => b.count - a.count)
           .slice(0, 10)
-          .map((it, idx) => ({
-            id: it.song.id,
-            title: it.song.title,
-            artist: it.song.artists.name,
-            cover_url:
-              it.song.cover_url ||
-              it.song.albums?.cover_url ||
-              `https://picsum.photos/300/300?random=${it.song.id}`,
-            rank: idx + 1,
-          }));
+          .map((it, idx) => {
+            const s = it.song;
+            const isAlbum = !!s.album_id;
+            return {
+              id: isAlbum ? `album:${s.album_id}` : s.id,
+              title: isAlbum ? (s.albums?.title || s.title) : s.title,
+              artist: s.artists.name,
+              cover_url:
+                (isAlbum ? s.albums?.cover_url : s.cover_url) ||
+                s.albums?.cover_url ||
+                s.cover_url ||
+                `https://picsum.photos/300/300?random=${s.id}`,
+              rank: idx + 1,
+              badge: isAlbum ? (
+                <span className="chip chip-vapor !text-[8px] !px-1.5 !py-0.5">ÁLBUM</span>
+              ) : undefined,
+            };
+          });
         setTrendingSongs(trending);
 
-        // Recientes
-        const recentsRaw: SongRow[] = (recentRes.data || []).map((s: any) => ({
-          id: s.id,
-          title: s.title,
-          artist: s.artists.name,
-          cover_url:
-            s.cover_url ||
-            s.albums?.cover_url ||
-            `https://picsum.photos/400/400?random=${s.id}`,
-          created_at: s.created_at,
-        }));
+        // Recientes — dedupe por álbum
+        const seenAlbums = new Set<string>();
+        const recentsRaw: (SongRow & { isAlbum?: boolean })[] = [];
+        (recentRes.data || []).forEach((s: any) => {
+          if (s.album_id) {
+            if (seenAlbums.has(s.album_id)) return;
+            seenAlbums.add(s.album_id);
+            recentsRaw.push({
+              id: `album:${s.album_id}`,
+              title: s.albums?.title || s.title,
+              artist: s.artists.name,
+              cover_url:
+                s.albums?.cover_url ||
+                s.cover_url ||
+                `https://picsum.photos/400/400?random=${s.album_id}`,
+              created_at: s.created_at,
+              isAlbum: true,
+            });
+          } else {
+            recentsRaw.push({
+              id: s.id,
+              title: s.title,
+              artist: s.artists.name,
+              cover_url:
+                s.cover_url ||
+                `https://picsum.photos/400/400?random=${s.id}`,
+              created_at: s.created_at,
+            });
+          }
+        });
 
-        const recentBadge = (createdAt?: string) => {
-          if (!createdAt) return undefined;
-          const isNew = Date.now() - new Date(createdAt).getTime() < 1000 * 60 * 60 * 24 * 30;
+        const recentBadge = (item: SongRow & { isAlbum?: boolean }) => {
+          if (item.isAlbum) {
+            return (
+              <span className="chip chip-vapor !text-[8px] !px-1.5 !py-0.5">ÁLBUM</span>
+            );
+          }
+          if (!item.created_at) return undefined;
+          const isNew = Date.now() - new Date(item.created_at).getTime() < 1000 * 60 * 60 * 24 * 30;
           if (!isNew) return undefined;
           return (
             <span className="chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
@@ -114,11 +148,11 @@ const Index = () => {
             title: s.title,
             artist: s.artist,
             cover_url: s.cover_url,
-            badge: recentBadge(s.created_at),
+            badge: recentBadge(s),
           }))
         );
 
-        // Hero: top 5 lanzamientos más recientes
+        // Hero: top 5 lanzamientos más recientes (incluye álbumes)
         setHeroSlides(recentsRaw.slice(0, 5));
       } catch (e) {
         console.error('Home fetch error:', e);
