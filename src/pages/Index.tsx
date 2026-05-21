@@ -135,7 +135,7 @@ const Index = () => {
           const isNew = Date.now() - new Date(item.created_at).getTime() < 1000 * 60 * 60 * 24 * 30;
           if (!isNew) return undefined;
           return (
-            <span className="chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
+            <span className="chip chip-warm !text-[8px] !px-1.5 !py-0.5">
               <Sparkles className="h-2 w-2" />{' '}
               {language === 'es' ? 'NUEVO' : language === 'en' ? 'NEW' : language === 'fr' ? 'NOUVEAU' : 'NOVO'}
             </span>
