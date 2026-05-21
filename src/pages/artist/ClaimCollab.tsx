@@ -240,7 +240,7 @@ const ClaimCollab = () => {
           </div>
 
           <div>
-            <Label>Documento o contrato (opcional)</Label>
+            <Label>Documento o contrato {isOwnershipMode ? '*' : '(opcional)'}</Label>
             <Input type="file" accept="image/*,application/pdf" onChange={e => setDocFile(e.target.files?.[0] ?? null)} />
           </div>
 
@@ -249,7 +249,7 @@ const ClaimCollab = () => {
             <Textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} maxLength={500} />
           </div>
 
-          <Button onClick={submit} disabled={submitting || !selectedSong} className="w-full">
+          <Button onClick={submit} disabled={submitting || (!isOwnershipMode && !selectedSong)} className="w-full">
             <Send className="h-4 w-4 mr-2" /> {submitting ? 'Enviando…' : 'Enviar reclamación'}
           </Button>
         </CardContent>
