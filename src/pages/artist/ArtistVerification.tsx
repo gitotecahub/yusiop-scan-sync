@@ -132,7 +132,10 @@ const ArtistVerification = () => {
             <div className="sm:col-span-2">
               <Label>Email</Label>
               <Input value={email} disabled />
-            </div>
+          </div>
+
+          <ArtistPoolMatch stageName={stageName} />
+
           </div>
 
           <div>
