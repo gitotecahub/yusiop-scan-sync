@@ -144,13 +144,13 @@ const Auth = () => {
             <TabsList className="grid w-full grid-cols-2 bg-card/40 border border-border rounded-full p-1 h-auto gap-1 mb-6">
               <TabsTrigger
                 value="signin"
-                className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
+                className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2.5 text-xs font-bold tracking-wide"
               >
                 {t('auth.signin')}
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
-                className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2.5 text-xs font-bold tracking-wide"
+                className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2.5 text-xs font-bold tracking-wide"
               >
                 {t('auth.signup')}
               </TabsTrigger>
@@ -175,7 +175,7 @@ const Auth = () => {
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-                <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
+                <Button type="submit" className="w-full h-12 rounded-full warm-bg text-white hover:opacity-90 font-bold shadow-warm-glow" disabled={loading}>
                   {loading ? t('auth.signingIn') : t('auth.signinBtn')}
                 </Button>
               </form>
@@ -236,7 +236,7 @@ const Auth = () => {
                     </p>
                   </div>
                 )}
-                <Button type="submit" className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow" disabled={loading}>
+                <Button type="submit" className="w-full h-12 rounded-full warm-bg text-white hover:opacity-90 font-bold shadow-warm-glow" disabled={loading}>
                   {loading ? t('auth.signingUp') : t('auth.signupBtn')}
                 </Button>
               </form>
