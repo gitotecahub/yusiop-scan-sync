@@ -79,11 +79,17 @@ const SongCarousel = ({
         </div>
       ) : songs.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
-          {songs.map((song, idx) => (
+          {songs.map((song, idx) => {
+            const isTop = idx < fireTopCount;
+            return (
             <button
               key={song.id}
               onClick={() => onSongClick(song.id)}
-              className="snap-start group relative shrink-0 w-[140px] rounded-2xl overflow-hidden border border-border md:hover:border-primary/50 md:hover:-translate-y-1 md:hover:shadow-vapor transition-all text-left animate-fade-in"
+              className={`snap-start group relative shrink-0 w-[140px] rounded-2xl overflow-hidden border md:hover:-translate-y-1 transition-all text-left animate-fade-in ${
+                isTop
+                  ? 'border-[hsl(var(--accent-warm)/0.45)] md:hover:border-[hsl(var(--accent-warm)/0.8)] md:hover:shadow-warm warm-card-active'
+                  : 'border-border md:hover:border-primary/50 md:hover:shadow-vapor'
+              }`}
             >
               <div className="relative w-[140px] h-[140px] overflow-hidden">
                 <img
@@ -93,16 +99,16 @@ const SongCarousel = ({
                   loading="lazy"
                   draggable={false}
                 />
-                {idx < fireTopCount && (
-                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/60 backdrop-blur-sm flex items-center justify-center">
-                    <Flame className="h-3 w-3 text-primary" />
+                {isTop && (
+                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-warm-glow">
+                    <Flame className="h-3 w-3 warm-text" fill="currentColor" />
                   </div>
                 )}
                 {song.badge && (
                   <span className="absolute top-1.5 left-1.5">{song.badge}</span>
                 )}
-                <div className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full vapor-bg items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity shadow-glow flex">
-                  <Play className="h-3.5 w-3.5 text-primary-foreground ml-0.5" />
+                <div className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full warm-bg items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity shadow-warm-glow flex">
+                  <Play className="h-3.5 w-3.5 text-white ml-0.5" />
                 </div>
               </div>
               <div className="p-2">
@@ -119,7 +125,8 @@ const SongCarousel = ({
                 )}
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="vapor-card p-6 text-center">

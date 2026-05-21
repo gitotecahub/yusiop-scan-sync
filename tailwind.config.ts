@@ -26,11 +26,14 @@ export default {
 				'vapor': 'var(--gradient-vapor)',
 				'sunset': 'var(--gradient-sunset)',
 				'aurora': 'var(--gradient-aurora)',
+				'warm': 'var(--gradient-warm)',
 				'gold': 'var(--gradient-vapor)',
 			},
 			boxShadow: {
 				'vapor': 'var(--shadow-vapor)',
 				'glow': 'var(--shadow-glow)',
+				'warm': 'var(--shadow-warm)',
+				'warm-glow': 'var(--shadow-warm-glow)',
 				'gold': 'var(--shadow-vapor)',
 				'glass': '0 8px 32px -8px hsl(250 95% 70% / 0.2)',
 			},
@@ -76,6 +79,11 @@ export default {
 					aqua: 'hsl(var(--vapor-aqua))',
 					pink: 'hsl(var(--vapor-pink))',
 					mint: 'hsl(var(--vapor-mint))'
+				},
+				warm: {
+					DEFAULT: 'hsl(var(--accent-warm))',
+					soft: 'hsl(var(--accent-warm-soft))',
+					deep: 'hsl(var(--accent-warm-deep))',
 				},
 				gold: {
 					DEFAULT: 'hsl(var(--primary))',

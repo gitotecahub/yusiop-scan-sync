@@ -276,8 +276,11 @@ const Index = () => {
                     </h3>
                     <p className="text-xs text-white/85 mt-0.5 line-clamp-1">{slide.artist}</p>
                   </div>
-                  <div className="shrink-0 w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="h-5 w-5 text-foreground ml-0.5" />
+                  <div className="shrink-0 inline-flex items-center gap-1.5 pl-4 pr-3 h-10 rounded-full warm-bg shadow-warm group-hover:shadow-warm-glow group-hover:scale-[1.03] transition-all">
+                    <span className="font-display font-bold text-xs text-white whitespace-nowrap">
+                      {language === 'es' ? 'Escuchar ahora' : language === 'en' ? 'Play now' : language === 'fr' ? 'Écouter' : 'Ouvir agora'}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-white" strokeWidth={2.4} />
                   </div>
                 </div>
               </button>
@@ -291,15 +294,15 @@ const Index = () => {
         onClick={() => navigate('/games/guess-song')}
         className="w-full p-4 rounded-2xl glass-strong flex items-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-transform text-left relative overflow-hidden group"
       >
-        <div className="absolute inset-0 vapor-bg opacity-20 group-hover:opacity-30 transition-opacity" />
-        <div className="relative w-12 h-12 rounded-xl vapor-bg flex items-center justify-center shadow-glow">
-          <Sparkles className="h-6 w-6 text-primary-foreground" />
+        <div className="absolute inset-0 warm-bg opacity-[0.08] group-hover:opacity-[0.14] transition-opacity" />
+        <div className="relative w-12 h-12 rounded-xl warm-bg flex items-center justify-center shadow-warm-glow">
+          <Sparkles className="h-6 w-6 text-white" />
         </div>
         <div className="relative flex-1 min-w-0">
           <div className="font-bold">Adivina la canción</div>
           <div className="text-xs text-muted-foreground">Mini juego diario · 5 preguntas</div>
         </div>
-        <ArrowRight className="relative h-5 w-5 text-muted-foreground" />
+        <ArrowRight className="relative h-5 w-5 warm-text" />
       </button>
 
       {/* === BANNER SUSCRIPCIONES === */}
