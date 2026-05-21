@@ -93,7 +93,7 @@ const ClaimCollab = () => {
         if (error) throw error;
         docPath = p;
       }
-      const { error } = await (supabase as any).from('collaboration_claims_v2').insert({
+      const { data: inserted, error } = await (supabase as any).from('collaboration_claims_v2').insert({
         claimant_user_id: user.id,
         claimant_artist_code: profile.artist_code,
         claimant_stage_name: profile.stage_name,
@@ -104,8 +104,25 @@ const ClaimCollab = () => {
         proof_links: validLinks,
         document_url: docPath,
         comment: comment.trim() || null,
-      });
+      }).select('id').single();
       if (error) throw error;
+
+      // Email de confirmación al claimant
+      if (user.email && inserted?.id) {
+        supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'claim-submitted',
+            recipientEmail: user.email,
+            idempotencyKey: `claim-submitted-${inserted.id}`,
+            templateData: {
+              artistName: profile.stage_name,
+              songTitle: selectedSong.title,
+              participationType: type,
+            },
+          },
+        }).catch((e) => console.error('[claim email]', e));
+      }
+
       toast.success('Reclamación enviada');
       setSelectedSong(null); setSongSearch(''); setPercent(''); setLinks(['']); setComment(''); setDocFile(null);
       loadMine();
