@@ -155,7 +155,7 @@ const ResetPassword = () => {
               <p className="text-sm text-muted-foreground">{errorMsg}</p>
               <Button
                 onClick={() => setForgotOpen(true)}
-                className="w-full h-12 rounded-full vapor-bg text-primary-foreground font-bold shadow-glow"
+                className="w-full h-12 rounded-full warm-bg text-white font-bold shadow-warm-glow"
               >
                 Solicitar nuevo enlace
               </Button>
@@ -199,7 +199,7 @@ const ResetPassword = () => {
               </div>
               <Button
                 type="submit"
-                className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 font-bold shadow-glow"
+                className="w-full h-12 rounded-full warm-bg text-white hover:opacity-90 font-bold shadow-warm-glow"
                 disabled={submitting}
               >
                 {submitting ? 'Guardando…' : 'Guardar nueva contraseña'}

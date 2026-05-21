@@ -838,7 +838,7 @@ const Library = () => {
             onClick={toggleSelectionMode}
             className={cn(
               'rounded-full shrink-0',
-              selectionMode && 'vapor-bg text-primary-foreground border-0 shadow-glow'
+              selectionMode && 'warm-bg text-white border-0 shadow-warm-glow'
             )}
           >
             {selectionMode ? (
@@ -886,25 +886,25 @@ const Library = () => {
         <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
             value="all"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2 text-xs font-bold tracking-wide"
           >
             {t('library.tab.all')}
           </TabsTrigger>
           <TabsTrigger
             value="recent"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2 text-xs font-bold tracking-wide"
           >
             {t('library.tab.recent')}
           </TabsTrigger>
           <TabsTrigger
             value="favorites"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2 text-xs font-bold tracking-wide"
           >
             {t('library.tab.favorites')}
           </TabsTrigger>
           <TabsTrigger
             value="cards"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:warm-bg data-[state=active]:text-white data-[state=active]:shadow-warm-glow py-2 text-xs font-bold tracking-wide"
           >
             {t('library.tab.cards')}
           </TabsTrigger>
@@ -952,7 +952,7 @@ const Library = () => {
 
           <Link
             to="/store"
-            className="flex items-center justify-between p-4 rounded-2xl vapor-bg text-primary-foreground shadow-glow"
+            className="flex items-center justify-between p-4 rounded-2xl warm-bg text-white shadow-warm-glow"
           >
             <div className="flex items-center gap-3">
               <ShoppingBag className="h-5 w-5" />

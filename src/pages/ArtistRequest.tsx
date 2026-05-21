@@ -302,7 +302,7 @@ const ArtistRequest = () => {
         <Button
           onClick={handleSubmit}
           disabled={submitting}
-          className="w-full rounded-full vapor-bg text-primary-foreground h-12 font-bold shadow-glow"
+          className="w-full rounded-full warm-bg text-white h-12 font-bold shadow-warm-glow"
         >
           {submitting ? 'Enviando…' : 'Enviar solicitud'}
         </Button>

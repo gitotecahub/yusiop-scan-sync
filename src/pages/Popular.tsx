@@ -117,7 +117,7 @@ const Popular = () => {
               onClick={() => setPeriod(p)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                 period === p
-                  ? 'vapor-bg text-primary-foreground shadow-glow'
+                  ? 'warm-bg text-white shadow-warm-glow'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >

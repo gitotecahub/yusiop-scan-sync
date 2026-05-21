@@ -60,7 +60,7 @@ export const ForgotPasswordDialog = ({ open, onOpenChange, defaultEmail = '' }: 
           </div>
           <Button
             type="submit"
-            className="w-full h-12 rounded-full vapor-bg text-primary-foreground font-bold shadow-glow"
+            className="w-full h-12 rounded-full warm-bg text-white font-bold shadow-warm-glow"
             disabled={submitting}
           >
             {submitting ? 'Enviando…' : 'Enviar enlace de recuperación'}

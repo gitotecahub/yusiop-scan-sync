@@ -654,7 +654,7 @@ const Profile = () => {
             <p className="text-[11px] text-muted-foreground">
               {t('common.optional')}
             </p>
-            <Button onClick={handleSaveProfile} className="w-full rounded-full vapor-bg text-primary-foreground hover:opacity-90 h-11 font-bold shadow-glow">
+            <Button onClick={handleSaveProfile} className="w-full rounded-full warm-bg text-white hover:opacity-90 h-11 font-bold shadow-warm-glow">
               {t('profile.save')}
             </Button>
           </div>
@@ -701,7 +701,7 @@ const Profile = () => {
               <Button
                 size="sm"
                 onClick={() => navigate('/admin')}
-                className="mt-3 rounded-full vapor-bg text-primary-foreground h-9 px-4 text-xs font-bold shadow-glow"
+                className="mt-3 rounded-full warm-bg text-white h-9 px-4 text-xs font-bold shadow-warm-glow"
               >
                 <ShieldCheck className="h-3 w-3 mr-1.5" />
                 {t('profile.accessPanel')}
@@ -737,7 +737,7 @@ const Profile = () => {
               <Button
                 size="sm"
                 onClick={() => navigate('/artist/request')}
-                className="mt-3 rounded-full vapor-bg text-primary-foreground h-9 px-4 text-xs font-bold"
+                className="mt-3 rounded-full warm-bg text-white h-9 px-4 text-xs font-bold"
                 disabled={artistRequestStatus === 'pending'}
               >
                 {artistRequestStatus === 'pending' ? (
