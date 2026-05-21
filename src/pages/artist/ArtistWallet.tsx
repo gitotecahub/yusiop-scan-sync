@@ -266,6 +266,9 @@ const ArtistWallet = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      {e.is_held && (
+                        <Badge variant="outline" className="bg-amber-500/15 text-amber-600 border-amber-500/30">Retenido</Badge>
+                      )}
                       <Badge variant="outline" className={b?.cls}>{b?.label ?? e.status}</Badge>
                       <span className="font-semibold">{formatXAFFixed(e.artist_amount_xaf)}</span>
                     </div>
