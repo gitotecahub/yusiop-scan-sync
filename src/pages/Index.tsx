@@ -276,8 +276,11 @@ const Index = () => {
                     </h3>
                     <p className="text-xs text-white/85 mt-0.5 line-clamp-1">{slide.artist}</p>
                   </div>
-                  <div className="shrink-0 w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="h-5 w-5 text-foreground ml-0.5" />
+                  <div className="shrink-0 inline-flex items-center gap-1.5 pl-4 pr-3 h-10 rounded-full warm-bg shadow-warm group-hover:shadow-warm-glow group-hover:scale-[1.03] transition-all">
+                    <span className="font-display font-bold text-xs text-white whitespace-nowrap">
+                      {language === 'es' ? 'Escuchar ahora' : language === 'en' ? 'Play now' : language === 'fr' ? 'Écouter' : 'Ouvir agora'}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-white" strokeWidth={2.4} />
                   </div>
                 </div>
               </button>
