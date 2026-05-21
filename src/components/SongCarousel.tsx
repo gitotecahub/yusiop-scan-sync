@@ -15,7 +15,7 @@ export interface CarouselSong {
 
 interface Props {
   title: string;
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   subtitle?: string;
   seeAllHref?: string;
   seeAllLabel?: string;
@@ -81,6 +81,7 @@ const SongCarousel = ({
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth">
           {songs.map((song, idx) => {
             const isTop = idx < fireTopCount;
+            const showFire = showRank && isTop;
             return (
             <button
               key={song.id}
@@ -99,7 +100,7 @@ const SongCarousel = ({
                   loading="lazy"
                   draggable={false}
                 />
-                {isTop && (
+                {showFire && (
                   <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-warm-glow">
                     <Flame className="h-3 w-3 warm-text" fill="currentColor" />
                   </div>

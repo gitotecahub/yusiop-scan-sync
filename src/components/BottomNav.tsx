@@ -27,22 +27,25 @@ const BottomNav = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                "relative flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300",
-                isActive
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                "relative flex flex-col items-center justify-center gap-1 px-3 pt-2 pb-2.5 rounded-2xl transition-all duration-300",
+                isActive ? "warm-text" : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {isActive && (
-                <span className="absolute inset-0 rounded-2xl vapor-bg shadow-glow" />
-              )}
-              <Icon className={cn("relative h-[18px] w-[18px]", isActive && "drop-shadow-sm")} strokeWidth={isActive ? 2.4 : 1.7} />
+              <Icon
+                className="h-[20px] w-[20px]"
+                strokeWidth={isActive ? 2.4 : 1.7}
+                fill={isActive ? 'currentColor' : 'none'}
+                style={isActive ? { filter: 'drop-shadow(0 0 8px hsl(var(--accent-warm) / 0.6))' } : undefined}
+              />
               <span className={cn(
-                "relative text-[9px] uppercase tracking-[0.16em]",
+                "text-[9px] uppercase tracking-[0.16em]",
                 isActive ? "font-bold" : "font-medium"
               )}>
                 {item.label}
               </span>
+              {isActive && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[3px] w-7 rounded-full warm-bg shadow-warm-glow" />
+              )}
             </Link>
           );
         })}

@@ -161,7 +161,16 @@
     opacity: 0.9;
     pointer-events: none;
   }
-  .aurora-bg { background: var(--gradient-aurora); }
+  .chip-warm {
+    background: var(--gradient-warm);
+    border-color: transparent;
+    color: #fff;
+  }
+  .eyebrow-warm {
+    color: hsl(var(--accent-warm));
+    text-shadow: 0 0 12px hsl(var(--accent-warm) / 0.35);
+  }
+
 
   .gold-text { /* legacy alias */
     background: var(--gradient-vapor);
