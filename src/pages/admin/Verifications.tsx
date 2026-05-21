@@ -33,6 +33,7 @@ interface Claim {
   claimant_stage_name: string;
   song_id: string | null;
   song_title_snapshot: string | null;
+  target_artist_id: string | null;
   participation_type: string;
   claimed_percent: number | null;
   proof_links: string[];
