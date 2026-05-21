@@ -411,6 +411,72 @@ export type Database = {
           },
         ]
       }
+      artist_profiles: {
+        Row: {
+          artist_code: string
+          artist_id: string | null
+          artist_username: string
+          country: string | null
+          created_at: string
+          email_verified: boolean
+          id: string
+          legal_name: string | null
+          official_links: Json
+          phone: string | null
+          phone_verified: boolean
+          rejection_reason: string | null
+          risk_score: number
+          stage_name: string
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["artist_verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          artist_code: string
+          artist_id?: string | null
+          artist_username: string
+          country?: string | null
+          created_at?: string
+          email_verified?: boolean
+          id?: string
+          legal_name?: string | null
+          official_links?: Json
+          phone?: string | null
+          phone_verified?: boolean
+          rejection_reason?: string | null
+          risk_score?: number
+          stage_name: string
+          updated_at?: string
+          user_id: string
+          verification_status?: Database["public"]["Enums"]["artist_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          artist_code?: string
+          artist_id?: string | null
+          artist_username?: string
+          country?: string | null
+          created_at?: string
+          email_verified?: boolean
+          id?: string
+          legal_name?: string | null
+          official_links?: Json
+          phone?: string | null
+          phone_verified?: boolean
+          rejection_reason?: string | null
+          risk_score?: number
+          stage_name?: string
+          updated_at?: string
+          user_id?: string
+          verification_status?: Database["public"]["Enums"]["artist_verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       artist_requests: {
         Row: {
           artist_name: string
@@ -461,6 +527,77 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      artist_verification_requests: {
+        Row: {
+          admin_note: string | null
+          artist_profile_id: string
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          id_document_url: string | null
+          legal_name: string | null
+          official_links: Json
+          phone: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string | null
+          stage_name: string | null
+          status: Database["public"]["Enums"]["artist_verification_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          artist_profile_id: string
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          id_document_url?: string | null
+          legal_name?: string | null
+          official_links?: Json
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          stage_name?: string | null
+          status?: Database["public"]["Enums"]["artist_verification_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          artist_profile_id?: string
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          id_document_url?: string | null
+          legal_name?: string | null
+          official_links?: Json
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          stage_name?: string | null
+          status?: Database["public"]["Enums"]["artist_verification_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_verification_requests_artist_profile_id_fkey"
+            columns: ["artist_profile_id"]
+            isOneToOne: false
+            referencedRelation: "artist_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       artist_withdrawal_methods: {
         Row: {
@@ -674,6 +811,47 @@ export type Database = {
         }
         Relationships: []
       }
+      claim_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          claim_id: string
+          created_at: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          claim_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          claim_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_audit_log_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "collaboration_claims_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_claims: {
         Row: {
           claimant_artist_name: string
@@ -727,6 +905,86 @@ export type Database = {
             columns: ["collaborator_id"]
             isOneToOne: false
             referencedRelation: "unclaimed_collaborators_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collaboration_claims_v2: {
+        Row: {
+          admin_note: string | null
+          claimant_artist_code: string
+          claimant_stage_name: string
+          claimant_user_id: string
+          claimed_percent: number | null
+          comment: string | null
+          created_at: string
+          document_url: string | null
+          id: string
+          ip_address: string | null
+          participation_type: Database["public"]["Enums"]["participation_type"]
+          proof_links: Json
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_flags: Json
+          risk_score: number
+          song_id: string | null
+          song_title_snapshot: string | null
+          status: Database["public"]["Enums"]["claim_status_v2"]
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          claimant_artist_code: string
+          claimant_stage_name: string
+          claimant_user_id: string
+          claimed_percent?: number | null
+          comment?: string | null
+          created_at?: string
+          document_url?: string | null
+          id?: string
+          ip_address?: string | null
+          participation_type: Database["public"]["Enums"]["participation_type"]
+          proof_links?: Json
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: Json
+          risk_score?: number
+          song_id?: string | null
+          song_title_snapshot?: string | null
+          status?: Database["public"]["Enums"]["claim_status_v2"]
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          claimant_artist_code?: string
+          claimant_stage_name?: string
+          claimant_user_id?: string
+          claimed_percent?: number | null
+          comment?: string | null
+          created_at?: string
+          document_url?: string | null
+          id?: string
+          ip_address?: string | null
+          participation_type?: Database["public"]["Enums"]["participation_type"]
+          proof_links?: Json
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_flags?: Json
+          risk_score?: number
+          song_id?: string | null
+          song_title_snapshot?: string | null
+          status?: Database["public"]["Enums"]["claim_status_v2"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaboration_claims_v2_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
             referencedColumns: ["id"]
           },
         ]
@@ -1069,6 +1327,39 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      phone_otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+          user_id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -2863,6 +3154,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      has_open_claim_on_song: { Args: { p_song_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3007,6 +3299,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      try_auto_approve_claim: {
+        Args: { p_claim_id: string }
+        Returns: Database["public"]["Enums"]["claim_status_v2"]
+      }
       update_copyright_analysis: {
         Args: {
           p_audio_hash?: string
@@ -3080,6 +3376,13 @@ export type Database = {
         | "crypto"
         | "manual_other"
       artist_request_status: "pending" | "approved" | "rejected"
+      artist_verification_status:
+        | "unverified"
+        | "basic_verified"
+        | "artist_verified"
+        | "under_review"
+        | "rejected"
+        | "suspended"
       artist_withdrawal_status:
         | "requested"
         | "under_review"
@@ -3089,6 +3392,13 @@ export type Database = {
         | "cancelled"
       card_origin: "physical" | "digital"
       card_type: "standard" | "premium"
+      claim_status_v2:
+        | "pending"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "disputed"
+        | "blocked"
       collab_claim_status: "pending" | "approved" | "rejected"
       collab_role: "featuring" | "producer" | "performer" | "composer" | "remix"
       copyright_status:
@@ -3100,6 +3410,14 @@ export type Database = {
         | "error"
       express_tier: "72h" | "48h" | "24h"
       friend_request_status: "pending" | "accepted" | "rejected" | "blocked"
+      participation_type:
+        | "singer"
+        | "composer"
+        | "producer"
+        | "beatmaker"
+        | "featuring"
+        | "label"
+        | "other"
       purchase_status: "pending" | "paid" | "failed" | "refunded"
       recharge_card_status: "active" | "used" | "expired" | "disabled"
       release_status: "draft" | "pending_review" | "published" | "rejected"
@@ -3318,6 +3636,14 @@ export const Constants = {
         "manual_other",
       ],
       artist_request_status: ["pending", "approved", "rejected"],
+      artist_verification_status: [
+        "unverified",
+        "basic_verified",
+        "artist_verified",
+        "under_review",
+        "rejected",
+        "suspended",
+      ],
       artist_withdrawal_status: [
         "requested",
         "under_review",
@@ -3328,6 +3654,14 @@ export const Constants = {
       ],
       card_origin: ["physical", "digital"],
       card_type: ["standard", "premium"],
+      claim_status_v2: [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "disputed",
+        "blocked",
+      ],
       collab_claim_status: ["pending", "approved", "rejected"],
       collab_role: ["featuring", "producer", "performer", "composer", "remix"],
       copyright_status: [
@@ -3340,6 +3674,15 @@ export const Constants = {
       ],
       express_tier: ["72h", "48h", "24h"],
       friend_request_status: ["pending", "accepted", "rejected", "blocked"],
+      participation_type: [
+        "singer",
+        "composer",
+        "producer",
+        "beatmaker",
+        "featuring",
+        "label",
+        "other",
+      ],
       purchase_status: ["pending", "paid", "failed", "refunded"],
       recharge_card_status: ["active", "used", "expired", "disabled"],
       release_status: ["draft", "pending_review", "published", "rejected"],
