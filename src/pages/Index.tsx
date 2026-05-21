@@ -216,9 +216,9 @@ const Index = () => {
             </Link>
             <Link
               to="/catalog"
-              className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-primary/40 bg-card/40 backdrop-blur-md hover:border-primary/70 hover:bg-card/70 transition-all hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-[hsl(var(--accent-warm)/0.55)] bg-card/40 backdrop-blur-md hover:border-[hsl(var(--accent-warm)/0.85)] hover:bg-card/70 hover:shadow-warm-glow transition-all hover:-translate-y-0.5"
             >
-              <Music className="h-5 w-5 text-foreground" strokeWidth={2.2} />
+              <Music className="h-5 w-5 warm-text" strokeWidth={2.2} />
               <span className="font-display font-bold text-sm text-foreground">
                 {t('home.hero.explore')}
               </span>
