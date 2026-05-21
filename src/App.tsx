@@ -30,8 +30,11 @@ import ArtistStats from '@/pages/artist/ArtistStats';
 import Collaborations from '@/pages/artist/Collaborations';
 import ArtistWallet from '@/pages/artist/ArtistWallet';
 import PaymentMethods from '@/pages/artist/PaymentMethods';
+import ArtistVerification from '@/pages/artist/ArtistVerification';
+import ClaimCollab from '@/pages/artist/ClaimCollab';
 import SongSubmissions from '@/pages/admin/SongSubmissions';
 import CollaborationClaims from '@/pages/admin/CollaborationClaims';
+import Verifications from '@/pages/admin/Verifications';
 import { RequireStaffArea } from '@/components/admin/RequireStaffArea';
 
 // Admin Pages
@@ -234,6 +237,7 @@ const AppContent = () => {
         <Route path="payment-methods" element={<RequireStaffArea area="monetization"><PaymentMethodsAdmin /></RequireStaffArea>} />
         <Route path="advertising" element={<Advertising />} />
         <Route path="audit-log" element={<AuditLog />} />
+        <Route path="verifications" element={<Verifications />} />
       </Route>
 
       <Route path="/auth" element={<Auth />} />
@@ -274,6 +278,8 @@ const AppContent = () => {
             <Route path="/artist/collaborations" element={<OnlineOnlyRoute><Collaborations /></OnlineOnlyRoute>} />
             <Route path="/artist/wallet" element={<OnlineOnlyRoute><ArtistWallet /></OnlineOnlyRoute>} />
             <Route path="/artist/payment-methods" element={<OnlineOnlyRoute><PaymentMethods /></OnlineOnlyRoute>} />
+            <Route path="/artist/verification" element={<OnlineOnlyRoute><ArtistVerification /></OnlineOnlyRoute>} />
+            <Route path="/artist/claim-collab" element={<OnlineOnlyRoute><ClaimCollab /></OnlineOnlyRoute>} />
             <Route path="/artist/request" element={<OnlineOnlyRoute><ArtistRequest /></OnlineOnlyRoute>} />
             <Route path="/support" element={<OnlineOnlyRoute><Support /></OnlineOnlyRoute>} />
             <Route path="/profile" element={
