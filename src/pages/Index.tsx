@@ -309,17 +309,23 @@ const Index = () => {
         ) : null}
       </section>
 
-      {/* === DESTACADO — No te lo pierdas === */}
-      <section className="space-y-3">
-        <div>
-          <p className="eyebrow eyebrow-warm mb-1 inline-flex items-center gap-1.5">
+      {/* === DESTACADO — Nuevos lanzamientos === */}
+      <SongCarousel
+        title={language === 'es' ? 'No te lo pierdas' : language === 'en' ? "Don't miss out" : language === 'fr' ? 'À ne pas manquer' : 'Não perca'}
+        eyebrow={
+          <span className="eyebrow eyebrow-warm inline-flex items-center gap-1.5">
             <Sparkles className="h-3 w-3" /> {language === 'es' ? 'Destacado' : language === 'en' ? 'Featured' : language === 'fr' ? 'À la une' : 'Destaque'}
-          </p>
-          <h2 className="font-display text-2xl font-bold tracking-tight">
-            {language === 'es' ? 'No te lo pierdas' : language === 'en' ? "Don't miss out" : language === 'fr' ? 'À ne pas manquer' : 'Não perca'}
-          </h2>
-        </div>
-      </section>
+          </span>
+        }
+        seeAllHref="/catalog"
+        seeAllLabel={language === 'es' ? 'Ver todo' : language === 'en' ? 'See all' : language === 'fr' ? 'Voir tout' : 'Ver tudo'}
+        songs={recentSongs}
+        loading={loading}
+        onSongClick={goSong}
+        emptyText={language === 'es' ? 'Pronto habrá lanzamientos' : 'Coming soon'}
+        fireTopCount={recentSongs.length}
+      />
+
 
 
       {/* === MINI JUEGO: ADIVINA LA CANCIÓN === */}
