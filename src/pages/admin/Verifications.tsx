@@ -121,6 +121,11 @@ const Verifications = () => {
       rejection_reason: newStatus === 'rejected' ? note : null,
     }).eq('id', c.id);
     if (error) return toast.error(error.message);
+
+    // Email al claimant (fire & forget)
+    supabase.functions.invoke('send-claim-status-email', { body: { claimId: c.id } })
+      .catch((e) => console.error('[claim email]', e));
+
     toast.success('Actualizado');
     setNoteOpen(false); setNoteText('');
     loadClaims();

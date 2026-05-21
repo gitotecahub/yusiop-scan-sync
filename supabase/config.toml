@@ -39,5 +39,7 @@ project_id = "wbzwdihdayasmikmqvgp"
     verify_jwt = true
   [functions.send-transactional-email]
     verify_jwt = true
+  [functions.send-claim-status-email]
+    verify_jwt = true
   [functions.stripe-webhook]
     verify_jwt = false
