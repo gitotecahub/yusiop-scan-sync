@@ -80,6 +80,11 @@ export default {
 					pink: 'hsl(var(--vapor-pink))',
 					mint: 'hsl(var(--vapor-mint))'
 				},
+				warm: {
+					DEFAULT: 'hsl(var(--accent-warm))',
+					soft: 'hsl(var(--accent-warm-soft))',
+					deep: 'hsl(var(--accent-warm-deep))',
+				},
 				gold: {
 					DEFAULT: 'hsl(var(--primary))',
 					light: 'hsl(var(--vapor-aqua))',
