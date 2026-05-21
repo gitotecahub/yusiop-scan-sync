@@ -838,7 +838,7 @@ const Library = () => {
             onClick={toggleSelectionMode}
             className={cn(
               'rounded-full shrink-0',
-              selectionMode && 'vapor-bg text-primary-foreground border-0 shadow-glow'
+              selectionMode && 'warm-bg text-white border-0 shadow-warm-glow'
             )}
           >
             {selectionMode ? (
@@ -952,7 +952,7 @@ const Library = () => {
 
           <Link
             to="/store"
-            className="flex items-center justify-between p-4 rounded-2xl vapor-bg text-primary-foreground shadow-glow"
+            className="flex items-center justify-between p-4 rounded-2xl warm-bg text-white shadow-warm-glow"
           >
             <div className="flex items-center gap-3">
               <ShoppingBag className="h-5 w-5" />

@@ -327,7 +327,7 @@ const QRScanner = () => {
               </Button>
             </div>
           ) : (
-            <Button onClick={startScanning} className="w-full h-12 rounded-full vapor-bg text-primary-foreground hover:opacity-90 gap-2 font-bold shadow-glow">
+            <Button onClick={startScanning} className="w-full h-12 rounded-full warm-bg text-white hover:opacity-90 gap-2 font-bold shadow-warm-glow">
               <Camera className="h-4 w-4" />
               {t('qr.startCamera')}
             </Button>
