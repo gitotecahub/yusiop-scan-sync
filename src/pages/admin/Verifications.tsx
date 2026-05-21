@@ -177,7 +177,7 @@ const Verifications = () => {
 
         <TabsContent value="verifs" className="space-y-4">
           <div className="flex gap-2 flex-wrap">
-            {['under_review', 'approved', 'rejected', 'all'].map(f => (
+            {['under_review', 'artist_verified', 'rejected', 'all'].map(f => (
               <Button key={f} size="sm" variant={filter === f ? 'default' : 'outline'} onClick={() => setFilter(f)}>{f}</Button>
             ))}
           </div>
