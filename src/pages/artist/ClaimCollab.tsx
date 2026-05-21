@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Plus, X, Send, Clock, CheckCircle2, AlertCircle, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,11 +13,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
-type Participation = 'singer' | 'composer' | 'producer' | 'beatmaker' | 'featuring' | 'label' | 'other';
+type Participation = 'singer' | 'composer' | 'producer' | 'beatmaker' | 'featuring' | 'label' | 'artist_ownership' | 'other';
 
 const TYPE_LABEL: Record<Participation, string> = {
   singer: 'Cantante', composer: 'Compositor', producer: 'Productor',
-  beatmaker: 'Beatmaker', featuring: 'Featuring', label: 'Sello', other: 'Otro',
+  beatmaker: 'Beatmaker', featuring: 'Featuring', label: 'Sello',
+  artist_ownership: 'Soy el artista', other: 'Otro',
 };
 
 const STATUS_BADGE: Record<string, { label: string; icon: any; variant: any }> = {
@@ -40,19 +41,25 @@ interface Claim {
 
 const ClaimCollab = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { user } = useAuthStore();
   const { profile } = useArtistProfile();
+
+  const ownershipArtistId = params.get('artistId');
+  const ownershipArtistName = params.get('name');
+  const isOwnershipMode = !!ownershipArtistId;
 
   const [songSearch, setSongSearch] = useState('');
   const [songs, setSongs] = useState<{ id: string; title: string; artist_id: string }[]>([]);
   const [selectedSong, setSelectedSong] = useState<{ id: string; title: string } | null>(null);
-  const [type, setType] = useState<Participation>('featuring');
+  const [type, setType] = useState<Participation>(isOwnershipMode ? 'artist_ownership' : 'featuring');
   const [percent, setPercent] = useState<string>('');
   const [links, setLinks] = useState<string[]>(['']);
   const [comment, setComment] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [mine, setMine] = useState<Claim[]>([]);
+  const [poolAmount, setPoolAmount] = useState<number | null>(null);
 
   const loadMine = async () => {
     if (!user) return;
@@ -65,6 +72,12 @@ const ClaimCollab = () => {
   };
 
   useEffect(() => { loadMine(); }, [user?.id]);
+
+  useEffect(() => {
+    if (!ownershipArtistId) { setPoolAmount(null); return; }
+    (supabase as any).rpc('get_artist_pool_amount', { p_artist_id: ownershipArtistId })
+      .then(({ data }: any) => setPoolAmount(data?.[0]?.total_xaf ?? 0));
+  }, [ownershipArtistId]);
 
   useEffect(() => {
     if (songSearch.length < 2) { setSongs([]); return; }
@@ -81,7 +94,13 @@ const ClaimCollab = () => {
 
   const submit = async () => {
     if (!profile || !user) return toast.error('Necesitas un perfil de artista');
-    if (!selectedSong) return toast.error('Selecciona una canción');
+    if (isOwnershipMode) {
+      if (!docFile) return toast.error('Sube un documento de identidad o contrato');
+      if (links.map(l => l.trim()).filter(Boolean).length === 0)
+        return toast.error('Añade al menos un link oficial');
+    } else {
+      if (!selectedSong) return toast.error('Selecciona una canción');
+    }
     const validLinks = links.map(l => l.trim()).filter(Boolean);
     setSubmitting(true);
     try {
@@ -93,21 +112,27 @@ const ClaimCollab = () => {
         if (error) throw error;
         docPath = p;
       }
-      const { data: inserted, error } = await (supabase as any).from('collaboration_claims_v2').insert({
+      const payload: any = {
         claimant_user_id: user.id,
         claimant_artist_code: profile.artist_code,
         claimant_stage_name: profile.stage_name,
-        song_id: selectedSong.id,
-        song_title_snapshot: selectedSong.title,
         participation_type: type,
         claimed_percent: percent ? Number(percent) : null,
         proof_links: validLinks,
         document_url: docPath,
         comment: comment.trim() || null,
-      }).select('id').single();
+      };
+      if (isOwnershipMode) {
+        payload.target_artist_id = ownershipArtistId;
+        payload.song_title_snapshot = `Artista completo: ${ownershipArtistName ?? ''}`.trim();
+      } else {
+        payload.song_id = selectedSong!.id;
+        payload.song_title_snapshot = selectedSong!.title;
+      }
+      const { data: inserted, error } = await (supabase as any)
+        .from('collaboration_claims_v2').insert(payload).select('id').single();
       if (error) throw error;
 
-      // Email de confirmación al claimant
       if (user.email && inserted?.id) {
         supabase.functions.invoke('send-transactional-email', {
           body: {
@@ -116,12 +141,13 @@ const ClaimCollab = () => {
             idempotencyKey: `claim-submitted-${inserted.id}`,
             templateData: {
               artistName: profile.stage_name,
-              songTitle: selectedSong.title,
+              songTitle: payload.song_title_snapshot,
               participationType: type,
             },
           },
         }).catch((e) => console.error('[claim email]', e));
       }
+
 
       toast.success('Reclamación enviada');
       setSelectedSong(null); setSongSearch(''); setPercent(''); setLinks(['']); setComment(''); setDocFile(null);
@@ -141,15 +167,22 @@ const ClaimCollab = () => {
 
       <div className="blob-card p-6 mb-6">
         <p className="eyebrow mb-1">Colaboraciones</p>
-        <h1 className="display-xl text-3xl">Reclamar colaboración</h1>
+        <h1 className="display-xl text-3xl">
+          {isOwnershipMode ? 'Reclamar artista completo' : 'Reclamar colaboración'}
+        </h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Reclama tu participación en una canción. Tu ID:{' '}
-          <span className="font-mono font-semibold">{profile?.artist_code ?? '—'}</span>
+          {isOwnershipMode ? (
+            <>Vas a reclamar la propiedad de <strong>{ownershipArtistName}</strong>. Si se aprueba, todas sus ganancias acumuladas{poolAmount != null && poolAmount > 0 ? ` (${new Intl.NumberFormat('fr-FR').format(poolAmount)} XAF)` : ''} se liberarán a tu cuenta. Requiere documento de identidad y links oficiales.</>
+          ) : (
+            <>Reclama tu participación en una canción. Tu ID:{' '}
+            <span className="font-mono font-semibold">{profile?.artist_code ?? '—'}</span></>
+          )}
         </p>
       </div>
 
       <Card className="mb-6">
         <CardContent className="p-6 space-y-4">
+          {!isOwnershipMode && (
           <div>
             <Label>Buscar canción *</Label>
             <Input value={songSearch} onChange={e => { setSongSearch(e.target.value); setSelectedSong(null); }} placeholder="Título de la canción" />
@@ -166,6 +199,8 @@ const ClaimCollab = () => {
             )}
             {selectedSong && <p className="text-xs text-primary mt-1">Seleccionada: {selectedSong.title}</p>}
           </div>
+          )}
+
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
@@ -205,7 +240,7 @@ const ClaimCollab = () => {
           </div>
 
           <div>
-            <Label>Documento o contrato (opcional)</Label>
+            <Label>Documento o contrato {isOwnershipMode ? '*' : '(opcional)'}</Label>
             <Input type="file" accept="image/*,application/pdf" onChange={e => setDocFile(e.target.files?.[0] ?? null)} />
           </div>
 
@@ -214,7 +249,7 @@ const ClaimCollab = () => {
             <Textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} maxLength={500} />
           </div>
 
-          <Button onClick={submit} disabled={submitting || !selectedSong} className="w-full">
+          <Button onClick={submit} disabled={submitting || (!isOwnershipMode && !selectedSong)} className="w-full">
             <Send className="h-4 w-4 mr-2" /> {submitting ? 'Enviando…' : 'Enviar reclamación'}
           </Button>
         </CardContent>

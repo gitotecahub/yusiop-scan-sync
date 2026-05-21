@@ -934,6 +934,7 @@ export type Database = {
           song_id: string | null
           song_title_snapshot: string | null
           status: Database["public"]["Enums"]["claim_status_v2"]
+          target_artist_id: string | null
           updated_at: string
         }
         Insert: {
@@ -957,6 +958,7 @@ export type Database = {
           song_id?: string | null
           song_title_snapshot?: string | null
           status?: Database["public"]["Enums"]["claim_status_v2"]
+          target_artist_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -980,6 +982,7 @@ export type Database = {
           song_id?: string | null
           song_title_snapshot?: string | null
           status?: Database["public"]["Enums"]["claim_status_v2"]
+          target_artist_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3009,6 +3012,17 @@ export type Database = {
       estimate_downloads: { Args: { p_balance_xaf: number }; Returns: number }
       expire_ad_campaigns: { Args: never; Returns: number }
       expire_stale_card_purchases: { Args: never; Returns: number }
+      find_artist_pool_matches: {
+        Args: { p_stage_name: string }
+        Returns: {
+          already_claimed: boolean
+          artist_id: string
+          artist_name: string
+          avatar_url: string
+          similarity: number
+          total_pool_xaf: number
+        }[]
+      }
       get_active_ad_campaigns: {
         Args: { p_limit?: number; p_placement?: string }
         Returns: {
@@ -3022,6 +3036,15 @@ export type Database = {
         }[]
       }
       get_artist_held_amount: { Args: { p_artist_id: string }; Returns: number }
+      get_artist_pool_amount: {
+        Args: { p_artist_id: string }
+        Returns: {
+          available_xaf: number
+          earnings_count: number
+          held_xaf: number
+          total_xaf: number
+        }[]
+      }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
       get_artist_wallet_summary: {
         Args: { p_artist_id: string }
@@ -3178,6 +3201,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      link_verified_artist_profile: {
+        Args: { p_artist_id: string; p_profile_id: string }
+        Returns: undefined
+      }
       log_admin_action: {
         Args: {
           p_action: string
@@ -3249,6 +3276,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      release_artist_pool_hold: {
+        Args: { p_artist_id: string }
+        Returns: number
+      }
       release_pending_earnings: { Args: never; Returns: number }
       release_scheduled_songs: { Args: never; Returns: number }
       request_artist_withdrawal: {
@@ -3271,6 +3302,8 @@ export type Database = {
           username: string
         }[]
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_ad_request: {
         Args: {
           p_ad_type: string
