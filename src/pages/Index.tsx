@@ -232,62 +232,95 @@ const Index = () => {
 
       {/* === HERO DESTACADO — carrusel grande === */}
       <section className="space-y-3">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="eyebrow mb-1">✨ Destacado</p>
-            <h2 className="font-display text-xl font-bold tracking-tight">
-              {language === 'es' ? 'No te lo pierdas' : language === 'en' ? "Don't miss out" : language === 'fr' ? 'À ne pas manquer' : 'Não perca'}
-            </h2>
-          </div>
-        </div>
-
         {loading ? (
           <div className="flex gap-3 -mx-5 px-5">
-            <div className="shrink-0 w-full h-44 rounded-3xl bg-muted animate-pulse" />
+            <div className="shrink-0 w-full h-[150px] rounded-3xl bg-muted animate-pulse" />
           </div>
         ) : heroSlides.length > 0 ? (
-          <div
-            ref={heroRef}
-            className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth"
-          >
-            {heroSlides.map((slide, idx) => (
-              <button
-                key={slide.id}
-                onClick={() => goSong(slide.id)}
-                className="snap-start group relative shrink-0 w-[88%] sm:w-[420px] h-44 rounded-3xl overflow-hidden border border-border md:hover:border-primary/50 transition-all text-left animate-fade-in"
-              >
-                <img
-                  src={slide.cover_url}
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover md:group-hover:scale-105 transition-all duration-700"
-                  loading="lazy"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-                <div className="absolute top-3 left-3">
-                  <span className="chip chip-vapor !text-[9px]">
-                    <Sparkles className="h-2.5 w-2.5" />{' '}
-                    {language === 'es' ? 'NUEVO' : language === 'en' ? 'NEW' : language === 'fr' ? 'NOUVEAU' : 'NOVO'}
-                  </span>
-                </div>
-                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="font-display font-bold text-lg text-white drop-shadow-lg leading-tight line-clamp-1">
-                      {slide.title}
-                    </h3>
-                    <p className="text-xs text-white/85 mt-0.5 line-clamp-1">{slide.artist}</p>
+          <>
+            <div
+              ref={heroRef}
+              className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 snap-x snap-mandatory scroll-smooth"
+            >
+              {heroSlides.map((slide) => (
+                <button
+                  key={slide.id}
+                  onClick={() => goSong(slide.id)}
+                  className="snap-start group relative shrink-0 w-[92%] sm:w-[440px] rounded-3xl overflow-hidden border border-border md:hover:border-[hsl(var(--accent-warm)/0.5)] transition-all text-left animate-fade-in"
+                >
+                  {/* Blurred cover backdrop */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-40"
+                    style={{ backgroundImage: `url(${slide.cover_url})`, filter: 'blur(18px) saturate(1.2)' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/60 to-background/85" />
+
+                  <div className="relative flex items-center gap-3 p-3">
+                    {/* Thumbnail */}
+                    <img
+                      src={slide.cover_url}
+                      alt={slide.title}
+                      className="shrink-0 w-[88px] h-[88px] rounded-2xl object-cover shadow-warm-glow border border-[hsl(var(--accent-warm)/0.4)]"
+                      loading="lazy"
+                    />
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Music2 className="h-3 w-3 warm-text" strokeWidth={2.4} />
+                        <p className="eyebrow eyebrow-warm !text-[9px] !tracking-[0.18em]">
+                          {language === 'es' ? 'Lanzamiento' : language === 'en' ? 'Release' : language === 'fr' ? 'Sortie' : 'Lançamento'}
+                        </p>
+                      </div>
+                      <p className="eyebrow eyebrow-warm !text-[10px] mb-1.5">
+                        {language === 'es' ? 'Destacado' : language === 'en' ? 'Featured' : language === 'fr' ? 'À la une' : 'Destaque'}
+                      </p>
+                      <h3 className="font-display font-bold text-[17px] leading-tight text-foreground line-clamp-1">
+                        {slide.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{slide.artist}</p>
+
+                      <div className="mt-2.5">
+                        <span className="inline-flex items-center gap-1.5 pl-3.5 pr-2.5 h-8 rounded-full warm-bg shadow-warm group-hover:shadow-warm-glow group-hover:scale-[1.03] transition-all">
+                          <span className="font-display font-bold text-[11px] text-white whitespace-nowrap">
+                            {language === 'es' ? 'Escuchar ahora' : language === 'en' ? 'Play now' : language === 'fr' ? 'Écouter' : 'Ouvir agora'}
+                          </span>
+                          <ArrowRight className="h-3.5 w-3.5 text-white" strokeWidth={2.6} />
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="shrink-0 inline-flex items-center gap-1.5 pl-4 pr-3 h-10 rounded-full warm-bg shadow-warm group-hover:shadow-warm-glow group-hover:scale-[1.03] transition-all">
-                    <span className="font-display font-bold text-xs text-white whitespace-nowrap">
-                      {language === 'es' ? 'Escuchar ahora' : language === 'en' ? 'Play now' : language === 'fr' ? 'Écouter' : 'Ouvir agora'}
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-white" strokeWidth={2.4} />
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
+                </button>
+              ))}
+            </div>
+            {heroSlides.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5">
+                {heroSlides.map((s, i) => (
+                  <span
+                    key={s.id}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === 0 ? 'w-6 warm-bg' : 'w-1.5 bg-muted'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         ) : null}
       </section>
+
+      {/* === DESTACADO — No te lo pierdas === */}
+      <section className="space-y-3">
+        <div>
+          <p className="eyebrow eyebrow-warm mb-1 inline-flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3" /> {language === 'es' ? 'Destacado' : language === 'en' ? 'Featured' : language === 'fr' ? 'À la une' : 'Destaque'}
+          </p>
+          <h2 className="font-display text-2xl font-bold tracking-tight">
+            {language === 'es' ? 'No te lo pierdas' : language === 'en' ? "Don't miss out" : language === 'fr' ? 'À ne pas manquer' : 'Não perca'}
+          </h2>
+        </div>
+      </section>
+
 
       {/* === MINI JUEGO: ADIVINA LA CANCIÓN === */}
       <button
