@@ -59,7 +59,7 @@ const ArtistWallet = () => {
     const [earningsRes, wRes] = await Promise.all([
       supabase
         .from('artist_earnings')
-        .select('id, song_id, artist_amount_xaf, status, validation_release_date, created_at')
+        .select('id, song_id, artist_amount_xaf, status, validation_release_date, created_at, is_held')
         .eq('artist_id', artistId)
         .order('created_at', { ascending: false })
         .limit(100),
