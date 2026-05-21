@@ -18,6 +18,7 @@ type Earning = {
   status: string;
   validation_release_date: string;
   created_at: string;
+  is_held?: boolean;
 };
 
 type Withdrawal = {
