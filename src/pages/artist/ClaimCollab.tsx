@@ -74,6 +74,12 @@ const ClaimCollab = () => {
   useEffect(() => { loadMine(); }, [user?.id]);
 
   useEffect(() => {
+    if (!ownershipArtistId) { setPoolAmount(null); return; }
+    (supabase as any).rpc('get_artist_pool_amount', { p_artist_id: ownershipArtistId })
+      .then(({ data }: any) => setPoolAmount(data?.[0]?.total_xaf ?? 0));
+  }, [ownershipArtistId]);
+
+  useEffect(() => {
     if (songSearch.length < 2) { setSongs([]); return; }
     const t = setTimeout(async () => {
       const { data } = await supabase
