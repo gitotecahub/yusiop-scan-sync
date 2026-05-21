@@ -93,7 +93,7 @@ const Verifications = () => {
 
   const resolveVerif = async (v: VerifReq, status: 'artist_verified' | 'rejected') => {
     const note = noteText.trim() || null;
-    const upd = { status: status === 'artist_verified' ? 'approved' : 'rejected', reviewed_at: new Date().toISOString(), admin_note: note, rejection_reason: status === 'rejected' ? note : null };
+    const upd = { status, reviewed_at: new Date().toISOString(), admin_note: note, rejection_reason: status === 'rejected' ? note : null };
     const { error } = await (supabase as any).from('artist_verification_requests').update(upd).eq('id', v.id);
     if (error) return toast.error(error.message);
     const { error: e2 } = await (supabase as any).from('artist_profiles').update({
@@ -177,7 +177,7 @@ const Verifications = () => {
 
         <TabsContent value="verifs" className="space-y-4">
           <div className="flex gap-2 flex-wrap">
-            {['under_review', 'approved', 'rejected', 'all'].map(f => (
+            {['under_review', 'artist_verified', 'rejected', 'all'].map(f => (
               <Button key={f} size="sm" variant={filter === f ? 'default' : 'outline'} onClick={() => setFilter(f)}>{f}</Button>
             ))}
           </div>
