@@ -352,6 +352,7 @@ export type Database = {
           fraud_score: number
           gross_amount_xaf: number
           id: string
+          is_held: boolean
           notes: string | null
           platform_amount_xaf: number
           qr_card_id: string | null
@@ -371,6 +372,7 @@ export type Database = {
           fraud_score?: number
           gross_amount_xaf?: number
           id?: string
+          is_held?: boolean
           notes?: string | null
           platform_amount_xaf?: number
           qr_card_id?: string | null
@@ -390,6 +392,7 @@ export type Database = {
           fraud_score?: number
           gross_amount_xaf?: number
           id?: string
+          is_held?: boolean
           notes?: string | null
           platform_amount_xaf?: number
           qr_card_id?: string | null
@@ -2920,6 +2923,10 @@ export type Database = {
         Returns: number
       }
       compute_age_group: { Args: { _birth_date: string }; Returns: string }
+      compute_claim_risk_score: {
+        Args: { p_claim_id: string }
+        Returns: number
+      }
       consume_card_credit: {
         Args: { p_card_id: string; p_song_id: string; p_user_id: string }
         Returns: {
@@ -3014,6 +3021,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_artist_held_amount: { Args: { p_artist_id: string }; Returns: number }
       get_artist_stats: { Args: { p_artist_id: string }; Returns: Json }
       get_artist_wallet_summary: {
         Args: { p_artist_id: string }
@@ -3219,6 +3227,10 @@ export type Database = {
         }[]
       }
       redeem_recharge_card: { Args: { p_code: string }; Returns: Json }
+      refresh_earnings_hold_for_song: {
+        Args: { p_song_id: string }
+        Returns: undefined
+      }
       register_subscription_attempt: {
         Args: { p_reason?: string; p_song_id?: string }
         Returns: undefined
