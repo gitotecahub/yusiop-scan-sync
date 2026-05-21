@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
+import { ArtistPoolMatch } from '@/components/artist/ArtistPoolMatch';
 
 const ArtistVerification = () => {
   const navigate = useNavigate();
