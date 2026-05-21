@@ -125,7 +125,8 @@ const SongCarousel = ({
                 )}
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="vapor-card p-6 text-center">
