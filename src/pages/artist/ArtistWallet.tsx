@@ -47,7 +47,7 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
 
 const ArtistWallet = () => {
   const navigate = useNavigate();
-  const { artistId, summary, settings, loading, reload, trulyAvailable } = useArtistWallet();
+  const { artistId, summary, settings, loading, reload, trulyAvailable, heldXaf } = useArtistWallet();
   const [earnings, setEarnings] = useState<Earning[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [songsMap, setSongsMap] = useState<Record<string, string>>({});
