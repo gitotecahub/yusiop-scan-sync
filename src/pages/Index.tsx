@@ -347,17 +347,61 @@ const Index = () => {
       {/* === BANNER SUSCRIPCIONES === */}
       <SubscriptionBanner />
 
-      {/* === MÁS POPULAR EN YUSIOP === */}
+      {/* === TOP GLOBAL — compacto, 3 destacados === */}
+      <section className="space-y-3">
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="eyebrow eyebrow-warm inline-flex items-center gap-1.5">
+              <Flame className="h-3 w-3" fill="currentColor" /> Top global
+            </p>
+          </div>
+          <Link to="/popular" className="text-xs warm-text hover:underline underline-offset-4 font-semibold inline-flex items-center gap-1">
+            {language === 'es' ? 'Ver más' : language === 'en' ? 'See more' : language === 'fr' ? 'Voir plus' : 'Ver mais'} <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="h-[92px] rounded-3xl bg-muted animate-pulse" />
+        ) : trendingSongs.length > 0 ? (
+          <div className="rounded-3xl border border-border bg-card/50 backdrop-blur p-3 grid grid-cols-3 gap-2 warm-card-active">
+            {trendingSongs.slice(0, 3).map((song, idx) => {
+              const rankColor = idx === 0 ? 'warm-text' : idx === 1 ? 'text-vapor-indigo' : 'text-vapor-cyan';
+              return (
+                <button
+                  key={song.id}
+                  onClick={() => goSong(song.id)}
+                  className="group flex items-center gap-2 p-1 rounded-xl hover:bg-muted/40 transition-colors text-left min-w-0"
+                >
+                  <span className={`font-display font-bold text-lg leading-none ${rankColor} shrink-0 w-4 text-center`}>
+                    {idx + 1}
+                  </span>
+                  <img
+                    src={song.cover_url}
+                    alt={song.title}
+                    className="w-11 h-11 rounded-full object-cover shrink-0 border border-border"
+                    loading="lazy"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-display font-bold text-[11px] leading-tight line-clamp-1">{song.title}</h4>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1">{song.artist}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+
+      {/* === MÁS POPULAR EN YUSIOP (carrusel completo) === */}
       <PopularSection />
 
-      {/* === TRENDING — basado en descargas globales === */}
+      {/* === TRENDING === */}
       <SongCarousel
         title={t('home.section.trending')}
         eyebrow={
-          language === 'es' ? '📈 Lo más sonado' :
-          language === 'en' ? '📈 Most played' :
-          language === 'fr' ? '📈 Les plus écoutés' :
-          '📈 Mais tocadas'
+          <span className="eyebrow eyebrow-warm inline-flex items-center gap-1.5">
+            <Flame className="h-3 w-3" fill="currentColor" /> {language === 'es' ? 'Lo más sonado' : language === 'en' ? 'Most played' : language === 'fr' ? 'Les plus écoutés' : 'Mais tocadas'}
+          </span>
         }
         seeAllHref="/catalog"
         seeAllLabel={language === 'es' ? 'Ver todo' : language === 'en' ? 'See all' : language === 'fr' ? 'Voir tout' : 'Ver tudo'}
@@ -373,22 +417,6 @@ const Index = () => {
         showRank
       />
 
-      {/* === NUEVOS LANZAMIENTOS === */}
-      <SongCarousel
-        title={t('home.section.recent')}
-        eyebrow={
-          language === 'es' ? '🆕 Nuevos lanzamientos' :
-          language === 'en' ? '🆕 New releases' :
-          language === 'fr' ? '🆕 Nouveautés' :
-          '🆕 Novos lançamentos'
-        }
-        seeAllHref="/catalog"
-        seeAllLabel={language === 'es' ? 'Ver todo' : language === 'en' ? 'See all' : language === 'fr' ? 'Voir tout' : 'Ver tudo'}
-        songs={recentSongs}
-        loading={loading}
-        onSongClick={goSong}
-        emptyText={language === 'es' ? 'Pronto habrá lanzamientos' : 'Coming soon'}
-      />
 
       {/* === TARJETAS DESTACADAS — carrusel === */}
       <section className="space-y-3">
