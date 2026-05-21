@@ -13,11 +13,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
 import { useArtistProfile } from '@/hooks/useArtistProfile';
 
-type Participation = 'singer' | 'composer' | 'producer' | 'beatmaker' | 'featuring' | 'label' | 'other';
+type Participation = 'singer' | 'composer' | 'producer' | 'beatmaker' | 'featuring' | 'label' | 'artist_ownership' | 'other';
 
 const TYPE_LABEL: Record<Participation, string> = {
   singer: 'Cantante', composer: 'Compositor', producer: 'Productor',
-  beatmaker: 'Beatmaker', featuring: 'Featuring', label: 'Sello', other: 'Otro',
+  beatmaker: 'Beatmaker', featuring: 'Featuring', label: 'Sello',
+  artist_ownership: 'Soy el artista', other: 'Otro',
 };
 
 const STATUS_BADGE: Record<string, { label: string; icon: any; variant: any }> = {
