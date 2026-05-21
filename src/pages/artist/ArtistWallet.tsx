@@ -18,6 +18,7 @@ type Earning = {
   status: string;
   validation_release_date: string;
   created_at: string;
+  is_held?: boolean;
 };
 
 type Withdrawal = {
@@ -47,7 +48,7 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
 
 const ArtistWallet = () => {
   const navigate = useNavigate();
-  const { artistId, summary, settings, loading, reload, trulyAvailable } = useArtistWallet();
+  const { artistId, summary, settings, loading, reload, trulyAvailable, heldXaf } = useArtistWallet();
   const [earnings, setEarnings] = useState<Earning[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [songsMap, setSongsMap] = useState<Record<string, string>>({});
@@ -58,7 +59,7 @@ const ArtistWallet = () => {
     const [earningsRes, wRes] = await Promise.all([
       supabase
         .from('artist_earnings')
-        .select('id, song_id, artist_amount_xaf, status, validation_release_date, created_at')
+        .select('id, song_id, artist_amount_xaf, status, validation_release_date, created_at, is_held')
         .eq('artist_id', artistId)
         .order('created_at', { ascending: false })
         .limit(100),
@@ -177,6 +178,16 @@ const ArtistWallet = () => {
         </Alert>
       )}
 
+      {heldXaf > 0 && (
+        <Alert variant="destructive" className="mb-4 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertOctagon className="h-4 w-4" />
+          <AlertDescription>
+            Tienes <strong>{formatXAFFixed(heldXaf)}</strong> retenidos por reclamaciones de colaboración abiertas sobre tus canciones.
+            Estas ganancias no se pueden retirar hasta que se resuelvan.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card>
           <CardContent className="p-4">
@@ -255,6 +266,9 @@ const ArtistWallet = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
+                      {e.is_held && (
+                        <Badge variant="outline" className="bg-amber-500/15 text-amber-600 border-amber-500/30">Retenido</Badge>
+                      )}
                       <Badge variant="outline" className={b?.cls}>{b?.label ?? e.status}</Badge>
                       <span className="font-semibold">{formatXAFFixed(e.artist_amount_xaf)}</span>
                     </div>

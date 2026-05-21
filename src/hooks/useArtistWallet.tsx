@@ -40,6 +40,7 @@ export const useArtistWallet = () => {
   const [artistId, setArtistId] = useState<string | null>(null);
   const [summary, setSummary] = useState<WalletSummary>(EMPTY_SUMMARY);
   const [settings, setSettings] = useState<FinancialSettings | null>(null);
+  const [heldXaf, setHeldXaf] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -74,9 +75,10 @@ export const useArtistWallet = () => {
 
       setArtistId(artist.id);
 
-      const [summaryRes, settingsRes] = await Promise.all([
+      const [summaryRes, settingsRes, heldRes] = await Promise.all([
         supabase.rpc('get_artist_wallet_summary', { p_artist_id: artist.id }),
         supabase.rpc('get_public_financial_settings'),
+        supabase.rpc('get_artist_held_amount', { p_artist_id: artist.id }),
       ]);
 
       if (summaryRes.error) {
@@ -100,6 +102,7 @@ export const useArtistWallet = () => {
       if (rawSettings && typeof rawSettings === 'object') {
         setSettings(rawSettings as FinancialSettings);
       }
+      setHeldXaf(Number(heldRes.data ?? 0));
     } finally {
       setLoading(false);
     }
@@ -109,7 +112,8 @@ export const useArtistWallet = () => {
     load();
   }, [load]);
 
-  const trulyAvailable = Math.max(0, summary.available_xaf - summary.reserved_xaf);
+  const trulyAvailable = Math.max(0, summary.available_xaf - summary.reserved_xaf - heldXaf);
 
-  return { artistId, summary, settings, loading, reload: load, trulyAvailable };
+  return { artistId, summary, settings, loading, reload: load, trulyAvailable, heldXaf };
 };
+
