@@ -177,6 +177,16 @@ const ArtistWallet = () => {
         </Alert>
       )}
 
+      {heldXaf > 0 && (
+        <Alert variant="destructive" className="mb-4 border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertOctagon className="h-4 w-4" />
+          <AlertDescription>
+            Tienes <strong>{formatXAFFixed(heldXaf)}</strong> retenidos por reclamaciones de colaboración abiertas sobre tus canciones.
+            Estas ganancias no se pueden retirar hasta que se resuelvan.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Card>
           <CardContent className="p-4">
