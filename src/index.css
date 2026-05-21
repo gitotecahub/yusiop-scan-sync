@@ -139,6 +139,29 @@
   .vapor-bg { background: var(--gradient-vapor); }
   .sunset-bg { background: var(--gradient-sunset); }
   .aurora-bg { background: var(--gradient-aurora); }
+  .warm-bg { background: var(--gradient-warm); }
+  .warm-solid { background: hsl(var(--accent-warm)); }
+  .warm-text { color: hsl(var(--accent-warm)); }
+  .warm-border { border-color: hsl(var(--accent-warm) / 0.6); }
+  .shadow-warm { box-shadow: var(--shadow-warm); }
+  .shadow-warm-glow { box-shadow: var(--shadow-warm-glow); }
+  .warm-card-active {
+    position: relative;
+  }
+  .warm-card-active::after {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--gradient-warm);
+    box-shadow: 0 0 14px hsl(var(--accent-warm) / 0.7);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .aurora-bg { background: var(--gradient-aurora); }
 
   .gold-text { /* legacy alias */
     background: var(--gradient-vapor);
