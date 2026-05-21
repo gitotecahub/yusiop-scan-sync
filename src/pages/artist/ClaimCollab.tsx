@@ -41,19 +41,25 @@ interface Claim {
 
 const ClaimCollab = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { user } = useAuthStore();
   const { profile } = useArtistProfile();
+
+  const ownershipArtistId = params.get('artistId');
+  const ownershipArtistName = params.get('name');
+  const isOwnershipMode = !!ownershipArtistId;
 
   const [songSearch, setSongSearch] = useState('');
   const [songs, setSongs] = useState<{ id: string; title: string; artist_id: string }[]>([]);
   const [selectedSong, setSelectedSong] = useState<{ id: string; title: string } | null>(null);
-  const [type, setType] = useState<Participation>('featuring');
+  const [type, setType] = useState<Participation>(isOwnershipMode ? 'artist_ownership' : 'featuring');
   const [percent, setPercent] = useState<string>('');
   const [links, setLinks] = useState<string[]>(['']);
   const [comment, setComment] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [mine, setMine] = useState<Claim[]>([]);
+  const [poolAmount, setPoolAmount] = useState<number | null>(null);
 
   const loadMine = async () => {
     if (!user) return;
