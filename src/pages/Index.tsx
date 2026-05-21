@@ -179,7 +179,14 @@ const Index = () => {
     return () => clearInterval(id);
   }, [heroSlides.length]);
 
-  const goSong = (id: string) => navigate('/catalog', { state: { highlightSongId: id } });
+  const goSong = (id: string) => {
+    if (id.startsWith('album:')) {
+      const albumId = id.slice('album:'.length);
+      navigate('/catalog', { state: { highlightAlbumId: albumId } });
+    } else {
+      navigate('/catalog', { state: { highlightSongId: id } });
+    }
+  };
 
   return (
     <div className="space-y-8 pb-4">
