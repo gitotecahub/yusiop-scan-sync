@@ -11,6 +11,7 @@ import SubmitAlbumDialog from '@/components/artist/SubmitAlbumDialog';
 import UploadTypeDialog from '@/components/artist/UploadTypeDialog';
 import DesktopUploadNotice from '@/components/artist/DesktopUploadNotice';
 import { useLanguageStore } from '@/stores/languageStore';
+import ArtistVerificationCard from '@/components/artist/ArtistVerificationCard';
 
 
 const ArtistDashboard = () => {
@@ -116,6 +117,7 @@ const ArtistDashboard = () => {
       </div>
 
       <DesktopUploadNotice />
+      <ArtistVerificationCard />
 
       <div className="blob-card p-6 mb-6">
         <p className="eyebrow mb-1">{t('artist.welcomeEyebrow')}</p>

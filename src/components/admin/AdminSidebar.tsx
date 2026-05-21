@@ -54,6 +54,7 @@ const menuItems: MenuItem[] = [
   { title: 'Canciones', url: '/admin/songs', icon: Music, area: 'catalog' },
   { title: 'Envíos canciones', url: '/admin/song-submissions', icon: Upload, area: 'catalog' },
   { title: 'Reclamaciones colab.', url: '/admin/collab-claims', icon: Users2, area: 'catalog' },
+  { title: 'Verificación artistas', url: '/admin/verifications', icon: ShieldCheck, area: 'artist_requests' },
   { title: 'Álbumes', url: '/admin/albums', icon: Album, area: 'catalog' },
   { title: 'Códigos QR', url: '/admin/qr-cards', icon: QrCode, area: 'qr_cards' },
   { title: 'Tarjetas recargables', url: '/admin/recharge-cards', icon: Wallet, area: 'qr_cards' },
