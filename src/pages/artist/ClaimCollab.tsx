@@ -167,15 +167,22 @@ const ClaimCollab = () => {
 
       <div className="blob-card p-6 mb-6">
         <p className="eyebrow mb-1">Colaboraciones</p>
-        <h1 className="display-xl text-3xl">Reclamar colaboración</h1>
+        <h1 className="display-xl text-3xl">
+          {isOwnershipMode ? 'Reclamar artista completo' : 'Reclamar colaboración'}
+        </h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Reclama tu participación en una canción. Tu ID:{' '}
-          <span className="font-mono font-semibold">{profile?.artist_code ?? '—'}</span>
+          {isOwnershipMode ? (
+            <>Vas a reclamar la propiedad de <strong>{ownershipArtistName}</strong>. Si se aprueba, todas sus ganancias acumuladas{poolAmount != null && poolAmount > 0 ? ` (${new Intl.NumberFormat('fr-FR').format(poolAmount)} XAF)` : ''} se liberarán a tu cuenta. Requiere documento de identidad y links oficiales.</>
+          ) : (
+            <>Reclama tu participación en una canción. Tu ID:{' '}
+            <span className="font-mono font-semibold">{profile?.artist_code ?? '—'}</span></>
+          )}
         </p>
       </div>
 
       <Card className="mb-6">
         <CardContent className="p-6 space-y-4">
+          {!isOwnershipMode && (
           <div>
             <Label>Buscar canción *</Label>
             <Input value={songSearch} onChange={e => { setSongSearch(e.target.value); setSelectedSong(null); }} placeholder="Título de la canción" />
@@ -192,6 +199,8 @@ const ClaimCollab = () => {
             )}
             {selectedSong && <p className="text-xs text-primary mt-1">Seleccionada: {selectedSong.title}</p>}
           </div>
+          )}
+
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
