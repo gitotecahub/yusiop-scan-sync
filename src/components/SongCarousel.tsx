@@ -15,7 +15,7 @@ export interface CarouselSong {
 
 interface Props {
   title: string;
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   subtitle?: string;
   seeAllHref?: string;
   seeAllLabel?: string;
