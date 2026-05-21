@@ -123,7 +123,23 @@ const Verifications = () => {
     }).eq('id', c.id);
     if (error) return toast.error(error.message);
 
-    // Email al claimant (fire & forget)
+    // Si se aprueba una reclamación de artista completo: linkear perfil + liberar pool
+    if (newStatus === 'approved' && c.participation_type === 'artist_ownership' && c.target_artist_id) {
+      const { data: ap } = await (supabase as any)
+        .from('artist_profiles').select('id').eq('user_id', c.claimant_user_id).maybeSingle();
+      if (ap?.id) {
+        const { error: linkErr } = await (supabase as any).rpc('link_verified_artist_profile', {
+          p_profile_id: ap.id, p_artist_id: c.target_artist_id,
+        });
+        if (linkErr) toast.error('Link fallido: ' + linkErr.message);
+        else {
+          const { error: relErr } = await (supabase as any).rpc('release_artist_pool_hold', { p_artist_id: c.target_artist_id });
+          if (relErr) toast.error('Liberación fallida: ' + relErr.message);
+          else toast.success('Perfil vinculado y pool liberado');
+        }
+      }
+    }
+
     supabase.functions.invoke('send-claim-status-email', { body: { claimId: c.id } })
       .catch((e) => console.error('[claim email]', e));
 
