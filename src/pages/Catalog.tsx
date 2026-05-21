@@ -270,6 +270,33 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [location.state, filteredSongs]);
 
+// Open album dialog when navigated with highlightAlbumId
+useEffect(() => {
+  const albumId = (location.state as any)?.highlightAlbumId as string | undefined;
+  if (!albumId || songs.length === 0) return;
+  const map = new Map<string, AlbumGroup>();
+  songs.forEach((s) => {
+    if (!s.album_id || !s.album) return;
+    const existing = map.get(s.album_id);
+    if (existing) {
+      existing.songs.push(s);
+    } else {
+      map.set(s.album_id, {
+        id: s.album_id,
+        title: s.album!,
+        cover_url: s.album_cover || s.cover_url || '',
+        artist: s.artist,
+        songs: [s],
+      });
+    }
+  });
+  const album = map.get(albumId);
+  if (album) {
+    setSelectedAlbum(album);
+    navigate('.', { replace: true, state: {} });
+  }
+}, [location.state, songs, navigate]);
+
   // Also refresh when the component mounts or when credits store changes
   useEffect(() => {
     if (!userCredits) {
