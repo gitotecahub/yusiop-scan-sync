@@ -226,7 +226,7 @@ const PlaybackControls = () => {
               <Button
                 size="sm"
                 onClick={togglePlayPause}
-                className="h-11 w-11 rounded-full warm-bg text-white hover:opacity-90 border-0 shadow-warm-glow shrink-0"
+                className="h-11 w-11 rounded-full vapor-bg text-white hover:opacity-90 border-0 shadow-glow shrink-0"
               >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
               </Button>
@@ -414,7 +414,7 @@ const PlaybackControls = () => {
             <Button
               size="icon"
               onClick={togglePlayPause}
-              className="h-14 w-14 rounded-full warm-bg text-white hover:opacity-90 border-0 shadow-warm-glow"
+              className="h-14 w-14 rounded-full vapor-bg text-white hover:opacity-90 border-0 shadow-glow"
               aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
             >
               {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5 fill-current" />}

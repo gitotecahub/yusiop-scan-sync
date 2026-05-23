@@ -55,12 +55,12 @@
     --gradient-vapor: linear-gradient(135deg, hsl(250 95% 75%) 0%, hsl(232 90% 75%) 35%, hsl(188 85% 67%) 70%, hsl(188 95% 82%) 100%);
     --gradient-sunset: linear-gradient(135deg, hsl(320 85% 78%) 0%, hsl(280 85% 75%) 50%, hsl(250 95% 75%) 100%);
     --gradient-aurora: linear-gradient(135deg, hsl(160 80% 70%) 0%, hsl(188 85% 67%) 50%, hsl(232 90% 75%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(var(--accent-warm-soft)) 0%, hsl(var(--accent-warm)) 55%, hsl(var(--accent-warm-deep)) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(var(--accent-warm-soft)) 0%, hsl(var(--primary)) 55%, hsl(var(--accent-warm-deep)) 100%);
 
     --shadow-vapor: 0 20px 60px -20px hsl(250 95% 70% / 0.4);
     --shadow-glow: 0 0 40px hsl(250 95% 70% / 0.3);
-    --shadow-warm: 0 12px 28px -10px hsl(var(--accent-warm) / 0.55);
-    --shadow-warm-glow: 0 0 22px hsl(var(--accent-warm) / 0.45);
+    --shadow-vapor: 0 12px 28px -10px hsl(var(--primary) / 0.55);
+    --shadow-glow: 0 0 22px hsl(var(--primary) / 0.45);
   }
 
   .dark {
@@ -96,12 +96,12 @@
     --gradient-vapor: linear-gradient(135deg, hsl(250 95% 75%) 0%, hsl(232 90% 75%) 35%, hsl(188 85% 67%) 70%, hsl(188 95% 82%) 100%);
     --gradient-sunset: linear-gradient(135deg, hsl(320 85% 78%) 0%, hsl(280 85% 75%) 50%, hsl(250 95% 75%) 100%);
     --gradient-aurora: linear-gradient(135deg, hsl(160 80% 70%) 0%, hsl(188 85% 67%) 50%, hsl(232 90% 75%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(var(--accent-warm-soft)) 0%, hsl(var(--accent-warm)) 55%, hsl(var(--accent-warm-deep)) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(var(--accent-warm-soft)) 0%, hsl(var(--primary)) 55%, hsl(var(--accent-warm-deep)) 100%);
 
     --shadow-vapor: 0 20px 60px -20px hsl(250 95% 75% / 0.5);
     --shadow-glow: 0 0 50px hsl(250 95% 75% / 0.35);
-    --shadow-warm: 0 14px 30px -10px hsl(var(--accent-warm) / 0.6);
-    --shadow-warm-glow: 0 0 26px hsl(var(--accent-warm) / 0.5);
+    --shadow-vapor: 0 14px 30px -10px hsl(var(--primary) / 0.6);
+    --shadow-glow: 0 0 26px hsl(var(--primary) / 0.5);
   }
 }
 
@@ -139,16 +139,16 @@
   .vapor-bg { background: var(--gradient-vapor); }
   .sunset-bg { background: var(--gradient-sunset); }
   .aurora-bg { background: var(--gradient-aurora); }
-  .warm-bg { background: var(--gradient-warm); }
-  .warm-solid { background: hsl(var(--accent-warm)); }
-  .warm-text { color: hsl(var(--accent-warm)); }
-  .warm-border { border-color: hsl(var(--accent-warm) / 0.6); }
-  .shadow-warm { box-shadow: var(--shadow-warm); }
-  .shadow-warm-glow { box-shadow: var(--shadow-warm-glow); }
-  .warm-card-active {
+  .vapor-bg { background: var(--gradient-warm); }
+  .warm-solid { background: hsl(var(--primary)); }
+  .vapor-text { color: hsl(var(--primary)); }
+  .warm-border { border-color: hsl(var(--primary) / 0.6); }
+  .shadow-vapor { box-shadow: var(--shadow-vapor); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .border-primary/40 {
     position: relative;
   }
-  .warm-card-active::after {
+  .border-primary/40::after {
     content: '';
     position: absolute;
     left: 12%;
@@ -157,18 +157,18 @@
     height: 2px;
     border-radius: 2px;
     background: var(--gradient-warm);
-    box-shadow: 0 0 14px hsl(var(--accent-warm) / 0.7);
+    box-shadow: 0 0 14px hsl(var(--primary) / 0.7);
     opacity: 0.9;
     pointer-events: none;
   }
-  .chip-warm {
+  .chip-vapor {
     background: var(--gradient-warm);
     border-color: transparent;
     color: #fff;
   }
   .eyebrow-warm {
-    color: hsl(var(--accent-warm));
-    text-shadow: 0 0 12px hsl(var(--accent-warm) / 0.35);
+    color: hsl(var(--primary));
+    text-shadow: 0 0 12px hsl(var(--primary) / 0.35);
   }
 
 

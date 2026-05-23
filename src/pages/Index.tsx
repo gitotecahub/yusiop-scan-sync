@@ -135,7 +135,7 @@ const Index = () => {
           const isNew = Date.now() - new Date(item.created_at).getTime() < 1000 * 60 * 60 * 24 * 30;
           if (!isNew) return undefined;
           return (
-            <span className="chip chip-warm !text-[8px] !px-1.5 !py-0.5">
+            <span className="chip chip-vapor !text-[8px] !px-1.5 !py-0.5">
               <Sparkles className="h-2 w-2" />{' '}
               {language === 'es' ? 'NUEVO' : language === 'en' ? 'NEW' : language === 'fr' ? 'NOUVEAU' : 'NOVO'}
             </span>
@@ -216,9 +216,9 @@ const Index = () => {
             </Link>
             <Link
               to="/catalog"
-              className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-[hsl(var(--accent-warm)/0.55)] bg-card/40 backdrop-blur-md hover:border-[hsl(var(--accent-warm)/0.85)] hover:bg-card/70 hover:shadow-warm-glow transition-all hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-3xl px-4 py-4 flex items-center gap-2.5 border border-[hsl(var(--primary)/0.55)] bg-card/40 backdrop-blur-md hover:border-[hsl(var(--primary)/0.85)] hover:bg-card/70 hover:shadow-glow transition-all hover:-translate-y-0.5"
             >
-              <Music className="h-5 w-5 warm-text" strokeWidth={2.2} />
+              <Music className="h-5 w-5 vapor-text" strokeWidth={2.2} />
               <span className="font-display font-bold text-sm text-foreground">
                 {t('home.hero.explore')}
               </span>
@@ -246,7 +246,7 @@ const Index = () => {
                 <button
                   key={slide.id}
                   onClick={() => goSong(slide.id)}
-                  className="snap-start group relative shrink-0 w-[92%] sm:w-[440px] rounded-3xl overflow-hidden border border-border md:hover:border-[hsl(var(--accent-warm)/0.5)] transition-all text-left animate-fade-in"
+                  className="snap-start group relative shrink-0 w-[92%] sm:w-[440px] rounded-3xl overflow-hidden border border-border md:hover:border-[hsl(var(--primary)/0.5)] transition-all text-left animate-fade-in"
                 >
                   {/* Blurred cover backdrop */}
                   <div
@@ -260,14 +260,14 @@ const Index = () => {
                     <img
                       src={slide.cover_url}
                       alt={slide.title}
-                      className="shrink-0 w-[88px] h-[88px] rounded-2xl object-cover shadow-warm-glow border border-[hsl(var(--accent-warm)/0.4)]"
+                      className="shrink-0 w-[88px] h-[88px] rounded-2xl object-cover shadow-glow border border-[hsl(var(--primary)/0.4)]"
                       loading="lazy"
                     />
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <Music2 className="h-3 w-3 warm-text" strokeWidth={2.4} />
+                        <Music2 className="h-3 w-3 vapor-text" strokeWidth={2.4} />
                         <p className="eyebrow eyebrow-warm !text-[9px] !tracking-[0.18em]">
                           {language === 'es' ? 'Lanzamiento' : language === 'en' ? 'Release' : language === 'fr' ? 'Sortie' : 'Lançamento'}
                         </p>
@@ -281,7 +281,7 @@ const Index = () => {
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{slide.artist}</p>
 
                       <div className="mt-2.5">
-                        <span className="inline-flex items-center gap-1.5 pl-3.5 pr-2.5 h-8 rounded-full warm-bg shadow-warm group-hover:shadow-warm-glow group-hover:scale-[1.03] transition-all">
+                        <span className="inline-flex items-center gap-1.5 pl-3.5 pr-2.5 h-8 rounded-full vapor-bg shadow-vapor group-hover:shadow-glow group-hover:scale-[1.03] transition-all">
                           <span className="font-display font-bold text-[11px] text-white whitespace-nowrap">
                             {language === 'es' ? 'Escuchar ahora' : language === 'en' ? 'Play now' : language === 'fr' ? 'Écouter' : 'Ouvir agora'}
                           </span>
@@ -299,7 +299,7 @@ const Index = () => {
                   <span
                     key={s.id}
                     className={`h-1.5 rounded-full transition-all ${
-                      i === 0 ? 'w-6 warm-bg' : 'w-1.5 bg-muted'
+                      i === 0 ? 'w-6 vapor-bg' : 'w-1.5 bg-muted'
                     }`}
                   />
                 ))}
@@ -333,15 +333,15 @@ const Index = () => {
         onClick={() => navigate('/games/guess-song')}
         className="w-full p-4 rounded-2xl glass-strong flex items-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-transform text-left relative overflow-hidden group"
       >
-        <div className="absolute inset-0 warm-bg opacity-[0.08] group-hover:opacity-[0.14] transition-opacity" />
-        <div className="relative w-12 h-12 rounded-xl warm-bg flex items-center justify-center shadow-warm-glow">
+        <div className="absolute inset-0 vapor-bg opacity-[0.08] group-hover:opacity-[0.14] transition-opacity" />
+        <div className="relative w-12 h-12 rounded-xl vapor-bg flex items-center justify-center shadow-glow">
           <Sparkles className="h-6 w-6 text-white" />
         </div>
         <div className="relative flex-1 min-w-0">
           <div className="font-bold">Adivina la canción</div>
           <div className="text-xs text-muted-foreground">Mini juego diario · 5 preguntas</div>
         </div>
-        <ArrowRight className="relative h-5 w-5 warm-text" />
+        <ArrowRight className="relative h-5 w-5 vapor-text" />
       </button>
 
       {/* === BANNER SUSCRIPCIONES === */}
@@ -355,7 +355,7 @@ const Index = () => {
               <Flame className="h-3 w-3" fill="currentColor" /> Top global
             </p>
           </div>
-          <Link to="/popular" className="text-xs warm-text hover:underline underline-offset-4 font-semibold inline-flex items-center gap-1">
+          <Link to="/popular" className="text-xs vapor-text hover:underline underline-offset-4 font-semibold inline-flex items-center gap-1">
             {language === 'es' ? 'Ver más' : language === 'en' ? 'See more' : language === 'fr' ? 'Voir plus' : 'Ver mais'} <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
@@ -363,9 +363,9 @@ const Index = () => {
         {loading ? (
           <div className="h-[92px] rounded-3xl bg-muted animate-pulse" />
         ) : trendingSongs.length > 0 ? (
-          <div className="rounded-3xl border border-border bg-card/50 backdrop-blur p-3 grid grid-cols-3 gap-2 warm-card-active">
+          <div className="rounded-3xl border border-border bg-card/50 backdrop-blur p-3 grid grid-cols-3 gap-2 border-primary/40">
             {trendingSongs.slice(0, 3).map((song, idx) => {
-              const rankColor = idx === 0 ? 'warm-text' : idx === 1 ? 'text-vapor-indigo' : 'text-vapor-cyan';
+              const rankColor = idx === 0 ? 'vapor-text' : idx === 1 ? 'text-vapor-indigo' : 'text-vapor-cyan';
               return (
                 <button
                   key={song.id}

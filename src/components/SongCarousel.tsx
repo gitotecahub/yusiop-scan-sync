@@ -88,7 +88,7 @@ const SongCarousel = ({
               onClick={() => onSongClick(song.id)}
               className={`snap-start group relative shrink-0 w-[140px] rounded-2xl overflow-hidden border md:hover:-translate-y-1 transition-all text-left animate-fade-in ${
                 isTop
-                  ? 'border-[hsl(var(--accent-warm)/0.45)] md:hover:border-[hsl(var(--accent-warm)/0.8)] md:hover:shadow-warm warm-card-active'
+                  ? 'border-[hsl(var(--primary)/0.45)] md:hover:border-[hsl(var(--primary)/0.8)] md:hover:shadow-vapor border-primary/40'
                   : 'border-border md:hover:border-primary/50 md:hover:shadow-vapor'
               }`}
             >
@@ -101,14 +101,14 @@ const SongCarousel = ({
                   draggable={false}
                 />
                 {showFire && (
-                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-warm-glow">
-                    <Flame className="h-3 w-3 warm-text" fill="currentColor" />
+                  <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center shadow-glow">
+                    <Flame className="h-3 w-3 vapor-text" fill="currentColor" />
                   </div>
                 )}
                 {song.badge && (
                   <span className="absolute top-1.5 left-1.5">{song.badge}</span>
                 )}
-                <div className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full warm-bg items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity shadow-warm-glow flex">
+                <div className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full vapor-bg items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity shadow-glow flex">
                   <Play className="h-3.5 w-3.5 text-white ml-0.5" />
                 </div>
               </div>
