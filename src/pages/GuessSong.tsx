@@ -241,7 +241,7 @@ const GuessSong = () => {
             onClick={startGame}
             disabled={starting}
             size="lg"
-            className="w-full warm-bg text-white font-bold relative"
+            className="w-full vapor-bg text-white font-bold relative"
           >
             {starting ? 'Preparando...' : '¡Empezar a jugar!'}
           </Button>
@@ -371,7 +371,7 @@ const GuessSong = () => {
               Ver artista
             </Button>
           </div>
-          <Button onClick={nextQuestion} className="w-full warm-bg text-white font-bold">
+          <Button onClick={nextQuestion} className="w-full vapor-bg text-white font-bold">
             {current + 1 >= TOTAL_QUESTIONS ? 'Ver resultado' : 'Siguiente'}
           </Button>
         </Card>

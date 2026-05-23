@@ -481,7 +481,7 @@ useEffect(() => {
             onClick={() => handleDownload(song)}
             disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
             className={`h-9 w-9 rounded-full border-0 ${
-              isDownloaded ? 'bg-muted text-primary' : 'warm-bg text-white hover:opacity-90 shadow-warm-glow'
+              isDownloaded ? 'bg-muted text-primary' : 'vapor-bg text-white hover:opacity-90 shadow-glow'
             }`}
           >
             {isDownloaded ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
@@ -547,7 +547,7 @@ useEffect(() => {
           </div>
           <Button
             onClick={() => navigate('/store')}
-            className="rounded-full warm-bg text-white hover:opacity-90 shadow-warm-glow shrink-0"
+            className="rounded-full vapor-bg text-white hover:opacity-90 shadow-glow shrink-0"
           >
             {t('catalog.buyCard')}
           </Button>
