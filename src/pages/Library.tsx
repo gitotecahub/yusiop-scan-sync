@@ -883,28 +883,34 @@ const Library = () => {
         </div>
       )}
       <Tabs defaultValue={initialTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
+        <TabsList className="grid w-full grid-cols-5 bg-card/40 border border-border rounded-full p-1 h-auto gap-1">
           <TabsTrigger
             value="all"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-[10px] font-bold tracking-wide"
           >
             {t('library.tab.all')}
           </TabsTrigger>
           <TabsTrigger
             value="recent"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-[10px] font-bold tracking-wide"
           >
             {t('library.tab.recent')}
           </TabsTrigger>
           <TabsTrigger
             value="favorites"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-[10px] font-bold tracking-wide"
           >
             {t('library.tab.favorites')}
           </TabsTrigger>
           <TabsTrigger
+            value="playlists"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-[10px] font-bold tracking-wide"
+          >
+            Playlists
+          </TabsTrigger>
+          <TabsTrigger
             value="cards"
-            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-xs font-bold tracking-wide"
+            className="rounded-full data-[state=active]:vapor-bg data-[state=active]:text-white data-[state=active]:shadow-glow py-2 text-[10px] font-bold tracking-wide"
           >
             {t('library.tab.cards')}
           </TabsTrigger>
