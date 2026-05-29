@@ -21,6 +21,8 @@ import Redeem from '@/pages/Redeem';
 import Wallet from '@/pages/Wallet';
 import Unsubscribe from '@/pages/Unsubscribe';
 import ParentalConsent from '@/pages/ParentalConsent';
+import PlaylistDetail from '@/pages/PlaylistDetail';
+import SharedPlaylist from '@/pages/SharedPlaylist';
 import NotFound from "./pages/NotFound";
 import ProfileSelection from '@/pages/ProfileSelection';
 import ArtistRequest from '@/pages/ArtistRequest';
