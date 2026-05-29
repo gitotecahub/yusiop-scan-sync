@@ -117,5 +117,35 @@ export function useRecommendations(userId: string | null, countryCode?: string |
     return () => { cancelled = true; };
   }, [userId, countryCode]);
 
-  return { carousels, loading };
+  // Telemetría: marca como "shown" las canciones recomendadas (una vez por carga)
+  const shownRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!userId || carousels.length === 0) return;
+    const rows: { user_id: string; song_id: string; source: string; score: number | null }[] = [];
+    carousels.forEach((c) => {
+      c.songs.forEach((s, idx) => {
+        const key = `${c.key}:${s.id}`;
+        if (shownRef.current.has(key)) return;
+        shownRef.current.add(key);
+        rows.push({ user_id: userId, song_id: s.id, source: c.key, score: 1 - idx / 20 });
+      });
+    });
+    if (rows.length) {
+      void supabase.from('recommendation_events').insert(rows);
+    }
+  }, [userId, carousels]);
+
+  // Marca el click sobre una recomendación
+  const trackClick = useCallback((songId: string, source: string) => {
+    if (!userId) return;
+    void supabase
+      .from('recommendation_events')
+      .update({ clicked_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .eq('song_id', songId)
+      .eq('source', source)
+      .is('clicked_at', null);
+  }, [userId]);
+
+  return { carousels, loading, trackClick };
 }
