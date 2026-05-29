@@ -35,7 +35,7 @@ const Index = () => {
   const { t, language } = useLanguageStore();
   const user = useAuthStore((s) => s.user);
   const countryCode = useLocaleStore((s) => s.countryCode);
-  const { carousels: recCarousels } = useRecommendations(user?.id ?? null, countryCode);
+  const { carousels: recCarousels, trackClick: trackRecClick } = useRecommendations(user?.id ?? null, countryCode);
 
   const [trendingSongs, setTrendingSongs] = useState<CarouselSong[]>([]);
   const [recentSongs, setRecentSongs] = useState<CarouselSong[]>([]);
@@ -347,7 +347,7 @@ const Index = () => {
               title={c.title}
               songs={c.songs}
               loading={false}
-              onSongClick={goSong}
+              onSongClick={(id) => { trackRecClick(id, c.key); goSong(id); }}
               emptyText=""
             />
           ))}
