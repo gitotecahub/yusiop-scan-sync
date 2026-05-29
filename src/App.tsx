@@ -308,6 +308,7 @@ const AppContent = () => {
               <Route path="/qr" element={<OnlineOnlyRoute><QRScanner /></OnlineOnlyRoute>} />
               <Route path="/catalog" element={<OnlineOnlyRoute><Catalog /></OnlineOnlyRoute>} />
               <Route path="/library" element={<Library />} />
+              <Route path="/library/playlist/:id" element={<OnlineOnlyRoute><PlaylistDetail /></OnlineOnlyRoute>} />
               <Route path="/store" element={<OnlineOnlyRoute><Store /></OnlineOnlyRoute>} />
               <Route path="/wallet" element={<OnlineOnlyRoute><Wallet /></OnlineOnlyRoute>} />
               <Route path="/subscriptions" element={<OnlineOnlyRoute><Subscriptions /></OnlineOnlyRoute>} />
