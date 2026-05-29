@@ -9,6 +9,9 @@ import PopularSection from '@/components/PopularSection';
 import SongCarousel, { CarouselSong } from '@/components/SongCarousel';
 import AdBanner from '@/components/ads/AdBanner';
 import { useLanguageStore } from '@/stores/languageStore';
+import { useRecommendations } from '@/hooks/useRecommendations';
+import { useAuthStore } from '@/stores/authStore';
+import { useLocaleStore } from '@/stores/localeStore';
 
 interface SongRow {
   id: string;
