@@ -248,6 +248,7 @@ const AppContent = () => {
       <Route path="/redeem/:token" element={<Redeem />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/parental-consent" element={<ParentalConsent />} />
+      <Route path="/p/:token" element={<SharedPlaylist />} />
 
       <Route path="/*" element={
         !session ? (
