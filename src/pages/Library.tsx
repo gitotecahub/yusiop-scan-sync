@@ -933,6 +933,10 @@ const Library = () => {
           <SongList songs={favorites} />
         </TabsContent>
 
+        <TabsContent value="playlists" className="mt-5">
+          <Playlists />
+        </TabsContent>
+
         <TabsContent value="cards" className="mt-5 space-y-4">
           {/* Wallet recargable */}
           <button
