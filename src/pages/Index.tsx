@@ -332,6 +332,30 @@ const Index = () => {
         fireTopCount={recentSongs.length}
       />
 
+      {/* === PARA TI — Recomendaciones personalizadas === */}
+      {recCarousels.length > 0 && (
+        <section className="space-y-5">
+          <div>
+            <p className="eyebrow eyebrow-warm inline-flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3" /> Para ti
+            </p>
+            <h2 className="font-display text-xl font-bold tracking-tight">Recomendado para ti</h2>
+          </div>
+          {recCarousels.map((c) => (
+            <SongCarousel
+              key={c.key}
+              title={c.title}
+              songs={c.songs}
+              loading={false}
+              onSongClick={goSong}
+              emptyText=""
+            />
+          ))}
+        </section>
+      )}
+
+
+
 
 
       {/* === MINI JUEGO: ADIVINA LA CANCIÓN === */}
