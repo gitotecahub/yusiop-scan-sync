@@ -36,6 +36,7 @@ import { listOfflineSongs, deleteOfflineSong, saveSongOffline, hasOfflineSong } 
 import { useLanguageStore } from '@/stores/languageStore';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { recordPlayback } from '@/lib/playbackSync';
+import Playlists from '@/pages/Playlists';
 
 interface DownloadedSong {
   id: string;
