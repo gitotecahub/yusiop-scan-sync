@@ -1,97 +1,80 @@
-# Plan: Verificación de artistas y reclamaciones seguras en YUSIOP
+# Playlists & Recomendaciones — YUSIOP
 
-Este es un sistema grande que toca base de datos, panel admin, panel artista y notificaciones. Lo divido en fases para que sea manejable. Confirma si quieres todas las fases o empezamos por las críticas (1, 2, 3 y 5).
+Feature grande dividida en 4 entregables. Manteniendo identidad visual Vapor Chrome (sin naranja), modo oscuro, carruseles y tarjetas existentes (`SongCarousel`, `chip-vapor`, `vapor-text`).
 
-## Fase 1 — Identidad del artista (BD + UI)
+## 1. Base de datos (1 migración)
 
-**Base de datos:**
-- Nueva tabla `artist_profiles` (1 fila por artista), vinculada a `auth.users`:
-  - `artist_code` (texto único, formato `YUS-ART-000001`, generado por secuencia + trigger, no editable)
-  - `artist_username` (texto único, citext)
-  - `legal_name`, `stage_name`, `country`, `phone`, `phone_verified`, `email_verified`
-  - `verification_status` enum: `unverified | basic_verified | artist_verified | under_review | rejected | suspended`
-  - `verified_at`, `verified_by`, `rejection_reason`, `risk_score`
-- Trigger que bloquea cambios a `artist_code` y a `artist_username` cuando `verification_status = artist_verified` (solo admin puede modificarlos).
-- RLS: el artista lee/edita su fila (campos no bloqueados); admin ve y edita todo.
+Nuevas tablas en `public` con GRANTs explícitos + RLS:
 
-**UI:**
-- En `ArtistDashboard`: tarjeta con el `artist_code` visible y badge de estado de verificación.
+- **playlists** — `id, user_id, title, description, cover_url, is_public, share_token, created_at, updated_at`
+  - RLS: dueño full CRUD; lectura pública si `is_public=true` o por `share_token`
+- **playlist_tracks** — `id, playlist_id, song_id, position, added_at`
+  - RLS: dueño de la playlist gestiona; lectura visible si la playlist es visible para el usuario
+  - Validación: trigger que verifica que `song_id` esté en `user_downloads` del dueño al insertar
+- **user_favorites** — `user_id, song_id, created_at` (PK compuesta)
+- **user_listening_history** — `id, user_id, song_id, played_at, duration_ms, completed`
+- **user_artist_follows** — `user_id, artist_id, created_at` (PK compuesta)
+- **recommendation_events** — `id, user_id, song_id, source, score, shown_at, clicked_at` (telemetría señales)
 
-## Fase 2 — Verificación documental (artist_verified)
+Todas con: `GRANT SELECT,INSERT,UPDATE,DELETE ... TO authenticated`, `GRANT ALL ... TO service_role`, RLS scoped a `auth.uid()`. Sin grant `anon` salvo lectura de playlists públicas.
 
-**Base de datos:**
-- Tabla `artist_verification_requests`:
-  - `artist_profile_id`, `id_document_url`, `selfie_url`, `official_links` (jsonb array), `country`, `stage_name`, `legal_name`, `phone`, `email`
-  - `status` (pending/under_review/approved/rejected), `admin_note`, `reviewed_by`, `reviewed_at`
-- Bucket privado `artist-verification` con RLS por carpeta `{user_id}/...`.
+## 2. UI — Playlists en "Mi Biblioteca"
 
-**UI artista:**
-- Página `/artist/verification` con formulario (subida de DNI, selfie, links oficiales, datos).
-- Envío → status pasa a `under_review`.
+- Nuevo tab/sección **"Playlists"** en `src/pages/Library.tsx`
+- Grid de tarjetas (portada gradient auto generada con los 4 primeros covers si no hay custom)
+- `PlaylistDetail.tsx` nueva ruta `/library/playlist/:id` con:
+  - cabecera (portada, título, descripción, contador, botón compartir)
+  - lista reordenable (drag con `@dnd-kit` ya o nativo `pointermove`)
+  - botón "Añadir canciones" → modal que lista SOLO canciones de `user_downloads`
+  - quitar canción (no borra de biblioteca)
+- `CreatePlaylistDialog.tsx` (título, descripción, público/privado, cover opcional via upload o auto)
+- Editar / eliminar desde menú `⋯`
 
-**Verificación básica automática:**
-- Si `email_verified` (auth) y `phone_verified` → trigger sube a `basic_verified`. Estructura `phone_otp` queda preparada (tabla `phone_otp_codes` con expiración) pero el flujo OTP se deja inactivo si aún no hay proveedor SMS.
+## 3. Compartir playlists
 
-## Fase 3 — Reclamaciones de colaboración (rehacer las existentes)
+- Botón "Compartir" → copia link `https://app/p/:share_token`
+- Ruta pública `/p/:token` (sin login requerido para ver, login para reproducir)
+- Lógica de reproducción:
+  - Si la canción está en `user_downloads` del visitante → reproducción completa
+  - Si no → preview 20s (cortar en `AudioPlayer` cuando `currentTime >= 20` y no posee la canción)
+  - CTA "Desbloquear" → redirige a `/store` o abre `RedeemCodeDialog`
 
-**Base de datos:**
-- Nueva tabla `collaboration_claims_v2` (no rompemos la actual; migramos después):
-  - `claimant_user_id`, `claimant_artist_code`, `claimant_stage_name`
-  - `song_id`, `participation_type` enum (`singer | composer | producer | beatmaker | featuring | label | other`)
-  - `claimed_percent`, `proof_links` jsonb, `document_url`, `comment`
-  - `status` enum: `pending | under_review | approved | rejected | disputed | blocked`
-  - `admin_note`, `reviewed_by`, `reviewed_at`, `rejection_reason`
-  - `risk_flags` jsonb, `ip_address`
-- RLS: el reclamante ve solo las suyas; admin ve todas.
+## 4. Recomendaciones — "Para ti"
 
-**UI artista:**
-- Página `/artist/claim-collab` con formulario completo.
-- Lista “Mis reclamaciones” con estado en vivo.
+Nueva sección en `Index.tsx` ("Recomendado para ti") y varios carruseles:
 
-**Aprobación automática (función SQL `try_auto_approve_claim`):**
-Aprueba solo si: `artist_verified` + `artist_code` coincide + email y teléfono verificados + ≥1 link oficial + sin riesgo + sin conflicto. Si no, pasa a `under_review`.
+- "Porque escuchaste {última canción}"
+- "Más canciones de este estilo" (mismo género)
+- "Artistas que podrían gustarte" (artistas con géneros solapados a los seguidos)
+- "Tendencias en tu país" (top por `country_code`)
+- "Nuevos lanzamientos para ti" (recientes filtrados por géneros del user)
+- "Populares entre usuarios similares" (collaborative: usuarios que descargaron lo mismo)
 
-## Fase 4 — Retención de ganancias
+Implementación: **hook `useRecommendations`** que ejecuta queries paralelas a Supabase (sin edge function en v1 — todo client-side con `select`s). Tracking en `recommendation_events` al mostrar/clickar.
 
-- Función `is_claim_locked(artist_id, song_id)` → bloquea retiros cuando hay reclamación `pending/under_review/disputed`.
-- En `ArtistWallet` y `WithdrawalRequestDialog`: si hay reclamaciones abiertas asociadas, mostrar “Ganancias retenidas hasta completar verificación” y bloquear el botón.
-- En `artist_earnings`: nuevo flag `is_held` actualizado por trigger según estado de reclamaciones.
+Si la query collaborative es pesada, la movemos a una RPC `get_recommendations(user_id)` SQL en una iteración posterior.
 
-## Fase 5 — Panel admin “Verificación y reclamaciones”
+## 5. Privacidad
 
-Nueva entrada en `AdminSidebar` → `/admin/verifications` con dos pestañas:
-- **Artistas pendientes**: lista de `artist_verification_requests`, ver documentos/links, aprobar/rechazar, cambiar estado, nota interna.
-- **Reclamaciones**: lista de `collaboration_claims_v2`, aprobar/rechazar/bloquear/marcar disputado, bloquear ganancias, nota interna.
+- Todas las queries de "similares" usan IDs agregados, nunca exponen perfiles ajenos
+- RLS estricto en `user_listening_history`, `user_favorites`, `user_artist_follows` (solo dueño lee)
+- `recommendation_events` solo lectura/escritura del dueño
 
-## Fase 6 — Antifraude
+## 6. Detalles técnicos
 
-Función `compute_claim_risk_score(claim)` que evalúa:
-- N reclamaciones del usuario en últimos 7 días
-- Artista famoso (top N descargas) sin historial del reclamante
-- Cambios recientes de `stage_name`
-- Datos incompletos / email no verificado
-- Conflictos con otras reclamaciones de la misma canción/porcentaje
+- Géneros: usamos `songs` actuales — si no tienen columna `genre`, añadimos `genre text` (nullable) en la misma migración
+- Cover auto: componente que renderiza grid 2x2 de covers con gradient vapor encima
+- Preview 20s: prop `previewOnly: boolean` en `playerStore` → el reproductor pausa a los 20s y muestra CTA
+- Tracking historial: hook `useTrackListen` que escribe en `user_listening_history` cuando una canción se reproduce >5s
 
-Si score ≥ umbral → `status = under_review` + `risk_flags` + notificación a admin.
+## Orden de implementación
 
-## Fase 7 — Logs y notificaciones
+1. Migración DB (tablas + RLS + GRANTs + trigger validación + columna `genre` en songs si falta)
+2. Playlists CRUD UI en Library
+3. Detalle de playlist + drag-to-reorder + añadir/quitar canciones
+4. Compartir + ruta pública + preview 20s
+5. Tracking (favoritos, follows, historial)
+6. Sección "Para ti" + carruseles de recomendación
+7. Telemetría `recommendation_events`
 
-- Tabla `claim_audit_log` (claim_id, action, actor_id, before, after, ip, created_at) escrita por triggers.
-- Notificaciones in-app (tabla `notifications` ya existe) + email (función `send-transactional-email` ya existe) en: enviada, en revisión, aprobada, rechazada, info adicional, ganancias desbloqueadas. Nuevas plantillas en `_shared/transactional-email-templates/`.
-
-## Detalles técnicos clave
-
-- Enums nuevos: `artist_verification_status`, `participation_type`, `claim_status_v2`.
-- Secuencia `artist_code_seq` + función `format('YUS-ART-%06s', nextval(...))`.
-- Todas las tablas con RLS estricto usando `is_admin(auth.uid())` (helper ya existe) y `auth.uid() = user_id`.
-- Storage bucket privado para documentos sensibles.
-- No se modifica el flujo actual de `collaboration_claims` hasta que el nuevo esté en producción; luego migramos datos.
-
-## Lo que NO hace este sistema (según pediste)
-
-- No requiere confirmación del artista principal.
-- Decisión final = ID único + documentos + links + admin + antifraude + retención.
-
----
-
-**Pregunta:** ¿Empiezo por las **Fases 1, 2, 3, 4 y 5** (núcleo funcional) y dejamos 6 y 7 (antifraude avanzado + emails) para una segunda iteración, o lo hago todo de una vez?
+¿Quieres que arranque por la migración + Playlists (pasos 1-3) en este turno, y dejemos compartir y recomendaciones para iteraciones siguientes? Es bastante código y prefiero entregarlo en bloques verificables.
