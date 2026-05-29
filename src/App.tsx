@@ -21,6 +21,8 @@ import Redeem from '@/pages/Redeem';
 import Wallet from '@/pages/Wallet';
 import Unsubscribe from '@/pages/Unsubscribe';
 import ParentalConsent from '@/pages/ParentalConsent';
+import PlaylistDetail from '@/pages/PlaylistDetail';
+import SharedPlaylist from '@/pages/SharedPlaylist';
 import NotFound from "./pages/NotFound";
 import ProfileSelection from '@/pages/ProfileSelection';
 import ArtistRequest from '@/pages/ArtistRequest';
@@ -246,6 +248,7 @@ const AppContent = () => {
       <Route path="/redeem/:token" element={<Redeem />} />
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/parental-consent" element={<ParentalConsent />} />
+      <Route path="/p/:token" element={<SharedPlaylist />} />
 
       <Route path="/*" element={
         !session ? (
@@ -305,6 +308,7 @@ const AppContent = () => {
               <Route path="/qr" element={<OnlineOnlyRoute><QRScanner /></OnlineOnlyRoute>} />
               <Route path="/catalog" element={<OnlineOnlyRoute><Catalog /></OnlineOnlyRoute>} />
               <Route path="/library" element={<Library />} />
+              <Route path="/library/playlist/:id" element={<OnlineOnlyRoute><PlaylistDetail /></OnlineOnlyRoute>} />
               <Route path="/store" element={<OnlineOnlyRoute><Store /></OnlineOnlyRoute>} />
               <Route path="/wallet" element={<OnlineOnlyRoute><Wallet /></OnlineOnlyRoute>} />
               <Route path="/subscriptions" element={<OnlineOnlyRoute><Subscriptions /></OnlineOnlyRoute>} />

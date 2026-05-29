@@ -9,6 +9,9 @@ import PopularSection from '@/components/PopularSection';
 import SongCarousel, { CarouselSong } from '@/components/SongCarousel';
 import AdBanner from '@/components/ads/AdBanner';
 import { useLanguageStore } from '@/stores/languageStore';
+import { useRecommendations } from '@/hooks/useRecommendations';
+import { useAuthStore } from '@/stores/authStore';
+import { useLocaleStore } from '@/stores/localeStore';
 
 interface SongRow {
   id: string;
@@ -30,6 +33,9 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, language } = useLanguageStore();
+  const user = useAuthStore((s) => s.user);
+  const countryCode = useLocaleStore((s) => s.countryCode);
+  const { carousels: recCarousels } = useRecommendations(user?.id ?? null, countryCode);
 
   const [trendingSongs, setTrendingSongs] = useState<CarouselSong[]>([]);
   const [recentSongs, setRecentSongs] = useState<CarouselSong[]>([]);
@@ -325,6 +331,30 @@ const Index = () => {
         emptyText={language === 'es' ? 'Pronto habrá lanzamientos' : 'Coming soon'}
         fireTopCount={recentSongs.length}
       />
+
+      {/* === PARA TI — Recomendaciones personalizadas === */}
+      {recCarousels.length > 0 && (
+        <section className="space-y-5">
+          <div>
+            <p className="eyebrow eyebrow-warm inline-flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3" /> Para ti
+            </p>
+            <h2 className="font-display text-xl font-bold tracking-tight">Recomendado para ti</h2>
+          </div>
+          {recCarousels.map((c) => (
+            <SongCarousel
+              key={c.key}
+              title={c.title}
+              songs={c.songs}
+              loading={false}
+              onSongClick={goSong}
+              emptyText=""
+            />
+          ))}
+        </section>
+      )}
+
+
 
 
 

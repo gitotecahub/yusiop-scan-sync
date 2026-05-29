@@ -1369,6 +1369,81 @@ export type Database = {
         }
         Relationships: []
       }
+      playlist_tracks: {
+        Row: {
+          added_at: string
+          id: string
+          playlist_id: string
+          position: number
+          song_id: string
+        }
+        Insert: {
+          added_at?: string
+          id?: string
+          playlist_id: string
+          position?: number
+          song_id: string
+        }
+        Update: {
+          added_at?: string
+          id?: string
+          playlist_id?: string
+          position?: number
+          song_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_tracks_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_tracks_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          share_token: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          share_token?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          share_token?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age_group: string | null
@@ -1557,6 +1632,44 @@ export type Database = {
           used_by?: string | null
         }
         Relationships: []
+      }
+      recommendation_events: {
+        Row: {
+          clicked_at: string | null
+          id: string
+          score: number | null
+          shown_at: string
+          song_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          clicked_at?: string | null
+          id?: string
+          score?: number | null
+          shown_at?: string
+          song_id?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          clicked_at?: string | null
+          id?: string
+          score?: number | null
+          shown_at?: string
+          song_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_events_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       releases: {
         Row: {
@@ -1944,6 +2057,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           duration_seconds: number
+          genre: string | null
           id: string
           is_explicit: boolean
           is_premium: boolean
@@ -1969,6 +2083,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds: number
+          genre?: string | null
           id?: string
           is_explicit?: boolean
           is_premium?: boolean
@@ -1994,6 +2109,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           duration_seconds?: number
+          genre?: string | null
           id?: string
           is_explicit?: boolean
           is_premium?: boolean
@@ -2301,6 +2417,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_artist_follows: {
+        Row: {
+          artist_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_artist_follows_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_balance: {
         Row: {
           created_at: string | null
@@ -2518,6 +2660,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_listening_history: {
+        Row: {
+          completed: boolean
+          duration_ms: number
+          id: string
+          played_at: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          duration_ms?: number
+          id?: string
+          played_at?: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          duration_ms?: number
+          id?: string
+          played_at?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_listening_history_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
