@@ -3,6 +3,7 @@ import TopBar from './TopBar';
 import BottomNav from './BottomNav';
 import OfflineBanner from './OfflineBanner';
 import { usePageSwipe } from '@/hooks/usePageSwipe';
+import { useTrackListen } from '@/hooks/useTrackListen';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   usePageSwipe();
+  useTrackListen();
   return (
     <div className="fixed inset-0 flex flex-col bg-background overflow-hidden grain">
       {/* Ambient blobs */}
