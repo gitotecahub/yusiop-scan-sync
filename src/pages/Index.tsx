@@ -347,7 +347,7 @@ const Index = () => {
               title={c.title}
               songs={c.songs}
               loading={false}
-              onSongClick={goSong}
+              onSongClick={(id) => { trackRecClick(id, c.key); goSong(id); }}
               emptyText=""
             />
           ))}
