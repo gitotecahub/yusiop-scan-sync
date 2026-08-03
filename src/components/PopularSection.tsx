@@ -60,7 +60,7 @@ const PopularSection = () => {
         const featsBySong: Record<string, string[]> = {};
         if (ids.length > 0) {
           const { data: collabs } = await supabase
-            .from('song_collaborators')
+            .from('song_collaborators_public')
             .select('song_id, artist_name, is_primary')
             .in('song_id', ids);
           (collabs || []).forEach((c: any) => {
