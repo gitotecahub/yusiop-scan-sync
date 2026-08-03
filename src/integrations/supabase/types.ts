@@ -740,6 +740,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          owner_user_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -747,6 +748,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          owner_user_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -754,6 +756,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          owner_user_id?: string | null
         }
         Relationships: []
       }
@@ -901,6 +904,13 @@ export type Database = {
             columns: ["collaborator_id"]
             isOneToOne: false
             referencedRelation: "song_collaborators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collaboration_claims_collaborator_id_fkey"
+            columns: ["collaborator_id"]
+            isOneToOne: false
+            referencedRelation: "song_collaborators_public"
             referencedColumns: ["id"]
           },
           {
@@ -2954,6 +2964,36 @@ export type Database = {
       }
     }
     Views: {
+      song_collaborators_public: {
+        Row: {
+          artist_name: string | null
+          created_at: string | null
+          id: string | null
+          is_primary: boolean | null
+          role: Database["public"]["Enums"]["collab_role"] | null
+          share_percent: number | null
+          song_id: string | null
+        }
+        Insert: {
+          artist_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          role?: Database["public"]["Enums"]["collab_role"] | null
+          share_percent?: number | null
+          song_id?: string | null
+        }
+        Update: {
+          artist_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          role?: Database["public"]["Enums"]["collab_role"] | null
+          share_percent?: number | null
+          song_id?: string | null
+        }
+        Relationships: []
+      }
       unclaimed_collaborators_public: {
         Row: {
           artist_name: string | null
@@ -3325,6 +3365,15 @@ export type Database = {
         }[]
       }
       get_public_financial_settings: { Args: never; Returns: Json }
+      get_public_profiles: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          user_id: string
+          username: string
+        }[]
+      }
       get_subscription_visibility: {
         Args: { _user_id: string }
         Returns: {
@@ -3470,6 +3519,15 @@ export type Database = {
           success: boolean
         }[]
       }
+      search_public_profiles: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          user_id: string
+          username: string
+        }[]
+      }
       search_users_for_friends: {
         Args: { _query: string }
         Returns: {
@@ -3479,8 +3537,6 @@ export type Database = {
           username: string
         }[]
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_ad_request: {
         Args: {
           p_ad_type: string
