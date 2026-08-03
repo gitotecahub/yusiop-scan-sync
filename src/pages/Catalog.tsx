@@ -172,7 +172,7 @@ const Catalog = () => {
           let collabsBySong = new Map<string, string[]>();
           if (songIds.length > 0) {
             const { data: collabsData } = await supabase
-              .from('song_collaborators')
+              .from('song_collaborators_public')
               .select('song_id, artist_name, is_primary, created_at')
               .in('song_id', songIds);
             (collabsData ?? []).forEach((c: any) => {

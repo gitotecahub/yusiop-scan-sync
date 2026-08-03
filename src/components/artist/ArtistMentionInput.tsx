@@ -64,13 +64,10 @@ const ArtistMentionInput = ({
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
     debounceRef.current = window.setTimeout(async () => {
       const q = mentionQuery;
-      let query = supabase
-        .from('profiles')
-        .select('user_id, username, full_name, avatar_url')
-        .order('username', { ascending: true })
-        .limit(8);
-      if (q.length > 0) query = query.ilike('username', `${q}%`);
-      const { data } = await query;
+      const { data } = await supabase.rpc('search_public_profiles', {
+        p_query: q,
+        p_limit: 8,
+      });
       setResults((data as ProfileResult[]) ?? []);
       setHighlight(0);
       setLoading(false);

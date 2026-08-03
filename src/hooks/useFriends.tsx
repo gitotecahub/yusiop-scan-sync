@@ -28,10 +28,7 @@ export const useFriends = () => {
 
   const loadProfilesByIds = async (ids: string[]) => {
     if (ids.length === 0) return new Map<string, FriendProfile>();
-    const { data } = await supabase
-      .from('profiles')
-      .select('user_id, username, full_name, avatar_url')
-      .in('user_id', ids);
+    const { data } = await supabase.rpc('get_public_profiles', { p_user_ids: ids });
     const map = new Map<string, FriendProfile>();
     (data || []).forEach((p: any) => map.set(p.user_id, p));
     return map;

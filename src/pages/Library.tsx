@@ -168,7 +168,7 @@ const Library = () => {
         const collabsBySong: Record<string, string[]> = {};
         if (songIds.length > 0) {
           const { data: collabs } = await supabase
-            .from('song_collaborators')
+            .from('song_collaborators_public')
             .select('song_id, artist_name, is_primary, share_percent')
             .in('song_id', songIds);
           (collabs || []).forEach((c: any) => {
