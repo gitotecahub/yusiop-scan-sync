@@ -354,6 +354,11 @@ useEffect(() => {
   };
 
   const handleDownload = (song: Song) => {
+    // Sin créditos → llevar directamente a la tienda de tarjetas
+    if (!userCredits || userCredits.credits_remaining <= 0) {
+      navigate('/store');
+      return;
+    }
     setConfirmSong(song);
   };
 
@@ -479,7 +484,7 @@ useEffect(() => {
           <Button
             size="icon"
             onClick={() => handleDownload(song)}
-            disabled={!userCredits || userCredits.credits_remaining <= 0 || isDownloaded}
+            disabled={isDownloaded}
             className={`h-9 w-9 rounded-full border-0 ${
               isDownloaded ? 'bg-muted text-primary' : 'vapor-bg text-white hover:opacity-90 shadow-glow'
             }`}

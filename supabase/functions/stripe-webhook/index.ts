@@ -7,6 +7,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=denonext";
 import { notifyGiftRecipient } from "../_shared/notify-gift.ts";
+import { sendPurchaseReceipt } from "../_shared/send-purchase-receipt.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -353,7 +355,23 @@ Deno.serve(async (req) => {
         .update({ qr_card_id: card.id })
         .eq("id", purchase.id);
 
+      // Recibo/factura automático al comprador
+      await sendPurchaseReceipt({
+        admin: supabase,
+        purchaseId: purchase.id,
+        buyerEmail,
+        cardType,
+        credits,
+        cardCode: code,
+        amountCents: session.amount_total ?? 0,
+        currency: (session.currency ?? "eur").toUpperCase(),
+        isGift,
+        giftRecipientEmail: giftEmail,
+        locale: meta.locale ?? "es",
+      });
+
       if (isGift && giftEmail && redemptionToken) {
+
         const origin = req.headers.get("origin") ?? "https://yusiop.com";
         await notifyGiftRecipient({
           admin: supabase,
