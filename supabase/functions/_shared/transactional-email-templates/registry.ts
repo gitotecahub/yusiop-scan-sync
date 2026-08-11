@@ -18,6 +18,7 @@ import { template as collaborationSubmitted } from './collaboration-submitted.ts
 import { template as claimSubmitted } from './claim-submitted.tsx'
 import { template as claimApproved } from './claim-approved.tsx'
 import { template as claimStatusUpdate } from './claim-status-update.tsx'
+import { template as purchaseReceipt } from './purchase-receipt.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'gift-received': giftReceived,
@@ -29,4 +30,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'claim-submitted': claimSubmitted,
   'claim-approved': claimApproved,
   'claim-status-update': claimStatusUpdate,
+  'purchase-receipt': purchaseReceipt,
 }
+
