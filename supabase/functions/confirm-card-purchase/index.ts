@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@18.5.0?target=denonext";
 import { notifyGiftRecipient } from "../_shared/notify-gift.ts";
+import { sendPurchaseReceipt } from "../_shared/send-purchase-receipt.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -183,6 +184,21 @@ Deno.serve(async (req) => {
       .eq("id", purchaseId);
 
     console.log(`confirm-card-purchase: created card ${card.code} for user ${userId}`);
+
+    // Recibo/factura automático al comprador (idempotente por compra)
+    await sendPurchaseReceipt({
+      admin: supabase,
+      purchaseId: purchaseId!,
+      buyerEmail,
+      cardType,
+      credits,
+      cardCode: card.code,
+      amountCents: session.amount_total ?? 0,
+      currency: (session.currency ?? "eur").toUpperCase(),
+      isGift,
+      giftRecipientEmail: giftEmail,
+      locale: (meta as any).locale ?? "es",
+    });
 
     // 5) Si es regalo: crear notificación in-app + enviar email al destinatario
     if (isGift && giftEmail && redemptionToken) {
