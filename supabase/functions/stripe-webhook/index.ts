@@ -355,7 +355,23 @@ Deno.serve(async (req) => {
         .update({ qr_card_id: card.id })
         .eq("id", purchase.id);
 
+      // Recibo/factura automático al comprador
+      await sendPurchaseReceipt({
+        admin: supabase,
+        purchaseId: purchase.id,
+        buyerEmail,
+        cardType,
+        credits,
+        cardCode: code,
+        amountCents: session.amount_total ?? 0,
+        currency: (session.currency ?? "eur").toUpperCase(),
+        isGift,
+        giftRecipientEmail: giftEmail,
+        locale: meta.locale ?? "es",
+      });
+
       if (isGift && giftEmail && redemptionToken) {
+
         const origin = req.headers.get("origin") ?? "https://yusiop.com";
         await notifyGiftRecipient({
           admin: supabase,
