@@ -165,22 +165,27 @@ const SongSubmissions = () => {
     // Cargar colaboradores asociados a estos envíos
     if (submissions.length > 0) {
       const ids = submissions.map((s) => s.id);
-      const { data: collabs } = await supabase
-        .from('song_collaborators')
-        .select('id,artist_name,role,share_percent,is_primary,contact_email,submission_id')
-        .in('submission_id', ids);
+      // contact_email solo es accesible vía RPC controlada (admin / dueño del envío)
+      const results = await Promise.all(
+        ids.map((sid) =>
+          supabase
+            .rpc('get_submission_collaborators', { p_submission_id: sid })
+            .then(({ data }) => ({ sid, rows: (data ?? []) as any[] }))
+        )
+      );
       const bySubmission = new Map<string, CollaboratorRow[]>();
-      (collabs ?? []).forEach((c: any) => {
-        const arr = bySubmission.get(c.submission_id) ?? [];
-        arr.push({
-          id: c.id,
-          artist_name: c.artist_name,
-          role: c.role,
-          share_percent: Number(c.share_percent),
-          is_primary: c.is_primary,
-          contact_email: c.contact_email ?? null,
-        });
-        bySubmission.set(c.submission_id, arr);
+      results.forEach(({ sid, rows }) => {
+        bySubmission.set(
+          sid,
+          rows.map((c: any) => ({
+            id: c.id,
+            artist_name: c.artist_name,
+            role: c.role,
+            share_percent: Number(c.share_percent),
+            is_primary: c.is_primary,
+            contact_email: c.contact_email ?? null,
+          }))
+        );
       });
       submissions.forEach((s) => {
         s.collaborators = bySubmission.get(s.id) ?? [];
