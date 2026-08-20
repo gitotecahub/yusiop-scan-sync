@@ -3374,6 +3374,19 @@ export type Database = {
           username: string
         }[]
       }
+      get_submission_collaborators: {
+        Args: { p_submission_id: string }
+        Returns: {
+          artist_name: string
+          claimed_by_user_id: string
+          contact_email: string
+          id: string
+          is_primary: boolean
+          role: Database["public"]["Enums"]["collab_role"]
+          share_percent: number
+          submission_id: string
+        }[]
+      }
       get_subscription_visibility: {
         Args: { _user_id: string }
         Returns: {

@@ -288,10 +288,7 @@ const SubmitSongDialog = ({ open, onOpenChange, defaultArtistName = '', onSubmit
       // Cargar colaboradores existentes del envío
       (async () => {
         const { data } = await supabase
-          .from('song_collaborators')
-          .select('id,artist_name,share_percent,is_primary,role,contact_email,claimed_by_user_id')
-          .eq('submission_id', editing.id)
-          .order('is_primary', { ascending: false });
+          .rpc('get_submission_collaborators', { p_submission_id: editing.id });
         if (data && data.length > 0) {
           setHasCollabs(true);
           setCollaborators(data.map((d: any) => ({
