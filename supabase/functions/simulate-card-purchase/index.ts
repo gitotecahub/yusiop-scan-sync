@@ -1,3 +1,4 @@
+// SOLO PARA ENTORNOS DE DESARROLLO — eliminar de producción con: supabase functions delete simulate-card-purchase
 // Edge function: simulate-card-purchase
 // Simula una compra completa SIN pasar por Stripe. Crea card_purchases + qr_cards
 // y la asocia al usuario (o al destinatario si es regalo). Solo para pruebas.
@@ -57,6 +58,26 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
     const userEmail = userData.user.email as string;
 
+    // Service role para validar rol y escribir saltando RLS
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+
+    // Solo super-admins pueden simular compras
+    const { data: roleRows } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .in("role", ["admin"]);
+    if (!roleRows || roleRows.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Solo administradores pueden simular compras. Esto es una herramienta de desarrollo." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const body = (await req.json()) as Body;
     if (!body.card_type || !["standard", "premium"].includes(body.card_type)) {
       return new Response(JSON.stringify({ error: "card_type inválido" }), {
@@ -73,13 +94,6 @@ Deno.serve(async (req) => {
 
     const tier = PRICING[body.card_type];
     const isGift = !!body.is_gift;
-
-    // Service role para escribir saltando RLS
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { persistSession: false } },
-    );
 
     // 1) Registrar la compra simulada
     const { data: purchase, error: pErr } = await admin
