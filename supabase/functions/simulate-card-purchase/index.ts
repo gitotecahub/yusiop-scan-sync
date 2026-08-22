@@ -1,3 +1,4 @@
+// SOLO PARA ENTORNOS DE DESARROLLO — eliminar de producción con: supabase functions delete simulate-card-purchase
 // Edge function: simulate-card-purchase
 // Simula una compra completa SIN pasar por Stripe. Crea card_purchases + qr_cards
 // y la asocia al usuario (o al destinatario si es regalo). Solo para pruebas.
