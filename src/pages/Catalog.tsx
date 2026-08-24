@@ -399,7 +399,10 @@ useEffect(() => {
             const { data: stream } = await supabase.functions.invoke('get-song-stream', {
               body: { songId: song.id },
             });
-            if (stream?.signed_url) trackUrl = stream.signed_url;
+            // Nunca guardar offline el recorte de preview como si fuera el track.
+            if (stream?.signed_url && stream?.is_preview_file !== true) {
+              trackUrl = stream.signed_url;
+            }
           }
           await saveSongOffline({
             id: song.id,
