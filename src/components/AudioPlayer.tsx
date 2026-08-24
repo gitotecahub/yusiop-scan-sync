@@ -5,7 +5,11 @@ import { getOfflineSong } from '@/lib/offlineStorage';
 import { supabase } from '@/integrations/supabase/client';
 
 // Cache de signed URLs de streaming (válidas 5 min). Evita llamadas repetidas.
-const streamUrlCache = new Map<string, { url: string; expires: number }>();
+const streamUrlCache = new Map<string, { url: string; expires: number; isPreviewFile: boolean }>();
+
+// Canciones cuyo stream servido es el recorte de preview: en ellas el offset
+// preview_start_seconds no aplica (apunta a posiciones del track completo).
+const previewFileSongs = new Set<string>();
 
 const getStreamUrl = async (songId: string): Promise<string | null> => {
   const cached = streamUrlCache.get(songId);
@@ -15,15 +19,20 @@ const getStreamUrl = async (songId: string): Promise<string | null> => {
       body: { songId },
     });
     if (error || !data?.signed_url) return null;
+    const isPreviewFile = data.is_preview_file === true;
+    if (isPreviewFile) previewFileSongs.add(songId);
+    else previewFileSongs.delete(songId);
     streamUrlCache.set(songId, {
       url: data.signed_url,
       expires: Date.now() + (data.expires_in ?? 300) * 1000,
+      isPreviewFile,
     });
     return data.signed_url;
   } catch {
     return null;
   }
 };
+
 
 
 const AudioPlayer = () => {
