@@ -5,7 +5,11 @@ import { getOfflineSong } from '@/lib/offlineStorage';
 import { supabase } from '@/integrations/supabase/client';
 
 // Cache de signed URLs de streaming (válidas 5 min). Evita llamadas repetidas.
-const streamUrlCache = new Map<string, { url: string; expires: number }>();
+const streamUrlCache = new Map<string, { url: string; expires: number; isPreviewFile: boolean }>();
+
+// Canciones cuyo stream servido es el recorte de preview: en ellas el offset
+// preview_start_seconds no aplica (apunta a posiciones del track completo).
+const previewFileSongs = new Set<string>();
 
 const getStreamUrl = async (songId: string): Promise<string | null> => {
   const cached = streamUrlCache.get(songId);
@@ -15,15 +19,20 @@ const getStreamUrl = async (songId: string): Promise<string | null> => {
       body: { songId },
     });
     if (error || !data?.signed_url) return null;
+    const isPreviewFile = data.is_preview_file === true;
+    if (isPreviewFile) previewFileSongs.add(songId);
+    else previewFileSongs.delete(songId);
     streamUrlCache.set(songId, {
       url: data.signed_url,
       expires: Date.now() + (data.expires_in ?? 300) * 1000,
+      isPreviewFile,
     });
     return data.signed_url;
   } catch {
     return null;
   }
 };
+
 
 
 const AudioPlayer = () => {
@@ -40,9 +49,19 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const previewStart = currentSong?.preview_start_seconds ?? 0;
+    // Si el archivo servido ya es el recorte de preview, el offset no aplica.
+    const rawPreviewStart = currentSong?.preview_start_seconds ?? 0;
+    const isPreviewFile = currentSong ? previewFileSongs.has(currentSong.id) : false;
+
+    // Nunca posicionar fuera del archivo cargado.
+    const safeStart = (dur: number) => {
+      if (isPreviewFile || rawPreviewStart <= 0) return 0;
+      if (!Number.isFinite(dur) || dur <= 0) return rawPreviewStart;
+      return rawPreviewStart + 1 < dur ? rawPreviewStart : 0;
+    };
 
     const handleTimeUpdate = () => {
+      const previewStart = safeStart(audio.duration);
       const elapsed = isPreview ? Math.max(0, audio.currentTime - previewStart) : audio.currentTime;
       setPosition(Math.floor(elapsed));
       if (isPreview && elapsed >= 20) {
@@ -54,15 +73,19 @@ const AudioPlayer = () => {
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(isPreview ? 20 : Math.floor(audio.duration || 0));
+      const dur = Math.floor(audio.duration || 0);
+      setDuration(isPreview ? Math.min(20, dur || 20) : dur);
+      const previewStart = safeStart(audio.duration);
       if (isPreview && previewStart > 0) {
         try { audio.currentTime = previewStart; } catch {}
       }
     };
 
+
     const handleCanPlay = () => {
       if (shouldAutoPlayRef.current) {
         shouldAutoPlayRef.current = false;
+        const previewStart = safeStart(audio.duration);
         if (isPreview && previewStart > 0 && audio.currentTime < previewStart) {
           try { audio.currentTime = previewStart; } catch {}
         }
@@ -107,7 +130,7 @@ const AudioPlayer = () => {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [isPreview, currentSong?.preview_start_seconds, setPosition, setDuration, pause, next, repeat, queue.length]);
+  }, [isPreview, currentSong?.id, currentSong?.preview_start_seconds, setPosition, setDuration, pause, next, repeat, queue.length]);
 
   // Cargar nueva canción cuando cambia el ID
   useEffect(() => {
