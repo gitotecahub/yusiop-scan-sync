@@ -85,6 +85,7 @@ const AudioPlayer = () => {
     const handleCanPlay = () => {
       if (shouldAutoPlayRef.current) {
         shouldAutoPlayRef.current = false;
+        const previewStart = safeStart(audio.duration);
         if (isPreview && previewStart > 0 && audio.currentTime < previewStart) {
           try { audio.currentTime = previewStart; } catch {}
         }
