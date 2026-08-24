@@ -22,7 +22,7 @@ project_id = "wbzwdihdayasmikmqvgp"
   [functions.generate-song-access]
     verify_jwt = true
   [functions.get-song-stream]
-    verify_jwt = false
+    verify_jwt = true
   [functions.handle-email-suppression]
     verify_jwt = false
   [functions.handle-email-unsubscribe]

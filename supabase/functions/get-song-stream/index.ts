@@ -27,17 +27,30 @@ serve(async (req) => {
   }
 
   try {
+    // 1) Validar sesión: sin JWT válido no se sirve ningún audio.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return json(401, { error: "No autorizado" });
+    }
+    const token = authHeader.replace("Bearer ", "");
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
+
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    const user = userData?.user;
+    if (userError || !user) {
+      return json(401, { error: "No autorizado" });
+    }
+
     const body = await req.json().catch(() => ({}));
     const songId =
       typeof body?.songId === "string" ? body.songId.trim() : "";
     if (!songId || !UUID_RE.test(songId)) {
       return json(400, { error: "songId inválido" });
     }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    );
 
     const { data: song, error: songError } = await supabase
       .from("songs")
@@ -57,10 +70,29 @@ serve(async (req) => {
       return json(403, { error: "Canción aún no disponible" });
     }
 
-    const source = song.preview_url || song.track_url;
+    // 2) ¿El usuario ya tiene la canción (la descargó/pagó)?
+    const { data: owned } = await supabase
+      .from("user_downloads")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("song_id", songId)
+      .limit(1);
+
+    const hasSong = Array.isArray(owned) && owned.length > 0;
+
+    // Sin propiedad: SOLO el archivo de preview, nunca el track completo.
+    const source = hasSong
+      ? (song.track_url || song.preview_url)
+      : song.preview_url;
+
     if (!source) {
-      return json(404, { error: "La canción no tiene archivo" });
+      return json(404, {
+        error: hasSong
+          ? "La canción no tiene archivo"
+          : "Esta canción no tiene preview disponible",
+      });
     }
+
 
     // Detectar bucket y path correctos a partir de la URL guardada.
     // Soporta tanto URLs públicas como signed URLs de cualquier bucket
