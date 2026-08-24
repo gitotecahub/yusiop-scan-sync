@@ -49,9 +49,19 @@ const AudioPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const previewStart = currentSong?.preview_start_seconds ?? 0;
+    // Si el archivo servido ya es el recorte de preview, el offset no aplica.
+    const rawPreviewStart = currentSong?.preview_start_seconds ?? 0;
+    const isPreviewFile = currentSong ? previewFileSongs.has(currentSong.id) : false;
+
+    // Nunca posicionar fuera del archivo cargado.
+    const safeStart = (dur: number) => {
+      if (isPreviewFile || rawPreviewStart <= 0) return 0;
+      if (!Number.isFinite(dur) || dur <= 0) return rawPreviewStart;
+      return rawPreviewStart + 1 < dur ? rawPreviewStart : 0;
+    };
 
     const handleTimeUpdate = () => {
+      const previewStart = safeStart(audio.duration);
       const elapsed = isPreview ? Math.max(0, audio.currentTime - previewStart) : audio.currentTime;
       setPosition(Math.floor(elapsed));
       if (isPreview && elapsed >= 20) {
@@ -63,11 +73,14 @@ const AudioPlayer = () => {
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(isPreview ? 20 : Math.floor(audio.duration || 0));
+      const dur = Math.floor(audio.duration || 0);
+      setDuration(isPreview ? Math.min(20, dur || 20) : dur);
+      const previewStart = safeStart(audio.duration);
       if (isPreview && previewStart > 0) {
         try { audio.currentTime = previewStart; } catch {}
       }
     };
+
 
     const handleCanPlay = () => {
       if (shouldAutoPlayRef.current) {
