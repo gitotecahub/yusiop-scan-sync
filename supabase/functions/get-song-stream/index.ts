@@ -128,6 +128,9 @@ serve(async (req) => {
       success: true,
       signed_url: signed.signedUrl,
       expires_in: 300,
+      // true => el archivo servido es el recorte de preview: el cliente NO debe
+      // aplicar preview_start_seconds (apunta al track completo).
+      is_preview_file: !hasSong,
     });
   } catch (error) {
     console.error("get-song-stream fatal:", error);
