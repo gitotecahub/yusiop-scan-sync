@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Play, Pause, Download, Heart, Check, Search, Music, CalendarClock, Share2, Disc3 } from 'lucide-react';
+import { Play, Pause, Download, Check, Search, Music, CalendarClock, Share2, Disc3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 import ShareWithFriendsDialog from '@/components/friends/ShareWithFriendsDialog';
@@ -521,7 +521,7 @@ useEffect(() => {
       {/* Header */}
       <div>
         <h1 className="display-xl text-4xl">
-          {t('catalog.title')}<span className="vapor-text"></span>
+          {t('catalog.title')}
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-xs">
           {t('catalog.subtitle')}
@@ -605,12 +605,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Derive albums + standalone songs */}
-      {(() => null)()}
-      {(() => {
-        return null;
-      })()}
-
       {/* Álbumes (carrusel) */}
       {!searchTerm && (() => {
         const map = new Map<string, AlbumGroup>();
@@ -636,7 +630,7 @@ useEffect(() => {
             <div className="flex items-center gap-2">
               <Disc3 className="h-4 w-4 text-primary" />
               <h2 className="font-display text-sm font-bold uppercase tracking-wider">
-                {t('catalog.title') ? 'Álbumes' : 'Álbumes'}
+                Álbumes
               </h2>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
