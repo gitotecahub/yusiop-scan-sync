@@ -80,18 +80,18 @@ serve(async (req) => {
 
     const hasSong = Array.isArray(owned) && owned.length > 0;
 
-    // Sin propiedad: SOLO el archivo de preview, nunca el track completo.
+    // Sin propiedad: se prefiere el recorte de preview. Si la canción no tiene
+    // archivo de preview propio, se sirve el track completo y el cliente limita
+    // la reproducción a 20s desde preview_start_seconds.
+    const previewIsOwnFile = !hasSong && !!song.preview_url;
     const source = hasSong
       ? (song.track_url || song.preview_url)
-      : song.preview_url;
+      : (song.preview_url || song.track_url);
 
     if (!source) {
-      return json(404, {
-        error: hasSong
-          ? "La canción no tiene archivo"
-          : "Esta canción no tiene preview disponible",
-      });
+      return json(404, { error: "La canción no tiene archivo de audio" });
     }
+
 
 
     // Detectar bucket y path correctos a partir de la URL guardada.
@@ -130,8 +130,9 @@ serve(async (req) => {
       expires_in: 300,
       // true => el archivo servido es el recorte de preview: el cliente NO debe
       // aplicar preview_start_seconds (apunta al track completo).
-      is_preview_file: !hasSong,
+      is_preview_file: previewIsOwnFile,
     });
+
   } catch (error) {
     console.error("get-song-stream fatal:", error);
     return json(500, { error: "Error interno del servidor" });
