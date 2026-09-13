@@ -90,7 +90,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   next: () => {
     const { queue, queueIndex, shuffle, repeat, isPreview } = get();
-    if (!queue.length) return;
+    if (!queue.length) {
+      // Sin cola: reiniciar la canción actual para que el control responda
+      const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
+      if (audioElement) audioElement.currentTime = 0;
+      set({ position: 0 });
+      return;
+    }
+
 
     let nextIdx: number;
     if (repeat === 'one') {
@@ -121,7 +128,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   previous: () => {
     const { queue, queueIndex, shuffle, position, isPreview } = get();
-    if (!queue.length) return;
+    if (!queue.length) {
+      const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
+      if (audioElement) audioElement.currentTime = 0;
+      set({ position: 0 });
+      return;
+    }
+
 
     // Si llevamos más de 3s reproducidos, reiniciar la canción actual
     if (position > 3) {
