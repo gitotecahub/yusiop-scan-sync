@@ -116,10 +116,12 @@ const startDeviceWatch = (
   document.addEventListener('visibilitychange', visibilityListener);
   window.addEventListener('online', onlineListener);
 
-  // Poll cada 30s como red de seguridad si Realtime cae
+  // Poll cada 5 min como red de seguridad si Realtime cae (solo con la pestaña visible)
   pollInterval = window.setInterval(() => {
-    if (currentWatchedUserId) verifyOrEvict(currentWatchedUserId, set);
-  }, 30_000);
+    if (currentWatchedUserId && document.visibilityState === 'visible') {
+      verifyOrEvict(currentWatchedUserId, set);
+    }
+  }, 5 * 60_000);
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
