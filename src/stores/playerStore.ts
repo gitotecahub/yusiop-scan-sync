@@ -46,6 +46,15 @@ const pickShuffleIndex = (length: number, currentIdx: number): number => {
   return idx;
 };
 
+// Reinicia la pista actual respetando el inicio del preview.
+const restartCurrent = (song: Song | null, isPreview: boolean) => {
+  const audio = document.querySelector('audio') as HTMLAudioElement | null;
+  if (!audio) return;
+  const start = isPreview ? song?.preview_start_seconds ?? 0 : 0;
+  const safe = Number.isFinite(audio.duration) && start + 1 >= audio.duration ? 0 : start;
+  try { audio.currentTime = safe; } catch {}
+};
+
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   currentSong: null,
   isPlaying: false,
@@ -67,7 +76,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isPreview,
       position: 0,
       duration: isPreview ? 20 : song.duration_seconds,
-      queueIndex: idx >= 0 ? idx : get().queueIndex,
+      // Si la canción no pertenece a la cola actual, se descarta la cola antigua
+      // para que siguiente/anterior no salten a canciones de otra lista.
+      ...(idx >= 0 ? { queueIndex: idx } : { queue: [], queueIndex: -1 }),
     });
   },
 
@@ -89,32 +100,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   next: () => {
-    const { queue, queueIndex, shuffle, repeat, isPreview } = get();
-    if (!queue.length) {
-      // Sin cola: reiniciar la canción actual para que el control responda
-      const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
-      if (audioElement) audioElement.currentTime = 0;
+    const { queue, queueIndex, shuffle, isPreview, currentSong } = get();
+    if (queue.length <= 1) {
+      // Sin más canciones: reiniciar la actual para que el control responda
+      restartCurrent(currentSong, isPreview);
       set({ position: 0 });
       return;
     }
 
-
-    let nextIdx: number;
-    if (repeat === 'one') {
-      nextIdx = queueIndex;
-    } else if (shuffle) {
-      nextIdx = pickShuffleIndex(queue.length, queueIndex);
-    } else {
-      nextIdx = queueIndex + 1;
-      if (nextIdx >= queue.length) {
-        if (repeat === 'all') nextIdx = 0;
-        else {
-          // No hay siguiente: detener en la última
-          set({ isPlaying: false, position: 0 });
-          return;
-        }
-      }
-    }
+    // Pulsar "siguiente" siempre avanza (aunque repetir-una esté activo);
+    // al final de la lista vuelve a la primera.
+    const nextIdx = shuffle
+      ? pickShuffleIndex(queue.length, queueIndex)
+      : (queueIndex + 1) % queue.length;
 
     const song = queue[nextIdx];
     set({
@@ -127,20 +125,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
 
   previous: () => {
-    const { queue, queueIndex, shuffle, position, isPreview } = get();
-    if (!queue.length) {
-      const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
-      if (audioElement) audioElement.currentTime = 0;
+    const { queue, queueIndex, shuffle, position, isPreview, currentSong } = get();
+    // Sin más canciones o con más de 3 s reproducidos: reiniciar la actual
+    if (queue.length <= 1 || position > 3) {
+      restartCurrent(currentSong, isPreview);
       set({ position: 0 });
-      return;
-    }
-
-
-    // Si llevamos más de 3s reproducidos, reiniciar la canción actual
-    if (position > 3) {
-      set({ position: 0 });
-      const audioElement = document.querySelector('audio') as HTMLAudioElement | null;
-      if (audioElement) audioElement.currentTime = 0;
       return;
     }
 
