@@ -104,6 +104,14 @@ const AudioPlayer = () => {
           audio.play().catch(() => pause());
           return;
         }
+        const st = usePlayerStore.getState();
+        const isLast = st.queueIndex >= st.queue.length - 1;
+        if (repeat === 'off' && !st.shuffle && isLast) {
+          // Fin de la lista sin repetición: parar
+          pause();
+          setPosition(0);
+          return;
+        }
         next();
         return;
       }
